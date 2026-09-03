@@ -15,11 +15,11 @@ Description: Social network analysis routines that mirror UCINET in concepts,
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
 Depends:
     R (>= 4.1)
 Imports:
     stats,
+    tools,
     utils
 Suggests:
     igraph,
@@ -31,6 +31,6 @@ Suggests:
     knitr,
     rmarkdown
 Config/testthat/edition: 3
-LazyData: true
 URL: https://github.com/stephenborgatti/xucinet
 BugReports: https://github.com/stephenborgatti/xucinet/issues
+Config/roxygen2/version: 8.1.0

@@ -1,6 +1,7 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^\.github$
+^\.claude$
 ^SPEC\.md$
 ^PLAN\.md$
 ^CLAUDE\.md$
