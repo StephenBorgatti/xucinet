@@ -10,7 +10,7 @@ aliases.
 
 ```r
 # install.packages("remotes")
-remotes::install_github("stephenborgatti/xucinet")
+remotes::install_github("sborgatti/xucinet")
 library(xucinet)
 net <- xread("campnet.csv")
 xdensity(net)
