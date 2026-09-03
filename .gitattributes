@@ -1,0 +1,8 @@
+# UCINET datasets are binary. Git currently guesses right because they contain
+# nul bytes, but a small header could be guessed wrong, and a single CRLF
+# translation would silently corrupt a fixture in a way only the test suite
+# would catch.
+*.##h binary
+*.##d binary
+*.##H binary
+*.##D binary
