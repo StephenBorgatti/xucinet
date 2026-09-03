@@ -1,0 +1,11 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^\.github$
+^SPEC\.md$
+^PLAN\.md$
+^CLAUDE\.md$
+^ISSUES-phase0\.md$
+^data-raw$
+^_pkgdown\.yml$
+^docs$
+^LICENSE\.md$
