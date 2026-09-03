@@ -23,13 +23,34 @@ Done when: tests in `test-class.R` cover every input type and both directions.
 
 ## 3. Native ##h/##d reader and writer (`xreaducinet`, `xsaveucinet`)
 
-Port from the Delphi reference (`utucifile.pas` / G3Tools) exactly: header layout, labels,
-multi-relation stacks, 2-mode, missing-value mapping (≥ 1e37 → NA; NA → 1e38 on write).
+Port from the Delphi reference, which is **`Tools\G2Tools\utucdataset.pas`** (class
+`tucdataset`, about 1,400 lines), not `utucifile.pas` (that G3Tools unit is a 90-line helper
+for writing unicode labels and dimensions, used only by `Uci.dpr` and `ug3matrix.pas`).
+Copy `utucdataset.pas` and the units it depends on for constants and file access
+(`ucommon.pas` for `na = 1E37`, `bna = 1E38`; `uufile`/`ufn` for the block reader; `utmat`,
+`utstrvec` for the containers it fills) into `inst/reference/delphi/` so the port can cite
+line numbers.
+
+What the unit shows, and what the port must cover:
+- Six header versions are readable: 4010 (10-char fixed ASCII labels), 4020 (20-char fixed
+  ASCII labels), 5000 (variable-length ASCII labels, header starts with a date), 6000
+  (variable-length Unicode labels), 6404 (starts with "V6404"; Unicode labels; integer
+  dimensions) and 6405 (starts with "V6405"; final byte records `istable`). `loadhdr()`
+  dispatches on the header; the reader must accept all six, since old datasets circulate.
+- The writer uses 6404 when needed and 6000 otherwise (`savehdr`, around line 1097); write
+  the same, so UCINET reads xucinet files without a version bump.
+- The `##d` file begins with a data-type byte (`infile.dt`) that says how cells are stored;
+  read it rather than assuming float.
+- Missing values: cells >= 1E37 (`na`) map to `NA` on read; `NA` writes as 1E38 (`bna`).
+- Labels, multi-relation stacks (`nm` matrices), 2-mode, and the DSL variants
+  (`savedsl`/`savehdrdsl`) that the Data Editor uses.
+
 Wire into `xread(filetype="ucinet")` and `xsave(filetype="ucinet")`.
 
 Done when: every dataset in `3e/data/DataUCINET` reads without error and, written back and
 re-read, is identical; at least one file written by xucinet opens in UCINET itself (manual
-check, recorded in the issue).
+check, recorded in the issue); one fixture of each header version (4010 through 6405) is in
+`inst/goldens/` and round-trips.
 
 ## 4. `.uci` JSON format: schema draft, reader, writer
 

@@ -21,12 +21,16 @@ xread <- function(file, filetype = NULL, layout = NULL, sheet = 1, labels = TRUE
                   directed = NULL, mode = NULL, title = NULL, ...) {
   if (is.null(filetype)) filetype <- detect_filetype(file)
   filetype <- match.arg(tolower(filetype), c("ucinet", "uci", "dl", "csv", "xlsx", "vna"))
+  # A UCINET dataset carries its own labels, shape and title, so it does not go
+  # through the layout detection below.
+  if (filetype == "ucinet") {
+    return(xreaducinet(file, directed = directed, mode = mode, title = title))
+  }
   if (is.null(title)) title <- tools::file_path_sans_ext(basename(file))
   raw <- switch(filetype,
     csv    = utils::read.csv(file, header = labels, row.names = if (labels) 1 else NULL,
                              check.names = FALSE, stringsAsFactors = FALSE),
     xlsx   = read_xlsx_df(file, sheet, labels),
-    ucinet = stop("xreaducinet() is not implemented yet (Phase 0, issue #3).", call. = FALSE),
     uci    = stop(".uci reader is not implemented yet (Phase 0, issue #4).", call. = FALSE),
     dl     = stop("DL reader is not implemented yet (Phase 0, issue #5).", call. = FALSE),
     vna    = stop("VNA reader is not implemented yet (Phase 0, issue #5).", call. = FALSE)
@@ -41,8 +45,13 @@ xread <- function(file, filetype = NULL, layout = NULL, sheet = 1, labels = TRUE
 }
 
 detect_filetype <- function(file) {
+  # tools::file_ext() only matches alphanumeric extensions, so it never sees
+  # "##h"; test for UCINET's pair by hand before falling back to it.
+  if (is_ucinet_path(file)) return("ucinet")
+  if (file.exists(paste0(file, ".##h")) || file.exists(paste0(file, ".##H"))) {
+    return("ucinet")
+  }
   ext <- tolower(tools::file_ext(file))
-  if (ext %in% c("##h", "##d") || file.exists(paste0(file, ".##h"))) return("ucinet")
   if (ext == "") stop("Cannot detect the file type of '", file, "'; give filetype=.", call. = FALSE)
   switch(ext, csv = "csv", txt = "csv", xlsx = "xlsx", xls = "xlsx", uci = "uci",
          json = "uci", dl = "dl", vna = "vna",
@@ -57,6 +66,10 @@ detect_layout <- function(df) {
   if (ncol(df) %in% 2:3) return("edgelist")
   if (all(numeric_cols) && nrow(df) == ncol(df)) return("matrix")
   "nodelist"
+}
+
+is_ucinet_path <- function(file) {
+  is.character(file) && length(file) == 1L && grepl("\\.##[hHdD]$", file)
 }
 
 read_xlsx_df <- function(file, sheet, labels) {
@@ -128,13 +141,18 @@ xfromnodelist <- function(df, ego = 1, directed = TRUE, title = NULL) {
 xsave <- function(net, file, filetype = NULL, ...) {
   net <- as_xucinet(net)
   if (is.null(filetype)) {
-    ext <- tolower(tools::file_ext(file))
-    filetype <- if (ext == "") "uci" else detect_filetype(file)
-    if (ext == "") file <- paste0(file, ".uci")
+    if (is_ucinet_path(file)) {
+      filetype <- "ucinet"
+    } else {
+      ext <- tolower(tools::file_ext(file))
+      filetype <- if (ext == "") "uci" else detect_filetype(file)
+      if (ext == "") file <- paste0(file, ".uci")
+    }
   }
   filetype <- match.arg(tolower(filetype), c("uci", "ucinet", "dl", "csv", "xlsx", "vna"))
   switch(filetype,
-    csv = utils::write.csv(as.matrix(net), file),
+    csv    = utils::write.csv(as.matrix(net), file),
+    ucinet = return(invisible(xsaveucinet(net, file, ...))),
     stop("xsave() for filetype '", filetype, "' is not implemented yet (Phase 0).", call. = FALSE)
   )
   invisible(file)

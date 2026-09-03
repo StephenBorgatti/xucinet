@@ -5,3 +5,4 @@
 docs/
 *.Rcheck/
 /inst/doc/
+.claude/

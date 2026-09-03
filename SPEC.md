@@ -173,7 +173,7 @@ regardless — decades of existing datasets.
 
 - **Native, full-fidelity read/write of UCINET ##h/##d files in pure R.** This is what makes
   "switch back and forth" real. The exact binary format will be ported from the Delphi source
-  (`utucifile.pas` / G3Tools) — we own the reference implementation, so this can be exact,
+  (`utucdataset.pas` / G2Tools) — we own the reference implementation, so this can be exact,
   including labels, multi-relation stacks, and missing-value codes.
 - Missing values: UCINET's `>= 1e37` convention maps to R `NA` on read; `NA` writes as `1e38`
   (bna) so UCINET reads it as missing. Users never see 1e37/1e38.
