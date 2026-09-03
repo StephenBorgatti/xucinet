@@ -92,8 +92,12 @@ xreaducinet <- function(file, directed = NULL, mode = NULL, title = NULL, ...) {
 #'   itself defaults to; `"double"` keeps full R precision but older UCINET
 #'   routines may not expect it.
 #' @param title Dataset title stored in the header. Defaults to the network's.
-#' @param istable Value of the trailing `istable` byte, version 6405 only.
 #' @return The path of the `.##h` file written, invisibly.
+#' @section The 6405 `istable` byte:
+#' Version 6405 ends with a byte UCINET calls `istable`. xucinet always writes 0,
+#' on Steve's instruction (2026-09-03): the flag is not well enough specified to
+#' set meaningfully, and 0 is what the 6405 files in the wild carry. It is read
+#' back and reported by the header reader, but nothing depends on it.
 #' @examples
 #' m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3)
 #' f <- file.path(tempdir(), "demo")
@@ -101,7 +105,7 @@ xreaducinet <- function(file, directed = NULL, mode = NULL, title = NULL, ...) {
 #' xreaducinet(f)
 #' @export
 xsaveucinet <- function(net, file, version = 6404, datatype = "single",
-                        title = NULL, istable = FALSE) {
+                        title = NULL) {
   net <- as_xucinet(net)
   version <- as.integer(version)
   if (!version %in% c(4010L, 4020L, 5000L, 6000L, 6404L, 6405L)) {
@@ -116,7 +120,7 @@ xsaveucinet <- function(net, file, version = 6404, datatype = "single",
   ucinet_write_header(paths$header, version, datatype, title,
                       nr = nrow(proto), nc = ncol(proto), nm = length(mats),
                       collab = colnames(proto), rowlab = rownames(proto),
-                      matlab = names(mats), istable = istable)
+                      matlab = names(mats))
   ucinet_write_data(paths$data, mats, datatype)
   invisible(paths$header)
 }
@@ -332,7 +336,7 @@ ucinet_data <- function(path, h) {
 # ---- writing ----------------------------------------------------------------
 
 ucinet_write_header <- function(path, version, datatype, title, nr, nc, nm,
-                                collab, rowlab, matlab, istable) {
+                                collab, rowlab, matlab) {
   lay <- ucinet_layout(version)
   con <- file(path, "wb")
   on.exit(close(con))
@@ -359,7 +363,8 @@ ucinet_write_header <- function(path, version, datatype, title, nr, nc, nm,
   wr(collab, nc)
   wr(rowlab, nr)
   wr(matlab, nm)
-  if (lay$istable) writeBin(as.raw(as.integer(isTRUE(istable))), con)
+  # Always 0: see the istable section of xsaveucinet()'s help.
+  if (lay$istable) writeBin(as.raw(0L), con)
   invisible(path)
 }
 

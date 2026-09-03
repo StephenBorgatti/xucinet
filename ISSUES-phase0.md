@@ -26,10 +26,11 @@ Done when: tests in `test-class.R` cover every input type and both directions.
 Port from the Delphi reference, which is **`Tools\G2Tools\utucdataset.pas`** (class
 `tucdataset`, about 1,400 lines), not `utucifile.pas` (that G3Tools unit is a 90-line helper
 for writing unicode labels and dimensions, used only by `Uci.dpr` and `ug3matrix.pas`).
-Copy `utucdataset.pas` and the units it depends on for constants and file access
-(`ucommon.pas` for `na = 1E37`, `bna = 1E38`; `uufile`/`ufn` for the block reader; `utmat`,
-`utstrvec` for the containers it fills) into `inst/reference/delphi/` so the port can cite
-line numbers.
+Copy `utucdataset.pas` and the units it depends on for constants and file access into
+`inst/reference/delphi/` so the port can cite line numbers. Three more turned out to be enough:
+`ucommon.pas` (the `datatype` enum, `dtsize`, `na = 1E37`, `bna = 1E38`), `uufile.pas` (the
+block reader, and `seekrow`, which is where the `##d` element order is actually defined) and
+`utsmat.pas` (`loadmat`/`loadrows`, the `##d` read loop, and `isna`, the missing-value test).
 
 What the unit shows, and what the port must cover:
 - Six header versions are readable: 4010 (10-char fixed ASCII labels), 4020 (20-char fixed
@@ -37,13 +38,25 @@ What the unit shows, and what the port must cover:
   (variable-length Unicode labels), 6404 (starts with "V6404"; Unicode labels; integer
   dimensions) and 6405 (starts with "V6405"; final byte records `istable`). `loadhdr()`
   dispatches on the header; the reader must accept all six, since old datasets circulate.
-- The writer uses 6404 when needed and 6000 otherwise (`savehdr`, around line 1097); write
-  the same, so UCINET reads xucinet files without a version bump.
-- The `##d` file begins with a data-type byte (`infile.dt`) that says how cells are stored;
-  read it rather than assuming float.
+- Write 6404 by default. `savehdr` does pick 6404-or-6000 by size (around line 1097), but only
+  when `fileversionmethod = 1`, and `ucommon.pas` sets it to 0, so that branch never runs and
+  UCINET's real default is `defaultucversion = 6405`. 6404 is what all 36 book datasets use
+  and any UCINET that reads 6405 also reads it, so it is the safest thing to write.
+- Write 0 for 6405's trailing `istable` byte, everywhere, until that flag is better specified.
+- The data-type byte (`infile.dt`) is in the **`##h` header**, not at the front of the `##d`
+  file; read it from the header rather than assuming float. The `##d` file has no header at
+  all: it is `nm` matrices back to back, each stored row by row, so it is exactly
+  `nr * nc * nm * dtsize[dt]` bytes. `ufile.seekrow` is the authority — element (i,j) of
+  matrix k sits at `dtsize * ((k-1)*nr*nc + (i-1)*nc + (j-1))`, so (1,1) is at offset 0.
+- `dims[1]` is the **column** count and `dims[2]` the **row** count, in that order
+  (`readdimensions`). Easy to get backwards.
+- The date record is five Delphi `Word`s, so **10 bytes**. The comment in `loadhdr6404` saying
+  a word is four bytes is wrong.
 - Missing values: cells >= 1E37 (`na`) map to `NA` on read; `NA` writes as 1E38 (`bna`).
-- Labels, multi-relation stacks (`nm` matrices), 2-mode, and the DSL variants
-  (`savedsl`/`savehdrdsl`) that the Data Editor uses.
+- Labels, multi-relation stacks (`nm` matrices) and 2-mode. The DSL calls
+  (`savedsl`/`savehdrdsl`) need nothing extra: `rdsl`/`cdsl` are row and column *selection
+  lists*, so `savematdsl` writes a submatrix as an ordinary dataset that any reader loads
+  normally. The R equivalent is `xsaveucinet(net[rows, cols], f)`.
 
 Wire into `xread(filetype="ucinet")` and `xsave(filetype="ucinet")`.
 

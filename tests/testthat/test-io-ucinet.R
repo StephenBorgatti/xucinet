@@ -113,16 +113,33 @@ test_that("version 4010 round trips (no UCINET-written specimen available)", {
   expect_equal(rownames(as.matrix(back))[1], "HOLLY")
 })
 
-test_that("version 6405 round trips and writes its trailing istable byte", {
+test_that("version 6405 round trips and always writes istable as 0", {
   net <- xreaducinet(uci("campnet.##h"))
   f <- tmpstem()
-  xsaveucinet(net, f, version = 6405, istable = TRUE)
+  xsaveucinet(net, f, version = 6405)
   h <- ucinet_header(paste0(f, ".##h"))
   expect_equal(h$version, 6405)
-  expect_true(h$istable)
+  expect_false(h$istable)          # 0 everywhere, per Steve 2026-09-03
   expect_identical(as.matrix(xreaducinet(f)), as.matrix(net))
-  xsaveucinet(net, f, version = 6405, istable = FALSE)
-  expect_false(ucinet_header(paste0(f, ".##h"))$istable)
+  # and the byte really is the last one in the file, not padding
+  size <- file.info(paste0(f, ".##h"))$size
+  con <- file(paste0(f, ".##h"), "rb"); on.exit(close(con))
+  seek(con, size - 1)
+  expect_identical(readBin(con, "raw", 1), as.raw(0))
+})
+
+test_that("the 6405 istable byte is still read back from a file that sets it", {
+  # The reader must not assume 0: UCINET can write 1, so flip the last byte of a
+  # 6405 header and check it comes back.
+  net <- xreaducinet(uci("campnet.##h"))
+  f <- tmpstem()
+  xsaveucinet(net, f, version = 6405)
+  h <- paste0(f, ".##h")
+  b <- readBin(h, "raw", file.info(h)$size)
+  b[length(b)] <- as.raw(1)
+  writeBin(b, h)
+  expect_true(ucinet_header(h)$istable)
+  expect_identical(as.matrix(xreaducinet(f)), as.matrix(net))
 })
 
 # ---- missing values ---------------------------------------------------------

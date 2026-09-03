@@ -4,14 +4,7 @@
 \alias{xsaveucinet}
 \title{Write a UCINET dataset}
 \usage{
-xsaveucinet(
-  net,
-  file,
-  version = 6404,
-  datatype = "single",
-  title = NULL,
-  istable = FALSE
-)
+xsaveucinet(net, file, version = 6404, datatype = "single", title = NULL)
 }
 \arguments{
 \item{net}{A network (any accepted form).}
@@ -25,8 +18,6 @@ itself defaults to; \code{"double"} keeps full R precision but older UCINET
 routines may not expect it.}
 
 \item{title}{Dataset title stored in the header. Defaults to the network's.}
-
-\item{istable}{Value of the trailing \code{istable} byte, version 6405 only.}
 }
 \value{
 The path of the \code{.##h} file written, invisibly.
@@ -39,6 +30,14 @@ trailing byte and is what current UCINET writes by default.
 \details{
 \code{NA} is written as 1e38, which is the value UCINET reads back as missing.
 }
+\section{The 6405 \code{istable} byte}{
+
+Version 6405 ends with a byte UCINET calls \code{istable}. xucinet always writes 0,
+on Steve's instruction (2026-09-03): the flag is not well enough specified to
+set meaningfully, and 0 is what the 6405 files in the wild carry. It is read
+back and reported by the header reader, but nothing depends on it.
+}
+
 \examples{
 m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3)
 f <- file.path(tempdir(), "demo")
