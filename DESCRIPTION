@@ -25,6 +25,7 @@ Suggests:
     igraph,
     network,
     sna,
+    tidygraph,
     jsonlite,
     readxl,
     testthat (>= 3.0.0),

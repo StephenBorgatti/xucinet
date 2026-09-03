@@ -7,13 +7,16 @@
 as_xucinet(x, directed = NULL, mode = NULL, title = NULL, ...)
 }
 \arguments{
-\item{x}{A matrix, a data frame holding an adjacency matrix or an edge list
-(detected by shape), an \code{igraph} object, a statnet \code{network} object, an
-existing \code{xucinet} object, or the name of a file readable by \code{\link[=xread]{xread()}}.}
+\item{x}{A matrix, a 3-D array (rows x columns x relations), a named list of
+matrices, a data frame holding an adjacency matrix or an edge list
+(detected by shape), an \code{igraph} object, a statnet \code{network} object, a
+tidygraph \code{tbl_graph}, an existing \code{xucinet} object, or the name of a file
+readable by \code{\link[=xread]{xread()}}.}
 
 \item{directed}{\code{TRUE}, \code{FALSE}, or \code{NULL} (default) to detect from the
-symmetry of the matrix. The result of detection is recorded and reported
-by routines as an assumption, as UCINET does.}
+symmetry of the matrix. For a multi-relation dataset the data are treated
+as directed if any relation is asymmetric. The result of detection is
+recorded and reported by routines as an assumption, as UCINET does.}
 
 \item{mode}{\code{"1-mode"}, \code{"2-mode"}, or \code{NULL} (default) to detect: square
 with matching row and column labels is 1-mode, otherwise 2-mode.}
@@ -35,9 +38,24 @@ printed output. Every analysis function in the package calls \code{as_xucinet()}
 on its first argument, so plain matrices and data frames can be passed
 directly to any routine.
 }
+\details{
+A dataset with several relations (UCINET's multi-relation stack, as in
+Sampson or the hightech advice/friendship/reports data) is built from a 3-D
+array whose third dimension is the relation, or from a named list of
+matrices. All relations must have the same dimensions and the same labels.
+\verb{$data} is then a named list of matrices; see \code{\link[=xrelations]{xrelations()}}.
+}
 \examples{
 m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3,
             dimnames = list(c("a","b","c"), c("a","b","c")))
 net <- as_xucinet(m)
 net
+
+# a two-relation stack
+both <- as_xucinet(list(liking = m, advice = t(m)))
+xrelations(both)
+}
+\seealso{
+\code{\link[=xrelations]{xrelations()}} for the relation names, \code{\link[=as_igraph]{as_igraph()}} and friends to
+convert the other way, and \verb{[.xucinet} to subset nodes.
 }

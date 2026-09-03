@@ -1,16 +1,22 @@
 #' @export
 print.xucinet <- function(x, ...) {
   m <- as.matrix(x)
+  k <- xnrelations(x)
   cat(x$title, "\n", sep = "")
-  cat(nrow(m), "rows,", ncol(m), "columns,", xnrelations(x),
-      if (xnrelations(x) == 1) "relation;" else "relations;",
+  cat(nrow(m), "rows,", ncol(m), "columns,", k,
+      if (k == 1) "relation;" else "relations;",
       x$mode, ";",
       if (isTRUE(x$directed)) "directed" else if (isFALSE(x$directed)) "undirected" else "directedness not determined",
       "\n")
-  if (nrow(m) <= 30 && ncol(m) <= 30) {
-    print(format_matrix(m), quote = FALSE, right = TRUE)
-  } else {
+  if (k > 1) cat("Relations:", paste(xrelations(x), collapse = ", "), "\n")
+  if (nrow(m) > 30 || ncol(m) > 30) {
     cat("(matrix larger than 30 x 30 not shown; use as.matrix() or xdisplay())\n")
+    return(invisible(x))
+  }
+  # One titled block per relation, as UCINET's display does for a stack.
+  for (r in seq_len(k)) {
+    if (k > 1) cat("\n", xrelations(x)[r], "\n", sep = "")
+    print(format_matrix(as.matrix(x, relation = r)), quote = FALSE, right = TRUE)
   }
   invisible(x)
 }
