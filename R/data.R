@@ -84,6 +84,10 @@
 #' the running example through much of the book. A tie means the respondent
 #' placed that person among those they interacted with most.
 #'
+#' There is no `campnet_attr`. These are the same 18 participants as [camp92],
+#' so their attributes are in [camp92_attr], whose row names line up with this
+#' network's node for node.
+#'
 #' @format An `xucinet` object, 18 x 18, one binary directed relation.
 #' @source Borgatti, S. P., Bernard, H. R., Pelto, P., Ryan, G. and DeJordy, R.
 #'   (2012). The Camp '92 dataset. *Connections*, 32(1), 51-53.
@@ -557,3 +561,111 @@
 #' @examples
 #' table(zachary_attr$Club)
 "zachary_attr"
+
+#' Lazega's corporate law firm
+#'
+#' Advice, co-working and friendship among 71 attorneys, partners and associates
+#' alike, in a north-eastern US corporate law firm between 1988 and 1991. A
+#' standard testbed for exponential random graph models, because the three
+#' relations and the rich attribute set let you ask what predicts a tie.
+#'
+#' @format An `xucinet` object, 71 x 71, three relations:
+#' \describe{
+#'   \item{Advice}{colleagues gone to for non-technical professional advice}
+#'   \item{Coworking}{colleagues worked with on at least one case}
+#'   \item{Friendship}{colleagues socialised with outside work}
+#' }
+#' @source Lazega, E. (2001). *The collegial phenomenon: the social mechanisms
+#'   of cooperation among peers in a corporate law partnership*. Oxford
+#'   University Press. See also Snijders, T. A. B., Pattison, P. E., Robins,
+#'   G. L. and Handcock, M. S. (2006). New specifications for exponential random
+#'   graph models. *Sociological Methodology*, 99-153.
+#' @seealso [lazega_attr]
+#' @examples
+#' xrelations(lazega)
+"lazega"
+
+#' Law firm attorney attributes
+#'
+#' @format A data frame, 71 rows keyed by attorney id, 7 columns:
+#' \describe{
+#'   \item{Status}{1 = partner, 2 = associate}
+#'   \item{Gender}{1 = male, 2 = female}
+#'   \item{Office}{1 = Boston, 2 = Hartford, 3 = Providence}
+#'   \item{Tenure}{years with the firm}
+#'   \item{Age}{age in years}
+#'   \item{Practice}{1 = litigation, 2 = corporate}
+#'   \item{LawSchool}{law school attended, as a code}
+#' }
+#' @source As [lazega].
+#' @seealso [lazega]
+#' @examples
+#' table(lazega_attr$Office)
+"lazega_attr"
+
+#' Read's New Guinea highland tribes
+#'
+#' Alliance and opposition among 16 Gahuku-Gama sub-tribes in the central
+#' highlands of New Guinea. Because it records positive and negative ties on the
+#' same set of actors, it is the standard example for methods that handle signed
+#' networks.
+#'
+#' @format An `xucinet` object, 16 x 16, two relations `Alliance` and
+#'   `Opposition`, both binary and symmetric.
+#' @source Read, K. (1954). Cultures of the central highlands, New Guinea.
+#'   *Southwestern Journal of Anthropology*, 10, 1-43. See also Everett, M. G.
+#'   and Borgatti, S. P. (2014). Networks containing negative ties. *Social
+#'   Networks*, 38, 111-120.
+#' @examples
+#' xrelations(newguinea)
+"newguinea"
+
+#' Rehnquist court voting
+#'
+#' How the nine justices of the US Supreme Court voted on 376 cases between 1995
+#' and 2004, the years of the second natural court under Chief Justice William
+#' Rehnquist. A two-mode matrix of cases by judges.
+#'
+#' A cell is 1 where the judge voted with the majority on that case and 0 where
+#' not. Thirty-two cells across eighteen cases hold 0.5, and nine cells are
+#' missing; UCINET stores those as 1e38 and they arrive here as `NA`.
+#'
+#' @format An `xucinet` object, 376 cases x 9 judges, 2-mode.
+#' @source Borgatti, S. P., Everett, M. G., Johnson, J. C. and Agneessens, F.
+#'   *Analyzing Social Networks*. 3rd edition. Sage.
+#' @seealso [supremecourt_cases_attr], [supremecourt_judges_attr]
+#' @examples
+#' dim(supremecourt)
+#' sum(is.na(as.matrix(supremecourt)))
+"supremecourt"
+
+#' Supreme Court case attributes
+#'
+#' The row-mode attributes of [supremecourt]: one row per case.
+#'
+#' @format A data frame, 376 rows keyed by case id, 2 columns:
+#' \describe{
+#'   \item{Year}{year the case was decided}
+#'   \item{Majority Size}{number of justices in the majority. The space is
+#'     UCINET's own column label, so reach it with
+#'     `supremecourt_cases_attr[["Majority Size"]]`.}
+#' }
+#' @source As [supremecourt].
+#' @seealso [supremecourt], [supremecourt_judges_attr]
+#' @examples
+#' table(supremecourt_cases_attr$Year)
+"supremecourt_cases_attr"
+
+#' Supreme Court justice attributes
+#'
+#' The column-mode attributes of [supremecourt]: one row per justice.
+#'
+#' @format A data frame, 9 rows keyed by justice name, 11 columns:
+#'   `NoTimesMajority`, the number of cases in which the justice was in the
+#'   majority, then one column per year from `1995` to `2004` giving the same
+#'   count within that year.
+#' @source As [supremecourt].
+#' @seealso [supremecourt], [supremecourt_cases_attr]
+#' @examples
+#' supremecourt_judges_attr[, "NoTimesMajority", drop = FALSE]
+"supremecourt_judges_attr"

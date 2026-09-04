@@ -19,6 +19,11 @@ The binary interaction network among the same 18 people as \link{camp92}, used a
 the running example through much of the book. A tie means the respondent
 placed that person among those they interacted with most.
 }
+\details{
+There is no \code{campnet_attr}. These are the same 18 participants as \link{camp92},
+so their attributes are in \link{camp92_attr}, whose row names line up with this
+network's node for node.
+}
 \section{Book sections}{
  5.2.3.
 }

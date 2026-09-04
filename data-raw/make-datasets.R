@@ -65,6 +65,12 @@ polarstation,Johnson_PolarStation,net
 kaptail,Kapferer_Tailorship,net
 knecht,Knecht_Class12b,net
 knecht_attr,Knecht_Class12b_Attributes,attr
+lazega,Lazega_Lawyers,net
+lazega_attr,Lazega_Lawyers_Attributes,attr
+newguinea,Read_NewGuinea,net
+supremecourt,Rehnquist_SupremeCourt,net
+supremecourt_cases_attr,Rehnquist_SupremeCourt_Attributes_Cases,attr
+supremecourt_judges_attr,Rehnquist_SupremeCourt_Attributes_Judges,attr
 hightech,Krackhardt_HighTech,net
 hightech_attr,Krackhardt_HighTech_Attributes,attr
 mainas_terro,Mainas_Terro,net
@@ -84,15 +90,16 @@ zachary_attr,Zachary_KarateClub_Attributes,attr
 # Not built, and why:
 #   hollywood, reddit_fracking, sunbelt_tweets, youtube_falcon9
 #     The four Everett social-media datasets (crosswalk 4.7 / 4.7.1). No source
-#     file of any kind exists on this machine - not ##h, not csv. Add them here
-#     once the data turns up.
+#     file of any kind exists on this machine - not ##h, not csv. Steve is
+#     sourcing them from Martin Everett; add them here when they arrive.
 #   campnet_attr
-#     The crosswalk lists it, but there is no Borgatti_Campnet_Attributes file.
-#     camp92_attr covers the same participants.
-#   lazega, newguinea, supremecourt
-#     Present as ##h and shipped by xUCINET 0.x, but absent from the crosswalk
-#     Datasets sheet, so they have no agreed 2.0 name yet. Naming them is a book
-#     edit (CLAUDE.md), so they wait for Steve rather than being coined here.
+#     There is no Borgatti_Campnet_Attributes file, and campnet covers the same
+#     18 people as camp92, so camp92_attr is the attribute table for both. The
+#     campnet help page says so, and the crosswalk row has been dropped.
+#
+# lazega, newguinea and supremecourt come from 'ASN3 Ucinet Files' rather than
+# DataUCINET, which holds neither Lazega nor Knecht. supremecourt is 2-mode
+# (cases x judges), so it has one attribute table per mode.
 
 # ---- build ------------------------------------------------------------------
 

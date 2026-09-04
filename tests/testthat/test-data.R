@@ -6,10 +6,12 @@ networks <- c("baker_journals", "bkham", "camp92", "campnet", "pv504", "pv960",
               "burkhardt", "davis", "eies", "doctorates", "wiring", "cities",
               "polarstation", "kaptail", "knecht", "hightech", "mainas_terro",
               "newfrat", "padgett", "pane_training", "sampson", "trade_pre29",
-              "papuan_village", "wolfe_primates", "zachary")
+              "papuan_village", "wolfe_primates", "zachary",
+              "lazega", "newguinea", "supremecourt")
 attributes <- c("camp92_attr", "pv504_attr", "eies_attr", "knecht_attr",
                 "hightech_attr", "padgett_attr", "wolfe_primates_attr",
-                "zachary_attr")
+                "zachary_attr", "lazega_attr",
+                "supremecourt_cases_attr", "supremecourt_judges_attr")
 
 get_data <- function(name) {
   env <- new.env(parent = emptyenv())
@@ -48,11 +50,24 @@ test_that("attribute tables line up with their network, node for node", {
                 c("eies", "eies_attr"), c("knecht", "knecht_attr"),
                 c("hightech", "hightech_attr"), c("padgett", "padgett_attr"),
                 c("wolfe_primates", "wolfe_primates_attr"),
-                c("zachary", "zachary_attr"))
+                c("zachary", "zachary_attr"), c("lazega", "lazega_attr"))
   for (p in pairs) {
     net <- get_data(p[1]); df <- get_data(p[2])
     expect_identical(rownames(as.matrix(net)), rownames(df), info = p[1])
   }
+})
+
+test_that("campnet borrows camp92's attribute table", {
+  # There is no campnet_attr: same 18 people, so camp92_attr keys both.
+  expect_identical(rownames(as.matrix(get_data("campnet"))),
+                   rownames(get_data("camp92_attr")))
+  expect_false("campnet_attr" %in% utils::data(package = "xucinet")$results[, "Item"])
+})
+
+test_that("supremecourt has one attribute table per mode", {
+  m <- as.matrix(get_data("supremecourt"))
+  expect_identical(rownames(m), rownames(get_data("supremecourt_cases_attr")))
+  expect_identical(colnames(m), rownames(get_data("supremecourt_judges_attr")))
 })
 
 # ---- shapes and labels that a transposition would break ---------------------
@@ -133,4 +148,22 @@ test_that("an unknown name still gives the file-type error, not a data error", {
 
 test_that("a path is never mistaken for a dataset name", {
   expect_error(xread("some/dir/campnet"), "Cannot detect the file type")
+})
+
+test_that("the three newly named datasets carry their structure", {
+  laz <- get_data("lazega")
+  expect_equal(dim(laz), c(71, 71, 3))
+  expect_equal(xrelations(laz), c("Advice", "Coworking", "Friendship"))
+
+  ng <- get_data("newguinea")
+  expect_equal(dim(ng), c(16, 16, 2))
+  expect_equal(xrelations(ng), c("Alliance", "Opposition"))
+  expect_false(ng$directed)
+  expect_equal(rownames(as.matrix(ng))[1], "GAVEV")
+
+  sc <- get_data("supremecourt")
+  expect_equal(dim(sc), c(376, 9))       # cases by judges, not the reverse
+  expect_equal(sc$mode, "2-mode")
+  expect_equal(colnames(as.matrix(sc))[1], "Rehnquist")
+  expect_equal(sum(is.na(as.matrix(sc))), 9)
 })
