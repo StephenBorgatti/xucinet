@@ -10,9 +10,12 @@
 //   2. In the command line box at the bottom of the main window:
 //        ->cd <this folder>
 //        ->run make_goldens.txt
-//   3. Commit the g_*.##h and g_*.##d files it creates, next to this script.
-//   4. Save the output log as make_goldens.log in this folder as well (see
-//      WHY THE LOG TOO, below).
+//   3. Commit the G_*.##h and G_*.##d files it creates, next to this script.
+//      UCINET upper-cases the names; the harness resolves either spelling.
+//   4. Save the session output as log_make_goldens.txt in this folder as well
+//      (see WHY THE LOG TOO, below).
+//
+// Last run: 4 Sep 2026. All nine fixtures produced; no line failed.
 //
 // The four input datasets are already here, so nothing outside this folder is
 // touched: campnet (binary, directed), hightech (three relations), davis
@@ -33,11 +36,22 @@
 //   2-mode matrix, cohesion on anything but a 1-mode network. If UCINET
 //   complains about a line, let the rest run and say which line failed; the
 //   test harness skips fixtures that are not there.
+//   As it turned out, none did: density() handles 2-mode fine, reporting
+//   "treated as 2-mode because it is not square" and counting every cell.
+//
+// WHAT density() ACTUALLY RETURNS
+//   Two columns, Density and AvgDeg, with one row per matrix in the stack,
+//   row-labelled by relation. cohesion() returns 33 whole-network measures as
+//   rows, one column per relation. Neither reports a standard deviation, so
+//   the Std Dev in our own report has no golden behind it yet.
 // ===========================================================================
 
 // Show plenty of decimals in the log. Saved datasets keep full precision
 // regardless; this only affects what dsp prints.
+
+Recordcli = true
 dec 8
+
 
 // --- campnet: binary, directed, 18 nodes -----------------------------------
 g_campnet_den = density(campnet)

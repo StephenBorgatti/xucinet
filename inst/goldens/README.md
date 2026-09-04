@@ -68,5 +68,28 @@ a real comparison the moment the files land.
 
 ## Status
 
-`density/` is written and waiting to be run. Everything in
-`tests/testthat/test-goldens.R` skips until it has been.
+`density/` was run in UCINET on 4 September 2026. All nine fixtures were
+produced, no line failed, and `tests/testthat/test-goldens.R` compares against
+them for real.
+
+## What the run established
+
+`density()` returns two columns, **Density** and **AvgDeg**, one row per matrix
+in the stack, row-labelled by relation. `cohesion()` returns 33 whole-network
+measures as rows, one column per relation. Neither reports a standard deviation,
+so the `Std Dev` in our own report has no golden behind it yet.
+
+It also caught two real bugs in `xdensity()`, both in the 2-mode case, which is
+exactly what davis was in the battery for:
+
+- We were excluding a pseudo-diagonal from an 18 x 14 matrix, where cell (i, i)
+  is woman i at event i and means nothing. Density came out 0.324 against
+  UCINET's 0.353.
+- Average degree divides by the number of **columns**. Only 2-mode data tells
+  the denominators apart: UCINET reports 89/14 for davis, not 89/18.
+
+One difference is left deliberately, and belongs in the differences ledger when
+issue #10 builds it: UCINET's `dichot()` zeroes the diagonal, ours leaves it
+alone. It changes no density, because both exclude the diagonal anyway, but it
+is a real difference in the transform. `test-goldens.R` pins both behaviours so
+neither can drift unnoticed.

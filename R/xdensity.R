@@ -46,13 +46,20 @@ xdensity <- function(net, relation = NULL, directed = NULL, weighted = NULL,
     m <- (m > 0) * 1
     assumptions <- c(assumptions, "Data dichotomized at > 0.")
   }
-  if (!diagonal) diag(m) <- NA
-  n <- nrow(m)
-  cells <- if (diagonal) m else m[row(m) != col(m)]
+  # A 2-mode matrix has no diagonal to leave out: cell (i,i) is row-node i tied
+  # to column-node i, two different things. UCINET counts every cell, and says
+  # so in its own log ("Dataset DAVIS treated as 2-mode because it is not
+  # square"). Excluding a pseudo-diagonal put our davis density at 0.324 against
+  # UCINET's 0.353.
+  twomode <- identical(net$mode, "2-mode")
+  cells <- if (diagonal || twomode) as.vector(m) else m[row(m) != col(m)]
   cells <- cells[!is.na(cells)]
   density <- mean(cells)
   ties <- sum(cells != 0)
-  avg_degree <- sum(m, na.rm = TRUE) / n
+  # UCINET divides the total by the number of COLUMNS. For a square network that
+  # is just n, so only 2-mode data tells the two apart: davis is 18 women by 14
+  # events and UCINET reports 89/14, not 89/18.
+  avg_degree <- sum(cells) / ncol(m)
   # UCINET's Std Dev is the population form: uestimator.calc in ustats.pas sets
   # variance := mcssq/n, not mcssq/(n-1). stats::sd() would be slightly high.
   summary <- list("Density" = density,

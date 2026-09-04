@@ -9,9 +9,20 @@ goldens_dir <- function(family = "density") {
   system.file("goldens", family, package = "xucinet")
 }
 
-golden_exists <- function(name, family = "density") {
+# UCINET upper-cases the dataset names it writes, so a script asking for
+# g_campnet_den produces G_CAMPNET_DEN.##h. Windows would not care; Linux CI
+# would. Resolve by scanning the folder rather than trusting either spelling.
+golden_path <- function(name, family = "density") {
   d <- goldens_dir(family)
-  nzchar(d) && file.exists(file.path(d, paste0(name, ".##h")))
+  if (!nzchar(d)) return(NA_character_)
+  files <- list.files(d, pattern = "[hH]$")
+  hit <- match(tolower(paste0(name, ".##h")), tolower(files))
+  if (is.na(hit)) return(NA_character_)
+  file.path(d, sub("\\.##[hH]$", "", files[hit]))
+}
+
+golden_exists <- function(name, family = "density") {
+  !is.na(golden_path(name, family))
 }
 
 # Skip rather than fail when the batch has not been run yet: the harness is
@@ -25,7 +36,7 @@ skip_if_no_golden <- function(name, family = "density") {
 
 # The golden as a plain matrix, labels and all.
 golden_matrix <- function(name, family = "density") {
-  as.matrix(xreaducinet(file.path(goldens_dir(family), name)))
+  as.matrix(xreaducinet(golden_path(name, family)))
 }
 
 # One labelled value out of a golden. UCINET writes these small result datasets

@@ -1,0 +1,371 @@
+->run make_goldens.txt
+
+Density
+
+                        1          2 
+                  Density     AvgDeg 
+               ---------- ---------- 
+     1 CAMPNET 0.17647059 3.00000000 
+
+1 rows, 2 columns, 1 levels.
+
+Warning: network is disconnected. Avg distance is calculated within components.
+
+Whole network measures
+
+                                       1 
+                            Top3Interact 
+                                  ionsT3 
+                            ------------ 
+     1           # of nodes  18.00000000 
+     2            # of ties  54.00000000 
+     3           Avg Degree   3.00000000 
+     4        Indeg H-Index   4.00000000 
+     5         K-core index   3.00000000 
+     6   Deg Centralization   0.07352941 
+     7   Out-Centralization   0.00000000 
+     8    In-Centralization   0.12456747 
+     9           Indeg Corr  -0.04165146 
+    10          Outdeg Corr              
+    11              Density   0.17647059 
+    12           Components   4.00000000 
+    13    Largest Component  10.00000000 
+    14      Component Ratio   0.17647059 
+    15        Connectedness   0.67320263 
+    16        Fragmentation   0.32679740 
+    17 Transitivity/Closure   0.48387095 
+    18   Transitivity Index   0.37327188 
+    19         Avg Distance   2.87378645 
+    20        Prop within 3   0.46078432 
+    21          SD Distance   1.70196700 
+    22             Diameter   7.00000000 
+    23         Wiener Index 592.00000000 
+    24       Dependency Sum 386.00000000 
+    25              Breadth   0.65797544 
+    26          Compactness   0.34202459 
+    27      Small Worldness              
+    28              Mutuals   0.12418301 
+    29          Asymmetrics   0.10457516 
+    30                Nulls   0.77124184 
+    31      Arc Reciprocity   0.70370370 
+    32     Dyad Reciprocity   0.54285717 
+    33    Reciprocity Index   0.64021164 
+
+33 rows, 1 columns, 1 levels.
+
+
+Densities
+
+                           1          2 
+                     Density     AvgDeg 
+                  ---------- ---------- 
+     1     Advice 0.45238096 9.04761887 
+     2 Friendship 0.24285714 4.85714293 
+     3   ReportTo 0.04761905 0.95238096 
+
+3 rows, 2 columns, 1 levels.
+
+Warning: network is disconnected. Avg distance is calculated within components.
+Warning: network is disconnected. Avg distance is calculated within components.
+
+Whole network measures
+
+                                       1            2            3 
+                                  Advice   Friendship     ReportTo 
+                            ------------ ------------ ------------ 
+     1           # of nodes  21.00000000  21.00000000  21.00000000 
+     2            # of ties 190.00000000 102.00000000  20.00000000 
+     3           Avg Degree   9.04761887   4.85714293   0.95238096 
+     4        Indeg H-Index   9.00000000   6.00000000   3.00000000 
+     5         K-core index  10.00000000   5.00000000   1.00000000 
+     6   Deg Centralization   0.34210527   0.57894737   0.33684212 
+     7   Out-Centralization   0.57499999   0.69000000   0.00250000 
+     8    In-Centralization   0.47000000   0.27000001   0.31750000 
+     9           Indeg Corr   0.11923646  -0.04789270   0.26127782 
+    10          Outdeg Corr   0.09179977   0.23611178   0.07980239 
+    11              Density   0.45238096   0.24285714   0.04761905 
+    12           Components   1.00000000   3.00000000  21.00000000 
+    13    Largest Component  21.00000000  19.00000000   1.00000000 
+    14      Component Ratio   0.00000000   0.10000000   1.00000000 
+    15        Connectedness   1.00000000   0.90476191   0.08571429 
+    16        Fragmentation   0.00000000   0.09523810   0.91428572 
+    17 Transitivity/Closure   0.66397852   0.46105263   0.00000000 
+    18   Transitivity Index   0.38639551   0.28818274  -0.05000000 
+    19         Avg Distance   1.64047623   2.10263157   1.44444442 
+    20        Prop within 3   1.00000000   0.83571428   0.08571429 
+    21          SD Distance   0.64496565   0.89589322   0.49690399 
+    22             Diameter   3.00000000   5.00000000   2.00000000 
+    23         Wiener Index 689.00000000 799.00000000  52.00000000 
+    24       Dependency Sum 269.00000000 419.00000000  16.00000000 
+    25              Breadth   0.28928572   0.47583333   0.93333334 
+    26          Compactness   0.71071428   0.52416664   0.06666667 
+    27      Small Worldness   1.44962692                           
+    28              Mutuals   0.21428572   0.10952381   0.00000000 
+    29          Asymmetrics   0.47619048   0.26666668   0.09523810 
+    30                Nulls   0.30952382   0.62380952   0.90476191 
+    31      Arc Reciprocity   0.47368422   0.45098040   0.00000000 
+    32     Dyad Reciprocity   0.31034482   0.29113925   0.00000000 
+    33    Reciprocity Index   0.03890162   0.27487975  -0.05000000 
+
+33 rows, 3 columns, 1 levels.
+
+Dataset DAVIS treated as 2-mode because it is not square
+
+Density
+
+                      1          2 
+                Density     AvgDeg 
+             ---------- ---------- 
+     1 DAVIS 0.35317460 6.35714293 
+
+1 rows, 2 columns, 1 levels.
+
+
+Density
+
+                                1           2 
+                          Density      AvgDeg 
+                      ----------- ----------- 
+     1 BAKER_JOURNALS  4.77368402 90.69999695 
+
+1 rows, 2 columns, 1 levels.
+
+Warning: network is disconnected. Avg distance is calculated within components.
+
+Whole network measures
+
+                                       1 
+                                Citation 
+                            ------------ 
+     1           # of nodes  20.00000000 
+     2            # of ties  87.00000000 
+     3           Avg Degree   4.34999990 
+     4        Indeg H-Index   6.00000000 
+     5         K-core index   5.00000000 
+     6   Deg Centralization   0.64912283 
+     7   Out-Centralization   0.42382270 
+     8    In-Centralization   0.64542937 
+     9           Indeg Corr   0.31718260 
+    10          Outdeg Corr   0.24184641 
+    11              Density   0.22894736 
+    12           Components   4.00000000 
+    13    Largest Component  17.00000000 
+    14      Component Ratio   0.15789473 
+    15        Connectedness   0.85000002 
+    16        Fragmentation   0.15000001 
+    17 Transitivity/Closure   0.47397768 
+    18   Transitivity Index   0.31778678 
+    19         Avg Distance   1.98452008 
+    20        Prop within 3   0.81578946 
+    21          SD Distance   0.77683687 
+    22             Diameter   4.00000000 
+    23         Wiener Index 641.00000000 
+    24       Dependency Sum 318.00000000 
+    25              Breadth   0.49364036 
+    26          Compactness   0.50635964 
+    27      Small Worldness              
+    28              Mutuals   0.14736842 
+    29          Asymmetrics   0.16315790 
+    30                Nulls   0.68947369 
+    31      Arc Reciprocity   0.64367819 
+    32     Dyad Reciprocity   0.47457626 
+    33    Reciprocity Index   0.53787613 
+
+33 rows, 1 columns, 1 levels.
+
+
+Density
+
+                            1          2 
+                      Density     AvgDeg 
+                   ---------- ---------- 
+     1 G_BAKER_BIN 0.22894737 4.34999990 
+
+1 rows, 2 columns, 1 levels.
+
+->recordcli true
+->run make_goldens.txt
+
+Density
+
+                        1          2 
+                  Density     AvgDeg 
+               ---------- ---------- 
+     1 CAMPNET 0.17647059 3.00000000 
+
+1 rows, 2 columns, 1 levels.
+
+Warning: network is disconnected. Avg distance is calculated within components.
+
+Whole network measures
+
+                                       1 
+                            Top3Interact 
+                                  ionsT3 
+                            ------------ 
+     1           # of nodes  18.00000000 
+     2            # of ties  54.00000000 
+     3           Avg Degree   3.00000000 
+     4        Indeg H-Index   4.00000000 
+     5         K-core index   3.00000000 
+     6   Deg Centralization   0.07352941 
+     7   Out-Centralization   0.00000000 
+     8    In-Centralization   0.12456747 
+     9           Indeg Corr  -0.04165146 
+    10          Outdeg Corr              
+    11              Density   0.17647059 
+    12           Components   4.00000000 
+    13    Largest Component  10.00000000 
+    14      Component Ratio   0.17647059 
+    15        Connectedness   0.67320263 
+    16        Fragmentation   0.32679740 
+    17 Transitivity/Closure   0.48387095 
+    18   Transitivity Index   0.37327188 
+    19         Avg Distance   2.87378645 
+    20        Prop within 3   0.46078432 
+    21          SD Distance   1.70196700 
+    22             Diameter   7.00000000 
+    23         Wiener Index 592.00000000 
+    24       Dependency Sum 386.00000000 
+    25              Breadth   0.65797544 
+    26          Compactness   0.34202459 
+    27      Small Worldness              
+    28              Mutuals   0.12418301 
+    29          Asymmetrics   0.10457516 
+    30                Nulls   0.77124184 
+    31      Arc Reciprocity   0.70370370 
+    32     Dyad Reciprocity   0.54285717 
+    33    Reciprocity Index   0.64021164 
+
+33 rows, 1 columns, 1 levels.
+
+
+Densities
+
+                           1          2 
+                     Density     AvgDeg 
+                  ---------- ---------- 
+     1     Advice 0.45238096 9.04761887 
+     2 Friendship 0.24285714 4.85714293 
+     3   ReportTo 0.04761905 0.95238096 
+
+3 rows, 2 columns, 1 levels.
+
+Warning: network is disconnected. Avg distance is calculated within components.
+Warning: network is disconnected. Avg distance is calculated within components.
+
+Whole network measures
+
+                                       1            2            3 
+                                  Advice   Friendship     ReportTo 
+                            ------------ ------------ ------------ 
+     1           # of nodes  21.00000000  21.00000000  21.00000000 
+     2            # of ties 190.00000000 102.00000000  20.00000000 
+     3           Avg Degree   9.04761887   4.85714293   0.95238096 
+     4        Indeg H-Index   9.00000000   6.00000000   3.00000000 
+     5         K-core index  10.00000000   5.00000000   1.00000000 
+     6   Deg Centralization   0.34210527   0.57894737   0.33684212 
+     7   Out-Centralization   0.57499999   0.69000000   0.00250000 
+     8    In-Centralization   0.47000000   0.27000001   0.31750000 
+     9           Indeg Corr   0.11923646  -0.04789270   0.26127782 
+    10          Outdeg Corr   0.09179977   0.23611178   0.07980239 
+    11              Density   0.45238096   0.24285714   0.04761905 
+    12           Components   1.00000000   3.00000000  21.00000000 
+    13    Largest Component  21.00000000  19.00000000   1.00000000 
+    14      Component Ratio   0.00000000   0.10000000   1.00000000 
+    15        Connectedness   1.00000000   0.90476191   0.08571429 
+    16        Fragmentation   0.00000000   0.09523810   0.91428572 
+    17 Transitivity/Closure   0.66397852   0.46105263   0.00000000 
+    18   Transitivity Index   0.38639551   0.28818274  -0.05000000 
+    19         Avg Distance   1.64047623   2.10263157   1.44444442 
+    20        Prop within 3   1.00000000   0.83571428   0.08571429 
+    21          SD Distance   0.64496565   0.89589322   0.49690399 
+    22             Diameter   3.00000000   5.00000000   2.00000000 
+    23         Wiener Index 689.00000000 799.00000000  52.00000000 
+    24       Dependency Sum 269.00000000 419.00000000  16.00000000 
+    25              Breadth   0.28928572   0.47583333   0.93333334 
+    26          Compactness   0.71071428   0.52416664   0.06666667 
+    27      Small Worldness   1.44962692                           
+    28              Mutuals   0.21428572   0.10952381   0.00000000 
+    29          Asymmetrics   0.47619048   0.26666668   0.09523810 
+    30                Nulls   0.30952382   0.62380952   0.90476191 
+    31      Arc Reciprocity   0.47368422   0.45098040   0.00000000 
+    32     Dyad Reciprocity   0.31034482   0.29113925   0.00000000 
+    33    Reciprocity Index   0.03890162   0.27487975  -0.05000000 
+
+33 rows, 3 columns, 1 levels.
+
+Dataset DAVIS treated as 2-mode because it is not square
+
+Density
+
+                      1          2 
+                Density     AvgDeg 
+             ---------- ---------- 
+     1 DAVIS 0.35317460 6.35714293 
+
+1 rows, 2 columns, 1 levels.
+
+
+Density
+
+                                1           2 
+                          Density      AvgDeg 
+                      ----------- ----------- 
+     1 BAKER_JOURNALS  4.77368402 90.69999695 
+
+1 rows, 2 columns, 1 levels.
+
+Warning: network is disconnected. Avg distance is calculated within components.
+
+Whole network measures
+
+                                       1 
+                                Citation 
+                            ------------ 
+     1           # of nodes  20.00000000 
+     2            # of ties  87.00000000 
+     3           Avg Degree   4.34999990 
+     4        Indeg H-Index   6.00000000 
+     5         K-core index   5.00000000 
+     6   Deg Centralization   0.64912283 
+     7   Out-Centralization   0.42382270 
+     8    In-Centralization   0.64542937 
+     9           Indeg Corr   0.31718260 
+    10          Outdeg Corr   0.24184641 
+    11              Density   0.22894736 
+    12           Components   4.00000000 
+    13    Largest Component  17.00000000 
+    14      Component Ratio   0.15789473 
+    15        Connectedness   0.85000002 
+    16        Fragmentation   0.15000001 
+    17 Transitivity/Closure   0.47397768 
+    18   Transitivity Index   0.31778678 
+    19         Avg Distance   1.98452008 
+    20        Prop within 3   0.81578946 
+    21          SD Distance   0.77683687 
+    22             Diameter   4.00000000 
+    23         Wiener Index 641.00000000 
+    24       Dependency Sum 318.00000000 
+    25              Breadth   0.49364036 
+    26          Compactness   0.50635964 
+    27      Small Worldness              
+    28              Mutuals   0.14736842 
+    29          Asymmetrics   0.16315790 
+    30                Nulls   0.68947369 
+    31      Arc Reciprocity   0.64367819 
+    32     Dyad Reciprocity   0.47457626 
+    33    Reciprocity Index   0.53787613 
+
+33 rows, 1 columns, 1 levels.
+
+
+Density
+
+                            1          2 
+                      Density     AvgDeg 
+                   ---------- ---------- 
+     1 G_BAKER_BIN 0.22894737 4.34999990 
+
+1 rows, 2 columns, 1 levels.
+
