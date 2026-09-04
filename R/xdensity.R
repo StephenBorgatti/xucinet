@@ -53,9 +53,11 @@ xdensity <- function(net, relation = NULL, directed = NULL, weighted = NULL,
   density <- mean(cells)
   ties <- sum(cells != 0)
   avg_degree <- sum(m, na.rm = TRUE) / n
+  # UCINET's Std Dev is the population form: uestimator.calc in ustats.pas sets
+  # variance := mcssq/n, not mcssq/(n-1). stats::sd() would be slightly high.
   summary <- list("Density" = density,
                   "Avg Degree" = avg_degree,
-                  "Std Dev" = stats::sd(cells),
+                  "Std Dev" = uci_stats(cells)[["Std Dev"]],
                   "No. of Ties" = ties)
   new_xucinet_output("Density", net, summary = summary, assumptions = assumptions,
                      subclass = "xdensity", call = match.call())

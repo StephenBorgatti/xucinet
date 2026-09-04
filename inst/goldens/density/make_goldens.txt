@@ -1,0 +1,81 @@
+// ===========================================================================
+// xucinet golden fixtures - Density (issue #7, the pilot routine)
+//
+// Produces the UCINET numbers that tests/testthat/test-goldens.R compares
+// xdensity() against. Re-run this whenever UCINET changes, and commit whatever
+// it writes into this folder.
+//
+// HOW TO RUN
+//   1. Open UCINET.
+//   2. In the command line box at the bottom of the main window:
+//        ->cd <this folder>
+//        ->run make_goldens.txt
+//   3. Commit the g_*.##h and g_*.##d files it creates, next to this script.
+//   4. Save the output log as make_goldens.log in this folder as well (see
+//      WHY THE LOG TOO, below).
+//
+// The four input datasets are already here, so nothing outside this folder is
+// touched: campnet (binary, directed), hightech (three relations), davis
+// (2-mode) and baker_journals (valued).
+//
+// WHY DATASETS RATHER THAN SCRAPED TEXT
+//   Each result is assigned to a dataset, so UCINET writes it as a ##h/##d
+//   pair that xucinet reads exactly. That avoids parsing the log and avoids
+//   losing precision to the display rounding, which is only three decimals.
+//
+// WHY THE LOG TOO
+//   Issue #6 has to match our printed report against UCINET's, line for line
+//   where that is feasible, and only the log shows that. The dsp lines below
+//   print every result for exactly that reason.
+//
+// IF A LINE FAILS
+//   Some of these ask for a measure on data it may not accept - density on a
+//   2-mode matrix, cohesion on anything but a 1-mode network. If UCINET
+//   complains about a line, let the rest run and say which line failed; the
+//   test harness skips fixtures that are not there.
+// ===========================================================================
+
+// Show plenty of decimals in the log. Saved datasets keep full precision
+// regardless; this only affects what dsp prints.
+dec 8
+
+// --- campnet: binary, directed, 18 nodes -----------------------------------
+g_campnet_den = density(campnet)
+dsp g_campnet_den
+g_campnet_coh = cohesion(campnet)
+dsp g_campnet_coh
+
+// --- hightech: three relations, binary, directed, 21 nodes -----------------
+// density() reports one value per matrix in the stack, which is the
+// multi-relation case xdensity(relation=) has to agree with.
+g_hightech_den = density(hightech)
+dsp g_hightech_den
+g_hightech_coh = cohesion(hightech)
+dsp g_hightech_coh
+
+// --- davis: 2-mode, 18 women by 14 events ----------------------------------
+// No cohesion here: it is a 1-mode measure.
+g_davis_den = density(davis)
+dsp g_davis_den
+
+// --- baker_journals: valued, directed, 20 nodes ----------------------------
+// Valued data is the case where density is the mean cell value rather than a
+// proportion, so it is the one that catches a wrong denominator.
+g_baker_den = density(baker_journals)
+dsp g_baker_den
+g_baker_coh = cohesion(baker_journals)
+dsp g_baker_coh
+
+// --- the same valued data dichotomised -------------------------------------
+// xdensity(weighted = FALSE) has to match this, so we need UCINET's own
+// dichotomisation rather than our idea of it.
+g_baker_bin = dichot(baker_journals GT 0)
+g_baker_bin_den = density(g_baker_bin)
+dsp g_baker_bin_den
+
+// ===========================================================================
+// Done. Expected new files in this folder:
+//   g_campnet_den, g_campnet_coh, g_hightech_den, g_hightech_coh,
+//   g_davis_den, g_baker_den, g_baker_coh, g_baker_bin, g_baker_bin_den
+// each as a .##h / .##d pair.
+// ===========================================================================
