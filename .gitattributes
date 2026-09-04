@@ -6,3 +6,6 @@
 *.##d binary
 *.##H binary
 *.##D binary
+
+# Shipped datasets are compressed binaries.
+*.rda binary

@@ -4,10 +4,20 @@
 \alias{xdensity}
 \title{Density and average degree}
 \usage{
-xdensity(net, directed = NULL, weighted = NULL, diagonal = FALSE)
+xdensity(
+  net,
+  relation = NULL,
+  directed = NULL,
+  weighted = NULL,
+  diagonal = FALSE
+)
 }
 \arguments{
 \item{net}{A network (any accepted form).}
+
+\item{relation}{Which relation of a multi-relation dataset, by name or
+position (SPEC D4). Defaults to the first. Reporting every relation as its
+own section is still to come.}
 
 \item{directed}{\code{NULL} (detect), \code{TRUE} or \code{FALSE}. Detection is reported as
 an assumption in the printed output.}
@@ -30,4 +40,8 @@ template every later routine follows.
 \examples{
 m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3)
 xdensity(m)
+
+# a dataset name works too, as it does on UCINET's command line
+xdensity("campnet")
+xdensity(hightech, relation = "Friendship")
 }

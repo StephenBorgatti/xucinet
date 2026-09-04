@@ -16,10 +16,21 @@
 #' @param directed,mode,title Passed to [as_xucinet()].
 #' @param ... Reserved.
 #' @return An `xucinet` object.
+#' @section Shipped datasets:
+#' If `file` names no file on disk but does name one of the datasets the package
+#' ships, that dataset is used. So `xdensity("campnet")` works the way the
+#' UCINET command line does, without a `data(campnet)` first. A real file always
+#' wins over a dataset of the same name.
 #' @export
 xread <- function(file, filetype = NULL, layout = NULL, sheet = 1, labels = TRUE,
                   directed = NULL, mode = NULL, title = NULL, ...) {
-  if (is.null(filetype)) filetype <- detect_filetype(file)
+  if (is.null(filetype)) {
+    shipped <- shipped_dataset(file)
+    if (!is.null(shipped)) {
+      return(as_xucinet(shipped, directed = directed, mode = mode, title = title))
+    }
+    filetype <- detect_filetype(file)
+  }
   filetype <- match.arg(tolower(filetype), c("ucinet", "uci", "dl", "csv", "xlsx", "vna"))
   # A UCINET dataset carries its own labels, shape and title, so it does not go
   # through the layout detection below.
@@ -66,6 +77,26 @@ detect_layout <- function(df) {
   if (ncol(df) %in% 2:3) return("edgelist")
   if (all(numeric_cols) && nrow(df) == ncol(df)) return("matrix")
   "nodelist"
+}
+
+# The UCINET command line takes a dataset name, so xdensity("campnet") should
+# too. Only consulted when nothing of that name exists on disk: a real file
+# always wins. Dataset names are lowercase (D3), which also keeps this from
+# firing on paths.
+shipped_dataset <- function(file) {
+  if (!is.character(file) || length(file) != 1L) return(NULL)
+  if (!grepl("^[a-z][a-z0-9_]*$", file)) return(NULL)
+  if (file.exists(file) || file.exists(paste0(file, ".##h")) ||
+      file.exists(paste0(file, ".##H"))) {
+    return(NULL)
+  }
+  env <- new.env(parent = emptyenv())
+  found <- tryCatch({
+    suppressWarnings(utils::data(list = file, package = "xucinet", envir = env))
+    exists(file, envir = env, inherits = FALSE)
+  }, error = function(e) FALSE)
+  if (!found) return(NULL)
+  get(file, envir = env, inherits = FALSE)
 }
 
 is_ucinet_path <- function(file) {

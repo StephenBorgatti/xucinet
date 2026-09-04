@@ -43,3 +43,11 @@ container) is detected from the extension; the \emph{layout} (how the data are
 arranged inside it) is detected from the shape of what is read. Both can be
 overridden.
 }
+\section{Shipped datasets}{
+
+If \code{file} names no file on disk but does name one of the datasets the package
+ships, that dataset is used. So \code{xdensity("campnet")} works the way the
+UCINET command line does, without a \code{data(campnet)} first. A real file always
+wins over a dataset of the same name.
+}
+
