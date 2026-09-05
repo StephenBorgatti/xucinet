@@ -34,15 +34,19 @@ xread <- function(file, filetype = NULL, layout = NULL, sheet = 1, labels = TRUE
   filetype <- match.arg(tolower(filetype), c("ucinet", "uci", "dl", "csv", "xlsx", "vna"))
   # A UCINET dataset carries its own labels, shape and title, so it does not go
   # through the layout detection below.
+  # These two carry their own labels, shape and title, so they do not go through
+  # the layout detection below.
   if (filetype == "ucinet") {
     return(xreaducinet(file, directed = directed, mode = mode, title = title))
+  }
+  if (filetype == "uci") {
+    return(xreaduci(file, directed = directed, mode = mode, title = title))
   }
   if (is.null(title)) title <- tools::file_path_sans_ext(basename(file))
   raw <- switch(filetype,
     csv    = utils::read.csv(file, header = labels, row.names = if (labels) 1 else NULL,
                              check.names = FALSE, stringsAsFactors = FALSE),
     xlsx   = read_xlsx_df(file, sheet, labels),
-    uci    = stop(".uci reader is not implemented yet (Phase 0, issue #4).", call. = FALSE),
     dl     = stop("DL reader is not implemented yet (Phase 0, issue #5).", call. = FALSE),
     vna    = stop("VNA reader is not implemented yet (Phase 0, issue #5).", call. = FALSE)
   )
@@ -183,6 +187,7 @@ xsave <- function(net, file, filetype = NULL, ...) {
   filetype <- match.arg(tolower(filetype), c("uci", "ucinet", "dl", "csv", "xlsx", "vna"))
   switch(filetype,
     csv    = utils::write.csv(as.matrix(net), file),
+    uci    = return(invisible(xsaveuci(net, file, ...))),
     ucinet = return(invisible(xsaveucinet(net, file, ...))),
     stop("xsave() for filetype '", filetype, "' is not implemented yet (Phase 0).", call. = FALSE)
   )

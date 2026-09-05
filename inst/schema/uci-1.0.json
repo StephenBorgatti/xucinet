@@ -1,0 +1,130 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/stephenborgatti/xucinet/inst/schema/uci-1.0.json",
+  "title": "UCINET .uci dataset, schema version 1.0",
+  "description": "A single-file JSON replacement for the ##h/##d pair (SPEC D6). One file holds everything the pair did - the matrices, the labels, the mode, the directedness, the multi-relation stack, the title - plus node attributes and provenance, which the old format had no room for. Written to be implementable in Delphi XE7's System.JSON as well as in R: the structure is deliberately shallow, every array is homogeneous, and nothing depends on key order. Draft for review; nothing outside xucinet reads it yet.",
+  "type": "object",
+  "required": ["uci", "mode", "nrows", "ncols", "relations"],
+  "additionalProperties": false,
+  "properties": {
+    "uci": {
+      "description": "Schema version of this file, not the version of the program that wrote it. A reader should refuse a major version it does not know.",
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+$"
+    },
+    "title": {
+      "description": "Dataset name, as the ##h header's title field carried it. Printed reports use it to name the input.",
+      "type": "string"
+    },
+    "mode": {
+      "description": "1-mode when rows and columns are the same node set, 2-mode when they are not. Not inferred from squareness: a 1-mode network can be square by coincidence and a 2-mode one can be square by accident.",
+      "type": "string",
+      "enum": ["1-mode", "2-mode"]
+    },
+    "directed": {
+      "description": "true, false, or null when it is not determined. Null is the honest value for 2-mode data, where directedness has no meaning.",
+      "type": ["boolean", "null"]
+    },
+    "nrows": { "type": "integer", "minimum": 0 },
+    "ncols": { "type": "integer", "minimum": 0 },
+    "rowlabels": {
+      "description": "One label per row. Omit the key entirely if the file carries no labels; a reader then supplies 1..nrows, as UCINET does. An empty array is not the same thing and is not allowed.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "collabels": {
+      "description": "One label per column. Same rule as rowlabels. For 1-mode data these normally repeat rowlabels rather than being omitted, so that a reader need not special-case them.",
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "datatype": {
+      "description": "Hint for a writer converting back to ##h/##d, which must choose a fixed cell width. Values are the names from ucommon.pas. Purely advisory: the numbers in this file are exact regardless, and a reader that ignores this key loses nothing.",
+      "type": "string",
+      "enum": ["byte", "boolean", "shortint", "word", "smallint", "longint", "single", "double", "integer"]
+    },
+    "relations": {
+      "description": "The matrices, in stack order. A single-relation dataset has one entry. Every relation is nrows by ncols and shares the labels above; that is what makes the stack a stack.",
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "layout"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "description": "Relation name, from the ##h matrix labels. Sampson's ten arrive as SAMPLK1 .. SAMPNPR.",
+            "type": "string"
+          },
+          "layout": {
+            "description": "How the payload below is written. 'matrix' is dense, 'edgelist' is sparse. The words are the ones the R interface already uses for input layouts, deliberately, so users meet one vocabulary rather than two.",
+            "type": "string",
+            "enum": ["matrix", "edgelist"]
+          },
+          "values": {
+            "description": "For layout 'matrix', nrows arrays of ncols numbers, row-major, matching the ##d file's own order. For layout 'edgelist', one number per entry in i and j. A missing cell is JSON null, never a sentinel: the 1e37/1e38 convention stays inside the binary format where it belongs, and a reader writing back to ##d restores it.",
+            "type": "array"
+          },
+          "i": {
+            "description": "Row indices for layout 'edgelist', 1-based. Cells not listed are zero. To record a missing cell in a sparse relation, list it with a null value.",
+            "type": "array",
+            "items": { "type": "integer", "minimum": 1 }
+          },
+          "j": {
+            "description": "Column indices for layout 'edgelist', 1-based.",
+            "type": "array",
+            "items": { "type": "integer", "minimum": 1 }
+          }
+        }
+      }
+    },
+    "attributes": {
+      "description": "Node attributes, which the ##h/##d pair could only hold as a separate dataset. Optional. Keyed by label rather than by position so that a reader can align them to the network even if either has been reordered.",
+      "type": "object",
+      "required": ["rows", "variables"],
+      "additionalProperties": false,
+      "properties": {
+        "rows": {
+          "description": "The node each row of every variable belongs to. Normally equal to rowlabels, but need not be: a 2-mode dataset may carry attributes for its column mode instead.",
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "variables": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "values"],
+            "additionalProperties": false,
+            "properties": {
+              "name": { "type": "string" },
+              "values": {
+                "description": "One value per entry in rows. Numbers, or null where missing. Strings are allowed for genuinely categorical attributes that have no numeric coding.",
+                "type": "array"
+              }
+            }
+          }
+        }
+      }
+    },
+    "provenance": {
+      "description": "Who wrote the file and from what. Advisory, ignored on read, and never load-bearing - but the reason a dataset five years from now can be traced to the file it came from.",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "written_by": {
+          "description": "Program and version, e.g. 'xucinet 2.0.0.9000' or 'UCINET 6.847'.",
+          "type": "string"
+        },
+        "written_at": {
+          "description": "ISO 8601 timestamp, UTC.",
+          "type": "string"
+        },
+        "source": {
+          "description": "What this was converted from, if anything, e.g. 'campnet.##h'.",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
