@@ -179,6 +179,31 @@ xrelations <- function(net) {
   if (is.list(net$data)) names(net$data) else net$title
 }
 
+#' Node attributes carried by a dataset
+#'
+#' The `.uci` format is a single-file container, so it can hold node attributes
+#' alongside the network and a reader has to put them somewhere. They live in
+#' `net$attributes` as an ordinary data frame keyed by node label, and this is
+#' the supported way to reach them.
+#'
+#' SPEC D1 keeps attributes out of the network object, and that still holds for
+#' analysis: no routine reads this, every function that wants covariates takes
+#' them as its own argument, and the slot is `NULL` for a network that arrived
+#' any other way. It exists so that a `.uci` file round trips whole.
+#'
+#' @param net A network (any accepted form).
+#' @return A data frame of attributes keyed by node label, or `NULL` when the
+#'   dataset carries none.
+#' @seealso [xreaduci()], [xsaveuci()]
+#' @examples
+#' f <- system.file("schema", "campnet-example.uci", package = "xucinet")
+#' xattributes(xreaduci(f))
+#' xattributes(campnet)   # NULL: campnet came from a ##h pair
+#' @export
+xattributes <- function(net) {
+  as_xucinet(net)$attributes
+}
+
 #' @rdname xrelations
 #' @export
 xnrelations <- function(net) {

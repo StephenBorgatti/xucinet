@@ -276,3 +276,21 @@ test_that("a sparse payload indexing outside the matrix is refused", {
                     '"i":[9],"j":[1],"values":[1]}]}'), f)
   expect_error(xreaduci(f), "outside the declared")
 })
+
+test_that("xattributes() is the documented way to reach them", {
+  skip_if_no_jsonlite()
+  net <- xreaduci(system.file("schema", "campnet-example.uci", package = "xucinet"))
+  expect_identical(xattributes(net), net$attributes)
+  expect_equal(names(xattributes(net)), c("Gender", "Role", "Betweenness"))
+  # NULL for a network that arrived by any other route
+  expect_null(xattributes(campnet))
+  expect_null(xattributes(matrix(0, 2, 2)))
+})
+
+test_that("the schema tells the Delphi side about the decimal separator", {
+  skip_if_no_jsonlite()
+  s <- jsonlite::fromJSON(system.file("schema", "uci-1.0.json", package = "xucinet"),
+                          simplifyVector = FALSE)
+  expect_true(grepl("decimal separator", s[["x-numbers"]]))
+  expect_true(grepl("TFormatSettings", s[["x-numbers"]]))
+})
