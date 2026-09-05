@@ -32,30 +32,35 @@ xread <- function(file, filetype = NULL, layout = NULL, sheet = 1, labels = TRUE
     filetype <- detect_filetype(file)
   }
   filetype <- match.arg(tolower(filetype), c("ucinet", "uci", "dl", "csv", "xlsx", "vna"))
-  # A UCINET dataset carries its own labels, shape and title, so it does not go
-  # through the layout detection below.
-  # These two carry their own labels, shape and title, so they do not go through
-  # the layout detection below.
+  # These carry their own labels, shape and title, so they do not go through the
+  # layout detection below.
   if (filetype == "ucinet") {
     return(xreaducinet(file, directed = directed, mode = mode, title = title))
   }
   if (filetype == "uci") {
     return(xreaduci(file, directed = directed, mode = mode, title = title))
   }
+  if (filetype == "dl") {
+    return(xreaddl(file, directed = directed, mode = mode, title = title))
+  }
+  if (filetype == "vna") {
+    return(xreadvna(file, directed = directed, mode = mode, title = title))
+  }
   if (is.null(title)) title <- tools::file_path_sans_ext(basename(file))
-  raw <- switch(filetype,
-    csv    = utils::read.csv(file, header = labels, row.names = if (labels) 1 else NULL,
-                             check.names = FALSE, stringsAsFactors = FALSE),
-    xlsx   = read_xlsx_df(file, sheet, labels),
-    dl     = stop("DL reader is not implemented yet (Phase 0, issue #5).", call. = FALSE),
-    vna    = stop("VNA reader is not implemented yet (Phase 0, issue #5).", call. = FALSE)
+  g <- switch(filetype,
+    csv  = read_delim_raw(file),
+    xlsx = read_xlsx_grid(file, sheet)
   )
-  if (is.null(layout)) layout <- detect_layout(raw)
+  has_header <- if (is.null(labels) || isTRUE(labels)) detect_header(g) else FALSE
+  if (is.null(layout)) layout <- detect_layout_grid(g, has_header)
   layout <- match.arg(tolower(layout), c("matrix", "edgelist", "nodelist"))
   switch(layout,
-    matrix   = as_xucinet(as.matrix(raw), directed = directed, mode = mode, title = title),
-    edgelist = xfromedgelist(raw, directed = directed, title = title),
-    nodelist = xfromnodelist(raw, directed = directed, title = title)
+    matrix   = as_xucinet(grid_to_matrix(g, has_header), directed = directed,
+                          mode = mode, title = title),
+    edgelist = xfromedgelist(grid_to_edgelist(g, has_header), directed = directed,
+                             title = title),
+    nodelist = xfromnodelist(grid_to_nodelist(g, has_header), directed = directed,
+                             title = title)
   )
 }
 
@@ -107,12 +112,18 @@ is_ucinet_path <- function(file) {
   is.character(file) && length(file) == 1L && grepl("\\.##[hHdD]$", file)
 }
 
-read_xlsx_df <- function(file, sheet, labels) {
-  if (!requireNamespace("readxl", quietly = TRUE))
-    stop("Reading .xlsx files needs the 'readxl' package: install.packages(\"readxl\")", call. = FALSE)
-  df <- as.data.frame(readxl::read_excel(file, sheet = sheet, col_names = labels))
-  if (labels) { rownames(df) <- df[[1]]; df <- df[-1] }
-  df
+# A worksheet as raw cells, so that a spreadsheet goes through exactly the same
+# header and layout detection a csv does.
+read_xlsx_grid <- function(file, sheet = 1) {
+  need_pkg("readxl", "Reading .xlsx files")
+  df <- readxl::read_excel(file, sheet = sheet, col_names = FALSE,
+                           col_types = "text", .name_repair = "minimal",
+                           progress = FALSE)
+  g <- as_raw_grid(as.data.frame(df, stringsAsFactors = FALSE))
+  # Excel keeps trailing blank rows and columns; they are not data.
+  keep_col <- apply(g, 2, function(x) any(nzchar(x)))
+  keep_row <- apply(g, 1, function(x) any(nzchar(x)))
+  g[keep_row, keep_col, drop = FALSE]
 }
 
 #' Build a network from an edge list
@@ -127,15 +138,38 @@ read_xlsx_df <- function(file, sheet, labels) {
 #' @export
 xfromedgelist <- function(df, from = 1, to = 2, weight = NULL, directed = NULL, title = NULL) {
   if (is.null(title)) title <- deparse1(substitute(df))
-  if (is.null(weight) && ncol(df) >= 3) weight <- 3
   s <- as.character(df[[from]]); r <- as.character(df[[to]])
-  w <- if (is.null(weight)) rep(1, nrow(df)) else as.numeric(df[[weight]])
   nodes <- unique(c(s, r))
-  m <- matrix(0, length(nodes), length(nodes), dimnames = list(nodes, nodes))
-  m[cbind(s, r)] <- w
-  if (is.null(directed)) directed <- !isSymmetric(unname(m))
-  if (!directed) m <- pmax(m, t(m))
-  new_xucinet(m, mode = "1-mode", directed = directed, title = title)
+  build <- function(w, rows = rep(TRUE, nrow(df))) {
+    m <- matrix(0, length(nodes), length(nodes), dimnames = list(nodes, nodes))
+    m[cbind(s[rows], r[rows])] <- w
+    m
+  }
+  extra <- if (is.null(weight)) setdiff(seq_along(df), c(from, to)) else weight
+
+  if (!length(extra)) {
+    mats <- stats::setNames(list(build(rep(1, nrow(df)))), title)
+  } else if (length(extra) == 1L && !is_numericish(as.character(df[[extra]]))) {
+    # from, to, relation-name: each row says which network its tie belongs to,
+    # so the column is split into one matrix per name rather than coerced to
+    # numbers, which would make every cell NA.
+    lab <- as.character(df[[extra]])
+    lv <- unique(lab[nzchar(lab)])
+    mats <- stats::setNames(lapply(lv, function(v) build(1, lab == v)), lv)
+  } else {
+    # Every remaining column is a relation over the same nodes: an edge list of
+    # FROM, TO, PADGM, PADGB carries two networks, and taking only the first
+    # would drop one without saying so.
+    mats <- stats::setNames(
+      lapply(extra, function(k) build(suppressWarnings(as.numeric(df[[k]])))),
+      names(df)[extra])
+  }
+  if (is.null(directed)) {
+    directed <- any(vapply(mats, function(m) !isTRUE(isSymmetric(unname(m))), logical(1)))
+  }
+  if (!directed) mats <- lapply(mats, function(m) pmax(m, t(m)))
+  new_xucinet(if (length(mats) == 1L) mats[[1L]] else mats,
+              mode = "1-mode", directed = directed, title = title)
 }
 
 #' Build a network from a node list
@@ -151,6 +185,10 @@ xfromedgelist <- function(df, from = 1, to = 2, weight = NULL, directed = NULL, 
 #' @export
 xfromnodelist <- function(df, ego = 1, directed = TRUE, title = NULL) {
   if (is.null(title)) title <- deparse1(substitute(df))
+  # NULL means "not specified", which xread() passes whenever the caller has not
+  # said. A node list is directed by default: ego names its alters, and the
+  # alters were not asked.
+  if (is.null(directed)) directed <- TRUE
   egos <- as.character(df[[ego]])
   alters <- df[-ego]
   s <- rep(egos, ncol(alters)); r <- as.character(unlist(alters, use.names = FALSE))
@@ -189,6 +227,8 @@ xsave <- function(net, file, filetype = NULL, ...) {
     csv    = utils::write.csv(as.matrix(net), file),
     uci    = return(invisible(xsaveuci(net, file, ...))),
     ucinet = return(invisible(xsaveucinet(net, file, ...))),
+    dl     = return(invisible(xsavedl(net, file, ...))),
+    vna    = return(invisible(xsavevna(net, file, ...))),
     stop("xsave() for filetype '", filetype, "' is not implemented yet (Phase 0).", call. = FALSE)
   )
   invisible(file)
