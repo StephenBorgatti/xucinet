@@ -133,6 +133,11 @@ read_xlsx_grid <- function(file, sheet = 1) {
 #' @param from,to,weight Column names or positions.
 #' @param directed Logical; `NULL` detects (an edge list is treated as directed
 #'   unless every tie appears in both directions).
+#' @param mode `"1-mode"`, `"2-mode"`, or `NULL` (default) to decide from the
+#'   data: two columns sharing no values are taken to be two node sets, and
+#'   the result is a rectangle rather than a square over their union. That is
+#'   evidence rather than proof - a strict hierarchy has disjoint columns and
+#'   is still 1-mode - so pass `mode` to settle it either way.
 #' @param title Dataset name.
 #' @return An `xucinet` object.
 #' @export
@@ -202,6 +207,11 @@ detect_two_mode <- function(s, r, mode = NULL) {
 #' @param df A data frame.
 #' @param ego Column name or position of the ego column.
 #' @param directed Logical; node lists are directed by default.
+#' @param mode `"1-mode"`, `"2-mode"`, or `NULL` (default) to decide from the
+#'   data: two columns sharing no values are taken to be two node sets, and
+#'   the result is a rectangle rather than a square over their union. That is
+#'   evidence rather than proof - a strict hierarchy has disjoint columns and
+#'   is still 1-mode - so pass `mode` to settle it either way.
 #' @param title Dataset name.
 #' @return An `xucinet` object.
 #' @export

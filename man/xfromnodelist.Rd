@@ -13,6 +13,12 @@ xfromnodelist(df, ego = 1, directed = TRUE, mode = NULL, title = NULL)
 
 \item{directed}{Logical; node lists are directed by default.}
 
+\item{mode}{\code{"1-mode"}, \code{"2-mode"}, or \code{NULL} (default) to decide from the
+data: two columns sharing no values are taken to be two node sets, and
+the result is a rectangle rather than a square over their union. That is
+evidence rather than proof - a strict hierarchy has disjoint columns and
+is still 1-mode - so pass \code{mode} to settle it either way.}
+
 \item{title}{Dataset name.}
 }
 \value{

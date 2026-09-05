@@ -23,6 +23,12 @@ weight column.}
 \item{directed}{Logical; \code{NULL} detects (an edge list is treated as directed
 unless every tie appears in both directions).}
 
+\item{mode}{\code{"1-mode"}, \code{"2-mode"}, or \code{NULL} (default) to decide from the
+data: two columns sharing no values are taken to be two node sets, and
+the result is a rectangle rather than a square over their union. That is
+evidence rather than proof - a strict hierarchy has disjoint columns and
+is still 1-mode - so pass \code{mode} to settle it either way.}
+
 \item{title}{Dataset name.}
 }
 \value{
