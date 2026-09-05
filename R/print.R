@@ -31,7 +31,7 @@ xdisplay <- function(net, relation = NULL) {
   net <- as_xucinet(net)
   m <- as.matrix(net, relation = relation)
   cat(net$title, "\n\n", sep = "")
-  print(format_matrix(m), quote = FALSE, right = TRUE)
+  cat_uci_matrix(m)
   invisible(net)
 }
 

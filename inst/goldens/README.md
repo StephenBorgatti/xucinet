@@ -88,8 +88,28 @@ exactly what davis was in the battery for:
 - Average degree divides by the number of **columns**. Only 2-mode data tells
   the denominators apart: UCINET reports 89/14 for davis, not 89/18.
 
-One difference is left deliberately, and belongs in the differences ledger when
-issue #10 builds it: UCINET's `dichot()` zeroes the diagonal, ours leaves it
-alone. It changes no density, because both exclude the diagonal anyway, but it
-is a real difference in the transform. `test-goldens.R` pins both behaviours so
-neither can drift unnoticed.
+It also settled how dichotomising treats the diagonal. UCINET's `dichot()`
+zeroes it; we now do the same for 1-mode data, so `g_baker_bin` reproduces cell
+for cell. We do **not** zero it for 2-mode data, where cell (i, i) is row-node i
+tied to column-node i and dropping it would delete real ties: 12 of davis's 89
+attendances. Both halves are pinned by tests, and the reasoning is in
+`inst/DIFFERENCES.md`, which is also where average degree on 2-mode data is
+logged as matched-but-under-review.
+
+## The menu routine's report
+
+`density/density_menu_log.txt` is UCINET's output from **Network | Whole
+Networks | Density | Density Overall** on campnet, 5 September 2026, UCINET
+6.847. It is a different surface from `log_make_goldens.txt`, which is the CLI
+session: the CLI's `density()` is a function whose result `dsp` prints as a bare
+matrix, while the menu routine prints the titled report our `print()` method
+imitates.
+
+`test-goldens.R` compares our printed report against it line for line. Two lines
+have no counterpart on our side and are dropped before comparing: UCINET appends
+the path of the file it read, and names an output dataset because it was asked
+to save one. Our assumptions block is an xucinet addition (SPEC D4/D5) and is
+dropped too. Everything else, all fifteen lines, matches exactly.
+
+That log is also what confirmed the standard deviation. UCINET prints 0.381 for
+campnet, which is the population form; `stats::sd()` gives 0.382.

@@ -119,17 +119,29 @@ test_that("dichotomising valued data matches UCINET's own dichotomisation", {
                unname(gold[1, "Density"]), tolerance = tol)
 })
 
-test_that("we count the same ties UCINET does, off the diagonal", {
+test_that("dichotomising 1-mode data reproduces UCINET cell for cell", {
+  # Including the diagonal, which UCINET's dichot() zeroes and we now zero too
+  # (Steve, 5 Sep 2026; inst/DIFFERENCES.md entry 1). baker_journals records
+  # each journal's citations to itself, so the diagonal is where this shows.
   skip_if_no_golden("g_baker_bin")
-  ours <- (as.matrix(baker_journals) > 0) * 1
+  ours <- dichotomize(as.matrix(baker_journals), twomode = FALSE)
   gold <- golden_matrix("g_baker_bin")
-  off <- row(ours) != col(ours)
-  expect_equal(unname(ours[off]), unname(gold[off]), tolerance = tol)
-  # UCINET's dichot() zeroes the diagonal; ours keeps whatever was there. It
-  # makes no difference to density, which excludes the diagonal either way, but
-  # it is a real difference in the transform and belongs in the ledger.
-  expect_true(all(diag(gold) == 0))
-  expect_true(all(diag(ours) == 1))   # baker's diagonal is non-zero throughout
+  expect_equal(unname(ours), unname(gold), tolerance = tol)
+  expect_true(all(diag(ours) == 0))
+  expect_true(any(diag(as.matrix(baker_journals)) > 0))   # there was something there
+})
+
+test_that("dichotomising 2-mode data keeps the diagonal", {
+  # Zeroing it would delete real ties: for davis it would drop 12 of the 89
+  # attendances, because cell (i,i) is woman i at event i.
+  m <- as.matrix(davis)
+  expect_equal(sum(dichotomize(m, twomode = TRUE)), 89)
+  # Belt and braces: the guard also tests squareness, so a rectangular matrix
+  # keeps its pseudo-diagonal even if something forgets to pass twomode.
+  expect_equal(sum(dichotomize(m, twomode = FALSE)), 89)
+  # and this is what zeroing it would have cost
+  z <- m; diag(z) <- 0
+  expect_equal(sum(z), 77)
 })
 
 test_that("the valued and dichotomised densities really do differ", {
@@ -160,4 +172,27 @@ test_that("our density agrees with the number printed in UCINET's log", {
   nums <- as.numeric(regmatches(row, gregexpr("[0-9]+\\.[0-9]+", row))[[1]])
   expect_equal(xdensity(campnet)$summary$Density, nums[1], tolerance = tol)
   expect_equal(xdensity(campnet)$summary$`Avg Degree`, nums[2], tolerance = tol)
+})
+
+test_that("the printed report matches UCINET's Density log line for line", {
+  # The acceptance test for issue #6. "density_menu_log.txt" is UCINET's own output
+  # from Network | Whole Networks | Density | Density Overall on campnet,
+  # 5 Sep 2026, UCINET 6.847.
+  log <- file.path(goldens_dir("density"), "density_menu_log.txt")
+  skip_if_not(file.exists(log), "menu Density log not captured")
+
+  theirs <- sub("\r$", "", readLines(log, warn = FALSE))
+  theirs <- sub("^\ufeff", "", theirs)   # byte order mark
+  # Two lines have no counterpart on our side: UCINET appends the path of the
+  # file it read, and names an output dataset because it was asked to save one.
+  theirs <- theirs[!grepl("^Output dataset:", theirs)]
+  theirs <- sub(" [(][A-Za-z]:[^)]*[)]$", "", theirs)
+  theirs <- theirs[seq_len(grep("^1 rows, 4 columns", theirs)[1])]
+
+  ours <- capture.output(print(xdensity(campnet)))
+  # our assumptions block is an xucinet addition (SPEC D4/D5), not UCINET's
+  ours <- ours[!grepl("^Note:", ours)]
+  ours <- ours[seq_len(grep("^1 rows, 4 columns", ours)[1])]
+
+  expect_identical(ours, theirs)
 })

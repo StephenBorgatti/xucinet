@@ -23,6 +23,15 @@ names and signatures is the crosswalk spreadsheet in the book repo (`asnr2e/cros
   otherwise implement natively. Every deliberate difference goes in the differences vignette.
 - Auto-transformations (dichotomize, symmetrize) print the same notice UCINET prints and are
   recorded in `$assumptions`.
+- Matrices are printed in UCINET's own layout — numbered column header, column labels wrapped
+  into the value width, dashed rule, numbered and right-aligned row labels — by
+  `cat_uci_matrix()` in `R/output.R`. That applies to `xdisplay()` and to every matrix section
+  of a printed report, including the whole-network statistics block, which UCINET renders as a
+  one-row matrix labelled with the dataset name. Decimals are decided per column, then every
+  column is padded to one width for the whole matrix. `print.xucinet()`, which shows the raw
+  network object rather than a report, deliberately keeps R's plain matrix printing.
+- Every deliberate departure from UCINET, and anything we match that UCINET may itself have
+  wrong, goes in `inst/DIFFERENCES.md` with who decided it and when.
 - ASNR 1e names (e.g. `xDegreeCentrality`) are exported as thin deprecated wrappers in
   `R/aliases-1e.R`, each calling the 2.0 function and emitting a one-line message. They are
   not documented in vignettes.

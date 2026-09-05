@@ -41,31 +41,38 @@ xdensity <- function(net, relation = NULL, directed = NULL, weighted = NULL,
     assumptions <- c(assumptions, sprintf("Data treated as %s (detected from symmetry).",
                                           if (isTRUE(net$directed)) "directed" else "undirected"))
   }
-  valued <- any(m != 0 & m != 1, na.rm = TRUE)
-  if (isFALSE(weighted) && valued) {
-    m <- (m > 0) * 1
-    assumptions <- c(assumptions, "Data dichotomized at > 0.")
-  }
   # A 2-mode matrix has no diagonal to leave out: cell (i,i) is row-node i tied
   # to column-node i, two different things. UCINET counts every cell, and says
   # so in its own log ("Dataset DAVIS treated as 2-mode because it is not
   # square"). Excluding a pseudo-diagonal put our davis density at 0.324 against
   # UCINET's 0.353.
   twomode <- identical(net$mode, "2-mode")
+  valued <- any(m != 0 & m != 1, na.rm = TRUE)
+  if (isFALSE(weighted) && valued) {
+    m <- dichotomize(m, twomode = twomode)
+    assumptions <- c(assumptions, "Data dichotomized at > 0.")
+  }
   cells <- if (diagonal || twomode) as.vector(m) else m[row(m) != col(m)]
   cells <- cells[!is.na(cells)]
   density <- mean(cells)
   ties <- sum(cells != 0)
-  # UCINET divides the total by the number of COLUMNS. For a square network that
-  # is just n, so only 2-mode data tells the two apart: davis is 18 women by 14
-  # events and UCINET reports 89/14, not 89/18.
+  # UCINET divides the total by the number of COLUMNS, so davis reports 89/14
+  # rather than 89/18. Every square network agrees either way, so only 2-mode
+  # data tells the denominators apart.
+  #
+  # UNDER REVIEW (Steve, 5 Sep 2026): ties/ncols may be a UCINET bug rather than
+  # a definition. We match it for now, and the golden test is pinned to UCINET's
+  # value; if UCINET changes, this and inst/DIFFERENCES.md change with it.
   avg_degree <- sum(cells) / ncol(m)
-  # UCINET's Std Dev is the population form: uestimator.calc in ustats.pas sets
-  # variance := mcssq/n, not mcssq/(n-1). stats::sd() would be slightly high.
+  # Column order is UCINET's own, from its Density report: Density, No. of Ties,
+  # Std Dev, Avg Degree. Std Dev is the population form - uestimator.calc in
+  # ustats.pas sets variance := mcssq/n, not mcssq/(n-1), and UCINET's report
+  # for campnet prints 0.381 where stats::sd() would give 0.382.
   summary <- list("Density" = density,
-                  "Avg Degree" = avg_degree,
+                  "No. of Ties" = ties,
                   "Std Dev" = uci_stats(cells)[["Std Dev"]],
-                  "No. of Ties" = ties)
-  new_xucinet_output("Density", net, summary = summary, assumptions = assumptions,
-                     subclass = "xdensity", call = match.call())
+                  "Avg Degree" = avg_degree)
+  new_xucinet_output("Density / Average Matrix Value", net, summary = summary,
+                     assumptions = assumptions, subclass = "xdensity",
+                     call = match.call())
 }

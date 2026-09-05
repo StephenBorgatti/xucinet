@@ -84,6 +84,70 @@ format_matrix <- function(m, digits = 3) {
   out
 }
 
+# UCINET's matrix layout, ported from its own logs (inst/goldens/density/
+# "density log.txt" and log_make_goldens.txt):
+#
+#                    1     2     3     4
+#                Densi No. o Std D Avg D
+#                   ty f Tie    ev egree
+#                          s
+#                ----- ----- ----- -----
+#      1 campnet 0.176    54 0.381     3
+#
+# The rules, read off those logs:
+#   - the column width comes from the VALUES, never from the labels;
+#   - a label too wide for it wraps into as many chunks as it needs, each right
+#     aligned, stacked downwards from the first header line;
+#   - the stub is a 6-wide row number, a space, the row labels right aligned to
+#     their widest, and a space;
+#   - every column is its value right aligned in the width, then one space.
+format_uci_matrix <- function(m, digits = 3, footer = TRUE) {
+  m <- as.matrix(m)
+  nr <- nrow(m); nc <- ncol(m)
+  if (nr == 0L || nc == 0L) return("(empty matrix)")
+  # Decimals are decided per column, then every column is padded to one width
+  # for the whole matrix. That is what UCINET's Density report shows: 54 and 3
+  # bare, in columns of their own, beside 0.176 and 0.381, all in a 5-wide grid.
+  vals <- vapply(seq_len(nc), function(j) format_values(m[, j], digits),
+                 character(nr))
+  dim(vals) <- c(nr, nc)
+  w <- max(nchar(vals), nchar(as.character(nc)))
+  vals[] <- formatC(vals, width = w)
+  rlab <- rownames(m); if (is.null(rlab)) rlab <- as.character(seq_len(nr))
+  clab <- colnames(m); if (is.null(clab)) clab <- as.character(seq_len(nc))
+  idxw <- max(6L, nchar(as.character(nr)))
+  stub <- strrep(" ", idxw + 1L + max(nchar(rlab)) + 1L)
+  band <- function(cells) paste0(paste0(formatC(cells, width = w), " ", collapse = ""))
+
+  lines <- paste0(stub, band(as.character(seq_len(nc))))
+  # Labels wrap into w-character chunks, top aligned, blank where they run out.
+  chunks <- lapply(clab, function(s) {
+    if (!nzchar(s)) return("")
+    vapply(seq_len(ceiling(nchar(s) / w)),
+           function(i) substr(s, (i - 1L) * w + 1L, i * w), character(1))
+  })
+  for (li in seq_len(max(1L, max(lengths(chunks))))) {
+    lines <- c(lines, paste0(stub, band(vapply(chunks, function(ch)
+      if (li <= length(ch)) ch[li] else "", character(1)))))
+  }
+  lines <- c(lines, paste0(stub, band(rep(strrep("-", w), nc))))
+  for (i in seq_len(nr)) {
+    lines <- c(lines, paste0(formatC(as.character(i), width = idxw), " ",
+                             formatC(rlab[i], width = max(nchar(rlab))), " ",
+                             band(vals[i, ])))
+  }
+  if (footer) {
+    lines <- c(lines, "",
+               sprintf("%d rows, %d columns, 1 levels.", nr, nc))
+  }
+  lines
+}
+
+cat_uci_matrix <- function(m, digits = 3, footer = TRUE) {
+  cat(format_uci_matrix(m, digits, footer), sep = "\n")
+  invisible(NULL)
+}
+
 format_number <- function(v, digits = 3) format_values(v, digits)
 
 # ---- the result object ------------------------------------------------------
@@ -145,22 +209,23 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = TRUE, ...) 
   }
   cat(toupper(x$routine), "\n", sep = "")
   rule()
-  cat("Input dataset:  ", x$dataset, "\n", sep = "")
-  for (a in x$assumptions) cat("Note:           ", a, "\n", sep = "")
   cat("\n")
+  # UCINET pads its header labels to column 40 before the value.
+  field <- function(label, value) cat(formatC(label, width = -40), value, "\n", sep = "")
+  field("Input dataset:", x$dataset)
+  for (a in x$assumptions) field("Note:", a)
+  cat("\n\n\n")
 
   if (!is.null(x$summary)) {
     s <- x$summary
     if (is.list(s) && !is.data.frame(s)) {
-      nm <- format(names(s))
-      # Each entry is its own quantity - a density, a count, an average - so
-      # each is formatted on its own terms, then padded to a common width.
-      vals <- vapply(s, function(v) format_values(as.numeric(v)[1], digits),
-                     character(1))
-      vals <- formatC(vals, width = max(nchar(vals)))
-      for (i in seq_along(s)) cat(nm[i], "  ", vals[i], "\n", sep = "")
+      # UCINET prints the whole-network statistics as a one-row matrix labelled
+      # with the dataset name, not as a list of label/value lines.
+      m <- matrix(vapply(s, function(v) as.numeric(v)[1], numeric(1)), nrow = 1,
+                  dimnames = list(x$dataset, names(s)))
+      cat_uci_matrix(m, digits)
     } else {
-      print(format_df(s, digits), right = TRUE)
+      cat_uci_matrix(as.matrix(s), digits)
     }
     cat("\n")
   }
@@ -183,8 +248,8 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = TRUE, ...) 
   }
 
   for (nm in names(x$matrices)) {
-    cat(nm, "\n", sep = "")
-    print(format_matrix(x$matrices[[nm]], digits), quote = FALSE, right = TRUE)
+    cat(nm, "\n\n", sep = "")
+    cat_uci_matrix(x$matrices[[nm]], digits)
     cat("\n")
   }
   invisible(x)

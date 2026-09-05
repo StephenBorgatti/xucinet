@@ -1,0 +1,23 @@
+﻿DENSITY / AVERAGE MATRIX VALUE
+--------------------------------------------------------------------------------
+
+Input dataset:                          campnet (C:\Users\Steve Borgatti\Dropbox\data\ucinet data\campnet)
+Output dataset:                         campnet-density (C:\Users\Steve Borgatti\Dropbox\data\ucinet data\campnet-density)
+
+
+
+                   1     2     3     4 
+               Densi No. o Std D Avg D 
+                  ty f Tie    ev egree 
+                         s             
+               ----- ----- ----- ----- 
+     1 campnet 0.176    54 0.381     3 
+
+1 rows, 4 columns, 1 levels.
+
+
+----------------------------------------
+Running time:  00:00:01
+Output generated:  05 Sep 26 15:29:39
+UCINET 6.847 Copyright (c) 2002-2026 Analytic Technologies
+

@@ -87,8 +87,11 @@ fake_output <- function() {
 test_that("the report carries title, dataset, assumptions and a stats block", {
   out <- capture.output(print(fake_output()))
   expect_true(any(grepl("^DEGREE$", out)))
-  expect_true(any(grepl("Input dataset:  campnet", out)))
-  expect_true(any(grepl("Note:           Data treated as directed", out)))
+  # UCINET pads its header labels to column 40 before the value.
+  expect_true(any(grepl("^Input dataset:\\s+campnet$", out)))
+  expect_true(any(grepl("^Note:\\s+Data treated as directed", out)))
+  expect_equal(regexpr("campnet", grep("^Input dataset:", out, value = TRUE)[1]), 41,
+               ignore_attr = TRUE)
   expect_true(any(grepl("DESCRIPTIVE STATISTICS", out)))
   expect_true(any(grepl("Euc Norm", out)))
   expect_true(any(grepl("N Missing", out)))
