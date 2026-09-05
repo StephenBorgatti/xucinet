@@ -4,7 +4,7 @@
 \alias{xfromnodelist}
 \title{Build a network from a node list}
 \usage{
-xfromnodelist(df, ego = 1, directed = TRUE, title = NULL)
+xfromnodelist(df, ego = 1, directed = TRUE, mode = NULL, title = NULL)
 }
 \arguments{
 \item{df}{A data frame.}

@@ -53,10 +53,19 @@ detect_header <- function(g) {
   head <- g[1, ]
   body <- g[-1, , drop = FALSE]
   named_col <- vapply(seq_len(ncol(g)), function(j) {
-    !is_numericish(head[j]) && is_numericish(body[, j])
+    # An all-blank column is vacuously "numeric", so it has to be excluded or
+    # any text above the padding of a node list would look like a header.
+    any(nzchar(body[, j])) && !is_numericish(head[j]) && is_numericish(body[, j])
   }, logical(1))
   if (any(named_col)) return(TRUE)
-  tolower(head[1]) %in% header_stubs
+  if (tolower(head[1]) %in% header_stubs) return(TRUE)
+  # An all-text file has no column of numbers to give the header away, so fall
+  # back on vocabulary: "actor,film" over rows of actors and films names nothing
+  # that appears in the data. Only for a full rectangle: a file with blanks is a
+  # node list, whose first row is data however unfamiliar its names look.
+  if (!all(nzchar(g))) return(FALSE)
+  cells <- head[nzchar(head)]
+  length(cells) > 0L && !any(cells %in% unique(as.vector(body)))
 }
 
 # Ragged means rows stop early: a node list names as many alters as ego has and

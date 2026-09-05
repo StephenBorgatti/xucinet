@@ -262,3 +262,50 @@ test_that("layout= overrides detection", {
   p <- csvfile("ID,a,b,c", "a,0,1,1", "b,1,0,0", "c,1,0,0")
   expect_equal(dim(xread(p, layout = "matrix")), c(3, 3))
 })
+
+# ---- 2-mode detection (issue #11) -------------------------------------------
+
+test_that("an edge list over disjoint node sets is 2-mode", {
+  p <- csvfile("actor,film", "a,f1", "a,f2", "b,f1")
+  net <- xread(p)
+  expect_equal(net$mode, "2-mode")
+  expect_equal(dim(net), c(2, 2))
+  expect_equal(rownames(as.matrix(net)), c("a", "b"))
+  expect_equal(colnames(as.matrix(net)), c("f1", "f2"))
+  expect_true(is.na(net$directed))   # meaningless across two node sets
+})
+
+test_that("an edge list whose columns overlap stays 1-mode", {
+  p <- csvfile("from,to", "a,b", "b,c", "c,a")
+  net <- xread(p)
+  expect_equal(net$mode, "1-mode")
+  expect_equal(dim(net), c(3, 3))
+})
+
+test_that("a node list over disjoint sets is 2-mode", {
+  p <- csvfile("w1,e1,e2", "w2,e2,", "w3,e1,")
+  net <- xread(p)
+  expect_equal(net$mode, "2-mode")
+  expect_equal(dim(net), c(3, 2))
+})
+
+test_that("mode= overrides the guess in both directions", {
+  # Disjointness is evidence, not proof: a strict hierarchy has disjoint
+  # columns and is still 1-mode, because nobody supervises themselves.
+  h <- data.frame(boss = c("a", "a", "b"), sub = c("c", "d", "e"),
+                  stringsAsFactors = FALSE)
+  expect_equal(xfromedgelist(h)$mode, "2-mode")
+  forced <- xfromedgelist(h, mode = "1-mode")
+  expect_equal(forced$mode, "1-mode")
+  expect_equal(dim(forced), c(5, 5))
+
+  p <- csvfile("from,to", "a,b", "b,c", "c,a")
+  expect_equal(xread(p, mode = "2-mode")$mode, "2-mode")
+  expect_equal(dim(xread(p, mode = "2-mode")), c(3, 3))
+})
+
+test_that("a 2-mode edge list is never symmetrised", {
+  # pmax(m, t(m)) is not even defined on a rectangle.
+  p <- csvfile("actor,film", "a,f1", "b,f2")
+  expect_equal(dim(xread(p, directed = FALSE)), c(2, 2))
+})

@@ -58,9 +58,9 @@ xread <- function(file, filetype = NULL, layout = NULL, sheet = 1, labels = TRUE
     matrix   = as_xucinet(grid_to_matrix(g, has_header), directed = directed,
                           mode = mode, title = title),
     edgelist = xfromedgelist(grid_to_edgelist(g, has_header), directed = directed,
-                             title = title),
+                             mode = mode, title = title),
     nodelist = xfromnodelist(grid_to_nodelist(g, has_header), directed = directed,
-                             title = title)
+                             mode = mode, title = title)
   )
 }
 
@@ -136,12 +136,18 @@ read_xlsx_grid <- function(file, sheet = 1) {
 #' @param title Dataset name.
 #' @return An `xucinet` object.
 #' @export
-xfromedgelist <- function(df, from = 1, to = 2, weight = NULL, directed = NULL, title = NULL) {
+xfromedgelist <- function(df, from = 1, to = 2, weight = NULL, directed = NULL,
+                          mode = NULL, title = NULL) {
   if (is.null(title)) title <- deparse1(substitute(df))
   s <- as.character(df[[from]]); r <- as.character(df[[to]])
-  nodes <- unique(c(s, r))
+  twomode <- detect_two_mode(s, r, mode)
+  if (twomode) {
+    rlab <- unique(s); clab <- unique(r)
+  } else {
+    rlab <- clab <- unique(c(s, r))
+  }
   build <- function(w, rows = rep(TRUE, nrow(df))) {
-    m <- matrix(0, length(nodes), length(nodes), dimnames = list(nodes, nodes))
+    m <- matrix(0, length(rlab), length(clab), dimnames = list(rlab, clab))
     m[cbind(s[rows], r[rows])] <- w
     m
   }
@@ -164,12 +170,28 @@ xfromedgelist <- function(df, from = 1, to = 2, weight = NULL, directed = NULL, 
       lapply(extra, function(k) build(suppressWarnings(as.numeric(df[[k]])))),
       names(df)[extra])
   }
+  if (twomode) {
+    # Directedness has no meaning across two node sets, and symmetrising a
+    # rectangle is not defined.
+    return(new_xucinet(if (length(mats) == 1L) mats[[1L]] else mats,
+                       mode = "2-mode", directed = NA, title = title))
+  }
   if (is.null(directed)) {
     directed <- any(vapply(mats, function(m) !isTRUE(isSymmetric(unname(m))), logical(1)))
   }
   if (!directed) mats <- lapply(mats, function(m) pmax(m, t(m)))
   new_xucinet(if (length(mats) == 1L) mats[[1L]] else mats,
               mode = "1-mode", directed = directed, title = title)
+}
+
+# Two columns that share no values are almost always two node sets: actors and
+# films, women and events. Almost, not always - a strict hierarchy is 1-mode and
+# disjoint too, since nobody supervises themselves - so this is evidence, not
+# proof, and mode= overrides it either way.
+detect_two_mode <- function(s, r, mode = NULL) {
+  if (!is.null(mode)) return(identical(match_mode(mode), "2-mode"))
+  s <- s[nzchar(s)]; r <- r[nzchar(r)]
+  length(s) > 0L && length(r) > 0L && !length(intersect(s, r))
 }
 
 #' Build a network from a node list
@@ -183,7 +205,7 @@ xfromedgelist <- function(df, from = 1, to = 2, weight = NULL, directed = NULL, 
 #' @param title Dataset name.
 #' @return An `xucinet` object.
 #' @export
-xfromnodelist <- function(df, ego = 1, directed = TRUE, title = NULL) {
+xfromnodelist <- function(df, ego = 1, directed = TRUE, mode = NULL, title = NULL) {
   if (is.null(title)) title <- deparse1(substitute(df))
   # NULL means "not specified", which xread() passes whenever the caller has not
   # said. A node list is directed by default: ego names its alters, and the
@@ -193,11 +215,19 @@ xfromnodelist <- function(df, ego = 1, directed = TRUE, title = NULL) {
   alters <- df[-ego]
   s <- rep(egos, ncol(alters)); r <- as.character(unlist(alters, use.names = FALSE))
   keep <- !is.na(r) & nzchar(r)
-  el <- data.frame(from = s[keep], to = r[keep], stringsAsFactors = FALSE)
-  # keep egos that have no alters as isolates
-  nodes <- unique(c(egos, el$to))
+  s <- s[keep]; r <- r[keep]
+
+  # Egos naming a set nobody in it belongs to - women naming events - is 2-mode.
+  if (detect_two_mode(egos, r, mode)) {
+    m <- matrix(0, length(egos), length(unique(r)),
+                dimnames = list(egos, unique(r)))
+    m[cbind(s, r)] <- 1
+    return(new_xucinet(m, mode = "2-mode", directed = NA, title = title))
+  }
+  # Egos with no alters stay as isolates.
+  nodes <- unique(c(egos, r))
   m <- matrix(0, length(nodes), length(nodes), dimnames = list(nodes, nodes))
-  m[cbind(el$from, el$to)] <- 1
+  m[cbind(s, r)] <- 1
   if (!directed) m <- pmax(m, t(m))
   new_xucinet(m, mode = "1-mode", directed = directed, title = title)
 }

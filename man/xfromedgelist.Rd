@@ -10,6 +10,7 @@ xfromedgelist(
   to = 2,
   weight = NULL,
   directed = NULL,
+  mode = NULL,
   title = NULL
 )
 }
