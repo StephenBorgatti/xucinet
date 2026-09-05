@@ -73,6 +73,10 @@ detect_filetype <- function(file) {
   }
   ext <- tolower(tools::file_ext(file))
   if (ext == "") stop("Cannot detect the file type of '", file, "'; give filetype=.", call. = FALSE)
+  # UCINET's own datasets ship DL files under .txt, so the extension alone
+  # cannot decide: look at the first token instead. Every DL file starts with
+  # one, which is the only thing the format guarantees.
+  if (ext == "txt" && looks_like_dl(file)) return("dl")
   switch(ext, csv = "csv", txt = "csv", xlsx = "xlsx", xls = "xlsx", uci = "uci",
          json = "uci", dl = "dl", vna = "vna",
          stop("Unrecognised extension '.", ext, "'; give filetype=.", call. = FALSE))
@@ -110,6 +114,16 @@ shipped_dataset <- function(file) {
 
 is_ucinet_path <- function(file) {
   is.character(file) && length(file) == 1L && grepl("\\.##[hHdD]$", file)
+}
+
+# Is the first token of the file "DL"? Cheap enough to ask, and the only thing
+# that separates a DL file from any other text under a .txt extension.
+looks_like_dl <- function(file) {
+  if (!file.exists(file)) return(FALSE)
+  con <- file(file, "rt")
+  on.exit(close(con))
+  first <- tryCatch(readLines(con, n = 1L, warn = FALSE), error = function(e) "")
+  length(first) > 0L && grepl("^\\s*dl\\b", first[1], ignore.case = TRUE)
 }
 
 # A worksheet as raw cells, so that a spreadsheet goes through exactly the same

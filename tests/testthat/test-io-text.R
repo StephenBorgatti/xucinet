@@ -309,3 +309,57 @@ test_that("a 2-mode edge list is never symmetrised", {
   p <- csvfile("actor,film", "a,f1", "b,f2")
   expect_equal(dim(xread(p, directed = FALSE)), c(2, 2))
 })
+
+# ---- DL against real UCINET files -------------------------------------------
+# inst/goldens/dl holds specimens from UCINET's own Datafiles folder. Until they
+# arrived the reader was only tested against fixtures written from the keyword
+# table, which agree with the spec by construction. Every one of these broke it.
+
+dlgold <- function(name) system.file("goldens", "dl", name, package = "xucinet")
+
+test_that("a real nodelist1 with embedded labels reads", {
+  net <- xreaddl(dlgold("games-nodelist1-embedded.dl"))
+  expect_equal(dim(net), c(14, 14))
+  # the header is "dl n 14 format = nodelist1": no equals sign after n
+  expect_equal(rownames(as.matrix(net))[1], "I1")
+  # I3 names nobody and must survive as an isolate rather than vanish
+  expect_true("I3" %in% rownames(as.matrix(net)))
+  expect_equal(sum(as.matrix(net)["I3", ]), 0)
+})
+
+test_that("a real edgelist1 with embedded labels reads", {
+  net <- xreaddl(dlgold("samplike-edgelist1-embedded.dl"))
+  expect_equal(dim(net), c(18, 18))
+  expect_equal(rownames(as.matrix(net))[1], "ROMUL")
+  expect_setequal(unique(as.vector(as.matrix(net))), c(0, 1, 2, 3))
+})
+
+test_that("a real el1 with quoted multi-word labels reads", {
+  net <- xreaddl(dlgold("interaction-el1-quoted.dl"))
+  # "el1" is an abbreviation of edgelist1, and the labels are quoted names with
+  # spaces: splitting on whitespace made one node into two and emptied the
+  # matrix. LABELS EMBEDDED also sits inside the labels block here, and counted
+  # as two more nodes until it was filtered out.
+  expect_equal(dim(net), c(74, 74))   # the header declares n 74
+  expect_equal(rownames(as.matrix(net))[1], "Hani Hanjour")
+  expect_gt(sum(as.matrix(net)), 0)
+})
+
+test_that("a DL file under a .txt extension is recognised by its first token", {
+  p <- tempfile(fileext = ".txt"); on.exit(unlink(p), add = TRUE)
+  writeLines(c("DL N=3", "FORMAT=FULLMATRIX", "DATA:", "0 1 1", "1 0 0", "1 0 0"), p)
+  expect_equal(detect_filetype(p), "dl")
+  expect_equal(unname(as.matrix(xread(p))), full3)
+  # and a .txt that is not DL is still read as delimited text
+  q <- tempfile(fileext = ".txt"); on.exit(unlink(q), add = TRUE)
+  writeLines(c("ID,a,b", "a,0,1", "b,1,0"), q)
+  expect_equal(detect_filetype(q), "csv")
+})
+
+test_that("a truncated DL file is refused with the counts that disagree", {
+  # krebs.txt in UCINET's Datafiles declares N=56, NM=5 and holds 15580 values
+  # where 15680 are needed. Not shipped; this reproduces its shape.
+  p <- dlfile("DL N=3, NM=2", "FORMAT=FULLMATRIX", "DATA:",
+              "0 1 1", "1 0 0", "1 0 0", "0 0 1")
+  expect_error(xreaddl(p), "holds 12 values, not 18")
+})

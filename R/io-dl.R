@@ -23,23 +23,61 @@ dl_keys <- list(
   labels = "labels"
 )
 
-# Formats we read. UCINET names more, but these are the ones that appear in
-# files; anything else is refused by name rather than guessed at.
+# Formats we read, with the abbreviations that turn up in real files: UCINET
+# accepts el1 for edgelist1 and so do the datasets shipped with it.
 dl_formats <- c("fullmatrix", "edgelist1", "edgelist2", "nodelist1", "nodelist2",
                 "lowerhalf", "upperhalf")
+dl_format_aliases <- list(
+  fullmatrix = c("fullmatrix", "fullmat", "full", "fm"),
+  edgelist1  = c("edgelist1", "edge1", "el1"),
+  edgelist2  = c("edgelist2", "edge2", "el2"),
+  nodelist1  = c("nodelist1", "node1", "nl1"),
+  nodelist2  = c("nodelist2", "node2", "nl2"),
+  lowerhalf  = c("lowerhalf", "lower", "lh"),
+  upperhalf  = c("upperhalf", "upper", "uh")
+)
 
-dl_split <- function(x) {
-  out <- trimws(unlist(strsplit(x, "[,[:space:]]+")))
-  out[nzchar(out)]
+dl_match_format <- function(fmt) {
+  for (nm in names(dl_format_aliases)) {
+    if (any(startsWith(dl_format_aliases[[nm]], fmt))) return(nm)
+  }
+  NA_character_
 }
 
-# The value of KEY=VALUE anywhere in the parameter block, matched by prefix as
-# UCINET does.
+# Strip what is not a parameter: // to end of line, and whole lines of prose.
+# krebs.txt carries five paragraphs of comment above its N=, and any of it could
+# otherwise be read as a keyword.
+dl_clean_params <- function(lines) {
+  lines <- sub("//.*$", "", lines)
+  lines <- lines[!grepl("^\\s*(comment|remark|title|rem|com|tit)\\b", lines,
+                        ignore.case = TRUE)]
+  paste(lines, collapse = " ")
+}
+
+# Split on whitespace and commas, but keep quoted labels whole: interaction.txt
+# names "Hani Hanjour", and splitting that into two tokens turns one node into
+# two and leaves the matrix empty.
+dl_split <- function(x) {
+  toks <- unlist(lapply(x, function(line) {
+    tryCatch(scan(text = line, what = "", quiet = TRUE, quote = "\"'"),
+             error = function(e) character(0))
+  }))
+  toks <- unlist(strsplit(toks, ",", fixed = TRUE))
+  toks <- trimws(toks)
+  toks[nzchar(toks)]
+}
+
+# The value of a keyword anywhere in the parameter block. The equals sign is
+# optional - real files write both "n=18" and "n 14" - so the pattern accepts
+# either. Longer aliases are tried first so that NR is not read as N.
 dl_param <- function(txt, aliases) {
-  for (a in aliases) {
-    m <- regmatches(txt, regexpr(paste0("\\b", a, "\\s*=\\s*[^,[:space:]]+"), txt,
+  for (a in aliases[order(-nchar(aliases))]) {
+    m <- regmatches(txt, regexpr(paste0("\\b", a, "\\s*=?\\s*[^,[:space:]]+"), txt,
                                  ignore.case = TRUE))
-    if (length(m) && nzchar(m[1])) return(trimws(sub("^[^=]*=\\s*", "", m[1])))
+    if (length(m) && nzchar(m[1])) {
+      v <- trimws(sub(paste0("^\\s*", a, "\\s*=?\\s*"), "", m[1], ignore.case = TRUE))
+      if (nzchar(v)) return(v)
+    }
   }
   NA_character_
 }
@@ -85,17 +123,17 @@ xreaddl <- function(file, directed = NULL, mode = NULL, title = NULL, ...) {
          call. = FALSE)
   }
   first_block <- min(unlist(marks))
-  params <- paste(lines[seq_len(first_block - 1L)], collapse = " ")
+  params <- dl_clean_params(lines[seq_len(first_block - 1L)])
 
   fmt <- dl_param(params, dl_keys$format)
   fmt <- if (is.na(fmt)) "fullmatrix" else tolower(fmt)
-  hit <- dl_formats[startsWith(dl_formats, fmt)]
-  if (!length(hit)) {
+  hit <- dl_match_format(fmt)
+  if (is.na(hit)) {
     stop("'", basename(file), "' asks for FORMAT=", fmt, ", which xucinet does ",
          "not read.\n  Understood: ", paste(dl_formats, collapse = ", "), ".",
          call. = FALSE)
   }
-  fmt <- hit[1]
+  fmt <- hit
 
   num <- function(k) {
     v <- suppressWarnings(as.integer(dl_param(params, dl_keys[[k]])))
@@ -112,7 +150,19 @@ xreaddl <- function(file, directed = NULL, mode = NULL, title = NULL, ...) {
     start <- where[1] + 1L
     ends <- unlist(marks); ends <- ends[ends > where[1]]
     stop_at <- if (length(ends)) min(ends) - 1L else length(lines)
-    if (start > stop_at) character(0) else dl_split(lines[start:stop_at])
+    if (start > stop_at) return(character(0))
+    # Prose sits between a block heading and the next one - interaction.txt puts
+    # a comment line between its matrix label and its labels - and would
+    # otherwise be read as labels.
+    seg <- lines[start:stop_at]
+    seg <- seg[!grepl("^\\s*(comment|remark|title|rem|com|tit)\\b", seg,
+                      ignore.case = TRUE)]
+    # Parameters can sit below a block heading as well as above it:
+    # interaction.txt puts LABELS EMBEDDED at the end of its labels block, and
+    # read as labels that is two extra nodes on a network of 74.
+    seg <- seg[!grepl("^\\s*(lab\\w*\\s+emb\\w*|emb\\w*|diag\\w*|format|dl)\\b",
+                      seg, ignore.case = TRUE)]
+    dl_split(sub("//.*$", "", seg))
   }
   rowlab <- block(marks$rowlab)
   collab <- block(marks$collab)
@@ -216,11 +266,9 @@ dl_edgelist <- function(lines, data_at, nr, nc, nm, rowlab, collab, twomode) {
   from <- vapply(rows, `[`, character(1), 1)
   to <- vapply(rows, `[`, character(1), 2)
   val <- vapply(rows, function(r) if (length(r) >= 3L) r[3] else "1", character(1))
-  rn <- dl_axis(from, rowlab, nr)
-  cn <- dl_axis(to, if (twomode) collab else rowlab, if (twomode) nc else nr)
-  m <- matrix(0, length(rn$labels), length(cn$labels),
-              dimnames = list(rn$labels, cn$labels))
-  m[cbind(rn$idx, cn$idx)] <- suppressWarnings(as.numeric(val))
+  ax <- dl_axes(from, to, rowlab, collab, nr, nc, twomode)
+  m <- matrix(0, length(ax$rlab), length(ax$clab), dimnames = list(ax$rlab, ax$clab))
+  m[cbind(ax$ridx, ax$cidx)] <- suppressWarnings(as.numeric(val))
   list(m)
 }
 
@@ -231,17 +279,37 @@ dl_nodelist <- function(lines, data_at, nr, nc, rowlab, collab, twomode) {
   egos <- vapply(rows, `[`, character(1), 1)
   alters <- unlist(lapply(rows, function(r) r[-1]))
   reps <- vapply(rows, function(r) length(r) - 1L, integer(1))
-  rn <- dl_axis(egos, rowlab, nr)
-  cn <- dl_axis(alters, if (twomode) collab else rowlab, if (twomode) nc else nr)
-  m <- matrix(0, length(rn$labels), length(cn$labels),
-              dimnames = list(rn$labels, cn$labels))
-  if (length(alters)) m[cbind(rep(rn$idx, reps), cn$idx)] <- 1
+  ax <- dl_axes(rep(egos, reps), alters, rowlab, collab, nr, nc, twomode,
+                all_rows = egos)
+  m <- matrix(0, length(ax$rlab), length(ax$clab), dimnames = list(ax$rlab, ax$clab))
+  if (length(alters)) m[cbind(ax$ridx, ax$cidx)] <- 1
   list(m)
+}
+
+# Both margins at once, because for 1-mode they have to share one vocabulary.
+# With LABELS EMBEDDED there is no labels block to supply it, so it is the union
+# of the two columns: games.txt names W5 and S1 only as alters, and they are
+# still nodes.
+dl_axes <- function(from, to, rowlab, collab, nr, nc, twomode, all_rows = from) {
+  numeric_ids <- !anyNA(suppressWarnings(as.numeric(c(from, to))))
+  if (twomode) {
+    r <- dl_axis(from, rowlab, nr, all_rows)
+    cc <- dl_axis(to, collab, nc, to)
+    return(list(rlab = r$labels, clab = cc$labels, ridx = r$idx, cidx = cc$idx))
+  }
+  if (numeric_ids) {
+    size <- if (!is.na(nr)) nr else max(as.integer(as.numeric(c(from, to))))
+    lab <- if (length(rowlab) == size) rowlab else as.character(seq_len(size))
+    return(list(rlab = lab, clab = lab,
+                ridx = as.integer(as.numeric(from)), cidx = as.integer(as.numeric(to))))
+  }
+  lab <- if (length(rowlab)) rowlab else unique(c(all_rows, to))
+  list(rlab = lab, clab = lab, ridx = match(from, lab), cidx = match(to, lab))
 }
 
 # Turn the identifiers in a data block into positions, whether they are numbers
 # into a declared node set or labels in their own right.
-dl_axis <- function(x, labels, n) {
+dl_axis <- function(x, labels, n, vocabulary = x) {
   numeric_ids <- !anyNA(suppressWarnings(as.numeric(x)))
   if (numeric_ids) {
     idx <- as.integer(as.numeric(x))
@@ -249,7 +317,7 @@ dl_axis <- function(x, labels, n) {
     lab <- if (length(labels) == size) labels else as.character(seq_len(size))
     return(list(idx = idx, labels = lab))
   }
-  lab <- if (length(labels)) labels else unique(x)
+  lab <- if (length(labels)) labels else unique(vocabulary)
   list(idx = match(x, lab), labels = lab)
 }
 
