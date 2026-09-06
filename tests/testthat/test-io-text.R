@@ -363,3 +363,59 @@ test_that("a truncated DL file is refused with the counts that disagree", {
               "0 1 1", "1 0 0", "1 0 0", "0 0 1")
   expect_error(xreaddl(p), "holds 12 values, not 18")
 })
+
+# ---- xhelp (issue #10) ------------------------------------------------------
+
+test_that("xhelp finds routines by measure name", {
+  hits <- xhelp("centrality", max = 0)
+  expect_true(nrow(hits) > 5)
+  # every hit mentions it somewhere the search actually looks
+  searched <- tolower(paste(hits$name_2, hits$name_1e, hits$topic, hits$menu,
+                            hits$section))
+  expect_true(all(grepl("centrality", searched)))
+  expect_true("xdegree" %in% hits$name_2)
+  expect_true("xbetweenness" %in% hits$name_2)
+})
+
+test_that("xhelp finds routines by UCINET menu path", {
+  # The bar has to be a literal, not a regex alternation, or nearly every row
+  # would match.
+  hits <- xhelp("Network|Centrality|Degree", max = 0)
+  expect_true("xdegree" %in% hits$name_2)
+  expect_lt(nrow(hits), 10)
+})
+
+test_that("xhelp finds routines by their first-edition name", {
+  expect_true("xdegree" %in% xhelp("xDegreeCentrality", max = 0)$name_2)
+})
+
+test_that("xhelp puts a name match above a description match", {
+  hits <- xhelp("density", max = 0)
+  expect_equal(hits$name_2[1], "xdensity")
+})
+
+test_that("xhelp survives a typo", {
+  expect_true("xbetweenness" %in% xhelp("betweeness", max = 0)$name_2)
+})
+
+test_that("xhelp marks unwritten routines as planned, from what exists now", {
+  hits <- xhelp("density", max = 0)
+  expect_true(hits$exists[hits$name_2 == "xdensity"][1])
+  expect_false(hits$exists[hits$name_2 == "xdensitybygroups"][1])
+})
+
+test_that("xhelp says so when nothing matches, rather than failing", {
+  expect_output(xhelp("zzzznotathing"), "Nothing matches")
+  expect_equal(nrow(suppressWarnings(xhelp("zzzznotathing"))), 0)
+})
+
+test_that("the shipped crosswalk table has what the vignette needs", {
+  p <- system.file("extdata", "crosswalk-routines.csv", package = "xucinet")
+  expect_true(nzchar(p))
+  tbl <- utils::read.csv(p, stringsAsFactors = FALSE)
+  expect_true(all(c("chapter", "section", "topic", "menu", "name_1e",
+                    "name_2", "name_2_raw", "signature") %in% names(tbl)))
+  expect_gt(nrow(tbl), 50)
+  # status is not stored: it would start lying the day a routine landed
+  expect_false("status" %in% names(tbl))
+})

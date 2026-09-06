@@ -1,0 +1,94 @@
+---
+title: "Getting started, for UCINET users"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Getting started, for UCINET users}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>")
+library(xucinet)
+# Loaded explicitly: lazy data is attached when the package is installed, but
+# not when pkgdown builds this from the source tree.
+data(campnet, package = "xucinet")
+```
+
+This is a stub. It covers what works today — Phase 0, which is file handling,
+the network object and one pilot routine — and grows a section per phase as the
+routines land.
+
+## Nothing to learn but R punctuation
+
+Everything you type is lowercase: function names, argument names, argument
+values, dataset names. There is no shift key anywhere in the interface, which
+kills the commonest beginner error. Type `x` and press Tab and the package
+unfolds.
+
+```{r}
+xdensity(campnet)
+```
+
+That is the whole idea: the report is UCINET's, laid out the way UCINET lays it
+out, and the object behind it is an ordinary R structure you can compute on.
+
+```{r}
+res <- xdensity(campnet)
+res$summary$Density
+```
+
+## Your data, whatever shape it is in
+
+Every routine takes a network as its first argument, and a network can be a
+matrix, a data frame, an igraph object, a statnet `network`, or a file name.
+
+```{r}
+m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3)
+xdensity(m)
+```
+
+A dataset name works too, as it does on UCINET's command line — no `data()`
+first:
+
+```{r}
+xdensity("campnet")
+```
+
+## Reading and writing UCINET's own files
+
+`xread()` detects the container from the file and the layout from the shape of
+what is inside it, so most of the time there is nothing to say beyond the name.
+
+| format | read | write |
+|---|---|---|
+| `##h`/`##d`, all six header versions | `xreaducinet()` | `xsaveucinet()` |
+| `.uci`, the single-file JSON | `xreaduci()` | `xsaveuci()` |
+| DL | `xreaddl()` | `xsavedl()` |
+| VNA | `xreadvna()` | `xsavevna()` |
+| csv, Excel | `xread()` | `xsave()` |
+
+```{r}
+f <- system.file("goldens", "ucinet", "davis.##h", package = "xucinet")
+davis_from_file <- xreaducinet(f)
+dim(davis_from_file)
+```
+
+## Finding the routine you want
+
+`xhelp()` searches on the UCINET menu path, the measure name, plain English, or
+the name the first edition used.
+
+```{r}
+xhelp("betweenness")
+```
+
+Routines still to be written are listed and marked `planned`, so you can see
+what is coming and what it will be called.
+
+## Where things are
+
+- Every dataset the book uses ships with the package: `data(package = "xucinet")`.
+- The full menu-to-function map is in `vignette("crosswalk")`.
+- Every deliberate difference from UCINET is in `vignette("differences")`.
+- First-edition names still work, with a message pointing at the new one.

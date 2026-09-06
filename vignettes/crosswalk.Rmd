@@ -1,0 +1,73 @@
+---
+title: "UCINET menu to xucinet"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{UCINET menu to xucinet}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", echo = FALSE)
+library(xucinet)
+```
+
+Every UCINET menu item the book uses, and the xucinet function that answers it.
+
+The table is generated from the crosswalk in the book repository, not written
+out here, so it cannot drift from the list the package and the chapters are both
+built against. Whether a routine exists is worked out when this page is built,
+so **planned** means planned as of this build and nothing more.
+
+```{r}
+csv <- system.file("extdata", "crosswalk-routines.csv", package = "xucinet")
+if (!nzchar(csv)) {
+  # pkgdown builds articles from the source tree with install = FALSE, where
+  # system.file() cannot see inst/. R CMD check builds them from an installed
+  # package, where it can. Both have to work.
+  csv <- file.path("..", "inst", "extdata", "crosswalk-routines.csv")
+}
+tbl <- utils::read.csv(csv, stringsAsFactors = FALSE, colClasses = "character")
+
+exists_now <- function(f) {
+  f <- sub("[(].*$", "", trimws(f))
+  nzchar(f) && grepl("^[a-z_]", f) &&
+    exists(f, envir = asNamespace("xucinet"), mode = "function")
+}
+tbl$status <- ifelse(vapply(tbl$name_2, exists_now, logical(1)), "", "planned")
+```
+
+`r sum(tbl$status == "")` of `r nrow(tbl)` routines are written. The rest are
+Phase 1 and later; their first-edition names already resolve, and each starts
+working the day its routine lands.
+
+```{r, results = "asis"}
+for (ch in unique(tbl$chapter)) {
+  rows <- tbl[tbl$chapter == ch, ]
+  cat("\n## Chapter ", ch, "\n\n", sep = "")
+  cat("| 3e | UCINET menu | xucinet | 1e name | |\n")
+  cat("|---|---|---|---|---|\n")
+  for (i in seq_len(nrow(rows))) {
+    r <- rows[i, ]
+    cat("| ", r$section,
+        " | ", gsub("|", "&#124;", r$menu, fixed = TRUE),
+        " | `", r$name_2_raw, "`",
+        " | ", if (nzchar(r$name_1e)) paste0("`", r$name_1e, "`") else "",
+        " | ", r$status, " |\n", sep = "")
+  }
+}
+```
+
+## Reading this table
+
+The **UCINET menu** column is the path in UCINET 6. A bar inside a path is part
+of the path, not an alternation.
+
+The **1e name** column is what *Analyzing Social Networks with R* (1st edition)
+called it. Those names still work: they are exported as deprecated wrappers that
+name the replacement and forward to it. See `xucinet_1e_names()` for the whole
+list, including the several the first edition spelled two ways.
+
+One routine per menu item, and one function per routine. Where UCINET's dialog
+has checkboxes, xucinet has arguments: the argument vocabulary is fixed across
+the package, so learning three functions teaches you the rest.

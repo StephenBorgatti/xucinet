@@ -32,8 +32,9 @@ Suggests:
     knitr,
     rmarkdown
 Config/testthat/edition: 3
+VignetteBuilder: knitr
 LazyData: true
 LazyDataCompression: xz
-URL: https://github.com/stephenborgatti/xucinet
+URL: https://github.com/stephenborgatti/xucinet, https://stephenborgatti.github.io/xucinet/
 BugReports: https://github.com/stephenborgatti/xucinet/issues
 Config/roxygen2/version: 8.1.0

@@ -1,0 +1,20 @@
+---
+title: "Differences from UCINET"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Differences from UCINET}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(collapse = TRUE, comment = "#>", echo = FALSE)
+```
+
+```{r, results = "asis"}
+# Rendered from inst/DIFFERENCES.md rather than restated, so the ledger has one
+# home. Entries are added when a golden test forces the question, which is why
+# the list is short: if a difference is not here, the goldens say the two agree.
+cat(readLines(system.file("DIFFERENCES.md", package = "xucinet"), warn = FALSE),
+    sep = "\n")
+```

@@ -1,0 +1,86 @@
+url: https://stephenborgatti.github.io/xucinet/
+
+template:
+  bootstrap: 5
+
+home:
+  title: "xucinet: UCINET-style social network analysis in R"
+  description: >
+    The same routines as UCINET, the same numbers, the same printed output,
+    under names that track UCINET's menus.
+
+navbar:
+  structure:
+    left: [intro, reference, articles]
+    right: [search, github]
+
+articles:
+- title: Articles
+  navbar: ~
+  contents:
+  - getting-started
+  - crosswalk
+  - differences
+
+# Grouped by UCINET's menu rather than alphabetically, so a UCINET user can find
+# a function where they would look for the menu item. Sections for menus whose
+# routines are not written yet are added as each phase lands, rather than sitting
+# here empty.
+reference:
+- title: Data
+  desc: >
+    Reading, writing and displaying datasets. UCINET's Data menu, plus the
+    file-format routines behind it.
+  contents:
+  - xread
+  - xsave
+  - xdisplay
+  - xhelp
+
+- title: Data | file formats
+  desc: >
+    One reader and one writer per format. `xread()` and `xsave()` dispatch to
+    these; call them directly when you want to be explicit about the format.
+  contents:
+  - xreaducinet
+  - xsaveucinet
+  - xreaduci
+  - xsaveuci
+  - xreaddl
+  - xsavedl
+  - xreadvna
+  - xsavevna
+
+- title: The network object
+  desc: >
+    The class every routine takes and returns, its coercers, and the way out to
+    the rest of the R network ecosystem.
+  contents:
+  - as_xucinet
+  - as_igraph
+  - xfromedgelist
+  - xfromnodelist
+  - xrelations
+  - xattributes
+  - "`[.xucinet`"
+
+- title: Network | Whole Networks
+  desc: Whole-network measures.
+  contents:
+  - xdensity
+
+- title: Datasets
+  desc: >
+    The datasets the book uses, under their lowercase names. Node attributes are
+    plain data frames named `<dataset>_attr`.
+  contents:
+  - has_keyword("datasets")
+
+- title: internal
+  contents:
+  - new_xucinet_output
+  - print.xucinet_output
+  - summary.xucinet_output
+  - xnrelations
+  - xucinet_1e_names
+  - xucinet-1e
