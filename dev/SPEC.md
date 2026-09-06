@@ -329,21 +329,46 @@ Phase 0's only routine was whole-network, so nothing in it exercised `$nodes`. T
 Steve's decisions, taken before the chapter 9 centrality routines were written, and they
 bind every node-level routine in the package rather than centrality alone.
 
-1. **Column headings.** `$nodes` uses UCINET's own headings exactly as they appear in the
-   output log — `Degree`, `NrmDegree`, `Share`, `OutDegree`, `NrmOutDeg` and so on — not
-   tidied or expanded versions of them. The normalized column is **always present**, not
-   conditional on `normalize = TRUE`; `normalize` selects what is reported as the primary
-   value, not whether the normalized column exists. Directed data yields **four** columns
-   (out, in, and their normalized partners) rather than a symmetric two.
+1. **Column headings.** `$nodes` uses UCINET's own headings exactly as UCINET writes them,
+   not tidied or expanded versions. For degree, from `store()` in `uc_DegreeCentrality.pas`,
+   that is `Degree` for symmetric data and `Outdeg` / `Indeg` for directed, with the
+   normalized pass calling `store('n')` — so `nDegree`, `nOutdeg`, `nIndeg`. Not
+   `NrmDegree`, and there is no `Share` column in that routine at all. (My earlier note
+   saying otherwise was from memory of an older UCINET; Steve confirmed the current
+   spelling on 6 September 2026.)
+
+   The normalized column is **always present**, not conditional on `normalize = TRUE`;
+   `normalize` selects what is reported as the primary value, not whether the normalized
+   column exists. Directed data yields **four** columns rather than a symmetric two.
+
+   That is a **deliberate simplification** of the dialog, recorded as such. UCINET builds
+   the table conditionally: the raw columns appear only if *Output raw totals* is ticked and
+   the normalized ones only if *Output averages (normalized)* is, so the four-column table
+   is the default tick state and not an invariant. We always emit all four and let the user
+   ignore what they do not want, rather than making the shape of `$nodes` depend on
+   arguments. Ledger entry 5.
 
 2. **Order and statistics.** `sort = NULL`, the default, prints in original node order, per
    D5. `sort = "descending"` gives UCINET's conventional view. The descriptive-statistics
    block is computed on the **full table, before any sorting or subsetting**, so that
    changing `sort` never changes a reported mean or standard deviation.
 
-3. **Centralization.** Goes in `$summary`, and is printed wherever UCINET prints it — which
-   is most but not all centrality measures. Absent from `$summary` where UCINET has none,
-   rather than computed by us.
+3. **Centralization.** Goes in `$summary`, and is reported under UCINET's own conditions.
+   It is not a `Network Centralization = x%` line: `uc_DegreeCentrality.pas` prints a second
+   titled matrix, `Graph Centralization -- as proportion, not percentage`, with column
+   `Centralization` for symmetric data and `Out-Centralization` / `In-Centralization` for
+   directed, rendered at four decimals — `cz.displayasmatrix(log.stream, 0, 4)`. A
+   proportion, not a percentage.
+
+   UCINET's conditions include *when it is computed at all*: `runcentralization` is called
+   inside the `raw.Checked` branch, so unticking raw totals produces no centralization.
+   Since we always emit the raw columns (decision 1), we always have it for the measures
+   UCINET has it for, and it is absent from `$summary` where UCINET has none rather than
+   invented by us.
+
+   For degree the formula is `(n·max − Σ) / (n−1)(n−2)` symmetric and `/ (n−1)²` directed,
+   with an optional weighted variant that divides by the maximum observed value.
+   Normalization divides by `n−1`, or `maxval·(n−1)` under *Weighted normalization*.
 
 4. **Closeness.** The default is UCINET's dialog default, and unreachable pairs are handled
    the way that default handles them. Both are read off the golden log rather than chosen
@@ -371,6 +396,19 @@ bind every node-level routine in the package rather than centrality alone.
    so the suite and the single-measure functions cannot disagree. A measure undefined for the
    input yields an **NA column plus a line in `$assumptions`** saying why, rather than being
    dropped from the table.
+
+**Where the layout comes from.** Settled 6 September 2026, on Steve's challenge: from the
+Delphi source, not from sampling an output log. Everything a centrality routine prints comes
+from two shared places — the `tlogfile` header helpers, where `putstr` right-pads the label
+to the single constant `pwidth`, and `tmat.display` in `utmat.pas`, which is the algorithm
+`cat_uci_matrix()` reproduces (a six-wide row-index field, `binbywidth` chopping over-wide
+column labels into value-width chunks, `pad` = `lpad` so the chunks are right-aligned,
+per-column widths, then the dashed rule). A log shows one path through a routine that
+branches on six dialog controls; the source shows all of them. The units involved are
+vendored in `inst/reference/delphi/`, as the format units were for issue #3.
+
+The golden logs are still wanted, for numbers at full precision and as a check that the
+source tree matches the installed binary — but they are the oracle, not the specification.
 
 Standing from the Phase 0 report and unchanged: eigenvector scaling and betweenness
 normalization follow UCINET, pinned by goldens rather than argued from theory; all thirteen

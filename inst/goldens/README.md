@@ -129,16 +129,32 @@ them - `g9_disc`, three components of different size and shape, and `g9_iso`, a
 seven-node core plus three isolates. Those two are the cases that tell closeness
 conventions apart, which is why they were built rather than borrowed.
 
-`make_goldens.txt` there comes in two parts, and the reason is worth knowing
-before adding any chapter 9 routine. Only six of the thirteen centrality
-routines exist as command-language functions: closeness, reach, beta reach,
-hubs and authorities, induced, 2-mode centrality and reach betweenness have no
-keyword in `Xdpfunc.pas` and their run procedures take no parser argument. They
-are dialog-only, so PART B of that file is a menu checklist rather than a script.
+`make_goldens.txt` there is for **numbers, not layout**, and that division is
+worth understanding before adding any chapter 9 routine.
 
-The two surfaces also report different things. The CLI's `degree()` returns
-Degree, Outdegree and Indegree, and its `norm` keyword replaces the value with a
-mean instead of adding a column; the **Degree** menu routine returns the
-headings our `$nodes` table has to reproduce and the centralization line that
-goes in `$summary`. PART A is therefore the source for numbers and PART B for
-layout, and both are needed.
+The printed layout is derived from the Delphi instead. Everything a centrality
+routine prints comes from two shared places: the `tlogfile` header helpers,
+where `putstr` right-pads each label to the single constant `pwidth`, and
+`tmat.display` in `utmat.pas`, which is the algorithm `cat_uci_matrix()` in
+`R/output.R` reproduces — a six-wide row-index field, `binbywidth` chopping
+over-wide column labels into value-width chunks, `pad` (= `lpad`, so the chunks
+are right-aligned), per-column widths, then the dashed rule. Those units are
+vendored in `inst/reference/delphi/`.
+
+The reason is that a log is one path through a routine that branches. Degree
+alone branches on six dialog controls, and reading the source rather than a
+sample immediately corrected three things: the headings are `Degree` / `Outdeg`
+/ `Indeg` with an `n` prefix for the normalized pass, not `NrmDegree`, and there
+is no `Share` column; graph centralization is a second titled matrix at four
+decimals, a proportion and not a percentage; and both the raw and the normalized
+columns are optional, so a four-column table is the default tick state rather
+than a fixed shape. That last one is ledger entry 5.
+
+PART B is therefore four menu runs, not a checklist. One of them, Degree on
+campnet, exists purely to confirm that the source tree matches the installed
+binary; the other three are the dialog-only measurements we need numbers for
+now. Only six of the thirteen routines exist as command-language functions —
+closeness, reach, beta reach, hubs and authorities, induced, 2-mode centrality
+and reach betweenness have no keyword in `Xdpfunc.pas` and their run procedures
+take no parser argument — so the rest of the dialog-only numbers will be
+collected when their routines are written.

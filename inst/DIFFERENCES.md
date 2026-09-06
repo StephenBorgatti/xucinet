@@ -109,3 +109,39 @@ programs differ.
 
 *UCINET catch-up: a bounds check in `importfullmatrix`, and a look at whatever
 was computed from `krebs.txt`.*
+
+---
+
+## 5. Node tables always carry every column
+
+**Status:** deliberate simplification.
+**Decided:** Steve, 6 September 2026.
+
+UCINET builds a centrality table conditionally. In `uc_DegreeCentrality.pas` the
+raw columns are written only if *Output raw totals* is ticked and the normalized
+ones only if *Output averages (normalized)* is:
+
+```pascal
+if raw.Checked then begin store; runcentralization; end;
+if normalized.checked then begin ... store('n'); end;
+```
+
+So the four-column table a directed network usually produces — `Outdeg`,
+`Indeg`, `nOutdeg`, `nIndeg` — is the default tick state rather than a fixed
+shape, and unticking one box changes the columns underneath the user. Untick
+raw totals and there is no graph centralization either, since
+`runcentralization` is called only in that branch.
+
+xucinet always emits all four, and always reports centralization where UCINET
+has one. `normalize` selects which column is read as the primary value; it does
+not change the shape of `$nodes`. The reason is that `$nodes` is a data frame
+people index by name and bind into other frames, and a table whose columns
+appear and disappear with an argument is a poor thing to compute on. The cost is
+that a user who wants exactly UCINET's two-column output has a column to drop.
+
+The headings themselves are UCINET's own, unchanged: `Degree`, `Outdeg`,
+`Indeg`, and the same again under `store('n')` as `nDegree`, `nOutdeg`,
+`nIndeg`.
+
+*UCINET catch-up: none proposed. The checkboxes are long-standing and harmless
+in a GUI; the difference is that our output is a data structure first.*

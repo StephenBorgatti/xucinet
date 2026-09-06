@@ -11,12 +11,11 @@
 //   2. In the command line box at the bottom of the main window:
 //        ->cd <this folder>
 //        ->run make_goldens.txt
-//   3. Then work through PART B below, which is a menu checklist. The command
-//      language cannot reach seven of the thirteen routines (see WHY TWO
-//      PARTS), and the menu output is the part that defines our printed report.
+//   3. Then do PART B, which is four menu runs and takes a couple of minutes.
 //   4. Commit everything UCINET writes into this folder, plus two logs:
 //        log_make_goldens.txt   the session log for PART A
-//        log_menu.txt           one continuous log covering all of PART B
+//        log_menu.txt           one continuous log covering PART B
+//   5. Tell me the version number from Help | About.
 //
 // Last run: not yet.
 //
@@ -35,31 +34,42 @@
 // different size and shape on purpose, so the four Freeman options for
 // undefined distances give four different answers rather than coinciding.
 //
-// WHY TWO PARTS
+// WHAT THIS FILE IS FOR, AND WHAT IT IS NOT FOR
+//   Numbers, at full precision. Not layout.
+//
+//   The printed layout is read from the Delphi instead, which Steve pointed out
+//   on 6 September 2026 is both easier and better. Everything a centrality
+//   routine prints comes from two shared places: the tlogfile header helpers,
+//   where putstr right-pads each label to the single constant pwidth, and
+//   tmat.display in utmat.pas, which is the algorithm cat_uci_matrix() in
+//   R/output.R reproduces. A log shows one path through a routine that branches
+//   on six dialog controls - graphtype, raw, normalized, edgeweights,
+//   wtdnormalization, excludediagonal - and the source shows all six. The units
+//   are vendored in inst/reference/delphi/ so the derivation stays checkable.
+//
+//   Reading them has already corrected three things a single log would have
+//   left wrong: the headings are Degree / Outdeg / Indeg with an "n" prefix for
+//   the normalized pass, not NrmDegree, and there is no Share column; graph
+//   centralization is a second titled matrix at four decimals, a proportion and
+//   not a percentage; and both the raw and the normalized columns are optional,
+//   so a four-column table is the default tick state rather than a fixed shape.
+//
+//   So PART A is the whole of the automated work. PART B exists only because
+//   the source tree is not the binary you are running - it is four runs to
+//   confirm that what I am reading is what you have installed.
+//
+// WHY PART A CANNOT COVER EVERYTHING
 //   Only six of the thirteen routines exist as command-language functions.
 //   Closeness, Reach, Beta Reach, Hubs and Authorities, Induced, 2-Mode
-//   Centrality and Reach Betweenness are dialog-only: there is no keyword for
-//   them in Xdpfunc.pas, and their run procedures take no parser argument.
-//
-//   The split matters for a second reason. The command functions and the menu
-//   routines do not report the same thing. degree() returns three columns
-//   (Degree, Outdegree, Indegree) and its "norm" keyword replaces the value
-//   with a mean rather than adding a column; the Degree menu routine returns
-//   the headings our node table has to reproduce, plus the centralization line
-//   that goes in the summary. PART A gives us full-precision numbers, PART B
-//   gives us the layout, and we need both.
-//
-// WHAT WE ARE READING OFF THE LOGS
-//   - the exact column headings, which we copy rather than tidy
-//   - whether the normalized column is always printed
-//   - how many columns directed data produces, and what they are called
-//   - the wording and placement of the centralization line
-//   - for closeness: the dialog defaults and what they do with unreachable
-//     pairs, which is the one open question the book cannot answer for us
+//   Centrality and Reach Betweenness are dialog-only: no keyword in
+//   Xdpfunc.pas, and their run procedures take no parser argument. Their
+//   numbers therefore have to come from PART B as saved datasets, which is why
+//   two of the four runs below are Closeness and 2-Mode Centrality rather than
+//   anything cheaper.
 //
 // IF A LINE FAILS
-//   Let the rest run and say which line failed. The test harness skips
-//   fixtures that are not there, so a partial run is still useful.
+//   Let the rest run and say which line failed. The test harness skips fixtures
+//   that are not there, so a partial run is still useful.
 // ===========================================================================
 
 
@@ -107,8 +117,9 @@ dsp g9_deg_disc
 g9_deg_baker = degree(baker_journals)
 dsp g9_deg_baker
 
-// 2-mode. degree() may refuse a non-square matrix; if it does, say so and carry
-// on - PART B item 11 covers davis properly.
+// 2-mode. degree() rejects a non-square matrix - rundegree and runmcent both
+// test IsSquare - so this line is expected to fail. It is here to record the
+// wording of the refusal, which is what our own message should say.
 g9_deg_davis = degree(davis)
 dsp g9_deg_davis
 
@@ -158,8 +169,10 @@ dsp g9_eigc_sampson
 // --- beta centrality (Bonacich power) --------------------------------------
 // Syntax is betacent(<net> <minbeta> <maxbeta> <increment> [multiple] [OUT|in]).
 // One explicit beta here, so there is a fixture whose arithmetic we can check
-// exactly. The dialog default is a sweep of ten betas from 0 to max, and that
-// is PART B item 4 - I did not want to guess the sweep from the syntax.
+// exactly. The dialog default is a sweep of ten betas from 0 to max
+// (uc_BetaCentrality.dfm: from 0, to max, number of betas 10), which the
+// command syntax expresses as an increment rather than a count, so the sweep
+// itself is left to the dialog.
 
 g9_beta_campnet = betac(campnet 0.1)
 dsp g9_beta_campnet
@@ -178,8 +191,9 @@ dsp g9_pn_newguinea
 
 
 // --- multiple measures -----------------------------------------------------
-// mcent() is the Multiple Measures Suite. If your UCINET predates it these
-// lines will fail; say so and PART B item 12 becomes the only source.
+// mcent() is the Multiple Measures Suite. It looks recently written, so if your
+// build predates it these lines will fail - say so, and treat that as the
+// answer to the source-versus-binary question PART B run 1 asks.
 //
 // Syntax: <out> = mcent(<network>
 //           [measures:deg,clo,harm,bet,2bet,eig,beta,kstep,ard,2loc,kcore,frag]
@@ -230,91 +244,74 @@ dsp g9_geo_iso
 
 
 // ===========================================================================
-// PART A ends. Save the session log as log_make_goldens.txt before going on.
+// PART B - four menu runs
 // ===========================================================================
-
-
-// ===========================================================================
-// PART B - the menu checklist
-// ===========================================================================
-// These cannot be scripted. Please run them from the menus with the dialog
-// defaults UNCHANGED unless a note below says otherwise - the defaults are
-// exactly what we are trying to learn. Save each output dataset under the name
-// given, and keep ONE continuous session log for the whole of PART B, saved as
-// log_menu.txt.
+// Please leave every dialog control ALONE. The defaults are the point: I have
+// read them out of the .dfm files and want to know whether your build agrees.
+// Save each output under the name given, keep one continuous session log for
+// all four, and save it as log_menu.txt.
 //
-// Everything is under Network | Centrality.
+//  #  Menu item                          Dataset   Save output as
+// --  ---------------------------------  --------  --------------------
+//  1  Network | Centrality | Degree      campnet   g9m_deg_campnet
+//  2  Network | Centrality | Closeness   g9_disc   g9m_clo_disc
+//  3  Network | Centrality | Closeness   campnet   g9m_clo_campnet
+//  4  Network | 2-Mode networks |        davis     g9m_2mode_davis
+//     2-Mode Centrality
 //
-//  #  Menu item                      Dataset          Save output as
-// --  -----------------------------  ---------------  --------------------
-//  1  Degree                         campnet          g9m_deg_campnet
-//  1  Degree                         g9_iso           g9m_deg_iso
-//  1  Degree                         baker_journals   g9m_deg_baker
-//  1  Degree                         sampson          g9m_deg_sampson
-//  2  Eigenvector Centrality         campnet          g9m_eig_campnet
-//  2  Eigenvector Centrality         g9_disc          g9m_eig_disc
-//  2  Eigenvector Centrality         g9_iso           g9m_eig_iso
-//  3  Freeman Betweenness |          campnet          g9m_bet_campnet
-//     Node Betweenness               g9_disc          g9m_bet_disc
-//                                    g9_iso           g9m_bet_iso
-//                                    baker_journals   g9m_bet_baker
-//  4  Beta Centrality                campnet          g9m_beta_campnet
-//     (Bonacich Power)               g9_iso           g9m_beta_iso
-//  5  Closeness                      campnet          g9m_clo_campnet
-//                                    g9_disc          g9m_clo_disc
-//                                    g9_iso           g9m_clo_iso
-//  6  Reach Centrality               campnet          g9m_reach_campnet
-//                                    g9_disc          g9m_reach_disc
-//  7  Beta Reach Centrality          campnet          g9m_breach_campnet
-//                                    g9_disc          g9m_breach_disc
-//  8  Hubs and Authorities           campnet          g9m_hubs_campnet
-//                                    baker_journals   g9m_hubs_baker
-//  9  PN Centrality                  campnet          g9m_pn_campnet
-//                                    newguinea        g9m_pn_newguinea
-// 10  Induced Centrality             campnet          g9m_induced_campnet
-//                                    g9_iso           g9m_induced_iso
-// 11  2-Mode Centrality              davis            g9m_2mode_davis
-// 12  Multiple Measures Suite        campnet          g9m_mms_campnet
-//                                    sampson          g9m_mms_sampson
-//                                    g9_disc          g9m_mms_disc
+// WHY THESE FOUR
 //
-// NOTES ON PARTICULAR ITEMS
+//  1  Degree on campnet is the confirmation run. From uc_DegreeCentrality.pas
+//     I expect the log to read FREEMAN DEGREE CENTRALITY, then nine header
+//     lines (input dataset, output degree dataset, output centralization
+//     dataset, treat data as, output raw totals, output averages (normalized),
+//     allow edge weights, weighted normalization, exclude diagonal), then a
+//     matrix titled "Degree Measures" with columns Outdeg, Indeg, nOutdeg and
+//     nIndeg, then a second matrix titled "Graph Centralization -- as
+//     proportion, not percentage" with columns Out-Centralization and
+//     In-Centralization at four decimals.
 //
-//  5  Closeness is the one that matters most, and the one place where the
-//     defaults need recording rather than choosing. From uc_ClosenessMeasures
-//     the dialog has no method selector - it reports Freeman, Valente-Forman
-//     and reciprocal-distance closeness together, each with its own options
-//     group, and Freeman defaults to "Max observed distance plus 1" for
-//     undefined distances and "Divide totals into N-1" for output. Please run
-//     it on campnet with everything left alone, so the log shows what the
-//     defaults are on your build, then on g9_disc and g9_iso, still untouched.
-//     If the dialog reports which options it used, that is what we need; if it
-//     does not, a note of the four selections is enough.
+//     If that is what you get, the source tree matches your binary and I can
+//     take the other twelve routines from the Delphi without asking you to
+//     click through them. If it differs anywhere - a heading, a header line,
+//     the centralization wording - your build is older than the tree I am
+//     reading, and I need to know that before writing any of them.
 //
-//     Separately, and this is the part the log cannot tell us: for each
-//     chapter 9 book table that reports closeness, which of these options was
-//     it produced with? If the answer is "the defaults, whatever they were at
-//     the time", that is a fine answer and we will note it.
+//  2  Closeness on g9_disc is the one measurement the source cannot settle.
+//     uc_ClosenessMeasures.dfm says the dialog has no method selector: it
+//     reports Freeman, Valente-Forman and reciprocal-distance closeness
+//     together, each with its own options group, and Freeman defaults to
+//     ItemIndex 1, "Max observed distance plus 1", with output ItemIndex 2,
+//     "Divide totals into N-1". g9_disc has three components, so those choices
+//     show up in the numbers rather than only in the dialog. This is also the
+//     saved dataset the closeness tests will compare against.
 //
-//  4  Beta Centrality defaults to a sweep - from 0, to max, number of betas 10.
-//     Leave that alone; PART A already pins a single beta.
+//  3  Closeness on campnet, the connected case, so the same options can be
+//     checked where no distance is undefined and the three measures should
+//     agree with hand arithmetic on g9_geo_campnet from PART A.
 //
-// 11  2-Mode Centrality on davis settles the normalization denominator for
-//     2-mode data. We have decided the denominator is the size of the opposite
-//     mode; this run confirms it and gives the exact headings for both margins.
+//  4  2-Mode Centrality on davis is the other dialog-only measurement worth
+//     having now. We have decided the normalization denominator for 2-mode data
+//     is the size of the opposite mode; this run confirms it and gives the
+//     exact headings for both margins.
 //
-// 12  If mcent() worked in PART A, item 12 is a cross-check on the printed
-//     layout only. If it did not, item 12 is our only source for xcentrality
-//     and is worth the extra minute.
+// The remaining dialog-only routines - Reach, Beta Reach, Hubs and Authorities,
+// Induced - are deliberately not here. They can wait until their routines are
+// being written, and by then run 1 will have told us whether the source can be
+// trusted for layout, so all we will need from you is numbers.
 //
 // ===========================================================================
-// A QUESTION I COULD NOT ANSWER FROM THE SOURCE
+// TWO THINGS ONLY YOU CAN ANSWER
 //
-//   xreachbetweenness (1e: xReachBetweennessCentrality and
-//   xBetaReachBetweennessCentrality) has no command keyword and no menu item I
-//   could find under Centrality - the crosswalk itself says "not in 3e menu
-//   index". Where does it live in UCINET 6? If it has been folded into
-//   Distance-Weighted Betweenness or Proximal Betweenness, say which and I will
-//   add it to this file. If it is genuinely gone, it should become an alias
-//   that says so rather than a routine we write.
+//   1. For each chapter 9 book table that reports closeness, which options was
+//      it produced with? If the answer is "the defaults, whatever they were at
+//      the time", that is a fine answer and we will note it.
+//
+//   2. xreachbetweenness (1e: xReachBetweennessCentrality and
+//      xBetaReachBetweennessCentrality) has no command keyword and no menu item
+//      I could find under Centrality - the crosswalk itself says "not in 3e
+//      menu index". Where does it live in UCINET 6? If it has been folded into
+//      Distance-Weighted Betweenness or Proximal Betweenness, say which and I
+//      will add it. If it is genuinely gone, it should become an alias that
+//      says so rather than a routine we write.
 // ===========================================================================

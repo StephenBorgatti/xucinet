@@ -1,9 +1,13 @@
-# Delphi reference for the UCINET ##h/##d format
+# Delphi reference
 
-The units UCINET itself uses to read and write its native datasets, copied here
-unchanged so the R port in `R/io-ucinet.R` can be checked against the source of
-truth rather than against a written-down description of it. We own this code, so
-the port can be exact.
+Units from UCINET and its G1/G2 tool libraries, copied here unchanged so the R
+port can be checked against the source of truth rather than against a
+written-down description of it. We own this code, so the port can be exact.
+
+Two families: the ones that define the `##h`/`##d` file format, and the ones
+that define the printed report.
+
+## The file format
 
 | file | taken from | what the port uses it for |
 |---|---|---|
@@ -70,3 +74,26 @@ UCINET writes `bna = 1E38` for a missing value. Note that `1E37` stored as a
 `single` is 9.99999993e36, which is *below* 1e37, so UCINET does not itself treat
 a stored single `1e37` as missing; the port reproduces that rather than
 "improving" it with a tolerance.
+
+## The printed report
+
+Added 6 September 2026. Steve's point was that the layout of a report is
+determined by code we can read, and that reading it beats sampling an output
+log, because a log shows one path through a routine that branches on its dialog
+controls. These are the units that decide what a report looks like.
+
+| file | taken from | what it defines |
+|---|---|---|
+| `utlogfile.pas` | `Tools/G2Tools` | `tlogfile.stdcreate` (the report title block), `putfn` / `putstr` / `putint` / `putfloat` (the header field lines — `putstr` right-pads the label to `pwidth`, which is the 40-column field `print.xucinet_output()` uses), `lf` |
+| `utmat.pas` | `Tools/G2Tools` | `tmat.display` / `displayasmatrix(f, w, d)` — the matrix layout `cat_uci_matrix()` reproduces: a six-wide row-index field, wrapped column labels, per-column widths, the dashed rule. `w` and `d` are width and decimals, `-1` for automatic |
+| `utstrvec.pas` | `Tools/G2Tools` | `binbywidth`, which is how an over-wide column label is wrapped: plain `copy(s, b, w)` slicing into fixed-width chunks left to right, as many header lines as the widest label needs. `pad` is `lpad`, so each chunk is right-aligned |
+| `uc_DegreeCentrality.pas` | `Ucinet/Source` | the worked example of a node-level report: the nine header lines, `store()` / `store('n')` giving `Degree` / `Outdeg` / `Indeg` and `nDegree` / `nOutdeg` / `nIndeg`, the `Degree Measures` table, and `Graph Centralization -- as proportion, not percentage` at four decimals |
+| `uc_ClosenessMeasures.pas` + `.dfm` | `Ucinet/Source` | the closeness dialog, which has no method selector: Freeman, Valente-Forman and reciprocal-distance closeness are reported together, each with its own options group. The `.dfm` `ItemIndex` values are the defaults |
+
+Three things reading these corrected, which a single log would have left wrong:
+the degree headings (not `NrmDegree`, and no `Share` column at all); graph
+centralization being a titled matrix and a proportion rather than a percentage
+line; and both the raw and the normalized column groups being optional, so a
+four-column table is the default tick state and not a fixed shape. The third is
+recorded as ledger entry 5 in `inst/DIFFERENCES.md`, since we deliberately
+always emit all four.
