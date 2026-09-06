@@ -14,7 +14,7 @@ library(xucinet)
 
 book <- "C:/Users/sborg2/Dropbox/Shared Folders/Analyzing Social Networks book/3e/data"
 sources <- c(
-  file.path(book, "DataUCINET"),        # the battery named in ISSUES-phase0.md
+  file.path(book, "DataUCINET"),        # the battery named in dev/ISSUES-phase0.md
   file.path(book, "ASN3 Ucinet Files")  # a superset: adds Knecht and Lazega
 )
 

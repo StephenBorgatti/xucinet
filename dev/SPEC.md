@@ -320,3 +320,60 @@ Still open:
 3. ERGM/ALAAM exposure: wrap statnet minimally, or leave out of 2.0? (Recommend: out of 2.0,
    document the `as_network()` bridge.)
 4. Scope confirmation for Phase 1 (see PLAN.md) — anything that must move earlier?
+
+---
+
+## Addendum, 6 September 2026 — output conventions for node-level routines (chapter 9)
+
+Phase 0's only routine was whole-network, so nothing in it exercised `$nodes`. These are
+Steve's decisions, taken before the chapter 9 centrality routines were written, and they
+bind every node-level routine in the package rather than centrality alone.
+
+1. **Column headings.** `$nodes` uses UCINET's own headings exactly as they appear in the
+   output log — `Degree`, `NrmDegree`, `Share`, `OutDegree`, `NrmOutDeg` and so on — not
+   tidied or expanded versions of them. The normalized column is **always present**, not
+   conditional on `normalize = TRUE`; `normalize` selects what is reported as the primary
+   value, not whether the normalized column exists. Directed data yields **four** columns
+   (out, in, and their normalized partners) rather than a symmetric two.
+
+2. **Order and statistics.** `sort = NULL`, the default, prints in original node order, per
+   D5. `sort = "descending"` gives UCINET's conventional view. The descriptive-statistics
+   block is computed on the **full table, before any sorting or subsetting**, so that
+   changing `sort` never changes a reported mean or standard deviation.
+
+3. **Centralization.** Goes in `$summary`, and is printed wherever UCINET prints it — which
+   is most but not all centrality measures. Absent from `$summary` where UCINET has none,
+   rather than computed by us.
+
+4. **Closeness.** The default is UCINET's dialog default, and unreachable pairs are handled
+   the way that default handles them. Both are read off the golden log rather than chosen
+   here. The chapter 9 golden generator records which option each book table was produced
+   with, since the book's own tables predate this decision.
+
+   For reference, from `uc_ClosenessMeasures.dfm`: the dialog has no method selector — it
+   reports Freeman, Valente-Forman and reciprocal-distance closeness together, each with its
+   own options group. Freeman defaults to *max observed distance plus 1* for undefined
+   distances and *divide totals into N-1* for output. The log is the arbiter.
+
+5. **Multi-relation input.** With `relation` omitted on a multi-relation dataset, a routine
+   reports **one section per relation** — it does not pick the first, and does not refuse.
+   `xdegree(net, relation = "negative")` is therefore the form the `xNegativeDegree` and
+   `xNegativeTieDegree` alias messages promise, and it works.
+
+6. **2-mode data.** `mode` selects the margin, and the normalization denominator is the size
+   of the **opposite** mode, as in UCINET's *2-Mode Centrality*. Average degree is reported
+   **separately for rows and columns** rather than as one number over a single denominator;
+   this supersedes the single `ties/ncols` figure `xdensity()` reports today, and ledger
+   entry 2 changes with it.
+
+7. **`xcentrality`** (UCINET's *Multiple Measures Suite*) returns **one `$nodes` table with a
+   column per measure**, each computed by the individual routine rather than reimplemented,
+   so the suite and the single-measure functions cannot disagree. A measure undefined for the
+   input yields an **NA column plus a line in `$assumptions`** saying why, rather than being
+   dropped from the table.
+
+Standing from the Phase 0 report and unchanged: eigenvector scaling and betweenness
+normalization follow UCINET, pinned by goldens rather than argued from theory; all thirteen
+chapter 9 routines are implemented natively, with igraph consulted only as a cross-check,
+since D7 names closeness, betweenness normalization and eigenvector scaling as danger zones
+and PN, induced, beta-reach and reach-betweenness have no igraph equivalent at all.

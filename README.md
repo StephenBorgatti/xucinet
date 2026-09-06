@@ -17,4 +17,4 @@ xdensity(net)
 xdegree(net)
 ```
 
-Design documents: [SPEC.md](SPEC.md), [PLAN.md](PLAN.md).
+Design documents: [dev/SPEC.md](dev/SPEC.md), [dev/PLAN.md](dev/PLAN.md).

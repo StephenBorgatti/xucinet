@@ -2,11 +2,9 @@
 ^\.Rproj\.user$
 ^\.github$
 ^\.claude$
-^SPEC\.md$
-^PLAN\.md$
-^CLAUDE\.md$
-^ISSUES-phase0\.md$
+^dev$
 ^data-raw$
 ^_pkgdown\.yml$
 ^docs$
 ^LICENSE\.md$
+^CLAUDE\.md$
