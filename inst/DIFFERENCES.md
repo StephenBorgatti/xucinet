@@ -64,3 +64,44 @@ by n-1, so an R-native implementation is quietly wrong against UCINET.
 We had this bug. UCINET's own Density report for campnet prints 0.381 where
 `stats::sd()` gives 0.382. Fixed, and the difference is now pinned by a test, so
 this is recorded as a trap rather than as a divergence.
+
+---
+
+## 4. A truncated DL file
+
+**Status:** deliberate difference. We refuse; UCINET accepts.
+**Checked:** 6 September 2026, at Steve's request.
+
+`krebs.txt`, in UCINET's own `Datafiles`, declares `N=56, NM=5` — 280 rows of 56
+values — and holds 278 full rows plus a partial row of 12: 15,580 values where
+15,680 are needed. xucinet refuses it, naming both counts.
+
+UCINET does not. `importfullmatrix` in `udlm.pas` runs
+
+```pascal
+for i:= 1 to m.nr do begin
+  ...
+  for j:= 1 to m.nc do if diagonal or (i<>j) then m.fput(i,j,fread(f));
+  end;
+```
+
+with no end-of-file guard and no comparison against the number of values
+actually present, and `fread` in `UtFile.pas` swallows the IO error at end of
+file:
+
+```pascal
+{$i-} read(f,x); {$i+}
+if ioresult = 0 then fread:= x else fread:= bna;
+```
+
+`bna` is 1e38, the missing-value marker. So the file imports without complaint
+and the tail of the data comes back all-missing. The file has presumably been
+imported that way before, and any analysis run on it was run on a partly-missing
+matrix.
+
+Refusing is the safer behaviour — a short matrix that looks complete is worse
+than an error — so xucinet keeps it, and this entry records that the two
+programs differ.
+
+*UCINET catch-up: a bounds check in `importfullmatrix`, and a look at whatever
+was computed from `krebs.txt`.*
