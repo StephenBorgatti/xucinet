@@ -1,12 +1,13 @@
 # Golden fixtures
 
 UCINET's own output, kept so the test suite can prove xucinet returns the same
-numbers. Two kinds live here.
+numbers. Three families live here.
 
 | folder | what it holds |
 |---|---|
 | `ucinet/` | `##h`/`##d` files in every header version, for the format reader (issue #3). Inputs, not results. |
 | `density/` | the Density goldens (issue #7): the four input datasets, the UCINET batch that measures them, and the results it writes. |
+| `centrality/` | the chapter 9 goldens: seven input datasets, `make_inputs.R` that writes them, and the batch that measures them. Awaiting its UCINET run. |
 
 ## Regenerating
 
@@ -88,13 +89,17 @@ exactly what davis was in the battery for:
 - Average degree divides by the number of **columns**. Only 2-mode data tells
   the denominators apart: UCINET reports 89/14 for davis, not 89/18.
 
+Average degree has since been settled the other way: we report both margins for
+2-mode data, `Avg Degree (rows)` and `Avg Degree (cols)`, so UCINET's 89/14 is
+still there but no longer stands alone (Steve, 6 September 2026; ledger entry 2).
+
 It also settled how dichotomising treats the diagonal. UCINET's `dichot()`
 zeroes it; we now do the same for 1-mode data, so `g_baker_bin` reproduces cell
 for cell. We do **not** zero it for 2-mode data, where cell (i, i) is row-node i
 tied to column-node i and dropping it would delete real ties: 12 of davis's 89
 attendances. Both halves are pinned by tests, and the reasoning is in
 `inst/DIFFERENCES.md`, which is also where average degree on 2-mode data is
-logged as matched-but-under-review.
+logged.
 
 ## The menu routine's report
 
@@ -113,3 +118,27 @@ dropped too. Everything else, all fifteen lines, matches exactly.
 
 That log is also what confirmed the standard deviation. UCINET prints 0.381 for
 campnet, which is the population form; `stats::sd()` gives 0.382.
+
+## `centrality/`, awaiting its run
+
+The chapter 9 battery, written 6 September 2026 and not yet run. Seven inputs:
+campnet (directed), davis (2-mode), sampson (ten relations), baker_journals
+(valued), newguinea (Alliance and Opposition, for the negative-tie case), and
+two networks built by `make_inputs.R` because the package ships nothing like
+them - `g9_disc`, three components of different size and shape, and `g9_iso`, a
+seven-node core plus three isolates. Those two are the cases that tell closeness
+conventions apart, which is why they were built rather than borrowed.
+
+`make_goldens.txt` there comes in two parts, and the reason is worth knowing
+before adding any chapter 9 routine. Only six of the thirteen centrality
+routines exist as command-language functions: closeness, reach, beta reach,
+hubs and authorities, induced, 2-mode centrality and reach betweenness have no
+keyword in `Xdpfunc.pas` and their run procedures take no parser argument. They
+are dialog-only, so PART B of that file is a menu checklist rather than a script.
+
+The two surfaces also report different things. The CLI's `degree()` returns
+Degree, Outdegree and Indegree, and its `norm` keyword replaces the value with a
+mean instead of adding a column; the **Degree** menu routine returns the
+headings our `$nodes` table has to reproduce and the centralization line that
+goes in `$summary`. PART A is therefore the source for numbers and PART B for
+layout, and both are needed.

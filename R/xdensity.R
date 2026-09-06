@@ -14,8 +14,13 @@
 #'   `FALSE` (dichotomize at > 0 first).
 #' @param diagonal Logical; include the diagonal? UCINET's default is `FALSE`.
 #' @return An object of class `c("xdensity", "xucinet_output")` with `$summary`
-#'   holding density, average degree, standard deviation of ties, and number
-#'   of ties; one section per relation for multi-relation data.
+#'   holding density, number of ties, standard deviation and average degree;
+#'   one section per relation for multi-relation data.
+#'
+#'   For 2-mode data average degree is reported twice, as
+#'   `Avg Degree (rows)` and `Avg Degree (cols)`, because neither margin is
+#'   "the" node set. UCINET reports the column figure alone; see the
+#'   differences vignette.
 #' @examples
 #' m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3)
 #' xdensity(m)
@@ -60,18 +65,25 @@ xdensity <- function(net, relation = NULL, directed = NULL, weighted = NULL,
   # rather than 89/18. Every square network agrees either way, so only 2-mode
   # data tells the denominators apart.
   #
-  # UNDER REVIEW (Steve, 5 Sep 2026): ties/ncols may be a UCINET bug rather than
-  # a definition. We match it for now, and the golden test is pinned to UCINET's
-  # value; if UCINET changes, this and inst/DIFFERENCES.md change with it.
-  avg_degree <- sum(cells) / ncol(m)
+  # RESOLVED (Steve, 6 Sep 2026): for a 2-mode network neither margin is "the"
+  # node set, so we report both rather than pick the one UCINET picked. A square
+  # network is unaffected - nrow and ncol are the same number - so this is the
+  # single "Avg Degree" line everywhere except 2-mode data. See ledger entry 2.
+  total <- sum(cells)
+  avg_degree <- if (twomode) {
+    list("Avg Degree (rows)" = total / nrow(m),
+         "Avg Degree (cols)" = total / ncol(m))
+  } else {
+    list("Avg Degree" = total / ncol(m))
+  }
   # Column order is UCINET's own, from its Density report: Density, No. of Ties,
   # Std Dev, Avg Degree. Std Dev is the population form - uestimator.calc in
   # ustats.pas sets variance := mcssq/n, not mcssq/(n-1), and UCINET's report
   # for campnet prints 0.381 where stats::sd() would give 0.382.
-  summary <- list("Density" = density,
-                  "No. of Ties" = ties,
-                  "Std Dev" = uci_stats(cells)[["Std Dev"]],
-                  "Avg Degree" = avg_degree)
+  summary <- c(list("Density" = density,
+                    "No. of Ties" = ties,
+                    "Std Dev" = uci_stats(cells)[["Std Dev"]]),
+               avg_degree)
   new_xucinet_output("Density / Average Matrix Value", net, summary = summary,
                      assumptions = assumptions, subclass = "xdensity",
                      call = match.call())

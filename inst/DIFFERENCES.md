@@ -36,24 +36,28 @@ does to a 2-mode matrix, which we have not tested.*
 
 ## 2. Average degree on 2-mode data
 
-**Status:** matched, but the UCINET side is under review.
-**Raised:** Steve, 5 September 2026.
+**Status:** resolved 6 September 2026. We now differ from UCINET deliberately.
+**Raised:** Steve, 5 September 2026, when davis entered the golden battery.
 
 UCINET's `density()` divides the tie total by the number of **columns**. For
 davis, 18 women by 14 events and 89 attendances, it reports 89/14 = 6.357, not
-89/18 = 4.944.
+89/18 = 4.944. Every square network agrees either way, so only 2-mode data
+tells the denominators apart, which is why this went unnoticed for so long.
 
-Every square network agrees either way, so only 2-mode data tells the
-denominators apart; this went unnoticed until davis entered the golden battery.
+xucinet matched that figure through Phase 0, with the test pinned to it and the
+question left open. It is now settled the other way: for a 2-mode network
+neither margin is "the" node set, so **average degree is reported separately for
+rows and columns** — 4.944 for the women, 6.357 for the events — rather than as
+one number over a denominator chosen by accident of orientation. Transposing the
+matrix now swaps the two figures instead of changing the answer.
 
-xucinet matches UCINET, and `test-goldens.R` is pinned to UCINET's value. But
-ties/ncols looks more like an oversight than a definition — for a 2-mode network
-neither margin is obviously "the" node set, and the row mode has at least as
-good a claim. If UCINET changes, this entry and the pinned test change with it.
+This follows the chapter 9 decision that on 2-mode data `mode` selects the margin
+and normalization uses the size of the opposite mode, as UCINET's *2-Mode
+Centrality* does. Density itself is unchanged: it still counts every cell.
 
-*UCINET catch-up: under review.*
-
----
+*UCINET catch-up: report both margins in `density()`, or say which margin the one
+figure belongs to. Until then the golden test carries both our numbers and
+UCINET's single one, so the difference stays visible rather than drifting.*
 
 ## 3. Standard deviation: not a difference, but worth recording
 

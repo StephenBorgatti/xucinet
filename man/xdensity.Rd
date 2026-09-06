@@ -29,8 +29,13 @@ an assumption in the printed output.}
 }
 \value{
 An object of class \code{c("xdensity", "xucinet_output")} with \verb{$summary}
-holding density, average degree, standard deviation of ties, and number
-of ties; one section per relation for multi-relation data.
+holding density, number of ties, standard deviation and average degree;
+one section per relation for multi-relation data.
+
+For 2-mode data average degree is reported twice, as
+\verb{Avg Degree (rows)} and \verb{Avg Degree (cols)}, because neither margin is
+"the" node set. UCINET reports the column figure alone; see the
+differences vignette.
 }
 \description{
 UCINET: Network | Whole Networks | Density | Density Overall. Phase 0 pilot

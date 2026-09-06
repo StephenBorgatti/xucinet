@@ -91,14 +91,38 @@ test_that("2-mode density counts every cell, as UCINET does", {
   expect_equal(res$summary$Density, sum(as.matrix(davis)) / (18 * 14), tolerance = tol)
 })
 
-test_that("2-mode average degree uses the column count, as UCINET does", {
+test_that("2-mode average degree is reported for both margins", {
   # Only 2-mode data tells the denominators apart: davis is 18 women by 14
-  # events and UCINET reports 89/14, not 89/18.
+  # events, and UCINET reports the one figure 89/14. We report both margins
+  # (Steve, 6 Sep 2026; ledger entry 2), so this test carries UCINET's number
+  # as well as ours and the difference stays visible.
   skip_if_no_golden("g_davis_den")
   gold <- golden_matrix("g_davis_den")
-  expect_equal(xdensity(davis)$summary$`Avg Degree`,
+  res <- xdensity(davis)
+
+  expect_null(res$summary$`Avg Degree`)
+  expect_equal(res$summary$`Avg Degree (rows)`, 89 / 18, tolerance = tol)
+  expect_equal(res$summary$`Avg Degree (cols)`, 89 / 14, tolerance = tol)
+
+  # UCINET's single figure is the column one, and stays pinned to the fixture.
+  expect_equal(res$summary$`Avg Degree (cols)`,
                unname(gold[1, "AvgDeg"]), tolerance = tol)
-  expect_equal(xdensity(davis)$summary$`Avg Degree`, 89 / 14, tolerance = tol)
+
+  # Transposing swaps the two rather than changing the answer, which is the
+  # whole point of reporting both.
+  tr <- xdensity(t(as.matrix(davis)))
+  expect_equal(tr$summary$`Avg Degree (rows)`, res$summary$`Avg Degree (cols)`,
+               tolerance = tol)
+  expect_equal(tr$summary$`Avg Degree (cols)`, res$summary$`Avg Degree (rows)`,
+               tolerance = tol)
+})
+
+test_that("square data keeps the single Avg Degree line", {
+  # The both-margins split is 2-mode only: nrow and ncol are the same number
+  # for a square network, so nothing above changes campnet's report.
+  res <- xdensity(campnet)
+  expect_false(is.null(res$summary$`Avg Degree`))
+  expect_null(res$summary$`Avg Degree (rows)`)
 })
 
 # ---- baker_journals: valued -------------------------------------------------
