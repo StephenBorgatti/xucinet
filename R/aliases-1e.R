@@ -83,7 +83,6 @@ xucinet_1e_map <- c(
   xEgoAlterSimilarityCat = "xegoaltersimilarity",
   xEgoAlterSimilarityCon = "xegoaltersimilarity",
   xEgonetStructure = "xegonet",
-  xEigenvector = "xcoreperiphery",
   xEigenvectorCentrality = "xeigenvector",
   xFastGreedy = "xfastgreedy",
   xFragmentation = "xcomponents",
@@ -140,6 +139,12 @@ xucinet_1e_map <- c(
   xWalktrap = "xwalktrap"
 )
 
+# Extra guidance for aliases whose replacement is not a simple rename.
+xucinet_1e_notes <- c(
+  xNegativeDegreeCentrality = "Negative-tie degree is xdegree() on the negative-tie matrix, e.g. xdegree(net, relation = \"negative\"). For the negative-tie centrality the 3e discusses, see xpncentrality().",
+  xNegativeWeightedCentrality = "Negative-tie degree is xdegree() on the negative-tie matrix, e.g. xdegree(net, relation = \"negative\"). For the negative-tie centrality the 3e discusses, see xpncentrality()."
+)
+
 #' The 1e alias table
 #'
 #' @return A named character vector: 1e name to 2.0 name.
@@ -151,14 +156,19 @@ xucinet_1e_names <- function() xucinet_1e_map
 # error in the alias layer, it is a routine not written yet, and the message
 # says which one so the reader knows what to wait for.
 alias_1e <- function(old, new, ...) {
+  # [[ ]] on a named vector errors for a name that is not there, and most
+  # aliases have no note.
+  note <- if (old %in% names(xucinet_1e_notes)) xucinet_1e_notes[[old]] else ""
   fn <- get0(new, envir = asNamespace("xucinet"), mode = "function")
   if (is.null(fn)) {
     stop(old, "() was the ASNR 1e name for what xucinet 2.0 calls ", new, "().\n",
          "  ", new, "() is not written yet; it belongs to a later phase.\n",
          "  This wrapper exists so the 1e name resolves, and will start working",
-         " the day ", new, "() lands.", call. = FALSE)
+         " the day ", new, "() lands.",
+         if (nzchar(note)) paste0("\n  ", note) else "", call. = FALSE)
   }
-  message(old, "() is the ASNR 1e name. xucinet 2.0 calls it ", new, "().")
+  message(old, "() is the ASNR 1e name. xucinet 2.0 calls it ", new, "().",
+          if (nzchar(note)) paste0("\n  ", note) else "")
   fn(...)
 }
 
@@ -322,9 +332,6 @@ xEgoAlterSimilarityCon <- function(...) alias_1e("xEgoAlterSimilarityCon", "xego
 #' @rdname xucinet-1e
 #' @export
 xEgonetStructure <- function(...) alias_1e("xEgonetStructure", "xegonet", ...)
-#' @rdname xucinet-1e
-#' @export
-xEigenvector <- function(...) alias_1e("xEigenvector", "xcoreperiphery", ...)
 #' @rdname xucinet-1e
 #' @export
 xEigenvectorCentrality <- function(...) alias_1e("xEigenvectorCentrality", "xeigenvector", ...)

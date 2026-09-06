@@ -45,7 +45,7 @@ dataset written by `xsaveucinet()` opens cleanly in UCINET.
 
 Transformations (needed by everything downstream):
 dichotomize, symmetrize, transpose, recode/reverse, normalize, subgraph/extract, remove
-isolates, combine/stack relations, permute/sort by vector, attribute↔network (xattributetonetwork
+isolates, combine/stack relations, permute/sort by vector, attribute↔network (xattributetomatrix
 etc.), geodesic distances, reachability.
 
 Whole-network descriptives: density, average degree, reciprocity (both defs), transitivity/

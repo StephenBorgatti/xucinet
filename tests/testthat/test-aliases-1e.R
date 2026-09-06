@@ -88,3 +88,29 @@ test_that("no alias collides with a 2.0 export", {
   expect_length(intersect(names(xucinet_1e_names()), twopoint0), 0)
   expect_true(all(grepl("^x[A-Z]", names(xucinet_1e_names()))))
 })
+
+test_that("xEigenvector is not an alias", {
+  # It appears in the 1e's core-periphery text as the name of a method option,
+  # not a function. As an alias it would mislead: anyone typing it wants
+  # eigenvector centrality (Steve, 6 Sep 2026).
+  expect_false("xEigenvector" %in% names(xucinet_1e_names()))
+  expect_false(exists("xEigenvector", envir = asNamespace("xucinet")))
+  # the real centrality alias is still there and points where it should
+  expect_equal(xucinet_1e_names()[["xEigenvectorCentrality"]], "xeigenvector")
+})
+
+test_that("xRegression goes to the regression routine", {
+  expect_equal(xucinet_1e_names()[["xRegression"]], "xregression")
+  expect_equal(xucinet_1e_names()[["xPermuteRegression"]], "xregression")
+})
+
+test_that("the negative-tie aliases explain what to do instead", {
+  # Both are degree on a negative-tie matrix rather than routines of their own.
+  for (nm in c("xNegativeDegreeCentrality", "xNegativeWeightedCentrality")) {
+    expect_equal(xucinet_1e_names()[[nm]], "xdegree")
+    err <- tryCatch(get(nm, envir = asNamespace("xucinet"))(campnet),
+                    error = function(e) conditionMessage(e))
+    expect_true(grepl("negative-tie matrix", err), info = nm)
+    expect_true(grepl("xpncentrality", err), info = nm)
+  }
+})

@@ -44,6 +44,10 @@ names and signatures is the crosswalk spreadsheet in the book repo (`asnr2e/cros
   golden fixture in `inst/goldens/`.
 - Run `devtools::check()` before committing anything that touches `R/`. CI runs R CMD check on
   Windows and Ubuntu.
+- `devtools::check()` runs as its own step and must report **0 errors, 0 warnings** before a
+  commit is made. Never chain it into `git` — `check() | tail` and `check() && git commit`
+  both hide the non-zero exit status behind the last command in the pipeline, and a warning
+  gets pushed. Read the result, then commit as a separate action.
 - Commit messages: short imperative subject; body says which UCINET routine and which book
   section the change serves.
 - Do not add dependencies to `Imports` without a note in the commit explaining why base R

@@ -55,7 +55,6 @@
 \alias{xEgoAlterSimilarityCat}
 \alias{xEgoAlterSimilarityCon}
 \alias{xEgonetStructure}
-\alias{xEigenvector}
 \alias{xEigenvectorCentrality}
 \alias{xFastGreedy}
 \alias{xFragmentation}
@@ -217,8 +216,6 @@ xEgoAlterSimilarityCat(...)
 xEgoAlterSimilarityCon(...)
 
 xEgonetStructure(...)
-
-xEigenvector(...)
 
 xEigenvectorCentrality(...)
 

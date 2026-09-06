@@ -47,37 +47,52 @@ overrides <- c(
   xRegression        = "xregression"
 )
 
-# Twelve names the released 0.x NAMESPACE exports that the crosswalk does not
-# list. Included so that 1e code resolves whether or not the book mentioned the
-# function. Targets follow the crosswalk's naming for the same routine.
-extras <- c(
-  xAddAttributesToProject   = "xaddtoproject",
-  xAttributeToNetwork       = "xattributetomatrix",
-  xBlockmodel               = "xblockmodel",
-  xBlockmodelOptimizing     = "xblockoptimize",
-  xCombineTies              = "xcombine",
-  xCorePeriphery            = "xcoreperiphery",
-  xDualStructuralEquivalence = "xstructuralequivalence",
-  xMultipleTieComposition   = "xtiecomposition",
-  xNegativeDegreeCentrality = "xdegree",
-  xNegativeWeightedCentrality = "xdegree",
-  xPermuteQAP               = "xqap",
-  xRemoveFromProject        = "xremovefromproject"
+# The twelve names only the 0.x NAMESPACE exported used to be listed here. They
+# are now rows in the crosswalk's Routines sheet, under chapter 0 / "(0.x only)"
+# (asnr2e 45f4428), so this script reads them with everything else and the alias
+# list and the crosswalk stay one document rather than two that can drift.
+
+# Names that appear in the 0.x column but were never functions. xEigenvector is
+# a method option in the 1e's core-periphery text; as an alias it would be worse
+# than useless, because anyone typing it wants eigenvector centrality and would
+# get a core-periphery routine (Steve, 6 Sep 2026).
+drop <- c("xEigenvector")
+
+# A few aliases need a sentence the generic message cannot give.
+notes <- c(
+  xNegativeDegreeCentrality = paste(
+    "Negative-tie degree is xdegree() on the negative-tie matrix, e.g.",
+    "xdegree(net, relation = \"negative\"). For the negative-tie centrality the",
+    "3e discusses, see xpncentrality()."),
+  xNegativeWeightedCentrality = paste(
+    "Negative-tie degree is xdegree() on the negative-tie matrix, e.g.",
+    "xdegree(net, relation = \"negative\"). For the negative-tie centrality the",
+    "3e discusses, see xpncentrality().")
 )
 
 map <- unlist(pairs)
 map[names(overrides)] <- overrides
-map <- c(map, extras[setdiff(names(extras), names(map))])
+
 map <- map[!is.na(map) & nzchar(map)]
+map <- map[setdiff(names(map), drop)]
 map <- map[order(tolower(names(map)))]
 
 cat("aliases:", length(map), " distinct targets:", length(unique(map)), "\n")
-live <- vapply(map, function(f) exists(f, envir = asNamespace("xucinet")), logical(1))
-cat("targets that exist today:", sum(live), "| still to be written:", sum(!live), "\n")
+# Informational only, and guarded: this script has to be runnable when the
+# package cannot be loaded, which is exactly the case after it writes a file
+# that does not parse.
+live <- tryCatch(
+  vapply(map, function(f) exists(f, envir = asNamespace("xucinet")), logical(1)),
+  error = function(e) rep(NA, length(map)))
+if (!anyNA(live)) {
+  cat("targets that exist today:", sum(live), "| still to be written:", sum(!live), "\n")
+}
 
 # ---- write the file ---------------------------------------------------------
 
-q <- function(x) paste0('"', x, '"')
+# encodeString rather than paste0('"', x, '"'): the notes contain quoted R code,
+# and unescaped inner quotes would generate a file that does not parse.
+q <- function(x) encodeString(x, quote = '"')
 body <- vapply(names(map), function(old) {
   sprintf("#' @rdname xucinet-1e\n#' @export\n%s <- function(...) alias_1e(%s, %s, ...)",
           old, q(old), q(map[[old]]))
@@ -118,6 +133,10 @@ header <- c(
 sprintf('xucinet_1e_map <- c(\n%s\n)',
         paste(sprintf('  %s = %s', names(map), q(unname(map))), collapse = ",\n")),
 '',
+'# Extra guidance for aliases whose replacement is not a simple rename.',
+sprintf('xucinet_1e_notes <- c(\n%s\n)',
+        paste(sprintf('  %s = %s', names(notes), q(unname(notes))), collapse = ",\n")),
+'',
 "#' The 1e alias table",
 "#'",
 "#' @return A named character vector: 1e name to 2.0 name.",
@@ -129,14 +148,19 @@ sprintf('xucinet_1e_map <- c(\n%s\n)',
 '# error in the alias layer, it is a routine not written yet, and the message',
 '# says which one so the reader knows what to wait for.',
 'alias_1e <- function(old, new, ...) {',
+'  # [[ ]] on a named vector errors for a name that is not there, and most',
+'  # aliases have no note.',
+'  note <- if (old %in% names(xucinet_1e_notes)) xucinet_1e_notes[[old]] else ""',
 '  fn <- get0(new, envir = asNamespace("xucinet"), mode = "function")',
 '  if (is.null(fn)) {',
 '    stop(old, "() was the ASNR 1e name for what xucinet 2.0 calls ", new, "().\\n",',
 '         "  ", new, "() is not written yet; it belongs to a later phase.\\n",',
 '         "  This wrapper exists so the 1e name resolves, and will start working",',
-'         " the day ", new, "() lands.", call. = FALSE)',
+'         " the day ", new, "() lands.",',
+'         if (nzchar(note)) paste0("\\n  ", note) else "", call. = FALSE)',
 '  }',
-'  message(old, "() is the ASNR 1e name. xucinet 2.0 calls it ", new, "().")',
+'  message(old, "() is the ASNR 1e name. xucinet 2.0 calls it ", new, "().",',
+'          if (nzchar(note)) paste0("\\n  ", note) else "")',
 '  fn(...)',
 '}',
 '')
