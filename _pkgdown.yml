@@ -69,6 +69,13 @@ reference:
   contents:
   - xdensity
 
+- title: Network | Centrality
+  desc: >
+    Chapter 9. One function per UCINET menu item; the dialog's checkboxes are
+    arguments, and the column headings in the node table are UCINET's own.
+  contents:
+  - xdegree
+
 - title: Datasets
   desc: >
     The datasets the book uses, under their lowercase names. Node attributes are
