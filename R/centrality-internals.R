@@ -161,3 +161,34 @@ eb_lambda_squared <- function(a) {
 # rather than on the raw component count, so a graph that is connected apart
 # from a few isolates still takes the ordinary eigenvector path.
 n_nontrivial <- function(comp) sum(table(comp) > 1)
+
+# The maximum betweenness a node can reach in a bipartite graph, given the size
+# of its own vertex set and of the other one. Ported from getmax() in
+# uc_twomodecentrality.pas:
+#
+#   s = (n1 - 1) div n2 ;  t = (n1 - 1) mod n2
+#   n2^2 (s+1)^2 + n2 (s+1)(2t - s - 1) - t(2s - t + 3)
+#
+# This is NOT the formula in Borgatti and Everett (1997), Social Networks 19,
+# p. 256, which gives two branches. Its n_o <= n_i branch is the same function -
+# it is this one with s = 0, which the algebra confirms - but its n_o > n_i
+# branch, 2(n_o - 1)(n_i - 1), disagrees. For davis rows, own set 18 and other
+# set 14, the paper gives 442 where this gives 890/2 = 445, and 445 is what
+# UCINET reports. The paper says a proof "will be the subject of a separate
+# paper", so this is presumably the corrected general result; either way the
+# fixture agrees with the code and not with the published branch.
+bipartite_max_betweenness <- function(n_own, n_other) {
+  s <- (n_own - 1) %/% n_other
+  t <- (n_own - 1) %% n_other
+  n_other^2 * (s + 1)^2 + n_other * (s + 1) * (2 * t - s - 1) -
+    t * (2 * s - t + 3)
+}
+
+# The bipartite graph behind a 2-mode matrix: rows first, then columns.
+bipartite <- function(m) {
+  nr <- nrow(m); nc <- ncol(m)
+  b <- matrix(0, nr + nc, nr + nc)
+  b[seq_len(nr), nr + seq_len(nc)] <- m
+  b[nr + seq_len(nc), seq_len(nr)] <- t(m)
+  b
+}

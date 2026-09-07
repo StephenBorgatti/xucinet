@@ -71,32 +71,35 @@
 //       and directed, and HITS on valued data is exactly where an
 //       implementation can silently dichotomize without saying so.
 //
-//  5    This is the one that is blocking rather than merely missing. From
-//       g9m_2mode_davis I could reproduce Degree and 2-Local exactly - degree
-//       normalized by the opposite mode, 2-local as the normalized sum of
-//       alters' normalized degrees, both to 2e-8. Eigenvector is right in shape
-//       and needs only the scaling settling: the two halves of davis come back
-//       with a combined sum of squares of 2, which says each mode is scaled to
-//       1 separately rather than the vector as a whole.
+//  5    2-mode centrality is now SOLVED and does not block anything; this run
+//       is confirmation on a second shape rather than discovery. All five
+//       measures reproduce g9m_2mode_davis and davis-colcent to 1e-8, and the
+//       one that needed real work was betweenness.
 //
-//       Closeness and Betweenness I could not solve. Neither matches the
-//       obvious form on the 32-node bipartite graph: Freeman closeness over all
-//       32 nodes is out by 0.28, and betweenness over (n-1)(n-2)/2 is out by
-//       0.005 - close enough to say the shape is right and the denominator is
-//       not what I guessed. A 5 x 3 network makes the arithmetic small enough
-//       to solve by hand from the log.
+//       Steve pointed at Borgatti and Everett (1997), Social Networks 19,
+//       243-269. Page 256 gives the bipartite maximum in two branches. The
+//       n_o <= n_i branch is right - it is algebraically identical to what
+//       UCINET computes, and the test checks that for every shape up to 10.
+//       The n_o > n_i branch, 2(n_o - 1)(n_i - 1), is NOT: for davis rows it
+//       gives 442 where UCINET gives 445, and 445 is what reproduces the
+//       fixture. UCINET's getmax() in uc_twomodecentrality.pas implements a
+//       single general formula instead, which is presumably the result the
+//       paper says "will be the subject of a separate paper".
 //
-//       If there is a paper or a note that states the two formulas, that would
-//       be quicker than reverse-engineering them, and I would rather have the
-//       source than a denominator that happens to fit one dataset.
+//       davis only exercises s = 1, t = 3 in that formula. g9_small2 is 5 x 3,
+//       so its rows give s = 1, t = 1 and its columns s = 0, t = 2 - a
+//       different corner of the same function, and small enough to check by
+//       hand from the log. That is worth having before the book quotes a
+//       normalization.
 //
 // ===========================================================================
 // A NOTE ON WHAT THE FIRST BATCH SETTLED
 //
 //   Written against fixtures from that run and now passing: xdegree,
-//   xbetweenness, xeigenvector, xcloseness, xbeta, xpncentrality and
-//   xcentrality. That is seven of the twelve chapter 9 routines; the four in
-//   PART B above, plus 2-mode centrality, are what remain.
+//   xbetweenness, xeigenvector, xcloseness, xbeta, xpncentrality, xcentrality
+//   and 2-mode centrality. That is eight of the twelve chapter 9 routines. The
+//   four in PART B above are what remain, and they remain only because they
+//   have no fixtures at all.
 //
 //   Two things the run turned up that are on the UCINET issue list rather than
 //   in the R code: mcent's Closeness column holds farness rather than closeness

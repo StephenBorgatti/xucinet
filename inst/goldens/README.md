@@ -196,3 +196,23 @@ negative eigenvector values from 2-Mode Centrality, `eigenvec()` ignoring its
 assigned output name for asymmetric input, the CLI and menu disagreeing about
 what `degree` returns, and centralization not being computed when raw totals are
 unticked.
+
+### The 2-mode betweenness normalization
+
+Worth recording because it is a discrepancy with a published paper rather than
+with a program. Borgatti and Everett (1997), *Social Networks* 19, 243-269, give
+the maximum betweenness in a bipartite graph on p. 256 as two branches:
+
+- `n_o <= n_i`: `n_i(n_i-1)/2 + (n_o-1)(n_o-2)/2 + (n_o-1)(n_i-1)`
+- `n_o > n_i`: `2(n_o-1)(n_i-1)`
+
+UCINET computes neither branch. `getmax()` in `uc_twomodecentrality.pas` uses one
+general formula, and the fixtures agree with it: for davis rows, own set 18 and
+other set 14, UCINET's denominator is 445 where the paper's second branch gives
+442. The first branch is fine -- it is the general formula at `s = 0`, which the
+test confirms algebraically for every shape up to 10 -- so only the `n_o > n_i`
+case is affected.
+
+The paper says a proof "will be the subject of a separate paper", so UCINET is
+presumably carrying the corrected result. Anything in the 3e that quotes the
+1997 branch should quote UCINET's formula instead.

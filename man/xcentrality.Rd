@@ -4,7 +4,7 @@
 \alias{xcentrality}
 \title{Multiple centrality measures at once}
 \usage{
-xcentrality(net, relation = NULL, directed = NULL)
+xcentrality(net, relation = NULL, directed = NULL, mode = c("rows", "cols"))
 }
 \arguments{
 \item{net}{A network (any accepted form).}
@@ -13,6 +13,9 @@ xcentrality(net, relation = NULL, directed = NULL)
 position. Defaults to the first.}
 
 \item{directed}{\code{NULL} (detect from symmetry), \code{TRUE} or \code{FALSE}.}
+
+\item{mode}{For 2-mode data, which margin to report: \code{"rows"} (default) or
+\code{"cols"}. Ignored for square matrices.}
 }
 \value{
 An \code{xucinet_output} whose \verb{$nodes} holds one column per measure.
@@ -33,6 +36,21 @@ Column names and their order are UCINET's, from its own output: directed data
 gives paired Out/In columns and no eigenvector, symmetric data gives single
 columns and does include one.
 }
+\section{2-mode data}{
+
+A rectangular matrix is answered by UCINET's \emph{Network | 2-Mode networks |
+2-Mode Centrality}, which is a different set of five measures -- \code{Degree},
+\code{2-Local}, \code{Closeness}, \code{Betweenness}, \code{Eigenvector} -- computed on the
+bipartite graph and reported for each margin in turn. \code{mode} picks the
+margin. Every normalization uses the size of the opposite mode, which is
+chapter 9 decision 6.
+
+Closeness and betweenness are computed on binarized data and the rest on the
+values, which is UCINET's own division and is printed in its report.
+}
+
 \examples{
 xcentrality(campnet)
+xcentrality(davis)                    # 2-mode: the women
+xcentrality(davis, mode = "cols")     # the events
 }
