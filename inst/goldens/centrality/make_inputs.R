@@ -51,6 +51,19 @@ iso[edges] <- 1
 iso[edges[, 2:1]] <- 1
 xsaveucinet(iso, file.path(here, "g9_iso"), title = "g9_iso")
 
+# --- a small 2-mode network --------------------------------------------------
+# davis is 18 x 14, too big to work a normalization denominator out of by
+# inspection. This is 5 rows by 3 columns, deliberately uneven so that row and
+# column margins, path lengths and degrees are all different and no two
+# candidate denominators can coincide by luck.
+small2 <- matrix(c(1, 1, 0,
+                   1, 0, 0,
+                   0, 1, 1,
+                   0, 0, 1,
+                   1, 1, 1), nrow = 5, byrow = TRUE,
+                 dimnames = list(paste0("r", 1:5), paste0("c", 1:3)))
+xsaveucinet(small2, file.path(here, "g9_small2"), title = "g9_small2")
+
 # --- check the round trip ----------------------------------------------------
 stopifnot(identical(unname(as.matrix(xreaducinet(file.path(here, "g9_disc")))),
                     unname(disc)),

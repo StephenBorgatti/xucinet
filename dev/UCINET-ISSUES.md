@@ -341,6 +341,46 @@ written into the file at least records *something* the fixture cannot lose.
 
 ---
 
+## 11. mcent's "Closeness" column holds farness
+
+**bug** · **open — fix pending** · found 7 September 2026, `G9_MC_ISO`
+
+`mcent()` labels a column **Closeness** and fills it with the total geodesic
+distance from each node, unreachable pairs counted as `n`. Bigger means further
+away, so the column runs in the opposite direction to its own name — and in the
+opposite direction to the Closeness routine one menu item above it, which for
+`g9_iso` reports 0.191, 0.214, 0.209 where the suite reports 47, 42, 43.
+
+Anyone reading the suite's table as centrality reads it backwards, and anyone
+comparing the suite against Closeness finds them disagreeing about the same
+nodes on the same data.
+
+**Fix:** rename the column Farness, or divide into it. Either resolves it; at
+present the heading and the number say opposite things.
+
+xucinet puts `xcloseness()`'s Freeman score in that column. Ledger entry 5.
+
+---
+
+## 12. mcent and the Beta Centrality dialog normalize differently
+
+**inconsistency** · **open — fix pending** · found 7 September 2026
+
+`mcent()`'s `BetaCent` column and the Beta Centrality dialog give different
+numbers for the same measure on the same data at the same beta. For `g9_iso`
+the ratio is a constant 546.5, so the scores agree in shape and differ only in
+scaling — the dialog normalizes to *ssq = n*, the suite to something else.
+
+This is the same shape of problem as issue 4, where the CLI and the menu
+disagree about degree: two routes to one measure, two answers.
+
+**Fix:** have the suite call the same normalization the dialog does.
+
+xucinet follows the dialog, which is the documented measure, so its suite
+disagrees with `mcent()` here too. Ledger entry 5.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps

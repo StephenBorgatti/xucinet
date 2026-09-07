@@ -138,3 +138,30 @@ raw-totals branch, unticking a display preference silently empties the graph
 centralization matrix. xucinet computes centralization whenever UCINET has one
 for the measure, regardless of which columns are printed. When UCINET does the
 same, that paragraph goes and the rest of this entry stays.
+
+---
+
+## 5. The centrality suite reports closeness, not farness
+
+**Status:** deliberate difference — **UCINET fix pending**.
+**Found:** 7 September 2026, writing `xcentrality()` against `G9_MC_ISO`.
+
+UCINET's `mcent()` labels a column **Closeness** and fills it with the total
+geodesic distance from each node, unreachable pairs counted as `n`. That is
+*farness*: bigger means further away, so the column runs in the opposite
+direction to its own name, and to the Closeness routine one menu item above it.
+For `g9_iso` it reports 47, 42, 43 where `xcloseness()` reports 0.191, 0.214,
+0.209.
+
+`xcentrality()` puts `xcloseness()`'s Freeman score in that column, because
+chapter 9 decision 7 says every column is computed by the individual routine so
+that the suite and the single-measure functions cannot disagree. Following
+UCINET here would mean the suite contradicting `xcloseness()` on the same data
+under the same heading.
+
+The same applies to **BetaCent**: `mcent()` normalizes it differently from the
+Beta Centrality dialog, so the two UCINET routines disagree with each other. We
+follow the dialog, which is the documented measure.
+
+*UCINET catch-up: rename the column to Farness, or divide into it. Either fixes
+the direction; the name and the number currently disagree.*

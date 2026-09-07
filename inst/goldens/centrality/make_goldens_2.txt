@@ -1,0 +1,98 @@
+// ===========================================================================
+// xucinet golden fixtures - Chapter 9, second batch
+//
+// The four routines the first batch deliberately left out, plus the two 2-mode
+// measures it could not settle. Everything here is menu work: none of these six
+// has a command-language function.
+//
+// HOW TO RUN
+//   1. Open UCINET, and check Help | About first - if the build is not 6.849,
+//      tell me the number before running anything, because the package tracks
+//      one build and the first batch was made on 6.849.
+//   2. Work through PART B below, leaving every dialog control alone. There is
+//      nothing to `run` this time - all six routines are menu-only.
+//   3. Save the session log here as log_menu_2.txt and commit whatever UCINET
+//      writes into this folder.
+//
+// Last run: not yet.
+//
+// THE INPUTS are already in this folder. Five are from the first batch;
+// g9_small2 is new, written by make_inputs.R:
+//
+//        c1 c2 c3
+//   r1    1  1  0
+//   r2    1  0  0
+//   r3    0  1  1
+//   r4    0  0  1
+//   r5    1  1  1
+//
+// Five rows by three columns, deliberately uneven so that row and column
+// margins, path lengths and degrees are all different and no two candidate
+// denominators can coincide by luck.
+// ===========================================================================
+
+
+// ===========================================================================
+// PART B - the menu runs
+// ===========================================================================
+// All under Network | Centrality unless stated. Defaults UNCHANGED, please:
+// the defaults are what we are recording.
+//
+//  #  Menu item                     Dataset      Save output as
+// --  ----------------------------  -----------  ---------------------
+//  1  Reach Centrality              campnet      g9m_reach_campnet
+//  1  Reach Centrality              g9_disc      g9m_reach_disc
+//  2  Beta Reach Centrality         campnet      g9m_breach_campnet
+//  2  Beta Reach Centrality         g9_disc      g9m_breach_disc
+//  3  Hubs && Authorities           campnet      g9m_hubs_campnet
+//  3  Hubs && Authorities           baker_journals  g9m_hubs_baker
+//  4  Induced Centrality            campnet      g9m_induced_campnet
+//  4  Induced Centrality            g9_iso       g9m_induced_iso
+//  5  Network | 2-Mode networks |   g9_small2    g9m_2mode_small
+//     2-Mode Centrality                          (and its COLUMN output as
+//                                                 g9m_2mode_small_col)
+//
+// WHY EACH
+//
+//  1-4  These four have no command keyword and no fixtures at all, so there is
+//       nothing to write the routines against. Two datasets each: campnet for
+//       the ordinary directed case, and g9_disc or g9_iso for the case that
+//       exposes what the routine does when something is unreachable or
+//       isolated, which is where conventions differ.
+//
+//  3    Hubs and Authorities on baker_journals as well, because it is valued
+//       and directed, and HITS on valued data is exactly where an
+//       implementation can silently dichotomize without saying so.
+//
+//  5    This is the one that is blocking rather than merely missing. From
+//       g9m_2mode_davis I could reproduce Degree and 2-Local exactly - degree
+//       normalized by the opposite mode, 2-local as the normalized sum of
+//       alters' normalized degrees, both to 2e-8. Eigenvector is right in shape
+//       and needs only the scaling settling: the two halves of davis come back
+//       with a combined sum of squares of 2, which says each mode is scaled to
+//       1 separately rather than the vector as a whole.
+//
+//       Closeness and Betweenness I could not solve. Neither matches the
+//       obvious form on the 32-node bipartite graph: Freeman closeness over all
+//       32 nodes is out by 0.28, and betweenness over (n-1)(n-2)/2 is out by
+//       0.005 - close enough to say the shape is right and the denominator is
+//       not what I guessed. A 5 x 3 network makes the arithmetic small enough
+//       to solve by hand from the log.
+//
+//       If there is a paper or a note that states the two formulas, that would
+//       be quicker than reverse-engineering them, and I would rather have the
+//       source than a denominator that happens to fit one dataset.
+//
+// ===========================================================================
+// A NOTE ON WHAT THE FIRST BATCH SETTLED
+//
+//   Written against fixtures from that run and now passing: xdegree,
+//   xbetweenness, xeigenvector, xcloseness, xbeta, xpncentrality and
+//   xcentrality. That is seven of the twelve chapter 9 routines; the four in
+//   PART B above, plus 2-mode centrality, are what remain.
+//
+//   Two things the run turned up that are on the UCINET issue list rather than
+//   in the R code: mcent's Closeness column holds farness rather than closeness
+//   (issue 11), and mcent normalizes beta centrality differently from the Beta
+//   Centrality dialog (issue 12).
+// ===========================================================================

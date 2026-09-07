@@ -78,6 +78,9 @@ reference:
   - xbetweenness
   - xcloseness
   - xeigenvector
+  - xbeta
+  - xpncentrality
+  - xcentrality
 
 - title: Datasets
   desc: >
