@@ -8,7 +8,22 @@
 // for and G9_EIGV_CAMPNET never existed. The symmetric branch honoured the name
 // and wrote G9_EIGV_DISC plus G9_EIGV_DISC-eig.
 //
-// Fixed in the current build. This regenerates the affected fixtures under it.
+// Fixed in 6.849. RUN, 7 September 2026 - this file is kept for the record and
+// to be re-runnable, not because anything is outstanding.
+//
+// What the fix produced: the assigned name in both branches, with the vectors
+// as levels of one stack rather than five separate files, and the eigenvalues
+// under the same -eig suffix the symmetric branch always used.
+//   G9_EIGV_CAMPNET      18 x 18, levels Right / Left / RightIm / LeftIm
+//   G9_EIGV_CAMPNET-eig  18 x 3
+//   G9_EIGV_DISC         12 x 12, one level
+//   G9_EIGV_DISC-eig     12 x 1
+//   G9_EIGV_BAKER        20 x 20, four levels
+//   G9_EIGV_BAKER-eig    20 x 3
+//
+// The five CAMPNET-* strays have been deleted. The build number did not change,
+// so no other family needed regenerating - see UCINET request 10 for why that
+// is uncomfortable rather than convenient.
 //
 // HOW TO RUN
 //   ->cd <this folder>

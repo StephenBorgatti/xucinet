@@ -1,5 +1,9 @@
 UCINET: 6.849
 Generated: 2026-09-07
-Script: make_goldens.txt
-Notes: PART A plus the four PART B menu runs. The eigenvec() fixtures are due to
-    be regenerated once the fix for UCINET issue 3 ships; see regen_eigenvec.txt.
+Script: make_goldens.txt, then regen_eigenvec.txt
+Notes: PART A and the four PART B menu runs, 6-7 September. The eigenvec()
+    fixtures were regenerated later the same day after UCINET issue 3 was fixed,
+    and are the only ones that changed; the fix shipped inside 6.849 rather than
+    under a new build number, so the version string here cannot distinguish the
+    two binaries. See UCINET request 10. Everything in this folder now comes
+    from the fixed build.

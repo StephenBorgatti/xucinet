@@ -132,8 +132,8 @@ path already does.
 
 ## 3. `eigenvec()` ignores the output name it was assigned, for asymmetric input
 
-**inconsistency** · **fixed in UCINET (build to be confirmed)** · found
-7 September 2026, PART A of the centrality goldens
+**inconsistency** · **fixed in UCINET 6.849** · found 7 September 2026, PART A
+of the centrality goldens; fixed and verified the same day
 
 `g9_eigv_disc = eigenvec(g9_disc)` saved `G9_EIGV_DISC` and
 `G9_EIGV_DISC-eig`, as asked. `g9_eigv_campnet = eigenvec(campnet)`, with an
@@ -149,28 +149,29 @@ for.
 outputs (`<out>`, `<out>-eval`, `<out>-lvec`) as the symmetric branch already
 does with `-eig`.
 
-**Fixed.** Steve reports this is done in the current build.
+**Fixed and verified**, 7 September 2026. `regen_eigenvec.txt` was run and the
+fixtures are in the repository.
 
-*Fixtures to regenerate:* the two `eigenvec()` outputs, and the five stray files
-the bug produced have to be deleted by hand because they are named after the
-input and nothing will overwrite them.
+The fix also tidied the output rather than merely renaming it. Where the bug
+wrote five separate files named after the input, the assigned dataset now holds
+the vectors as levels of one stack, and the eigenvalues go beside it under the
+same `-eig` suffix the symmetric branch always used:
 
-| fixture | why |
-|---|---|
-| `G9_EIGV_CAMPNET` | never existed; the bug wrote `CAMPNET-eval`, `CAMPNET-lvec`, `CAMPNET-lveci`, `CAMPNET-rvec`, `CAMPNET-rveci` instead |
-| `G9_EIGV_DISC`, `G9_EIGV_DISC-eig` | correct already, regenerated so the family comes from one build |
-| `G9_EIGV_BAKER` | new — the other asymmetric input, valued, to check the fix holds there too |
+| input | output | shape |
+|---|---|---|
+| campnet (asymmetric) | `G9_EIGV_CAMPNET` | 18 x 18, four levels: `Right`, `Left`, `RightIm`, `LeftIm` |
+| | `G9_EIGV_CAMPNET-eig` | 18 x 3 |
+| g9_disc (symmetric) | `G9_EIGV_DISC` | 12 x 12, one level |
+| | `G9_EIGV_DISC-eig` | 12 x 1 |
+| baker_journals (asymmetric, valued) | `G9_EIGV_BAKER` | 20 x 20, four levels |
+| | `G9_EIGV_BAKER-eig` | 20 x 3 |
 
-The batch lines are in `inst/goldens/centrality/regen_eigenvec.txt`. Nothing
-else in the centrality folder is affected: `eigencent()` honoured its assigned
-name throughout, so every `G9_EIGC_*` fixture stands.
-
-*Still needed before the reference can be bumped:* the build number that
-contains the fix. `Config/ucinet/reference` and
-`inst/goldens/centrality/UCINET-VERSION` both say 6.849 today, and the test
-suite fails the moment they disagree with each other. If the fixing build is
-newer than 6.849, the density fixtures need regenerating too, since the package
-tracks one build.
+So the naming rule is now `<out>` and `<out>-eig` in both branches, and the
+harness can find them by the name the batch asked for. The five `CAMPNET-*`
+strays have been deleted. Nothing else in the centrality folder was affected:
+`eigencent()` honoured its assigned name throughout, so every `G9_EIGC_*`
+fixture stands, and the reference build is unchanged at 6.849, so no other
+family needed regenerating.
 
 ---
 
@@ -290,6 +291,33 @@ file itself.
 
 ---
 
+## 10. The build number does not change when behaviour does
+
+**request** · **open — fix pending** · raised 7 September 2026
+
+Issue 3 was found and fixed on the same day, and both the buggy binary and the
+fixed one report **6.849** from Help | About. Two builds that produce different
+output share a version string.
+
+That is a problem for us specifically, because of the convention this file
+opens with. `Config/ucinet/reference` and the `UCINET-VERSION` manifests exist
+to make "which UCINET produced this fixture" answerable, and the whole scheme
+rests on the build number changing when the behaviour does. Here it did not, so
+the centrality fixtures went from wrong to right while every recorded version
+string stayed the same. Nothing in the test suite could have caught it; only the
+file names changing gave it away.
+
+**Fix:** bump the build number on any change that alters output, even a small
+one. A fourth component would do — 6.849.1 — if bumping the third is reserved
+for releases.
+
+Until then, the manifests are honest about the build but not sufficient to
+identify it, and `Notes:` in each one carries the date and script as a partial
+substitute. This is also the strongest argument for request 9: a build stamp
+written into the file at least records *something* the fixture cannot lose.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps
@@ -303,3 +331,6 @@ file itself.
   about the denominator has been removed; what remains in the ledger is only
   that we print two extra per-margin lines beside UCINET's figure, which is an
   addition of ours and not a UCINET defect.
+- **`eigenvec()` ignored its assigned output name for asymmetric input** —
+  **fixed in UCINET 6.849**, same day it was reported. Issue 3 above has the
+  detail; the fixtures were regenerated and the strays deleted.
