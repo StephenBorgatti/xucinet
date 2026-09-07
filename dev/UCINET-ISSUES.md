@@ -41,6 +41,21 @@ computed on a partly-missing matrix.
 **Fix:** count the values read and refuse, or at minimum warn, when the count
 falls short. xucinet refuses it and names both counts; ledger entry 4.
 
+**Confirmed independently, 7 September 2026.** Steve pointed at the same data as
+an `.rda` in the `zalmquist/networkdata` package. It holds all five relations at
+56 x 56 under the names BUSINESS_1, BUSINESS_2, ADVICE, TECHNICAL and CUSTOMER,
+so the DL header's `N=56, NM=5` was right and the file, not the declaration, is
+at fault.
+
+Every one of the 15,580 values the file does contain agrees with the `.rda`
+exactly, which also says our DL parser is reading it correctly. The file stops
+at **row 55, column 13 of CUSTOMER** - 100 values short, the last row and a half
+of the last matrix.
+
+**Second fix, on the data rather than the code:** the copy in `Datafiles` can be
+rewritten from the `.rda`, and should be, since it is the copy everyone gets.
+
+
 ---
 
 ## 2. 2-Mode Centrality reports eigenvector centrality as negative

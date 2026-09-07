@@ -80,6 +80,12 @@ this is recorded as a trap rather than as a divergence.
 values — and holds 278 full rows plus a partial row of 12: 15,580 values where
 15,680 are needed. xucinet refuses it, naming both counts.
 
+The same data survives complete as an `.rda` in the `zalmquist/networkdata`
+package, and it settles the question: all five relations are 56 x 56, every
+value the DL file does contain agrees with it, and the file stops at row 55,
+column 13 of the fifth matrix. So the declaration is right, our parser is
+right, and the file is short by its last row and a half.
+
 UCINET does not. `importfullmatrix` in `udlm.pas` runs
 
 ```pascal
