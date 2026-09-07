@@ -33,20 +33,37 @@ test_that("a wrapper whose target exists calls it and names the replacement", {
 })
 
 test_that("a wrapper whose target is unwritten says so, and says which", {
-  # xBetweennessCentrality -> xbetweenness, still to come. xDegreeCentrality
-  # used to be the example here and is not any more, which is the point: the
-  # message turns into a working call the day the routine lands, with no change
-  # to the alias layer.
-  expect_error(xBetweennessCentrality(campnet), "xbetweenness\\(\\) is not written yet")
-  expect_error(xBetweennessCentrality(campnet), "ASNR 1e name")
+  # The example is found rather than named. Naming one meant editing this test
+  # every time a routine landed - it was xDegreeCentrality, then
+  # xBetweennessCentrality, both within a day - and an assertion that has to be
+  # rewritten whenever the code improves is testing the wrong thing.
+  map <- xucinet_1e_names()
+  written <- vapply(map, exists, logical(1),
+                    envir = asNamespace("xucinet"), mode = "function")
+  skip_if(all(written), "every 2.0 target now exists")
+
+  old <- names(map)[!written][1]
+  new <- map[[old]]
+  f <- get(old, envir = asNamespace("xucinet"))
+
+  expect_error(f(campnet), paste0(new, "\\(\\) is not written yet"))
+  expect_error(f(campnet), "ASNR 1e name")
   # the message names the routine to wait for, not just "not implemented"
-  expect_error(xBetweennessCentrality(campnet), "the day xbetweenness\\(\\) lands")
+  expect_error(f(campnet), paste0("the day ", new, "\\(\\) lands"))
 })
 
-test_that("xDegreeCentrality now forwards, because xdegree has landed", {
+test_that("a wrapper starts forwarding the day its target lands", {
+  # Nothing in the alias layer changed when xdegree was written; the same
+  # wrapper that used to explain the absence now calls the routine.
   expect_message(xDegreeCentrality(campnet), "xucinet 2.0 calls it xdegree")
   expect_equal(suppressMessages(xDegreeCentrality(campnet))$nodes,
                xdegree(campnet)$nodes)
+
+  for (nm in c("xBetweennessCentrality", "xClosenessCentrality",
+               "xEigenvectorCentrality")) {
+    f <- get(nm, envir = asNamespace("xucinet"))
+    expect_message(f(campnet), "xucinet 2.0 calls it")
+  }
 })
 
 test_that("the spellings the 1e was inconsistent about all resolve, together", {

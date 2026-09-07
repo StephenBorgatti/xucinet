@@ -75,6 +75,9 @@ reference:
     arguments, and the column headings in the node table are UCINET's own.
   contents:
   - xdegree
+  - xbetweenness
+  - xcloseness
+  - xeigenvector
 
 - title: Datasets
   desc: >
