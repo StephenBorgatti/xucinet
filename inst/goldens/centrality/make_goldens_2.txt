@@ -14,6 +14,13 @@
 //   3. Save the session log here as log_menu_2.txt and commit whatever UCINET
 //      writes into this folder.
 //
+// SAVING THE LOG - please save UCINET's own log file rather than copying the
+// output out of the window. The log echoes the commands as well as the results,
+// so a paste is never needed, and a paste is how the Degree block in
+// log_menu.txt lost a leading space from every data row. That cost real time:
+// the report layout is checked against these logs byte for byte, so a shifted
+// paste reads as a bug in the R code and gets chased as one.
+//
 // Last run: not yet.
 //
 // THE INPUTS are already in this folder. Five are from the first batch;

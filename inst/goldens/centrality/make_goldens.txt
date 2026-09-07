@@ -16,6 +16,13 @@
 //   4. Commit everything UCINET writes into this folder, plus two logs:
 //        log_make_goldens.txt   the session log for PART A
 //        log_menu.txt           one continuous log covering PART B
+//
+// SAVING THE LOG - please save UCINET's own log file rather than copying the
+// output out of the window. The log echoes the commands as well as the results,
+// so a paste is never needed, and a paste is how the Degree block in
+// log_menu.txt lost a leading space from every data row. That cost real time:
+// the report layout is checked against these logs byte for byte, so a shifted
+// paste reads as a bug in the R code and gets chased as one.
 //   5. Tell me the version number from Help | About.
 //
 // Last run: 6-7 September 2026, UCINET 6.849. Every line ran. PART B run 1

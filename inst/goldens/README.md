@@ -168,6 +168,15 @@ the `Graph Centralization -- as proportion, not percentage` matrix at four
 decimals. So the remaining chapter 9 routines can be written from the Delphi,
 and UCINET is needed only for numbers.
 
+**`log_menu.txt` is a paste, not a log**, and its Degree block is shifted one
+character left of what UCINET wrote. It was assembled by hand under the
+impression that UCINET's log recorded only output and not commands; it records
+both, so the paste was never necessary. Everything in it is correct except the
+leading whitespace on the data rows. Until those four menu runs are repeated and
+UCINET's own log saved, the layout test for `xdegree` compares against
+`log_make_goldens.txt`, which UCINET wrote itself, and checks landmarks rather
+than bytes. Both batch files now say to save the log rather than paste it.
+
 **Closeness is settled.** The dialog prints the options it used, so nothing had
 to be inferred. All three measures — Freeman, Valente-Forman, reciprocal —
 reproduce from the geodesics in `G9_GEO_DISC` under the printed defaults. The

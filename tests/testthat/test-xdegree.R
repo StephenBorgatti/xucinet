@@ -105,10 +105,13 @@ test_that("isolates come back as zeros rather than as missing", {
 })
 
 test_that("the printed table reproduces UCINET's layout", {
-  # Compared against the CLI session log rather than log_menu.txt: the menu log
-  # was assembled by hand and its Degree block lost a leading space in the
-  # paste, so it is a byte-for-byte comparison against a typo. The CLI log is
-  # what UCINET wrote.
+  # Landmarks rather than bytes, and against the CLI log rather than
+  # log_menu.txt, because that file is a paste: its Degree block sits one
+  # character left of what UCINET wrote, so a byte comparison would be a
+  # comparison against a typo. UCINET's own log echoes commands as well as
+  # output, so the paste was never needed; when those four menu runs are
+  # repeated and the real log saved, this test should become a byte-for-byte
+  # comparison of the whole block, which is the stronger check.
   skip_if_no_golden("g9m_deg_campnet", "centrality")
   out <- capture.output(print(xdegree(campnet)))
 
