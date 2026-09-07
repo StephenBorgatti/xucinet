@@ -12,7 +12,6 @@
 \alias{xAutoregression}
 \alias{xAverageDistance}
 \alias{xBetaCentrality}
-\alias{xBetaReachBetweennessCentrality}
 \alias{xBetaReachCentrality}
 \alias{xBetweennessCentrality}
 \alias{xBiCliques}
@@ -86,7 +85,6 @@
 \alias{xQAPCorrelation}
 \alias{xQAPLogisticRegression}
 \alias{xQAPRegression}
-\alias{xReachBetweennessCentrality}
 \alias{xReachCentrality}
 \alias{xReciprocity}
 \alias{xREGE}
@@ -130,8 +128,6 @@ xAutoregression(...)
 xAverageDistance(...)
 
 xBetaCentrality(...)
-
-xBetaReachBetweennessCentrality(...)
 
 xBetaReachCentrality(...)
 
@@ -278,8 +274,6 @@ xQAPCorrelation(...)
 xQAPLogisticRegression(...)
 
 xQAPRegression(...)
-
-xReachBetweennessCentrality(...)
 
 xReachCentrality(...)
 

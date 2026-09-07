@@ -11,53 +11,53 @@ by construction: if a difference is not here, the goldens say the two agree.
 
 ## 1. `dichotomize()` and the diagonal
 
-**Status:** matched for 1-mode, deliberately not for 2-mode.
-**Decided:** Steve, 5 September 2026.
+**Status:** resolved 7 September 2026. No longer a difference — UCINET changed.
 
-UCINET's `dichot()` zeroes the diagonal as part of dichotomising. Comparing our
-result against `g_baker_bin`, which UCINET wrote from
-`dichot(baker_journals GT 0)`, the only cells that differed were the twenty on
-the diagonal: UCINET 0, ours 1, because `baker_journals` records each journal's
-citations to itself.
+UCINET's `dichot()` used to zero the diagonal as part of dichotomising. Through
+Phase 0 we matched that for 1-mode data and refused it for 2-mode, where cell
+(i, i) is row-node i tied to column-node i and zeroing it would have deleted 12
+of davis's 89 attendances.
 
-xucinet now zeroes the diagonal too, but **only for 1-mode data**. A 2-mode
-matrix has no diagonal in any meaningful sense: cell (i, i) is row-node i tied
-to column-node i, two unrelated things, and zeroing it would silently delete
-real ties. For davis that would drop 12 of the 89 attendances.
+UCINET 6.849 no longer zeroes it, for either. Regenerating the density goldens
+changed `g_baker_bin`, which UCINET writes from `dichot(baker_journals GT 0)`:
+the twenty diagonal cells that used to come back 0 now come back 1, because
+`baker_journals` counts each journal's citations to itself.
 
-No density changes either way for 1-mode, because density excludes the diagonal
-regardless. The difference is in the transform, and would show up the moment
-`xdichotomize()` is exported in Phase 1.
-
-*UCINET catch-up: none needed for 1-mode. Worth checking what UCINET's `dichot()`
-does to a 2-mode matrix, which we have not tested.*
+So the special case is gone from `dichotomize()` and the two programs agree.
+The entry is kept rather than deleted because the old behaviour is still in
+every UCINET before 6.849, and anyone comparing against an older run needs to
+know why the diagonal moved.
 
 ---
 
 ## 2. Average degree on 2-mode data
 
-**Status:** resolved 6 September 2026. We now differ from UCINET deliberately.
-**Raised:** Steve, 5 September 2026, when davis entered the golden battery.
+**Status:** we report UCINET's figure plus two more. Third revision.
 
-UCINET's `density()` divides the tie total by the number of **columns**. For
-davis, 18 women by 14 events and 89 attendances, it reports 89/14 = 6.357, not
-89/18 = 4.944. Every square network agrees either way, so only 2-mode data
-tells the denominators apart, which is why this went unnoticed for so long.
+This one has now been three different numbers, which is worth recording as much
+as the answer is.
 
-xucinet matched that figure through Phase 0, with the test pinned to it and the
-question left open. It is now settled the other way: for a 2-mode network
-neither margin is "the" node set, so **average degree is reported separately for
-rows and columns** — 4.944 for the women, 6.357 for the events — rather than as
-one number over a denominator chosen by accident of orientation. Transposing the
-matrix now swaps the two figures instead of changing the answer.
+Through Phase 0, UCINET's `density()` divided the tie total by the number of
+**columns**: davis, 18 women by 14 events and 89 attendances, gave 89/14 =
+6.357. We matched it, pinned it, and flagged it here as probably an oversight,
+since for a 2-mode network neither margin is obviously "the" node set.
 
-This follows the chapter 9 decision that on 2-mode data `mode` selects the margin
-and normalization uses the size of the opposite mode, as UCINET's *2-Mode
-Centrality* does. Density itself is unchanged: it still counts every cell.
+On 6 September 2026 we split it instead, reporting 89/18 and 89/14 as separate
+lines. That lasted a day.
 
-*UCINET catch-up: report both margins in `density()`, or say which margin the one
-figure belongs to. Until then the golden test carries both our numbers and
-UCINET's single one, so the difference stays visible rather than drifting.*
+UCINET 6.849 now divides by the number of **nodes**, counting both modes:
+89/32 = 2.781, in the CLI and in the menu report alike. That answers the
+original objection properly — it uses both margins rather than choosing one —
+and it is consistent with the 1-mode case, which was always ties/n.
+
+xucinet reports UCINET's `Avg Degree` and adds `Avg Degree (rows)` and
+`Avg Degree (cols)` beside it for 2-mode data only. The margins are kept because
+"attendances per woman" and "attendances per event" are what a reader of a
+2-mode table wants, and neither can be recovered from 89/32 without knowing both
+margins. Square networks are unaffected: one line, ties/n, as before.
+
+*Left open for Steve: whether the two margin lines earn their place now that
+UCINET's own figure is defensible. Dropping them is a two-line change.*
 
 ## 3. Standard deviation: not a difference, but worth recording
 

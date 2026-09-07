@@ -65,16 +65,22 @@ xdensity <- function(net, relation = NULL, directed = NULL, weighted = NULL,
   # rather than 89/18. Every square network agrees either way, so only 2-mode
   # data tells the denominators apart.
   #
-  # RESOLVED (Steve, 6 Sep 2026): for a 2-mode network neither margin is "the"
-  # node set, so we report both rather than pick the one UCINET picked. A square
-  # network is unaffected - nrow and ncol are the same number - so this is the
-  # single "Avg Degree" line everywhere except 2-mode data. See ledger entry 2.
+  # UCINET 6.849 changed this. It used to divide by the number of columns, so
+  # davis reported 89/14; it now divides by the number of NODES, counting both
+  # modes, so davis reports 89/32 = 2.781. A square network is unaffected either
+  # way, since ties/n is what it always was.
+  #
+  # We follow the new figure, and add the two per-margin averages beside it,
+  # because "attendances per woman" and "attendances per event" are the numbers
+  # a reader of a 2-mode table actually wants and neither is recoverable from
+  # 89/32 without knowing both margins. Ledger entry 2.
   total <- sum(cells)
-  avg_degree <- if (twomode) {
-    list("Avg Degree (rows)" = total / nrow(m),
-         "Avg Degree (cols)" = total / ncol(m))
-  } else {
-    list("Avg Degree" = total / ncol(m))
+  nodes <- if (twomode) nrow(m) + ncol(m) else ncol(m)
+  avg_degree <- list("Avg Degree" = total / nodes)
+  if (twomode) {
+    avg_degree <- c(avg_degree,
+                    list("Avg Degree (rows)" = total / nrow(m),
+                         "Avg Degree (cols)" = total / ncol(m)))
   }
   # Column order is UCINET's own, from its Density report: Density, No. of Ties,
   # Std Dev, Avg Degree. Std Dev is the population form - uestimator.calc in

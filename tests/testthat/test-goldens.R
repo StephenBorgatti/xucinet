@@ -91,26 +91,27 @@ test_that("2-mode density counts every cell, as UCINET does", {
   expect_equal(res$summary$Density, sum(as.matrix(davis)) / (18 * 14), tolerance = tol)
 })
 
-test_that("2-mode average degree is reported for both margins", {
-  # Only 2-mode data tells the denominators apart: davis is 18 women by 14
-  # events, and UCINET reports the one figure 89/14. We report both margins
-  # (Steve, 6 Sep 2026; ledger entry 2), so this test carries UCINET's number
-  # as well as ours and the difference stays visible.
+test_that("2-mode average degree matches UCINET, with both margins beside it", {
+  # davis is 18 women by 14 events with 89 attendances. UCINET 6.849 divides by
+  # the number of nodes counting both modes, 89/32 = 2.781; it used to divide by
+  # the columns, 89/14. We follow the new figure and add the two per-margin
+  # averages. Ledger entry 2.
   skip_if_no_golden("g_davis_den")
   gold <- golden_matrix("g_davis_den")
   res <- xdensity(davis)
 
-  expect_null(res$summary$`Avg Degree`)
+  expect_equal(res$summary$`Avg Degree`, 89 / 32, tolerance = tol)
+  expect_equal(res$summary$`Avg Degree`,
+               unname(gold[1, "AvgDeg"]), tolerance = tol)
+
   expect_equal(res$summary$`Avg Degree (rows)`, 89 / 18, tolerance = tol)
   expect_equal(res$summary$`Avg Degree (cols)`, 89 / 14, tolerance = tol)
 
-  # UCINET's single figure is the column one, and stays pinned to the fixture.
-  expect_equal(res$summary$`Avg Degree (cols)`,
-               unname(gold[1, "AvgDeg"]), tolerance = tol)
-
-  # Transposing swaps the two rather than changing the answer, which is the
-  # whole point of reporting both.
+  # Transposing leaves UCINET's figure alone and swaps the two margins, which is
+  # the point of reporting them.
   tr <- xdensity(t(as.matrix(davis)))
+  expect_equal(tr$summary$`Avg Degree`, res$summary$`Avg Degree`,
+               tolerance = tol)
   expect_equal(tr$summary$`Avg Degree (rows)`, res$summary$`Avg Degree (cols)`,
                tolerance = tol)
   expect_equal(tr$summary$`Avg Degree (cols)`, res$summary$`Avg Degree (rows)`,
@@ -118,10 +119,10 @@ test_that("2-mode average degree is reported for both margins", {
 })
 
 test_that("square data keeps the single Avg Degree line", {
-  # The both-margins split is 2-mode only: nrow and ncol are the same number
-  # for a square network, so nothing above changes campnet's report.
+  # The margin lines are 2-mode only: nrow and ncol are the same number for a
+  # square network, so nothing above changes campnet's report.
   res <- xdensity(campnet)
-  expect_false(is.null(res$summary$`Avg Degree`))
+  expect_equal(res$summary$`Avg Degree`, 54 / 18, tolerance = tol)
   expect_null(res$summary$`Avg Degree (rows)`)
 })
 
@@ -143,16 +144,21 @@ test_that("dichotomising valued data matches UCINET's own dichotomisation", {
                unname(gold[1, "Density"]), tolerance = tol)
 })
 
-test_that("dichotomising 1-mode data reproduces UCINET cell for cell", {
-  # Including the diagonal, which UCINET's dichot() zeroes and we now zero too
-  # (Steve, 5 Sep 2026; inst/DIFFERENCES.md entry 1). baker_journals records
-  # each journal's citations to itself, so the diagonal is where this shows.
+test_that("dichotomising reproduces UCINET cell for cell, diagonal included", {
+  # UCINET's dichot() used to zero the diagonal and no longer does as of 6.849
+  # (ledger entry 1). baker_journals records each journal's citations to itself,
+  # so the diagonal is exactly where the change shows.
   skip_if_no_golden("g_baker_bin")
-  ours <- dichotomize(as.matrix(baker_journals), twomode = FALSE)
+  m <- as.matrix(baker_journals)
   gold <- golden_matrix("g_baker_bin")
-  expect_equal(unname(ours), unname(gold), tolerance = tol)
-  expect_true(all(diag(ours) == 0))
-  expect_true(any(diag(as.matrix(baker_journals)) > 0))   # there was something there
+
+  expect_true(any(diag(m) > 0))                 # there is something to preserve
+  expect_true(any(diag(gold) == 1))             # and UCINET now preserves it
+
+  for (tm in c(FALSE, TRUE)) {                  # twomode no longer changes it
+    ours <- dichotomize(m, twomode = tm)
+    expect_equal(unname(ours), unname(gold), tolerance = tol)
+  }
 })
 
 test_that("dichotomising 2-mode data keeps the diagonal", {
@@ -160,8 +166,7 @@ test_that("dichotomising 2-mode data keeps the diagonal", {
   # attendances, because cell (i,i) is woman i at event i.
   m <- as.matrix(davis)
   expect_equal(sum(dichotomize(m, twomode = TRUE)), 89)
-  # Belt and braces: the guard also tests squareness, so a rectangular matrix
-  # keeps its pseudo-diagonal even if something forgets to pass twomode.
+  # And with the argument wrong, since nothing depends on it any more.
   expect_equal(sum(dichotomize(m, twomode = FALSE)), 89)
   # and this is what zeroing it would have cost
   z <- m; diag(z) <- 0

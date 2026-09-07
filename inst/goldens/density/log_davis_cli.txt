@@ -1,0 +1,15 @@
+->log on
+RecordCli = YES
+->dsp density(davis)
+Dataset DAVIS treated as 2-mode because it is not square
+
+Density
+
+                 1     2     3 
+              Ties Densi AvgDe 
+                      ty     g 
+             ----- ----- ----- 
+     1 DAVIS    89 0.353 2.781 
+
+1 rows, 3 columns, 1 levels.
+

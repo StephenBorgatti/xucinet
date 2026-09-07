@@ -1,0 +1,23 @@
+﻿DENSITY / AVERAGE MATRIX VALUE
+--------------------------------------------------------------------------------
+
+Input dataset:                          davis (C:\Users\sborg2\GitHub\xucinet\inst\goldens\density\davis)
+Output dataset:                         davis-density (C:\Users\sborg2\GitHub\xucinet\inst\goldens\density\davis-density)
+
+
+
+                 1     2     3     4 
+             Densi No. o Std D Avg D 
+                ty f Tie    ev egree 
+                       s             
+             ----- ----- ----- ----- 
+     1 davis 0.353    89 0.478 2.781 
+
+1 rows, 4 columns, 1 levels.
+
+
+----------------------------------------
+Running time:  00:00:01
+Output generated:  06 Sep 26 17:05:17
+UCINET 6.848 Copyright (c) 2002-2026 Analytic Technologies
+

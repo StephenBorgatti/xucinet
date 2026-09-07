@@ -7,7 +7,7 @@ numbers. Three families live here.
 |---|---|
 | `ucinet/` | `##h`/`##d` files in every header version, for the format reader (issue #3). Inputs, not results. |
 | `density/` | the Density goldens (issue #7): the four input datasets, the UCINET batch that measures them, and the results it writes. |
-| `centrality/` | the chapter 9 goldens: seven input datasets, `make_inputs.R` that writes them, and the batch that measures them. Awaiting its UCINET run. |
+| `centrality/` | the chapter 9 goldens: seven input datasets, `make_inputs.R` that writes them, the batch that measures them, and the 42 fixtures plus two logs it produced on 7 September 2026. |
 
 ## Regenerating
 
@@ -119,9 +119,9 @@ dropped too. Everything else, all fifteen lines, matches exactly.
 That log is also what confirmed the standard deviation. UCINET prints 0.381 for
 campnet, which is the population form; `stats::sd()` gives 0.382.
 
-## `centrality/`, awaiting its run
+## `centrality/`
 
-The chapter 9 battery, written 6 September 2026 and not yet run. Seven inputs:
+The chapter 9 battery, run in UCINET 6.849 on 6-7 September 2026. Seven inputs:
 campnet (directed), davis (2-mode), sampson (ten relations), baker_journals
 (valued), newguinea (Alliance and Opposition, for the negative-tie case), and
 two networks built by `make_inputs.R` because the package ships nothing like
@@ -158,3 +158,32 @@ closeness, reach, beta reach, hubs and authorities, induced, 2-mode centrality
 and reach betweenness have no keyword in `Xdpfunc.pas` and their run procedures
 take no parser argument — so the rest of the dialog-only numbers will be
 collected when their routines are written.
+
+### What the centrality run established
+
+**The source is the binary.** PART B run 1 reproduced the layout predicted from
+`uc_DegreeCentrality.pas` exactly: the title, all nine header lines, the
+`Degree Measures` table headed `Outdeg` / `Indeg` / `nOutdeg` / `nIndeg`, and
+the `Graph Centralization -- as proportion, not percentage` matrix at four
+decimals. So the remaining chapter 9 routines can be written from the Delphi,
+and UCINET is needed only for numbers.
+
+**Closeness is settled.** The dialog prints the options it used, so nothing had
+to be inferred. All three measures — Freeman, Valente-Forman, reciprocal —
+reproduce from the geodesics in `G9_GEO_DISC` under the printed defaults. The
+formulas and headings are in the chapter 9 addendum of `dev/SPEC.md`.
+
+**`mcent()` exists in 6.849**, with `undef:n|max1|zero|avg`, and the four
+`G9_MC_DISC_*` fixtures are the raw distance sums under each convention. That
+is an independent check on closeness that does not go through the dialog.
+
+**Two UCINET behaviours changed under us**, both caught by regenerating the
+density goldens on the same day: `dichot()` no longer zeroes the diagonal, and
+2-mode average degree is now ties over the nodes of both modes. Ledger entries 1
+and 2. Anything measured against an older UCINET needs re-checking.
+
+Four smaller things went into `dev/UCINET-ISSUES.md` rather than being copied:
+negative eigenvector values from 2-Mode Centrality, `eigenvec()` ignoring its
+assigned output name for asymmetric input, the CLI and menu disagreeing about
+what `degree` returns, and centralization not being computed when raw totals are
+unticked.

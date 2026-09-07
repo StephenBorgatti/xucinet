@@ -43,7 +43,6 @@
 "9","9.3.5","Beta-reach centrality","Network|Centrality|Beta Reach","xBetaReachCentrality","xbetareach","xbetareach","xbetareach(net, beta=, directed=NULL)"
 "9","9.3.5 / 9.4.4","k-step reach centrality","Network|Centrality|Reach","xReachCentrality","xreach","xreach","xreach(net, k=2, directed=NULL)"
 "9","9.3.6","Betweenness centrality","Network|Centrality|Freeman Betweenness|Node Betweenness","xBetweennessCentrality","xbetweenness","xbetweenness","xbetweenness(net, directed=NULL, normalize=TRUE)"
-"9","9.3.6","Reach / beta-reach betweenness","(not in 3e menu index)","xReachBetweennessCentrality, xBetaReachBetweennessCentrality","xreachbetweenness","xreachbetweenness","xreachbetweenness(net, k=NULL, beta=NULL)"
 "9","9.4.3","Hubs and authorities (new in 3e)","Network|Centrality|Hubs & Authorities","(none)","xhubsauthorities","xhubsauthorities","xhubsauthorities(net)"
 "9","9.6.1","PN centrality (negative ties)","Network|Centrality|PN","xPNCentrality","xpncentrality","xpncentrality","xpncentrality(net, positive=, negative=)"
 "9","9.7","Induced centrality","Network|Centrality|Induced","xInducedCentrality","xinduced","xinduced","xinduced(net, measure=c(""density"",""components"",...))"

@@ -4,19 +4,19 @@
 
 # Dichotomise at > 0, the way UCINET's dichot() does.
 #
-# UCINET zeroes the diagonal as part of dichotomising. Comparing our result with
-# g_baker_bin, which UCINET wrote from `dichot(baker_journals GT 0)`, the only
-# cells that differed were the twenty on the diagonal: UCINET 0, ours 1, because
-# baker_journals counts a journal's citations to itself.
+# UCINET's dichot() used to zero the diagonal, and through Phase 0 we matched
+# that for 1-mode data while arguing it was wrong for 2-mode, where cell (i, i)
+# is row-node i tied to column-node i and dropping it deletes real ties.
 #
-# We follow that for 1-mode data only. A 2-mode matrix has no diagonal - cell
-# (i, i) is row-node i tied to column-node i, two unrelated things - so zeroing
-# it would silently delete real ties. Steve's call, 5 Sep 2026; recorded in
-# inst/DIFFERENCES.md.
+# UCINET 6.849 no longer zeroes it. Regenerating the density goldens changed
+# g_baker_bin: the twenty diagonal cells that used to come back 0 now come back
+# 1, because baker_journals counts a journal's citations to itself. So the
+# special case goes away and dichotomising is a threshold and nothing else.
+# The `twomode` argument is kept because callers pass it and the distinction may
+# return; it no longer changes the result. Ledger entry 1.
 dichotomize <- function(m, twomode = FALSE) {
   out <- (m > 0) * 1
   dim(out) <- dim(m)
   dimnames(out) <- dimnames(m)
-  if (!twomode && nrow(out) == ncol(out)) diag(out) <- 0
   out
 }

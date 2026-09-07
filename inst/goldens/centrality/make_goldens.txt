@@ -3,8 +3,9 @@
 //
 // Produces the UCINET numbers the chapter 9 routines are written against:
 // xdegree, xeigenvector, xbeta, xcloseness, xbetareach, xreach, xbetweenness,
-// xreachbetweenness, xhubsauthorities, xpncentrality, xinduced, xcentrality,
-// and 2-mode centrality.
+// xhubsauthorities, xpncentrality, xinduced, xcentrality, and 2-mode
+// centrality. (Twelve, not thirteen: xreachbetweenness was withdrawn on
+// 7 Sep 2026 - it has no UCINET equivalent.)
 //
 // HOW TO RUN
 //   1. Open UCINET.
@@ -17,7 +18,10 @@
 //        log_menu.txt           one continuous log covering PART B
 //   5. Tell me the version number from Help | About.
 //
-// Last run: not yet.
+// Last run: 6-7 September 2026, UCINET 6.849. Every line ran. PART B run 1
+// matched the layout predicted from uc_DegreeCentrality.pas exactly, so the
+// source tree is the binary and the remaining routines can be written from the
+// Delphi. Results and both logs are in this folder.
 //
 // THE SEVEN INPUTS, all already in this folder as ##h/##d pairs
 //   campnet          binary, directed, 18 nodes        the everyday case
@@ -148,8 +152,8 @@ dsp g9_bet_baker
 
 g9_eigc_campnet = eigencent(campnet)
 dsp g9_eigc_campnet
-g9_eigv_campnet = eigenvec(campnet)
-dsp g9_eigv_campnet
+//g9_eigv_campnet = eigenvec(campnet)
+//dsp g9_eigv_campnet
 
 g9_eigc_disc = eigencent(g9_disc)
 dsp g9_eigc_disc
@@ -301,17 +305,13 @@ dsp g9_geo_iso
 // trusted for layout, so all we will need from you is numbers.
 //
 // ===========================================================================
-// TWO THINGS ONLY YOU CAN ANSWER
+// ANSWERED, 7 September 2026
 //
-//   1. For each chapter 9 book table that reports closeness, which options was
-//      it produced with? If the answer is "the defaults, whatever they were at
-//      the time", that is a fine answer and we will note it.
+//   Closeness options: the dialog prints them, so nothing had to be
+//   remembered. All six defaults are recorded in the chapter 9 addendum of
+//   dev/SPEC.md, and all three measures reproduce from the geodesics.
 //
-//   2. xreachbetweenness (1e: xReachBetweennessCentrality and
-//      xBetaReachBetweennessCentrality) has no command keyword and no menu item
-//      I could find under Centrality - the crosswalk itself says "not in 3e
-//      menu index". Where does it live in UCINET 6? If it has been folded into
-//      Distance-Weighted Betweenness or Proximal Betweenness, say which and I
-//      will add it. If it is genuinely gone, it should become an alias that
-//      says so rather than a routine we write.
+//   xreachbetweenness: withdrawn. It has no command keyword and no menu item,
+//   and Steve confirmed it does not exist anywhere. The crosswalk row and both
+//   1e aliases are gone.
 // ===========================================================================

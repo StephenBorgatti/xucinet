@@ -1,0 +1,224 @@
+//  1  Network | Centrality | Degree      campnet   g9m_deg_campnet
+
+FREEMAN DEGREE CENTRALITY
+--------------------------------------------------------------------------------
+
+Input dataset:                          campnet (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\campnet
+Output degree dataset:                  g9m_deg_campnet (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9m_deg_campnet
+Output centralization dataset:          campnet-degcz (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\campnet-degcz
+Treat data as:                          Auto-detect
+Output raw totals:                      YES
+Output averages (normalized):           YES
+Allow edge weights:                     YES
+Weighted normalization:                 YES
+Exclude diagonal:                       YES
+
+Network 1 is directed? YES
+
+Degree Measures
+
+                   1     2     3     4 
+               Outde Indeg nOutd nInde 
+                   g          eg     g 
+               ----- ----- ----- ----- 
+    1   HOLLY  3.000 4.000 0.176 0.235 
+    2  BRAZEY  3.000 1.000 0.176 0.059 
+    3   CAROL  3.000 2.000 0.176 0.118 
+    4     PAM  3.000 5.000 0.176 0.294 
+    5     PAT  3.000 4.000 0.176 0.235 
+    6  JENNIE  3.000 3.000 0.176 0.176 
+    7 PAULINE  3.000 4.000 0.176 0.235 
+    8     ANN  3.000 2.000 0.176 0.118 
+    9 MICHAEL  3.000 4.000 0.176 0.235 
+   10    BILL  3.000 0.000 0.176 0.000 
+   11     LEE  3.000 3.000 0.176 0.176 
+   12     DON  3.000 4.000 0.176 0.235 
+   13    JOHN  3.000 0.000 0.176 0.000 
+   14   HARRY  3.000 3.000 0.176 0.176 
+   15    GERY  3.000 2.000 0.176 0.118 
+   16   STEVE  3.000 5.000 0.176 0.294 
+   17    BERT  3.000 4.000 0.176 0.235 
+   18    RUSS  3.000 4.000 0.176 0.235 
+
+
+18 rows, 4 columns, 1 levels.
+
+
+Graph Centralization -- as proportion, not percentage
+
+              1      2 
+         Out-Ce In-Cen 
+         ntrali traliz 
+         zation  ation 
+         ------ ------ 
+     1 1 0.0000 0.1246 
+
+1 rows, 2 columns, 1 levels.
+
+
+--------------------------------------
+Running time: 00:00:01 seconds.
+Output generated: 06 Sep 26 19:15:06
+UCINET 6.849 Copyright (c) 2002-2026 Analytic Technologies
+
+//  2  Network | Centrality | Closeness   g9_disc   g9m_clo_disc
+
+CLOSENESS CENTRALITY MEASURES
+--------------------------------------------------------------------------------
+
+Input network dataset:                  g9_disc (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9_disc
+Output measures:                        g9_disc-clo (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9_disc-clo
+(Freeman) Set undefined distances to:   Max observed distance plus 1
+(Freeman) Output options:               Divide totals into N-1 (Freeman normalization)
+(Valente-Forman) Handle undefined distances:Set reverse distance to zero
+(Valente-Forman) Output options:        Divide averages by diameter
+(Reciprocal) Handle undefined distances:Set reciprocal distance to zero
+(Reciprocal) Output options:            Averages
+
+
+
+               1     2     3 
+           FreeC ValCl Recip 
+              lo     o   Clo 
+           ----- ----- ----- 
+    1  n1  0.344 0.364 0.364 
+    2  n2  0.314 0.273 0.227 
+    3  n3  0.314 0.273 0.227 
+    4  n4  0.314 0.273 0.227 
+    5  n5  0.314 0.273 0.227 
+    6  n6  0.289 0.182 0.167 
+    7  n7  0.306 0.242 0.227 
+    8  n8  0.306 0.242 0.227 
+    9  n9  0.289 0.182 0.167 
+   10 n10  0.289 0.182 0.182 
+   11 n11  0.289 0.182 0.182 
+   12 n12  0.289 0.182 0.182 
+
+
+12 rows, 3 columns, 1 levels.
+
+
+--------------------------------------
+Running time: 00:00:01 seconds.
+Output generated: 07 Sep 26 10:54:59
+UCINET 6.849 Copyright (c) 2002-2026 Analytic Technologies
+
+//  3  Network | Centrality | Closeness   campnet   g9m_clo_campnet
+
+CLOSENESS CENTRALITY MEASURES
+--------------------------------------------------------------------------------
+
+Input network dataset:                  campnet (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\campnet
+Output measures:                        g9m_clo_campnet (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9m_clo_campnet
+(Freeman) Set undefined distances to:   Max observed distance plus 1
+(Freeman) Output options:               Divide totals into N-1 (Freeman normalization)
+(Valente-Forman) Handle undefined distances:Set reverse distance to zero
+(Valente-Forman) Output options:        Divide averages by diameter
+(Reciprocal) Handle undefined distances:Set reciprocal distance to zero
+(Reciprocal) Output options:            Averages
+
+
+
+                   1     2     3     4     5     6 
+               OutCl InClo OutVa InVal OutRe InRec 
+                 ose    se  lClo   Clo cipCl ipClo 
+                                           o       
+               ----- ----- ----- ----- ----- ----- 
+    1   HOLLY  0.215 0.386 0.479 0.773 0.353 0.514 
+    2  BRAZEY  0.205 0.165 0.445 0.277 0.329 0.172 
+    3   CAROL  0.202 0.283 0.437 0.639 0.314 0.401 
+    4     PAM  0.193 0.362 0.403 0.748 0.293 0.538 
+    5     PAT  0.210 0.354 0.462 0.739 0.333 0.509 
+    6  JENNIE  0.202 0.283 0.437 0.639 0.314 0.421 
+    7 PAULINE  0.202 0.293 0.437 0.655 0.314 0.460 
+    8     ANN  0.193 0.279 0.403 0.630 0.293 0.391 
+    9 MICHAEL  0.205 0.347 0.445 0.731 0.314 0.479 
+   10    BILL  0.205 0.125 0.445 0.000 0.304 0.000 
+   11     LEE  0.205 0.173 0.445 0.319 0.329 0.255 
+   12     DON  0.205 0.347 0.445 0.731 0.314 0.475 
+   13    JOHN  0.378 0.125 0.765 0.000 0.485 0.000 
+   14   HARRY  0.205 0.304 0.445 0.672 0.314 0.415 
+   15    GERY  0.315 0.170 0.689 0.303 0.441 0.216 
+   16   STEVE  0.236 0.179 0.538 0.345 0.362 0.324 
+   17    BERT  0.236 0.177 0.538 0.336 0.362 0.294 
+   18    RUSS  0.270 0.177 0.613 0.336 0.390 0.294 
+
+
+18 rows, 6 columns, 1 levels.
+
+
+--------------------------------------
+Running time: 00:00:01 seconds.
+Output generated: 07 Sep 26 11:01:04
+UCINET 6.849 Copyright (c) 2002-2026 Analytic Technologies
+
+//  4  Network | 2-Mode networks |        davis     g9m_2mode_davis
+
+2-MODE CENTRALITY
+--------------------------------------------------------------------------------
+
+Input dataset:                          davis (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\davis
+Output ROW measures:                    g9m_2mode_davis (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9m_2mode_davis
+Output COLUMN measures:                 davis-colcent (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\davis-colcent
+
+2-Mode Centrality Measures for ROWS of davis
+
+                      1      2      3      4      5 
+                 Degree 2-Loca Closen Betwee Eigenv 
+                             l    ess  nness  ector 
+                 ------ ------ ------ ------ ------ 
+     1    EVELYN  0.571  0.230  0.800  0.097 -0.335 
+     2     LAURA  0.500  0.206  0.727  0.051 -0.309 
+     3   THERESA  0.571  0.258  0.800  0.088 -0.371 
+     4    BRENDA  0.500  0.210  0.727  0.049 -0.313 
+     5 CHARLOTTE  0.286  0.111  0.600  0.011 -0.168 
+     6   FRANCES  0.286  0.143  0.667  0.011 -0.209 
+     7   ELEANOR  0.286  0.159  0.667  0.009 -0.228 
+     8     PEARL  0.214  0.135  0.667  0.007 -0.180 
+     9      RUTH  0.286  0.175  0.706  0.017 -0.236 
+    10     VERNE  0.286  0.167  0.706  0.016 -0.218 
+    11     MYRNA  0.286  0.147  0.686  0.016 -0.187 
+    12 KATHERINE  0.429  0.171  0.727  0.047 -0.220 
+    13    SYLVIA  0.500  0.210  0.774  0.072 -0.277 
+    14      NORA  0.571  0.202  0.800  0.113 -0.264 
+    15     HELEN  0.357  0.155  0.727  0.042 -0.201 
+    16   DOROTHY  0.143  0.103  0.649  0.002 -0.131 
+    17    OLIVIA  0.143  0.063  0.585  0.005 -0.070 
+    18     FLORA  0.143  0.063  0.585  0.005 -0.070 
+
+18 rows, 5 columns, 1 levels.
+
+2-Mode Centrality Measures for COLUMNS of davis
+
+                1      2      3      4      5 
+           Degree 2-Loca Closen Betwee Eigenv 
+                       l    ess  nness  ector 
+           ------ ------ ------ ------ ------ 
+     1  E1  0.167  0.087  0.524  0.002 -0.142 
+     2  E2  0.167  0.091  0.524  0.002 -0.150 
+     3  E3  0.333  0.151  0.564  0.018 -0.253 
+     4  E4  0.222  0.107  0.537  0.008 -0.176 
+     5  E5  0.444  0.183  0.595  0.038 -0.322 
+     6  E6  0.444  0.194  0.688  0.065 -0.328 
+     7  E7  0.556  0.230  0.733  0.130 -0.384 
+     8  E8  0.778  0.290  0.846  0.244 -0.507 
+     9  E9  0.667  0.230  0.786  0.226 -0.379 
+    10 E10  0.278  0.119  0.550  0.011 -0.170 
+    11 E11  0.222  0.067  0.537  0.020 -0.090 
+    12 E12  0.333  0.135  0.564  0.018 -0.203 
+    13 E13  0.167  0.083  0.524  0.002 -0.113 
+    14 E14  0.167  0.083  0.524  0.002 -0.113 
+
+14 rows, 5 columns, 1 levels.
+
+
+Closeness and betweenness are calculated on binarized data. The other measures use valued data.
+The 2-local measure is the normalized sum of normalized degree of a node's alters.
+
+--------------------------------------
+Running time: 00:00:01 seconds.
+Output generated: 07 Sep 26 11:05:49
+UCINET 6.849 Copyright (c) 2002-2026 Analytic Technologies
+
+
+

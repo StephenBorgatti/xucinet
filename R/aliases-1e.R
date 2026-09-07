@@ -40,7 +40,6 @@ xucinet_1e_map <- c(
   xAutoregression = "xautoregression",
   xAverageDistance = "xcohesion",
   xBetaCentrality = "xbeta",
-  xBetaReachBetweennessCentrality = "xreachbetweenness",
   xBetaReachCentrality = "xbetareach",
   xBetweennessCentrality = "xbetweenness",
   xBiCliques = "xbicliques",
@@ -114,7 +113,6 @@ xucinet_1e_map <- c(
   xQAPCorrelation = "xqap",
   xQAPLogisticRegression = "xlrqap",
   xQAPRegression = "xmrqap",
-  xReachBetweennessCentrality = "xreachbetweenness",
   xReachCentrality = "xreach",
   xReciprocity = "xreciprocity",
   xREGE = "xrege",
@@ -203,9 +201,6 @@ xAverageDistance <- function(...) alias_1e("xAverageDistance", "xcohesion", ...)
 #' @rdname xucinet-1e
 #' @export
 xBetaCentrality <- function(...) alias_1e("xBetaCentrality", "xbeta", ...)
-#' @rdname xucinet-1e
-#' @export
-xBetaReachBetweennessCentrality <- function(...) alias_1e("xBetaReachBetweennessCentrality", "xreachbetweenness", ...)
 #' @rdname xucinet-1e
 #' @export
 xBetaReachCentrality <- function(...) alias_1e("xBetaReachCentrality", "xbetareach", ...)
@@ -425,9 +420,6 @@ xQAPLogisticRegression <- function(...) alias_1e("xQAPLogisticRegression", "xlrq
 #' @rdname xucinet-1e
 #' @export
 xQAPRegression <- function(...) alias_1e("xQAPRegression", "xmrqap", ...)
-#' @rdname xucinet-1e
-#' @export
-xReachBetweennessCentrality <- function(...) alias_1e("xReachBetweennessCentrality", "xreachbetweenness", ...)
 #' @rdname xucinet-1e
 #' @export
 xReachCentrality <- function(...) alias_1e("xReachCentrality", "xreach", ...)

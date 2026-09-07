@@ -56,7 +56,13 @@ overrides <- c(
 # a method option in the 1e's core-periphery text; as an alias it would be worse
 # than useless, because anyone typing it wants eigenvector centrality and would
 # get a core-periphery routine (Steve, 6 Sep 2026).
-drop <- c("xEigenvector")
+# xEigenvector: the 1e name was ambiguous between the measure and the vector.
+# xReachBetweennessCentrality / xBetaReachBetweennessCentrality: the routine has
+# no UCINET equivalent - no command keyword, no menu item - and Steve confirmed
+# on 7 Sep 2026 that it does not exist anywhere, so it is withdrawn rather than
+# left pointing at a function nobody will write.
+drop <- c("xEigenvector",
+          "xReachBetweennessCentrality", "xBetaReachBetweennessCentrality")
 
 # A few aliases need a sentence the generic message cannot give.
 notes <- c(

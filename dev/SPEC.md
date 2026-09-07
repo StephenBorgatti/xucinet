@@ -370,15 +370,40 @@ bind every node-level routine in the package rather than centrality alone.
    with an optional weighted variant that divides by the maximum observed value.
    Normalization divides by `n−1`, or `maxval·(n−1)` under *Weighted normalization*.
 
-4. **Closeness.** The default is UCINET's dialog default, and unreachable pairs are handled
-   the way that default handles them. Both are read off the golden log rather than chosen
-   here. The chapter 9 golden generator records which option each book table was produced
-   with, since the book's own tables predate this decision.
+4. **Closeness.** *Answered by the 7 September 2026 golden run, and no longer open.*
 
-   For reference, from `uc_ClosenessMeasures.dfm`: the dialog has no method selector — it
-   reports Freeman, Valente-Forman and reciprocal-distance closeness together, each with its
-   own options group. Freeman defaults to *max observed distance plus 1* for undefined
-   distances and *divide totals into N-1* for output. The log is the arbiter.
+   The dialog has no method selector: it reports all three measures together, and it prints
+   the options it used, so nothing here has to be remembered or guessed. The defaults, from
+   the log and confirming `uc_ClosenessMeasures.dfm` exactly:
+
+   ```
+   (Freeman) Set undefined distances to:       Max observed distance plus 1
+   (Freeman) Output options:                   Divide totals into N-1 (Freeman normalization)
+   (Valente-Forman) Handle undefined distances:Set reverse distance to zero
+   (Valente-Forman) Output options:            Divide averages by diameter
+   (Reciprocal) Handle undefined distances:    Set reciprocal distance to zero
+   (Reciprocal) Output options:                Averages
+   ```
+
+   All three reproduce from the geodesics on `g9_disc`, to within the single precision the
+   fixtures are stored at:
+
+   - **Freeman** — undefined distances set to *max observed distance + 1*, then
+     `(n - 1) / sum(d)`. For `g9_disc` the max observed distance is 3, so unreachable pairs
+     count 4. `n1` has four neighbours at distance 1 and seven unreachable: `4 + 7·4 = 32`,
+     and `11/32 = 0.34375`.
+   - **Valente-Forman** — reverse distance `diameter + 1 - d`, zero where unreachable,
+     averaged over `n - 1`, then divided by the diameter.
+   - **Reciprocal** — `1/d`, zero where unreachable, averaged over `n - 1`.
+
+   Column headings are `FreeClo`, `ValClo`, `RecipClo` when the data are symmetric, and
+   `OutClose`, `InClose`, `OutValClo`, `InValClo`, `OutRecipClo`, `InRecipClo` when they are
+   not. Note the asymmetry in UCINET's own naming: the Freeman columns become `OutClose` and
+   `InClose`, not `OutFreeClo`.
+
+   Steve does not know which options the book's own chapter 9 tables were produced with. We
+   do not need to: `xcloseness()` defaults to the six above, and any book table that
+   disagrees can be identified by which of the four Freeman conventions reproduces it.
 
 5. **Multi-relation input.** With `relation` omitted on a multi-relation dataset, a routine
    reports **one section per relation** — it does not pick the first, and does not refuse.
@@ -386,10 +411,17 @@ bind every node-level routine in the package rather than centrality alone.
    `xNegativeTieDegree` alias messages promise, and it works.
 
 6. **2-mode data.** `mode` selects the margin, and the normalization denominator is the size
-   of the **opposite** mode, as in UCINET's *2-Mode Centrality*. Average degree is reported
-   **separately for rows and columns** rather than as one number over a single denominator;
-   this supersedes the single `ties/ncols` figure `xdensity()` reports today, and ledger
-   entry 2 changes with it.
+   of the **opposite** mode. *Confirmed by the 7 September run:* in `g9m_2mode_davis`,
+   EVELYN's degree is 0.571 = 8/14, normalized by the number of events, and E1's is
+   0.167 = 3/18, normalized by the number of women. The routine reports rows and columns as
+   two separate tables with columns `Degree`, `2-Local`, `Closeness`, `Betweenness`,
+   `Eigenvector`, and notes that closeness and betweenness are computed on binarized data
+   while the rest use values.
+
+   Average degree in `xdensity()` moved twice and has settled on UCINET's own figure —
+   ties over the number of nodes in both modes, 89/32 for davis — with the two per-margin
+   averages printed beside it. See ledger entry 2 for the full history; it is worth reading
+   before anyone re-opens the question.
 
 7. **`xcentrality`** (UCINET's *Multiple Measures Suite*) returns **one `$nodes` table with a
    column per measure**, each computed by the individual routine rather than reimplemented,
