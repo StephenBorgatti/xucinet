@@ -33,6 +33,21 @@ names and signatures is the crosswalk spreadsheet in the book repo (`asnr2e/cros
   network object rather than a report, deliberately keeps R's plain matrix printing.
 - Every deliberate departure from UCINET, and anything we match that UCINET may itself have
   wrong, goes in `inst/DIFFERENCES.md` with who decided it and when.
+- **One reference UCINET version.** It is declared in DESCRIPTION as
+  `Config/ucinet/reference` (currently 6.849). Every folder of golden fixtures records the
+  build that produced it in a `UCINET-VERSION` file beside them, and the test suite fails if
+  a folder and the declaration disagree. `inst/goldens/ucinet` is exempt: those are format
+  inputs of mixed provenance, not results.
+- **UCINET bugs go in `dev/UCINET-ISSUES.md`**, never silently copied. The lifecycle:
+  - *While a fix is pending* — xucinet implements the **correct** behaviour, not UCINET's.
+    The test is marked as expected to differ from UCINET below the fixing version, and the
+    `inst/DIFFERENCES.md` entry says **UCINET fix pending**. This overrides "UCINET numbers
+    win": a known bug is not a number worth matching.
+  - *When UCINET fixes it* — the issue moves to **fixed in UCINET x.y** and stays there;
+    entries in that file are never deleted, because the old behaviour is in every earlier
+    build. The affected fixtures are regenerated from the fixing build,
+    `Config/ucinet/reference` is bumped, xucinet follows the fixed behaviour with **no
+    compatibility option**, and the corresponding `inst/DIFFERENCES.md` entry is **removed**.
 - ASNR 1e names (e.g. `xDegreeCentrality`) are exported as thin deprecated wrappers in
   `R/aliases-1e.R`, each calling the 2.0 function and emitting a one-line message. They are
   not documented in vignettes.

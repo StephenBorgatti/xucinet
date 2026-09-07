@@ -1,0 +1,8 @@
+UCINET: n/a
+Generated: 2026-09-05
+Script: none
+Notes: Exempt from the reference-version check, for the same reason as
+    inst/goldens/ucinet. These are DL files collected from UCINET's Datafiles to
+    exercise the reader against the format families that occur in the wild. They
+    are inputs written by many builds over many years, which is the point of
+    them; no UCINET run produced them.

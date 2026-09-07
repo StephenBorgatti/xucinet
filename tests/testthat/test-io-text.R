@@ -357,6 +357,10 @@ test_that("a DL file under a .txt extension is recognised by its first token", {
 })
 
 test_that("a truncated DL file is refused with the counts that disagree", {
+  # UCINET imports it silently, padding with missing values. We refuse, which
+  # is the correct behaviour and a deliberate difference while the fix is
+  # pending: dev/UCINET-ISSUES.md issue 1, ledger entry 1.
+  expect_differs_from_ucinet(issue = 1)
   # krebs.txt in UCINET's Datafiles declares N=56, NM=5 and holds 15580 values
   # where 15680 are needed. Not shipped; this reproduces its shape.
   p <- dlfile("DL N=3, NM=2", "FORMAT=FULLMATRIX", "DATA:",

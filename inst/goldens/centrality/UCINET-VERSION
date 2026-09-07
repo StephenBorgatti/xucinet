@@ -1,0 +1,5 @@
+UCINET: 6.849
+Generated: 2026-09-07
+Script: make_goldens.txt
+Notes: PART A plus the four PART B menu runs. The eigenvec() fixtures are due to
+    be regenerated once the fix for UCINET issue 3 ships; see regen_eigenvec.txt.

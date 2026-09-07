@@ -1,0 +1,8 @@
+UCINET: n/a
+Generated: 2026-09-03
+Script: none
+Notes: Exempt from the reference-version check. These are format inputs, not
+    results: ##h/##d files in all six header versions, collected from the book
+    data folder and from UCINET's own Datafiles over many years. What they test
+    is that we can read what UCINET has written historically, so being older
+    than the reference build is the whole point of them.

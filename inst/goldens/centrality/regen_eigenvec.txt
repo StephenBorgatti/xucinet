@@ -1,0 +1,67 @@
+// ===========================================================================
+// Regenerate the eigenvec() fixtures - UCINET issue 3
+//
+// Issue 3 was that eigenvec() ignored the output name it was assigned when the
+// input was asymmetric. `g9_eigv_campnet = eigenvec(campnet)` wrote
+// CAMPNET-eval, CAMPNET-lvec, CAMPNET-lveci, CAMPNET-rvec and CAMPNET-rveci -
+// names taken from the input - so the batch produced files nothing was looking
+// for and G9_EIGV_CAMPNET never existed. The symmetric branch honoured the name
+// and wrote G9_EIGV_DISC plus G9_EIGV_DISC-eig.
+//
+// Fixed in the current build. This regenerates the affected fixtures under it.
+//
+// HOW TO RUN
+//   ->cd <this folder>
+//   ->run regen_eigenvec.txt
+//
+// Then, please:
+//   1. Delete the five CAMPNET-* files this replaces. They are named after the
+//      input, so nothing else will ever overwrite them:
+//        CAMPNET-eval  CAMPNET-lvec  CAMPNET-lveci  CAMPNET-rvec  CAMPNET-rveci
+//   2. Save the session log here as log_regen_eigenvec.txt.
+//   3. Tell me the build number from Help | About. It goes in DESCRIPTION as
+//      Config/ucinet/reference and in this folder's UCINET-VERSION file, and
+//      the test suite fails until both say the same thing.
+//
+// If the build number has changed from 6.849, the density fixtures need the
+// same treatment - `cd ..\density` and `run make_goldens.txt` - because the
+// package tracks one build and the test suite checks it per folder.
+// ===========================================================================
+
+Recordcli = true
+dec 8
+
+
+// --- the case the bug affected ---------------------------------------------
+// campnet is asymmetric, so this is the branch that used to ignore the name.
+// Expected now: G9_EIGV_CAMPNET, plus whatever suffixed companions the fix
+// settles on for the eigenvalues and the left and right vectors. Please say in
+// the log or in a note what names it actually wrote, so the harness can look
+// for them by the right spelling.
+
+g9_eigv_campnet = eigenvec(campnet)
+dsp g9_eigv_campnet
+
+
+// --- the case that already worked, regenerated for consistency -------------
+// g9_disc is symmetric and honoured the name before the fix. It is here so the
+// whole eigenvec family comes from one build rather than two.
+
+g9_eigv_disc = eigenvec(g9_disc)
+dsp g9_eigv_disc
+
+
+// --- baker_journals: valued and asymmetric ---------------------------------
+// Not in the original batch. Worth adding now: it is the other asymmetric input
+// we have, so it checks that the fix holds for valued data as well as binary.
+
+g9_eigv_baker = eigenvec(baker_journals)
+dsp g9_eigv_baker
+
+
+// ===========================================================================
+// Expected afterwards in this folder:
+//   G9_EIGV_CAMPNET, G9_EIGV_DISC, G9_EIGV_BAKER, each as a ##h / ##d pair,
+//   plus their eigenvalue and left/right companions under names derived from
+//   those, not from campnet / g9_disc / baker_journals.
+// ===========================================================================

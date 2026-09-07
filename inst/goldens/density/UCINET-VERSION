@@ -1,0 +1,6 @@
+UCINET: 6.849
+Generated: 2026-09-07
+Script: make_goldens.txt
+Notes: Regenerated on 6.849 after dichot() stopped zeroing the diagonal and
+    2-mode average degree changed denominator. The fixtures from the 4 September
+    run on 6.847 are not compatible and were replaced wholesale.
