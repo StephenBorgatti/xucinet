@@ -33,11 +33,20 @@ test_that("a wrapper whose target exists calls it and names the replacement", {
 })
 
 test_that("a wrapper whose target is unwritten says so, and says which", {
-  # xDegreeCentrality -> xdegree, a Phase 1 routine.
-  expect_error(xDegreeCentrality(campnet), "xdegree\\(\\) is not written yet")
-  expect_error(xDegreeCentrality(campnet), "ASNR 1e name")
+  # xBetweennessCentrality -> xbetweenness, still to come. xDegreeCentrality
+  # used to be the example here and is not any more, which is the point: the
+  # message turns into a working call the day the routine lands, with no change
+  # to the alias layer.
+  expect_error(xBetweennessCentrality(campnet), "xbetweenness\\(\\) is not written yet")
+  expect_error(xBetweennessCentrality(campnet), "ASNR 1e name")
   # the message names the routine to wait for, not just "not implemented"
-  expect_error(xDegreeCentrality(campnet), "the day xdegree\\(\\) lands")
+  expect_error(xBetweennessCentrality(campnet), "the day xbetweenness\\(\\) lands")
+})
+
+test_that("xDegreeCentrality now forwards, because xdegree has landed", {
+  expect_message(xDegreeCentrality(campnet), "xucinet 2.0 calls it xdegree")
+  expect_equal(suppressMessages(xDegreeCentrality(campnet))$nodes,
+               xdegree(campnet)$nodes)
 })
 
 test_that("the spellings the 1e was inconsistent about all resolve, together", {
@@ -106,11 +115,13 @@ test_that("xRegression goes to the regression routine", {
 
 test_that("the negative-tie aliases explain what to do instead", {
   # Both are degree on a negative-tie matrix rather than routines of their own.
+  # The note used to arrive inside the not-written-yet error; now that xdegree
+  # exists the call succeeds and the note arrives as the message beside it, so
+  # the explanation survives the target landing rather than disappearing with it.
   for (nm in c("xNegativeDegreeCentrality", "xNegativeWeightedCentrality")) {
     expect_equal(xucinet_1e_names()[[nm]], "xdegree")
-    err <- tryCatch(get(nm, envir = asNamespace("xucinet"))(campnet),
-                    error = function(e) conditionMessage(e))
-    expect_true(grepl("negative-tie matrix", err), info = nm)
-    expect_true(grepl("xpncentrality", err), info = nm)
+    f <- get(nm, envir = asNamespace("xucinet"))
+    expect_message(f(campnet), "negative-tie matrix")
+    expect_message(f(campnet), "xpncentrality")
   }
 })

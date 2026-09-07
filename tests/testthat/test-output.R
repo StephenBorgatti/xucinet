@@ -79,9 +79,13 @@ fake_output <- function() {
   net <- as_xucinet(campnet)
   nodes <- data.frame(Degree = c(3, 1, 4, 2), nDegree = c(0.5, 0.25, 1, 0.5),
                       row.names = c("a", "b", "c", "d"))
+  # stats_block = TRUE because this stands in for the routines that print one -
+  # XFreeBet.pas and xcentrality.pas do, uc_DegreeCentrality.pas does not, so
+  # the routine says which and the printer obeys.
   new_xucinet_output("Degree", net, nodes = nodes,
                      matrices = list(Distances = matrix(c(0, 1, 1, 0), 2, 2)),
-                     assumptions = "Data treated as directed.")
+                     assumptions = "Data treated as directed.",
+                     stats_block = TRUE)
 }
 
 test_that("the report carries title, dataset, assumptions and a stats block", {
@@ -102,19 +106,42 @@ test_that("the stats block can be turned off", {
   expect_false(any(grepl("DESCRIPTIVE STATISTICS", out)))
 })
 
+test_that("the stats block is off unless the routine asks for it", {
+  net <- as_xucinet(matrix(c(0, 1, 1, 0), 2, 2), title = "x")
+  nodes <- data.frame(Degree = c(1, 1), row.names = c("a", "b"))
+  quiet <- new_xucinet_output("Degree", net, nodes = nodes)
+  expect_false(any(grepl("DESCRIPTIVE STATISTICS", capture.output(print(quiet)))))
+  # and stats = TRUE still forces it, for anyone who wants the numbers anyway
+  expect_true(any(grepl("DESCRIPTIVE STATISTICS",
+                        capture.output(print(quiet, stats = TRUE)))))
+})
+
 test_that("matrix results print as their own titled sections", {
   out <- capture.output(print(fake_output()))
   expect_true(any(grepl("^Distances$", out)))
 })
 
 test_that("node tables keep original order unless sort is asked for", {
-  out <- capture.output(print(fake_output()))
-  rows <- grep("^[abcd] ", out, value = TRUE)
-  expect_equal(substr(rows, 1, 1), c("a", "b", "c", "d"))
+  # Node tables print in UCINET's matrix layout - a six-wide row number, then
+  # the label right aligned - so a row is "     1 a 3.000 0.500".
+  labels_of <- function(out) {
+    rows <- grep("^ *[0-9]+ +[abcd] ", out, value = TRUE)
+    sub("^ *[0-9]+ +([abcd]) .*$", "\\1", rows)
+  }
+  expect_equal(labels_of(capture.output(print(fake_output()))),
+               c("a", "b", "c", "d"))
+  expect_equal(labels_of(capture.output(print(fake_output(), sort = "Degree"))),
+               c("c", "a", "d", "b"))
+})
 
+test_that("the statistics describe the table, not the view of it", {
+  # SPEC ch 9 decision 2: computed before any sorting, so changing the view
+  # cannot change a reported mean.
+  plain  <- capture.output(print(fake_output()))
   sorted <- capture.output(print(fake_output(), sort = "Degree"))
-  rows <- grep("^[abcd] ", sorted, value = TRUE)
-  expect_equal(substr(rows, 1, 1), c("c", "a", "d", "b"))
+  block <- function(out) out[seq(grep("DESCRIPTIVE STATISTICS", out) + 1,
+                                 length(out))]
+  expect_identical(block(plain), block(sorted))
 })
 
 test_that("sort accepts a position and refuses an unknown column", {

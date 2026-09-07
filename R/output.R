@@ -101,15 +101,28 @@ format_matrix <- function(m, digits = 3) {
 #   - the stub is a 6-wide row number, a space, the row labels right aligned to
 #     their widest, and a space;
 #   - every column is its value right aligned in the width, then one space.
-format_uci_matrix <- function(m, digits = 3, footer = TRUE) {
+format_uci_matrix <- function(m, digits = 3, footer = TRUE, by_column = TRUE) {
   m <- as.matrix(m)
   nr <- nrow(m); nc <- ncol(m)
   if (nr == 0L || nc == 0L) return("(empty matrix)")
-  # Decimals are decided per column, then every column is padded to one width
-  # for the whole matrix. That is what UCINET's Density report shows: 54 and 3
-  # bare, in columns of their own, beside 0.176 and 0.381, all in a 5-wide grid.
-  vals <- vapply(seq_len(nc), function(j) format_values(m[, j], digits),
-                 character(nr))
+  # Decimals: `if istable then getwdbycol else getwd` in tmat.display. Either
+  # way the test is "is it integer valued", and the answer decides between 0
+  # decimals and defaultd = -3, which means three, always shown. What changes is
+  # the scope of the question.
+  #
+  #   by_column = TRUE  (istable): asked per column. UCINET's Density report
+  #     prints 89 bare next to 0.353, because Ties is an integer column.
+  #   by_column = FALSE (not istable): asked once for the whole matrix. UCINET's
+  #     Degree Measures table prints 3.000 and 4.000 next to 0.176, because one
+  #     non-integer anywhere puts every column on three decimals.
+  #
+  # Both are pinned by goldens: density/density_menu_log.txt for the first,
+  # centrality/log_menu.txt for the second.
+  vals <- if (by_column) {
+    vapply(seq_len(nc), function(j) format_values(m[, j], digits), character(nr))
+  } else {
+    matrix(format_values(as.vector(m), digits), nr, nc)
+  }
   dim(vals) <- c(nr, nc)
   w <- max(nchar(vals), nchar(as.character(nc)))
   vals[] <- formatC(vals, width = w)
@@ -143,8 +156,8 @@ format_uci_matrix <- function(m, digits = 3, footer = TRUE) {
   lines
 }
 
-cat_uci_matrix <- function(m, digits = 3, footer = TRUE) {
-  cat(format_uci_matrix(m, digits, footer), sep = "\n")
+cat_uci_matrix <- function(m, digits = 3, footer = TRUE, by_column = TRUE) {
+  cat(format_uci_matrix(m, digits, footer, by_column), sep = "\n")
   invisible(NULL)
 }
 
@@ -167,15 +180,28 @@ format_number <- function(v, digits = 3) format_values(v, digits)
 #' @param assumptions Character vector of notes such as "Data were symmetrized (max)".
 #' @param subclass Character; additional S3 class to prepend.
 #' @param call The call that produced the result.
+#' @param nodes_title Title UCINET prints above the node table, e.g.
+#'   `"Degree Measures"`. `NULL` prints the table with no title.
+#' @param summary_title Title UCINET prints above the whole-network block when it
+#'   renders it as a titled matrix rather than as bare label/value lines.
+#' @param stats_block Does UCINET print its descriptive-statistics block for this
+#'   routine? It is not universal: `XFreeBet.pas` and `xcentrality.pas` print
+#'   `DESCRIPTIVE STATISTICS FOR EACH MEASURE`, `uc_DegreeCentrality.pas` and
+#'   `uc_ClosenessMeasures.pas` print nothing of the kind. So the routine
+#'   decides, rather than the printer assuming.
 #' @return An object of class `xucinet_output`.
 #' @keywords internal
 #' @export
 new_xucinet_output <- function(routine, net, nodes = NULL, summary = NULL,
                                matrices = NULL, assumptions = character(),
-                               subclass = NULL, call = sys.call(-1)) {
+                               subclass = NULL, call = sys.call(-1),
+                               nodes_title = NULL, summary_title = NULL,
+                               stats_block = FALSE) {
   structure(
     list(routine = routine, dataset = net$title, nodes = nodes, summary = summary,
-         matrices = matrices, assumptions = assumptions, call = call),
+         matrices = matrices, assumptions = assumptions, call = call,
+         nodes_title = nodes_title, summary_title = summary_title,
+         stats_block = stats_block),
     class = c(subclass, "xucinet_output")
   )
 }
@@ -192,11 +218,13 @@ rule <- function() {
 #'   printed table by, largest first. The default, `NULL`, keeps the original
 #'   node order, which is what UCINET's datasets are stored in and what makes
 #'   rows line up across measures.
-#' @param stats Show the descriptive-statistics block under a node table?
+#' @param stats Show the descriptive-statistics block under a node table? The
+#'   default, `NULL`, follows UCINET: the block appears for the routines that
+#'   print one and not for the routines that do not.
 #' @param ... Unused.
 #' @return `x`, invisibly.
 #' @export
-print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = TRUE, ...) {
+print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = NULL, ...) {
   # Checked before anything is printed, so a bad sort= does not leave half a
   # report on screen above the error.
   sort_col <- NULL
@@ -207,6 +235,8 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = TRUE, ...) 
            paste(names(x$nodes), collapse = ", "), call. = FALSE)
     }
   }
+  if (is.null(stats)) stats <- isTRUE(x$stats_block)
+
   cat(toupper(x$routine), "\n", sep = "")
   rule()
   cat("\n")
@@ -216,11 +246,16 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = TRUE, ...) 
   for (a in x$assumptions) field("Note:", a)
   cat("\n\n\n")
 
-  if (!is.null(x$summary)) {
+  # UCINET prints the whole-network block BEFORE a node table only when there is
+  # no node table - density is its own report. Where a routine has both, as
+  # every centrality routine does, the node table comes first and the graph-level
+  # figure follows it. Ordering here rather than in each routine keeps the
+  # routines free of display logic.
+  summary_block <- function() {
+    if (is.null(x$summary)) return(invisible(NULL))
+    if (!is.null(x$summary_title)) cat(x$summary_title, "\n\n", sep = "")
     s <- x$summary
     if (is.list(s) && !is.data.frame(s)) {
-      # UCINET prints the whole-network statistics as a one-row matrix labelled
-      # with the dataset name, not as a list of label/value lines.
       m <- matrix(vapply(s, function(v) as.numeric(v)[1], numeric(1)), nrow = 1,
                   dimnames = list(x$dataset, names(s)))
       cat_uci_matrix(m, digits)
@@ -230,21 +265,27 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = TRUE, ...) 
     cat("\n")
   }
 
+  if (is.null(x$nodes)) summary_block()
+
   if (!is.null(x$nodes)) {
     nodes <- x$nodes
+    # The statistics describe the measure, not the view of it, so they are taken
+    # from the full table before any sorting or subsetting (SPEC ch 9 decision 2).
+    block <- if (isTRUE(stats)) uci_stats_block(nodes) else NULL
     if (!is.null(sort_col)) {
       nodes <- nodes[order(nodes[[sort_col]], decreasing = TRUE), , drop = FALSE]
     }
-    print(format_df(nodes, digits), right = TRUE)
+    if (!is.null(x$nodes_title)) cat(x$nodes_title, "\n\n", sep = "")
+    # A node table is saved as a plain dataset rather than a table, so decimals
+    # are decided across the whole matrix: see format_uci_matrix().
+    cat_uci_matrix(as.matrix(nodes), digits, by_column = FALSE)
     cat("\n")
-    if (isTRUE(stats)) {
-      block <- uci_stats_block(nodes)
-      if (!is.null(block)) {
-        cat("DESCRIPTIVE STATISTICS\n\n")
-        print(format_df(block, digits), right = TRUE)
-        cat("\n")
-      }
+    if (!is.null(block)) {
+      cat("DESCRIPTIVE STATISTICS FOR EACH MEASURE\n\n")
+      cat_uci_matrix(as.matrix(block), digits, footer = FALSE, by_column = FALSE)
+      cat("\n")
     }
+    summary_block()
   }
 
   for (nm in names(x$matrices)) {

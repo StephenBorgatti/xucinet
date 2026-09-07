@@ -12,7 +12,10 @@ new_xucinet_output(
   matrices = NULL,
   assumptions = character(),
   subclass = NULL,
-  call = sys.call(-1)
+  call = sys.call(-1),
+  nodes_title = NULL,
+  summary_title = NULL,
+  stats_block = FALSE
 )
 }
 \arguments{
@@ -31,6 +34,18 @@ new_xucinet_output(
 \item{subclass}{Character; additional S3 class to prepend.}
 
 \item{call}{The call that produced the result.}
+
+\item{nodes_title}{Title UCINET prints above the node table, e.g.
+\code{"Degree Measures"}. \code{NULL} prints the table with no title.}
+
+\item{summary_title}{Title UCINET prints above the whole-network block when it
+renders it as a titled matrix rather than as bare label/value lines.}
+
+\item{stats_block}{Does UCINET print its descriptive-statistics block for this
+routine? It is not universal: \code{XFreeBet.pas} and \code{xcentrality.pas} print
+\verb{DESCRIPTIVE STATISTICS FOR EACH MEASURE}, \code{uc_DegreeCentrality.pas} and
+\code{uc_ClosenessMeasures.pas} print nothing of the kind. So the routine
+decides, rather than the printer assuming.}
 }
 \value{
 An object of class \code{xucinet_output}.

@@ -4,7 +4,7 @@
 \alias{print.xucinet_output}
 \title{Print a routine result in UCINET's log format}
 \usage{
-\method{print}{xucinet_output}(x, digits = 3, sort = NULL, stats = TRUE, ...)
+\method{print}{xucinet_output}(x, digits = 3, sort = NULL, stats = NULL, ...)
 }
 \arguments{
 \item{x}{An \code{xucinet_output} object.}
@@ -16,7 +16,9 @@ printed table by, largest first. The default, \code{NULL}, keeps the original
 node order, which is what UCINET's datasets are stored in and what makes
 rows line up across measures.}
 
-\item{stats}{Show the descriptive-statistics block under a node table?}
+\item{stats}{Show the descriptive-statistics block under a node table? The
+default, \code{NULL}, follows UCINET: the block appears for the routines that
+print one and not for the routines that do not.}
 
 \item{...}{Unused.}
 }
