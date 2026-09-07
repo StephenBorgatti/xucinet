@@ -308,8 +308,31 @@ string stayed the same. Nothing in the test suite could have caught it; only the
 file names changing gave it away.
 
 **Fix:** bump the build number on any change that alters output, even a small
-one. A fourth component would do — 6.849.1 — if bumping the third is reserved
-for releases.
+one. Concretely, in `Source/Uci.dproj`, three places that have to move together:
+
+```xml
+<VerInfo_MinorVer>849</VerInfo_MinorVer>
+<VerInfo_Build>849</VerInfo_Build>
+<VerInfo_Keys>...FileVersion=6.849.0.849;...</VerInfo_Keys>
+```
+
+*Not* a fourth component, which was my first suggestion and is wrong. The
+displayed version is major-dot-**build**, not major-dot-minor:
+
+```pascal
+function majorbuild(fn:string): string;
+begin
+  s:= getversionstring(fn);
+  decodeversionstring(s,major,minor,release,build);
+  result:= major + '.' + build;
+end;
+```
+
+`VerInfo_Release` is 0 and unused, so a 6.849.1 would not appear in the About
+box or in the footer of any output log — the two places we actually read the
+version from. `VerInfo_Build` is the number that shows, so `VerInfo_Build` is
+the number to bump. `VerInfo_MinorVer` is kept equal to it by convention and
+should move with it.
 
 Until then, the manifests are honest about the build but not sufficient to
 identify it, and `Notes:` in each one carries the date and script as a partial

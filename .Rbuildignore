@@ -8,3 +8,4 @@
 ^docs$
 ^LICENSE\.md$
 ^CLAUDE\.md$
+^inst/goldens/.*/cli .*\.txt$
