@@ -1,0 +1,35 @@
+BETA REACH
+--------------------------------------------------------------------------------
+
+Network:                                g9_disc (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9_disc
+Beta:                                   0.8
+Centrality scores:                      g9m_breach_disc
+Type of data:                           Undirected
+Count matrix:                           g9_disc-brcount_reached
+
+Beta Reach Scores
+
+                    1 
+           Beta Reach 
+           ---------- 
+    1  n1  0.36363637 
+    2  n2  0.30909088 
+    3  n3  0.30909088 
+    4  n4  0.30909088 
+    5  n5  0.30909088 
+    6  n6  0.22181819 
+    7  n7  0.25454545 
+    8  n8  0.25454545 
+    9  n9  0.22181819 
+   10 n10  0.18181819 
+   11 n11  0.18181819 
+   12 n12  0.18181819 
+
+
+12 rows, 1 columns, 1 levels.
+
+
+--------------------------------------
+Running time: 00:00:01 seconds.
+Output generated: 07 Sep 26 20:26:22
+UCINET 6.849 Copyright (c) 2002-2026 Analytic Technologies

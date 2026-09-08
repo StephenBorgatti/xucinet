@@ -1,0 +1,39 @@
+2-MODE CENTRALITY
+--------------------------------------------------------------------------------
+
+Input dataset:                          g9_small2 (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9_small2
+Output ROW measures:                    g9m_2mode_small (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9m_2mode_small
+Output COLUMN measures:                 g9m_2mode_small_col (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9m_2mode_small_col
+
+2-Mode Centrality Measures for ROWS of g9_small2
+
+                    1           2           3           4           5 
+               Degree     2-Local   Closeness Betweenness Eigenvector 
+          ----------- ----------- ----------- ----------- ----------- 
+     1 r1  0.66666669  0.40000001  0.73333335  0.10416666 -0.46919033 
+     2 r2  0.33333334  0.20000000  0.57894737  0.00000000 -0.21462037 
+     3 r3  0.66666669  0.40000001  0.73333335  0.10416666 -0.46919033 
+     4 r4  0.33333334  0.20000000  0.57894737  0.00000000 -0.21462037 
+     5 r5  1.00000000  0.60000002  1.00000000  0.54166669 -0.68381071 
+
+5 rows, 5 columns, 1 levels.
+
+2-Mode Centrality Measures for COLUMNS of g9_small2
+
+                    1           2           3           4           5 
+               Degree     2-Local   Closeness Betweenness Eigenvector 
+          ----------- ----------- ----------- ----------- ----------- 
+     1 c1  0.60000002  0.40000001  0.69230771  0.37719297 -0.54177433 
+     2 c2  0.60000002  0.46666670  0.69230771  0.24561404 -0.64262056 
+     3 c3  0.60000002  0.40000001  0.69230771  0.37719297 -0.54177433 
+
+3 rows, 5 columns, 1 levels.
+
+
+Closeness and betweenness are calculated on binarized data. The other measures use valued data.
+The 2-local measure is the normalized sum of normalized degree of a node's alters.
+
+--------------------------------------
+Running time: 00:00:01 seconds.
+Output generated: 07 Sep 26 20:31:26
+UCINET 6.849 Copyright (c) 2002-2026 Analytic Technologies

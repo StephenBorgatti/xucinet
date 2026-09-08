@@ -1,0 +1,44 @@
+INDUCED CENTRALITY
+--------------------------------------------------------------------------------
+
+Input Network:                          g9_iso (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9_iso
+Output dataset:                         g9m_induced_iso (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9m_induced_iso
+
+Induced Centrality Measures
+
+                       1             2             3             4             5             6             7             8             9 
+                   W'in3       SumDist     Sum_iDist    SumOverlap  Transtriples Fragmentation SumBetweennes SumEdgeBetwee    SumRevDist 
+                                                                                                           s             n               
+           ------------- ------------- ------------- ------------- ------------- ------------- ------------- ------------- ------------- 
+     1  n1    8.00000000  -94.00000000    6.16666985    4.00000000    0.00000000   12.00000000   22.00000000   34.00000000   86.00000000 
+     2  n2   16.00000000  -16.00000000   11.33333778   12.00000000    6.00000000   22.00000000   34.00000000   56.00000000  164.00000000 
+     3  n3   10.00000000  -86.00000000    7.76667023   10.00000000    6.00000000   12.00000000   14.00000000   26.00000000   94.00000000 
+     4  n4   22.00000000   40.00000000   13.36667061   14.00000000    6.00000000   30.00000000   50.00000000   80.00000000  220.00000000 
+     5  n5   20.00000000   22.00000000   11.56666756    8.00000000    0.00000000   28.00000000   50.00000000   78.00000000  202.00000000 
+     6  n6   14.00000000  -24.00000000    9.50000191    4.00000000    0.00000000   22.00000000   42.00000000   64.00000000  156.00000000 
+     7  n7    6.00000000  -98.00000000    5.66666985    2.00000000    0.00000000   12.00000000   26.00000000   38.00000000   82.00000000 
+     8  n8    0.00000000 -180.00000000    1.80000496    0.00000000    0.00000000    0.00000000    0.00000000    0.00000000    0.00000000 
+     9  n9    0.00000000 -180.00000000    1.80000496    0.00000000    0.00000000    0.00000000    0.00000000    0.00000000    0.00000000 
+    10 n10    0.00000000 -180.00000000    1.80000496    0.00000000    0.00000000    0.00000000    0.00000000    0.00000000    0.00000000 
+
+10 rows, 9 columns, 1 levels.
+
+ 1. No. of pairs within 3 links of each other.
+ 2. Sum of all-pairs geodesic distances
+ 3. Sum of reciprocal distances
+ 4. Sum of no. of alters in common, across all pairs
+ 5. No. of transitive triples
+ 6. No. of pairs that cannot reach each other
+ 7. Sum of every node's betweenness
+ 8. Sum of every edge's betweenness
+ 9. No. of transitive triples
+10. Sum of reverse distances (N - D(i,j))
+
+Measures 2 and 6 are calculated in reverse: X(G-k) = X(G)
+
+Output dataset:                         g9m_induced_iso (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9m_induced_iso
+
+--------------------------------------
+Running time: 00:00:01 seconds.
+Output generated: 07 Sep 26 20:29:58
+UCINET 6.849 Copyright (c) 2002-2026 Analytic Technologies

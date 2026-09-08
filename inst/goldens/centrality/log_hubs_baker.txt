@@ -1,0 +1,71 @@
+HUBS AND AUTHORITIES
+--------------------------------------------------------------------------------
+
+Input network:                          baker_journals (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\baker_journals
+Output scores:                          g9m_hubs_baker (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9m_hubs_baker
+No. of dimensions:                      1
+
+
+
+                1     2 
+              Hub Autho 
+                   rity 
+            ----- ----- 
+    1  AMH  0.006 0.000 
+    2  ASW  0.166 0.064 
+    3 BJSW  0.042 0.009 
+    4  CAN  0.027 0.017 
+    5  CCQ  0.008 0.003 
+    6   CW  0.227 0.221 
+    7 CYSR  0.100 0.009 
+    8 CSWJ  0.125 0.017 
+    9   FR  0.046 0.041 
+   10 IJSW  0.006 0.000 
+   11 JGSW  0.044 0.006 
+   12  JSP  0.003 0.000 
+   13 JSWE  0.164 0.135 
+   14   PW  0.003 0.042 
+   15  SCW  0.363 0.280 
+   16  SSR  0.284 0.220 
+   17   SW  0.787 0.885 
+   18  SWG  0.093 0.040 
+   19 SWHC  0.079 0.096 
+   20 SWRA  0.123 0.063 
+
+
+20 rows, 2 columns, 1 levels.
+
+
+Singular values
+
+                 1 
+            Values 
+          -------- 
+        1 465.43954468 
+        2 205.69944763 
+        3 188.61607361 
+        4 128.38404846 
+        5 108.69252014 
+        6 106.85453033 
+        7 98.86679840 
+        8 91.72154236 
+        9 90.80410004 
+       10 76.57587433 
+       11 62.66880417 
+       12 39.25812149 
+       13 35.95500565 
+       14 34.81518173 
+       15 24.44886017 
+       16 21.71905899 
+       17 13.00080681 
+       18 8.74242020 
+       19 8.08060169 
+       20 5.99631119 
+
+20 rows, 1 columns, 1 levels.
+
+
+--------------------------------------
+Running time: 00:00:01 seconds.
+Output generated: 07 Sep 26 20:27:51
+UCINET 6.849 Copyright (c) 2002-2026 Analytic Technologies

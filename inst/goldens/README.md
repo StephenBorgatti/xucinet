@@ -207,11 +207,25 @@ the maximum betweenness in a bipartite graph on p. 256 as two branches:
 - `n_o > n_i`: `2(n_o-1)(n_i-1)`
 
 UCINET computes neither branch. `getmax()` in `uc_twomodecentrality.pas` uses one
-general formula, and the fixtures agree with it: for davis rows, own set 18 and
-other set 14, UCINET's denominator is 445 where the paper's second branch gives
-442. The first branch is fine -- it is the general formula at `s = 0`, which the
-test confirms algebraically for every shape up to 10 -- so only the `n_o > n_i`
-case is affected.
+general formula, and the fixtures agree with it.
+
+The `n_o <= n_i` branch is **correct**: it is the general formula at `s = 0`,
+which the test confirms algebraically for every shape up to 10.
+
+The `n_o > n_i` branch is **not**, and the failure is systematic rather than
+occasional. Over every shape up to 20 by 20 the two disagree on 136 of 361, and
+every disagreement has `n_o > n_i` and has UCINET larger. It gets worse as the
+modes get more lopsided: at 7 by 2 the paper gives 12 where UCINET gives 16.
+
+It does coincide sometimes, which is what makes it awkward. For davis, 18 rows
+by 14 columns, they differ -- 442 against 445 -- but for the 5 by 3 network in
+the second batch they agree, both giving 16. So a spot check on one dataset can
+easily pass.
+
+The direction of the error matters. UCINET's value is the larger, so the paper
+**understates** the maximum, and a betweenness score normalized by it can exceed
+1 -- which is impossible for a normalization and is the cleanest way to show the
+branch is wrong without re-deriving it.
 
 The paper says a proof "will be the subject of a separate paper", so UCINET is
 presumably carrying the corrected result. Anything in the 3e that quotes the

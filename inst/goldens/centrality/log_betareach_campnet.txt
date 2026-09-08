@@ -1,0 +1,67 @@
+BETA REACH
+--------------------------------------------------------------------------------
+
+Network:                                campnet (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\campnet
+Beta:                                   0.8
+Centrality scores:                      g9m_breach_campnet
+Type of data:                           Directed
+Count matrix:                           g9m_breach_campnet_reached
+
+Beta Reach Scores
+
+Matrix: Out Beta Reach
+
+                        1 
+               Beta Reach 
+               ---------- 
+    1   HOLLY  0.45882356 
+    2  BRAZEY  0.46380797 
+    3   CAROL  0.41552943 
+    4     PAM  0.38654113 
+    5     PAT  0.44000000 
+    6  JENNIE  0.41552943 
+    7 PAULINE  0.41552943 
+    8     ANN  0.38654113 
+    9 MICHAEL  0.42117646 
+   10    BILL  0.41929412 
+   11     LEE  0.46380800 
+   12     DON  0.42117646 
+   13    JOHN  0.71482354 
+   14   HARRY  0.42117646 
+   15    GERY  0.64517647 
+   16   STEVE  0.52387762 
+   17    BERT  0.52387762 
+   18    RUSS  0.57778823 
+
+Matrix: In Beta Reach
+
+                        1 
+               Beta Reach 
+               ---------- 
+    1   HOLLY  0.72960007 
+    2  BRAZEY  0.25835294 
+    3   CAROL  0.61960280 
+    4     PAM  0.72156245 
+    5     PAT  0.70979774 
+    6  JENNIE  0.62195575 
+    7 PAULINE  0.64313221 
+    8     ANN  0.61019105 
+    9 MICHAEL  0.68818825 
+   10    BILL  0.00000000 
+   11     LEE  0.30823532 
+   12     DON  0.68630594 
+   13    JOHN  0.00000000 
+   14   HARRY  0.63049418 
+   15    GERY  0.28705883 
+   16   STEVE  0.34117648 
+   17    BERT  0.32941175 
+   18    RUSS  0.32941175 
+
+
+18 rows, 1 columns, 2 levels.
+
+
+--------------------------------------
+Running time: 00:00:01 seconds.
+Output generated: 07 Sep 26 20:25:17
+UCINET 6.849 Copyright (c) 2002-2026 Analytic Technologies

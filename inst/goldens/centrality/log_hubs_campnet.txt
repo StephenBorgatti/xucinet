@@ -1,0 +1,67 @@
+HUBS AND AUTHORITIES
+--------------------------------------------------------------------------------
+
+Input network:                          campnet (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\campnet
+Output scores:                          g9m_hubs_campnet (C:\Users\sborg2\GitHub\xucinet\inst\goldens\centrality\g9m_hubs_campnet
+No. of dimensions:                      1
+
+
+
+                    1      2 
+                  Hub Author 
+                         ity 
+               ------ ------ 
+    1   HOLLY  -0.303 -0.251 
+    2  BRAZEY  -0.243 -0.059 
+    3   CAROL  -0.294 -0.122 
+    4     PAM  -0.167 -0.399 
+    5     PAT  -0.161 -0.326 
+    6  JENNIE  -0.251 -0.171 
+    7 PAULINE  -0.251 -0.269 
+    8     ANN  -0.249 -0.124 
+    9 MICHAEL  -0.221 -0.287 
+   10    BILL  -0.232  0.000 
+   11     LEE  -0.198 -0.211 
+   12     DON  -0.218 -0.297 
+   13    JOHN  -0.199  0.000 
+   14   HARRY  -0.247 -0.199 
+   15    GERY  -0.270 -0.123 
+   16   STEVE  -0.222 -0.348 
+   17    BERT  -0.248 -0.260 
+   18    RUSS  -0.217 -0.278 
+
+
+18 rows, 2 columns, 1 levels.
+
+
+Singular values
+
+                 1 
+            Values 
+          -------- 
+        1 3.37614560 
+        2 3.24250984 
+        3 3.04063773 
+        4 2.27996373 
+        5 1.96258330 
+        6 1.73113656 
+        7 1.53297007 
+        8 1.49021780 
+        9 1.21561992 
+       10 1.16097653 
+       11 1.00000000 
+       12 0.95624357 
+       13 0.92000794 
+       14 0.65812349 
+       15 0.37344250 
+       16 0.25640517 
+       17 0.00000000 
+       18 0.00000000 
+
+18 rows, 1 columns, 1 levels.
+
+
+--------------------------------------
+Running time: 00:00:01 seconds.
+Output generated: 07 Sep 26 20:27:05
+UCINET 6.849 Copyright (c) 2002-2026 Analytic Technologies
