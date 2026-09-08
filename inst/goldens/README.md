@@ -227,6 +227,45 @@ The direction of the error matters. UCINET's value is the larger, so the paper
 1 -- which is impossible for a normalization and is the cleanest way to show the
 branch is wrong without re-deriving it.
 
+**An explicit counterexample.** On 7 rows by 2 columns, put `a1` on both column
+nodes and split the other six three and three:
+
+```
+      b1  b2
+ a1    1   1
+ a2    1   0
+ a3    1   0
+ a4    1   0
+ a5    0   1
+ a6    0   1
+ a7    0   1
+```
+
+`a1` scores 16: nine pairs across the divide, three to each column node, one
+between the column nodes. The paper's maximum for `n_o = 7, n_i = 2` is 12, so
+normalizing by it gives 1.33 -- and a maximum that can be exceeded is not one.
+UCINET's `getmax(7,2)/2` is 16.
+
+That graph is the paper's own. Page 256 describes the extremal construction as
+"a node connected to all nodes in the opposite set, the remaining nodes are then
+connected pairwise so as to avoid concentrating ties on a single opposing node",
+which is exactly the above. The paper identifies the right graph and reports the
+wrong count for it, so it reads as a mis-derivation rather than a wrong idea.
+UCINET's `s` and `t` are that even spread: `s = (n_o-1) div n_i` on each node of
+the other set, with `t` of them taking one extra.
+
+**The case split was checked against the page**, not paraphrased: the branches
+are `2(n_o-1)(n_i-1)` for `n_o > n_i` and the three-term expression for
+`n_o <= n_i`, with `n_o` defined there as "the size of the node's own vertex
+set". The counterexample node is in the 7-set, so `n_o = 7 > n_i = 2` and the
+first branch is the one that applies.
+
+Building that construction across 21 shapes from 3x2 to 9x4 matches UCINET at
+all 21 and the paper at 13.
+
 The paper says a proof "will be the subject of a separate paper", so UCINET is
 presumably carrying the corrected result. Anything in the 3e that quotes the
 1997 branch should quote UCINET's formula instead.
+
+This is held here as a note rather than as a ledger entry: `inst/DIFFERENCES.md`
+records where xucinet and UCINET differ, and on this they agree.

@@ -192,3 +192,95 @@ bipartite <- function(m) {
   b[nr + seq_len(nc), seq_len(nr)] <- t(m)
   b
 }
+
+# Brandes again, returning edge betweenness beside node betweenness. The edge
+# figure is a by-product of the same dependency accumulation: the share of a
+# pair's shortest paths that uses edge (v, w) is exactly the term added to
+# delta[v] on w's behalf. Induced centrality is the only routine that needs it,
+# which is why it is separate from brandes() rather than always computed.
+brandes_edges <- function(a) {
+  n <- nrow(a)
+  cb <- numeric(n)
+  eb <- matrix(0, n, n)
+  nbr <- lapply(seq_len(n), function(i) which(a[i, ] > 0))
+  for (s in seq_len(n)) {
+    sigma <- numeric(n); sigma[s] <- 1
+    d <- rep(-1, n);     d[s] <- 0
+    pred <- vector("list", n)
+    seen <- integer(0)
+    queue <- s
+    while (length(queue)) {
+      v <- queue[1L]; queue <- queue[-1L]
+      seen <- c(seen, v)
+      for (w in nbr[[v]]) {
+        if (d[w] < 0) { d[w] <- d[v] + 1; queue <- c(queue, w) }
+        if (d[w] == d[v] + 1) {
+          sigma[w] <- sigma[w] + sigma[v]
+          pred[[w]] <- c(pred[[w]], v)
+        }
+      }
+    }
+    delta <- numeric(n)
+    for (w in rev(seen)) {
+      for (v in pred[[w]]) {
+        c_ <- (sigma[v] / sigma[w]) * (1 + delta[w])
+        delta[v] <- delta[v] + c_
+        eb[v, w] <- eb[v, w] + c_
+      }
+      if (w != s) cb[w] <- cb[w] + delta[w]
+    }
+  }
+  list(node = cb, edge = eb)
+}
+
+# The whole-network statistics induced centrality differences.
+#
+# From uc_ContributionCentrality.pas. Two things there are easy to get wrong and
+# both were got wrong before the source was read:
+#
+#   - unreachable distances are set to n, not skipped, so removing a cut vertex
+#     RAISES the distance total rather than lowering it;
+#   - `ignore` excludes a node from the sums but the node stays in the graph.
+#     buildnet() calls isolatenode(), which strips a node's edges and leaves it
+#     in place, so n is the same on both sides of the subtraction.
+#
+# The comparison is deliberately asymmetric: the full-graph figures are computed
+# once with nothing ignored, and each isolated-graph figure ignores the node
+# that was isolated.
+induced_stats <- function(a, ignore = 0L, k = 3L) {
+  n <- nrow(a)
+  d <- geodesics(a)
+  nmiss <- sum(is.na(d) & row(d) != col(d))
+  d[is.na(d)] <- n                     # bfsdistance's substitute for unreachable
+
+  keep <- if (ignore > 0L) setdiff(seq_len(n), ignore) else seq_len(n)
+  dk <- d[keep, keep, drop = FALSE]
+  off <- row(dk) != col(dk)
+
+  x <- (a > 0) * 1
+  a2 <- x %*% x
+  diag_paths <- x * a2                 # ordered i->j->k closed by i->k, i != k
+  transtriples <- sum(diag_paths) - sum(diag(x) * diag(a2))
+
+  # common alters, over unordered pairs, counted both ways round
+  outc <- x %*% t(x)
+  inc  <- t(x) %*% x
+  ov <- outc + inc
+  diag(ov) <- 0
+  sumoverlap <- sum(ov[upper.tri(ov)])
+
+  b <- brandes_edges(a)
+  ebk <- b$edge[keep, keep, drop = FALSE]
+
+  list(
+    within_k   = sum(dk[off] <= k),
+    sumdist    = sum(dk[off]),
+    sumrdist   = sum(1 / dk[off][dk[off] > 0]),
+    sumoverlap = sumoverlap,
+    transtriples = transtriples,
+    frag       = nmiss,
+    sumbet     = sum(b$node[keep]),
+    sumebet    = sum(ebk[row(ebk) != col(ebk)]),
+    sumrevdist = sum(n - dk[off])
+  )
+}

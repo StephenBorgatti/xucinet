@@ -381,6 +381,46 @@ disagrees with `mcent()` here too. Ledger entry 5.
 
 ---
 
+## 13. The Induced Centrality footnote list has ten entries for nine columns
+
+**bug, cosmetic** · **open — no xucinet impact** · found 7 September 2026
+
+`uc_ContributionCentrality.pas` writes nine columns and then ten footnotes:
+
+```pascal
+log.writeln(' 5. No. of transitive triples');
+...
+log.writeln(' 9. No. of transitive triples');
+```
+
+Item 9 repeats item 5 word for word, and there is no ninth column for it to
+describe, so from item 9 on the numbering no longer lines up with the table.
+The `cycles` field is computed in `calcmatrixmeasures` but never written to the
+output, which is probably where the stray line came from.
+
+**Fix:** delete the duplicate, or add the cycles column the footnote implies.
+
+---
+
+## 14. The Induced Centrality reversal note is missing its minus sign
+
+**bug, cosmetic** · **open — no xucinet impact** · found 7 September 2026
+
+```pascal
+log.writeln('Measures 2 and 6 are calculated in reverse: X(G-k) = X(G)');
+```
+
+It prints `X(G-k) = X(G)`, which says the two are equal. The code does
+`v1.sumdist - v.sumdist`, so it should read `X(G-k) - X(G)`.
+
+The sentence is doing real work -- SumDist and Fragmentation genuinely run the
+opposite way from the other seven columns, because for those two an increase is
+the damage -- so a reader who takes it literally gets the sign wrong.
+
+**Fix:** one character.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps
