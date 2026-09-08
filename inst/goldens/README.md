@@ -246,6 +246,10 @@ between the column nodes. The paper's maximum for `n_o = 7, n_i = 2` is 12, so
 normalizing by it gives 1.33 -- and a maximum that can be exceeded is not one.
 UCINET's `getmax(7,2)/2` is 16.
 
+16 is also the true maximum, not merely a value that beats 12: an exhaustive
+search of all 16,384 bipartite graphs on 7 by 2 finds nothing above it, and the
+graph attaining it is the one below up to relabelling.
+
 That graph is the paper's own. Page 256 describes the extremal construction as
 "a node connected to all nodes in the opposite set, the remaining nodes are then
 connected pairwise so as to avoid concentrating ties on a single opposing node",
