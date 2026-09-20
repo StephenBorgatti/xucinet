@@ -38,8 +38,6 @@ better). Overwrite the first three sections each session; append to the last two
   without them it fails on `\textfont 0 is undefined` in the DESCRIPTION URL.
   And `devtools::check()` passes `--no-manual` itself, so the PDF manual is only
   exercised by a plain `R CMD check --as-cran`.
-- `gh` is not installed here, so issues cannot be listed or created from this machine
-  and commits made here carry no `Refs #N`.
 - UCINET source for porting: `C:\Dev\ucinet\Source` (repo StephenBorgatti/ucinet) and
   `C:\Dev\tools\G2Tools` (repo StephenBorgatti/tools), both on Delphi 13 since 14 Sep. The
   Dropbox copies are stale. See `asnr2e/docs/plan.md`, "UCINET, Tools and NetDraw repositories".
