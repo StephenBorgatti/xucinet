@@ -15,7 +15,9 @@ new_xucinet_output(
   call = sys.call(-1),
   nodes_title = NULL,
   summary_title = NULL,
-  stats_block = FALSE
+  stats_block = FALSE,
+  fields = NULL,
+  preamble = NULL
 )
 }
 \arguments{
@@ -46,6 +48,14 @@ routine? It is not universal: \code{XFreeBet.pas} and \code{xcentrality.pas} pri
 \verb{DESCRIPTIVE STATISTICS FOR EACH MEASURE}, \code{uc_DegreeCentrality.pas} and
 \code{uc_ClosenessMeasures.pas} print nothing of the kind. So the routine
 decides, rather than the printer assuming.}
+
+\item{fields}{Optional named character vector of header lines UCINET prints
+with \code{log.putstr()} before the dataset name, such as \code{c("Method:" = "AVERAGE", "Type of Data:" = "Dissimilarities")}. Printed label-padded in
+the same way as \verb{Input dataset:}.}
+
+\item{preamble}{Optional character vector of preformatted lines printed after
+the header block and before any table, for output that is not a matrix,
+such as the text cluster diagram of Johnson's clustering.}
 }
 \value{
 An object of class \code{xucinet_output}.

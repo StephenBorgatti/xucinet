@@ -1,0 +1,7 @@
+UCINET: n/a
+Generated: not yet
+Notes: Chapter 6 goldens (non-metric MDS, correspondence analysis, Johnson's
+    hierarchical clustering). The batch has not been run. Until it is, every
+    test that calls skip_if_no_golden(<name>, "multivariate") skips, and this
+    family is exempt from the reference-build check. When the batch is run,
+    set UCINET: to the build that produced the fixtures. See README.md here.

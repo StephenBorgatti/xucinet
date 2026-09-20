@@ -1,5 +1,35 @@
 # Chapter 6 — design questions
 
+## Steve's answers (18 September 2026, Cowork session)
+
+Given by Steve before the routines were written that day; the recommendations
+below stand unless a row here says otherwise.
+
+| # | decision |
+|---|---|
+| 1 | As recommended: copy, cite commit, vendor sources in `inst/reference/borgworld/`; `MASS` to Imports; ggplot2 not taken. |
+| 2 | As recommended: matrix, `dist`, `xucinet`; `as_xucinet()` learns `dist`; `type` never inferred. |
+| 3 | As recommended: `stop()` with both values glossed. |
+| 4 | As recommended: UCINET's report layout, borgworld's numbers. One change in implementation: the Shepard data live in `res$shepard`, not `res$matrices$Shepard`, so the report does not print one row per pair. |
+| 4c | **UCINET's text cluster diagram** (`format_uci_dendrogram()` in `R/output.R`, ported from `Udendro.pas`). |
+| 5 | As recommended: base graphics via a shared `plot_coords()`, `asp = 1`; D13 narrowed to network plots. |
+| 6 | As recommended. Helpers `expect_procrustes_equal()`, `expect_equal_up_to_sign()`, `expect_same_partition()` in `tests/testthat/helper-goldens.R`. |
+| 7 | As recommended: entries 6–11 written, plus 12 (equal axis scaling). |
+| 8 | **Skip Gamma, retain Modularity** ("community detection and clustering coincide when the data consist of a graph"); Corr and Silhouette also kept. Modularity follows UCINET's `calcmoca` formula (Newman's Q) rather than borgworld's loop. |
+| 9 | **Off-diagonal maximum everywhere.** `xmds()` on similarity input does not reproduce `bclassicalmds`/`bnonmetricmds` when the diagonal holds the maximum. |
+| 10 | As recommended: configuration by default; `xshepard()` separate. |
+| 11 | As recommended: no row ≥ column limit; NA to the overall mean; zero margins dropped and named; full-spectrum inertia. |
+| 12 | As recommended: `k` adds a `Cluster` column. |
+| 13 | As recommended: `x` for proximity input; `type`, `dim`, `k`, `method`, `labels` added to the D4 vocabulary. `save =` deferred: no routine in the package has it yet, and it should land for all of them at once. |
+
+Found while porting (not in the questions): `bcophenetic()` indexes the `dist`
+object returned by `cophenetic()` with `lower.tri()` of its matrix form, so it
+correlates the wrong cells and reports 0.08 for cities where the value is 0.71.
+The port computes it on matching lower triangles; borgworld should be fixed.
+
+---
+
+
 *Multivariate techniques: MDS (6.2), correspondence analysis (6.3), Johnson's
 hierarchical clustering (6.4). Written 8 September 2026, before any code, on the
 model of the chapter 9 centrality pilot. Every question carries a recommendation;
@@ -48,6 +78,8 @@ drags with it; name any dependency xucinet does not have.
 **Recommendation — copy, with provenance in a comment.** Each ported block gets
 a header comment naming the borgworld function, file and commit, in the same
 spirit as the Delphi citations in `R/xdegree.R`:
+
+** yes, copy/paraphrase code. do not rely borgworld existing.
 
 ```r
 # Ported from borgworld::bclassicalmds() (R/b_classicalmds.R, commit d9ca8bc,
@@ -266,6 +298,8 @@ solution, which is deterministic, so `isoMDS` never calls the RNG. The port is
 reproducible without `set.seed()` and the test needs no seed. If you *want* a
 random-start option later it would be a new argument, not a fidelity issue.
 
+** good
+
 **Fact worth flagging: `bnonmetricmds` does not draw a Shepard plot.** Its
 `plot = TRUE` draws the **configuration scatter** — points, labels, grid, with
 `Stress = 0.123 - Good fit` in the `sub` line. `shepard.bnmds()` is a separate
@@ -333,6 +367,9 @@ Three places where UCINET and borgworld differ on the same computation:
   into one level and UCINET's table has one row per *distinct level*. borgworld's
   has one column per *merge step*. On data with ties — which binary network data
   always has — the two tables have different widths.
+
+** we should follow standard practice. if ucinet disagrees, we will fix ucinet.
+
 - **Tie-breaking.** `GetClosestPair` scans `i = 2..n` outer, `j = 1..i-1` inner
   over the still-active list in original index order and replaces only on a strict
   `>` / `<`, so among tied pairs the first one reached wins. `hclust` has its own
@@ -404,6 +441,8 @@ in CA everywhere else, it is what `ca::ca` and FactoMineR report, and a share of
 Σd has no interpretation. Print both columns and let the reader see the
 relationship: `Singular value`, `Inertia`, `Percent`, `Cumulative`. Ledger entry.
 
+** I agree. another instance where ucinet needs to be changed
+
 **Proposed `xucinet_output`:**
 
 | slot | contents |
@@ -443,6 +482,8 @@ is the preferred path and there is a complete base-R fallback behind
 
 **Recommendation — base graphics for chapter 6, and D13 should be narrowed.**
 
+** agreed
+
 `xplot()` as specced is a *network* drawing function: nodes, edges, layouts,
 spring embedding. None of chapter 6 draws a network. An MDS map, a CA biplot and
 a dendrogram are ordinary statistical graphics that happen to have labels, and
@@ -467,6 +508,8 @@ the wrong tool. Recommend:
 4. **Narrow SPEC D13** to say: `xplot()` is for networks and is ggraph-backed
    when it lands; measure and scaling plots are base graphics via
    `plot_coords()`. Otherwise D13 reads as a promise that chapter 6 breaks.
+
+** yes
 
 **Non-interactive safety.** Base graphics need no guard — `plot()` writes to
 whatever device is current, and knitr supplies one. Three things do need doing:
@@ -576,6 +619,7 @@ method. Test instead:
   known 2-D configuration, `xmds` must recover that configuration to 1e-10 after
   Procrustes, and the third eigenvalue must be ~0. That is the "known exact
   solution" test, and it is stronger than any fixture.
+** yes
 
 **`xcorrespondence`** — scores up to sign, inertias at 1e-6.
 
@@ -689,6 +733,8 @@ tested against UCINET's own; `Gamma` should not ship under that name until it
 either is Hubert's Γ or is renamed. Alternatively defer MOCA entirely to its own
 `xmoca()` and have `xhclust()` not print it — say which you prefer.
 
+** accept recommendation
+
 ## 9. The similarity→dissimilarity conversion is inconsistent, and it matters
 
 `bclassicalmds` and `bnonmetricmds` use `max(x)` over the **whole matrix**;
@@ -707,6 +753,8 @@ off-diagonal everywhere, document it in one place, and record the change from
 from borgworld's numbers for similarity input to the two MDS methods, so it needs
 your explicit yes — it means `xmds(cor_mat, "s")` will not reproduce
 `bclassicalmds(cor_mat, "s")`.
+
+** yes
 
 (For dissimilarity input, and for `cities`, nothing changes.)
 
@@ -798,19 +846,19 @@ down, and leaving them unwritten means re-arguing them in chapter 7.
 
 | # | question | my recommendation |
 |---|---|---|
-| 1 | port or depend | copy, cite commit, vendor sources; `MASS` → Imports; drop ggplot2 |
-| 2 | input types | matrix, `dist`, `xucinet`; teach `as_xucinet()` about `dist`; never infer `type` |
-| 3 | missing `type` | `stop()` with both values glossed |
-| 4 | output object | tables as laid out above; UCINET's report layout, borgworld's numbers |
-| 5 | plotting | base graphics via a shared `plot_coords()`; add `asp = 1`; narrow D13 |
-| 6 | acceptance | borgworld at 1e-12, UCINET at 1e-6, Procrustes at 0.05 RSS, stress one-sided at 0.02 |
-| 7 | ledger | six entries, 6–11 |
-| 8 | `bmoca` | port, but report `n_clusters`/`Corr`/`Silhouette` only |
-| 9 | sim→dissim `max` | off-diagonal everywhere — **changes borgworld's numbers, needs your yes** |
-| 10 | Shepard plot | configuration by default, `xshepard()` for the diagnostic |
-| 11 | CA input rules | no row≥col limit; mean-substitute `NA`; drop zero margins; **fix the truncated-inertia bug** |
-| 12 | `k =` | adds a `Cluster` column, does not change the table |
-| 13 | SPEC addendum | `x` for proximity input; add `type`/`dim`/`k`/`method`/`labels` to D4; add `save =` |
+| 1 | port or depend | copy, cite commit, vendor sources; `MASS` → Imports; drop ggplot2 | steve:agree
+| 2 | input types | matrix, `dist`, `xucinet`; teach `as_xucinet()` about `dist`; never infer `type` | steve:agree
+| 3 | missing `type` | `stop()` with both values glossed | steve:agree
+| 4 | output object | tables as laid out above; UCINET's report layout, borgworld's numbers | steve:agree
+| 5 | plotting | base graphics via a shared `plot_coords()`; add `asp = 1`; narrow D13 | steve:agree
+| 6 | acceptance | borgworld at 1e-12, UCINET at 1e-6, Procrustes at 0.05 RSS, stress one-sided at 0.02 | steve:agree
+| 7 | ledger | six entries, 6–11 | steve:agree
+| 8 | `bmoca` | port, but report `n_clusters`/`Corr`/`Silhouette` only | steve:agree
+| 9 | sim→dissim `max` | off-diagonal everywhere — **changes borgworld's numbers, needs your yes** | steve:agree
+| 10 | Shepard plot | configuration by default, `xshepard()` for the diagnostic | steve:agree
+| 11 | CA input rules | no row≥col limit; mean-substitute `NA`; drop zero margins; **fix the truncated-inertia bug** | steve:agree
+| 12 | `k =` | adds a `Cluster` column, does not change the table | steve:agree
+| 13 | SPEC addendum | `x` for proximity input; add `type`/`dim`/`k`/`method`/`labels` to D4; add `save =` | steve:agree
 
 The ones that actually block coding are **9** (it changes numbers), **11** (it
 changes numbers), **4c** (which text dendrogram) and **8** (whether MOCA ships).

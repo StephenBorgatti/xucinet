@@ -18,10 +18,13 @@ Roxygen: list(markdown = TRUE)
 Depends:
     R (>= 4.1)
 Imports:
+    graphics,
+    MASS,
     stats,
     tools,
     utils
 Suggests:
+    cluster,
     igraph,
     network,
     sna,

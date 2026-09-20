@@ -189,6 +189,13 @@ format_number <- function(v, digits = 3) format_values(v, digits)
 #'   `DESCRIPTIVE STATISTICS FOR EACH MEASURE`, `uc_DegreeCentrality.pas` and
 #'   `uc_ClosenessMeasures.pas` print nothing of the kind. So the routine
 #'   decides, rather than the printer assuming.
+#' @param fields Optional named character vector of header lines UCINET prints
+#'   with `log.putstr()` before the dataset name, such as `c("Method:" =
+#'   "AVERAGE", "Type of Data:" = "Dissimilarities")`. Printed label-padded in
+#'   the same way as `Input dataset:`.
+#' @param preamble Optional character vector of preformatted lines printed after
+#'   the header block and before any table, for output that is not a matrix,
+#'   such as the text cluster diagram of Johnson's clustering.
 #' @return An object of class `xucinet_output`.
 #' @keywords internal
 #' @export
@@ -196,12 +203,13 @@ new_xucinet_output <- function(routine, net, nodes = NULL, summary = NULL,
                                matrices = NULL, assumptions = character(),
                                subclass = NULL, call = sys.call(-1),
                                nodes_title = NULL, summary_title = NULL,
-                               stats_block = FALSE) {
+                               stats_block = FALSE, fields = NULL,
+                               preamble = NULL) {
   structure(
     list(routine = routine, dataset = net$title, nodes = nodes, summary = summary,
          matrices = matrices, assumptions = assumptions, call = call,
          nodes_title = nodes_title, summary_title = summary_title,
-         stats_block = stats_block),
+         stats_block = stats_block, fields = fields, preamble = preamble),
     class = c(subclass, "xucinet_output")
   )
 }
@@ -242,9 +250,17 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = NULL, ...) 
   cat("\n")
   # UCINET pads its header labels to column 40 before the value.
   field <- function(label, value) cat(formatC(label, width = -40), value, "\n", sep = "")
+  # Routine-specific header lines come first, as UCINET's log.putstr() calls
+  # precede log.dataset() (XCluster.pas prints Method: and Type of Data: before
+  # the dataset name).
+  for (nm in names(x$fields)) field(nm, x$fields[[nm]])
   field("Input dataset:", x$dataset)
   for (a in x$assumptions) field("Note:", a)
   cat("\n\n\n")
+  if (length(x$preamble)) {
+    cat(x$preamble, sep = "\n")
+    cat("\n")
+  }
 
   # UCINET prints the whole-network block BEFORE a node table only when there is
   # no node table - density is its own report. Where a routine has both, as
@@ -322,4 +338,103 @@ as.data.frame.xucinet_output <- function(x, ...) {
   if (!is.null(x$nodes)) return(x$nodes)
   if (is.data.frame(x$summary)) return(x$summary)
   as.data.frame(x$summary, stringsAsFactors = FALSE, check.names = FALSE)
+}
+
+# ---- the text cluster diagram -----------------------------------------------
+#
+# UCINET's Johnson's Hierarchical Clustering report draws its cluster diagram
+# with Text_Dendrogram in Tools/G1Tools/Udendro.pas (GetBestPerm for the item
+# order, dendroguts for the rows), called from XCluster.pas with flip = false,
+# label "Level" and character "X". This reproduces it line for line:
+#
+#   HIERARCHICAL CLUSTERING
+#
+#              M       C
+#              i S     h
+#              a e   B i
+#              m a D o c
+#              i t C s a
+#              . . . . .
+#   Level      3 8 2 1 4
+#   -----      - - - - -
+#     206      . . . XXX .
+#     ...
+#
+# `part` is the item-by-level partition matrix (integer cluster ids), `levels`
+# the level labels already formatted to UCINET's decimals (see hclust_decimals),
+# `ids` the pre-renumbering cluster ids GetBestPerm sorts on (in UCINET these
+# are Johnson2's own, which are the largest original index in each cluster),
+# and `labels` the item labels.
+
+# GetBestPerm: a shell sort of the items on their cluster ids, coarsest level
+# first (branchesup = TRUE), ties broken by the next finer level. Ported as a
+# comparison plus order() rather than as the shell sort, which gives the same
+# permutation because the comparison is a total order on distinct rows and
+# GetBestPerm's swap-on-strict-less keeps original order among equal rows, as
+# a stable sort does.
+uci_dendrogram_order <- function(ids) {
+  keys <- lapply(rev(seq_len(ncol(ids))), function(k) ids[, k])
+  do.call(order, c(keys, list(seq_len(nrow(ids)))))
+}
+
+format_uci_dendrogram <- function(part, levels, ids, labels,
+                                  title = "HIERARCHICAL CLUSTERING",
+                                  lab = "Level", ch = "X") {
+  n <- nrow(part); npart <- ncol(part)
+  bp <- uci_dendrogram_order(ids)
+  # clen(): labels are cut to 11 characters in the diagram, whatever the
+  # dataset holds.
+  cl <- pmin(nchar(labels), 11L)
+  rw <- max(nchar(lab), max(nchar(levels)))
+  lines <- character()
+  if (nzchar(title)) lines <- c(lines, toupper(title), "")
+  stub <- strrep(" ", rw + 2L)
+  # Labels written downwards, bottom-aligned, each character right-aligned in
+  # a two-character column.
+  maxclen <- max(cl[bp])
+  for (k in seq(maxclen, 1L)) {
+    cells <- vapply(bp, function(j) {
+      if (cl[j] >= k) {
+        s <- substr(labels[j], 1L, cl[j])
+        formatC(substr(s, cl[j] - k + 1L, cl[j] - k + 1L), width = 2L)
+      } else "  "
+    }, character(1))
+    lines <- c(lines, paste0(stub, paste(cells, collapse = "")))
+  }
+  lines <- c(lines, "")
+  # The item numbers, one digit per row, units row carrying the level label.
+  num <- formatC(bp, width = 4L)
+  digit_row <- function(pos, prefix = "") {
+    paste0(formatC(prefix, width = rw), "  ",
+           paste(formatC(substr(num, pos, pos), width = 2L), collapse = ""))
+  }
+  if (n > 999) lines <- c(lines, digit_row(1L))
+  if (n > 99)  lines <- c(lines, digit_row(2L))
+  if (n > 9)   lines <- c(lines, digit_row(3L))
+  lines <- c(lines, digit_row(4L, lab))
+  lines <- c(lines, paste0(strrep("-", rw), "  ", paste(rep(" -", n), collapse = "")))
+  # dendroguts, rows in level order (flip = false).
+  for (it in seq_len(npart)) {
+    cc <- rep(" ", n); ss <- rep(" ", n)
+    lastp <- 0L; cc[n] <- "."
+    for (j in seq_len(n)) {
+      p <- part[bp[j], it]
+      if (identical(p, lastp)) {
+        cc[j] <- ch
+        if (j > 1L) { ss[j - 1L] <- ch; cc[j - 1L] <- ch }
+      } else {
+        cc[j] <- "."
+        ss[j] <- " "
+      }
+      lastp <- p
+    }
+    body <- paste0(paste0(cc[-n], ss[-n], collapse = ""), cc[n])
+    lines <- c(lines, paste0(formatC(levels[it], width = rw), "   ", body))
+  }
+  lines
+}
+
+cat_uci_dendrogram <- function(...) {
+  cat(format_uci_dendrogram(...), sep = "\n")
+  invisible(NULL)
 }

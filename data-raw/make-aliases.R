@@ -73,7 +73,10 @@ notes <- c(
   xNegativeWeightedCentrality = paste(
     "Negative-tie degree is xdegree() on the negative-tie matrix, e.g.",
     "xdegree(net, relation = \"negative\"). For the negative-tie centrality the",
-    "3e discusses, see xpncentrality().")
+    "3e discusses, see xpncentrality()."),
+  xMDS = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xmds.",
+  xHierarchicalClustering = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xhclust.",
+  xHierarchicalCluster = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xhclust."
 )
 
 map <- unlist(pairs)

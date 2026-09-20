@@ -86,6 +86,21 @@ reference:
   - xhubsauthorities
   - xinduced
 
+- title: Tools | Scaling/Decomposition
+  desc: >
+    Chapter 6. Multidimensional scaling and correspondence analysis of a
+    proximity matrix or a table; `type=` says whether large values mean close
+    or far, and has no default.
+  contents:
+  - xmds
+  - xshepard
+  - xcorrespondence
+
+- title: Tools | Cluster Analysis
+  desc: Chapter 6. Johnson's hierarchical clustering, reported as UCINET reports it.
+  contents:
+  - xhclust
+
 - title: Datasets
   desc: >
     The datasets the book uses, under their lowercase names. Node attributes are

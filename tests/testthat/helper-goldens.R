@@ -145,3 +145,62 @@ expect_differs_from_ucinet <- function(issue, fixed_in = NA_character_) {
   testthat::succeed()
   invisible(TRUE)
 }
+
+# ---- chapter 6: comparisons that are invariant to what MDS and CA leave free --
+#
+# An MDS configuration is determined only up to rotation, reflection,
+# translation and (between programs) scale; a correspondence-analysis axis only
+# up to sign; a partition only up to how its clusters are numbered. The
+# chapter 6 tests compare under those equivalences rather than cell by cell.
+
+# Orthogonal Procrustes: centre both, scale a to b's size, rotate/reflect a
+# onto b, and return the residual sum of squares as a proportion of b's total
+# sum of squares. 0 means the same shape.
+procrustes_rss <- function(a, b) {
+  a <- as.matrix(a); b <- as.matrix(b)
+  stopifnot(identical(dim(a), dim(b)))
+  ac <- scale(a, center = TRUE, scale = FALSE)
+  bc <- scale(b, center = TRUE, scale = FALSE)
+  ssb <- sum(bc^2)
+  if (ssb == 0) return(if (sum(ac^2) == 0) 0 else Inf)
+  s <- svd(t(bc) %*% ac)
+  rot <- s$v %*% t(s$u)
+  ar <- ac %*% rot
+  k <- sum(diag(t(ar) %*% bc)) / sum(ar^2)     # optimal isotropic scaling
+  sum((k * ar - bc)^2) / ssb
+}
+
+expect_procrustes_equal <- function(a, b, tolerance = 0.05, info = NULL) {
+  rss <- procrustes_rss(a, b)
+  testthat::expect_true(rss <= tolerance,
+                        info = paste0(if (!is.null(info)) paste0(info, ": "),
+                                      "Procrustes residual ", format(rss, digits = 3),
+                                      " exceeds ", tolerance))
+  invisible(rss)
+}
+
+# Column by column, because axis 1 can match while axis 2 is flipped.
+expect_equal_up_to_sign <- function(a, b, tolerance = 1e-6, info = NULL) {
+  a <- as.matrix(a); b <- as.matrix(b)
+  stopifnot(identical(dim(a), dim(b)))
+  bad <- integer(0)
+  for (j in seq_len(ncol(a))) {
+    same <- isTRUE(all.equal(unname(a[, j]), unname(b[, j]), tolerance = tolerance))
+    flip <- isTRUE(all.equal(unname(a[, j]), -unname(b[, j]), tolerance = tolerance))
+    if (!(same || flip)) bad <- c(bad, j)
+  }
+  # One expectation for the whole matrix, not one per column, so that
+  # expect_failure() sees a single failure however many columns differ.
+  testthat::expect_true(length(bad) == 0,
+                        info = paste0(info, if (!is.null(info)) ": ", "columns ",
+                                      paste(bad, collapse = ", "),
+                                      " differ beyond sign"))
+  invisible(TRUE)
+}
+
+# Two partitions are the same if they put the same pairs together, whatever
+# the cluster numbers are.
+expect_same_partition <- function(a, b, info = NULL) {
+  a <- unname(as.vector(a)); b <- unname(as.vector(b))
+  testthat::expect_identical(outer(a, a, "=="), outer(b, b, "=="), info = info)
+}

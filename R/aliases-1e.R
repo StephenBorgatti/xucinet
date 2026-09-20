@@ -140,7 +140,10 @@ xucinet_1e_map <- c(
 # Extra guidance for aliases whose replacement is not a simple rename.
 xucinet_1e_notes <- c(
   xNegativeDegreeCentrality = "Negative-tie degree is xdegree() on the negative-tie matrix, e.g. xdegree(net, relation = \"negative\"). For the negative-tie centrality the 3e discusses, see xpncentrality().",
-  xNegativeWeightedCentrality = "Negative-tie degree is xdegree() on the negative-tie matrix, e.g. xdegree(net, relation = \"negative\"). For the negative-tie centrality the 3e discusses, see xpncentrality()."
+  xNegativeWeightedCentrality = "Negative-tie degree is xdegree() on the negative-tie matrix, e.g. xdegree(net, relation = \"negative\"). For the negative-tie centrality the 3e discusses, see xpncentrality().",
+  xMDS = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xmds.",
+  xHierarchicalClustering = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xhclust.",
+  xHierarchicalCluster = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xhclust."
 )
 
 #' The 1e alias table

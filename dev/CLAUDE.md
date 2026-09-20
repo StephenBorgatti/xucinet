@@ -70,6 +70,15 @@ names and signatures is the crosswalk spreadsheet in the book repo (`asnr2e/cros
   would not do. `igraph`, `sna`, `network`, `jsonlite`, `readxl` stay in `Suggests` and are
   loaded with `requireNamespace()`.
 
+## UCINET source
+
+The reference UCINET code is the git working copy at `C:\Dev\ucinet\Source` (repository
+StephenBorgatti/ucinet, private) with the shared units in `C:\Dev\tools` (G1Tools, G2Tools,
+G3Tools, Alg, Adox; repository StephenBorgatti/tools). Both build under Delphi 13 since 14 Sep
+2026. Do not read `Dropbox\code\Ucinet` or `Dropbox\code\Tools`; they are stale copies. When
+porting a routine, cite the unit, procedure and the commit of the ucinet or tools repo it was
+read from, as the Delphi units vendored in `inst/reference/delphi/` do.
+
 ## Book coupling
 
 The book chapters (Word files in Dropbox, not in git) reference these functions by name.

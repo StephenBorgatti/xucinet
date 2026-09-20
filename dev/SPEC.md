@@ -447,3 +447,51 @@ normalization follow UCINET, pinned by goldens rather than argued from theory; a
 chapter 9 routines are implemented natively, with igraph consulted only as a cross-check,
 since D7 names closeness, betweenness normalization and eigenvector scaling as danger zones
 and PN, induced, beta-reach and reach-betweenness have no igraph equivalent at all.
+
+---
+
+## Addendum, 18 September 2026 — proximity routines (chapter 6)
+
+Steve's decisions for `xmds()`, `xcorrespondence()` and `xhclust()`, taken in a
+Cowork session from `dev/design/ch06-questions.md` (answers recorded at the top
+of that file), before the routines were written the same day.
+
+1. **`x`, not `net`, for proximity input.** D4 says the first argument is `net`.
+   Routines whose input is a proximity matrix rather than a network — a
+   distance matrix, a correlation matrix, a table for correspondence analysis —
+   name it `x`, because the thing passed in is often not a network at all.
+   Everything else about D4 holds, including the `xnet(x, substitute(x))` first
+   line, which keeps the caller's expression as the dataset title.
+
+2. **Vocabulary added to D4.** `type` (`"similarities"` / `"dissimilarities"`,
+   required where it appears, never inferred), `dim` (number of dimensions),
+   `k` (number of clusters), `method` (the algorithm variant: linkage, or
+   classical vs non-metric), `labels` (point labels for a plot). Later routines
+   reuse these rather than inventing `nclusters`, `linkage` or `dims`.
+
+3. **Source is borgworld, report is UCINET's.** The numbers come from Steve's
+   borgworld code (vendored in `inst/reference/borgworld/` with the commit each
+   file was copied from); the printed report follows UCINET's log, including
+   the text cluster diagram ported from `Udendro.pas`. Where the two compute
+   different things the choice is recorded in `inst/DIFFERENCES.md` (entries
+   6–12).
+
+4. **One conversion rule.** Similarities become dissimilarities as `max - x`
+   with the maximum over the off-diagonal cells, in every routine.
+
+5. **D13 narrowed.** `xplot()` is for networks (nodes, edges, layouts) and is
+   ggraph-backed when it lands. Measure and scaling plots — MDS maps, CA maps,
+   dendrograms, Shepard diagrams — are base graphics drawn through the shared
+   `plot_coords()` in `R/proximity-internals.R`, so they need no dependency and
+   render identically under Rscript, RStudio and knitr. `plot = TRUE` returns
+   the result invisibly.
+
+6. **Output object additions.** `new_xucinet_output()` gains `fields` (named
+   header lines printed before `Input dataset:`, for UCINET's `Method:` and
+   `Type of Data:` lines) and `preamble` (preformatted lines printed after the
+   header, for the cluster diagram). Anything with one row per pair, such as
+   Shepard data, lives in its own slot (`res$shepard`) rather than `$matrices`,
+   which `print()` renders in full.
+
+7. **`save =` deferred.** D4 lists it, no routine has it yet; it lands for every
+   routine at once rather than starting with chapter 6.

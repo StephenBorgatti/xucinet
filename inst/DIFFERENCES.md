@@ -165,3 +165,113 @@ follow the dialog, which is the documented measure.
 
 *UCINET catch-up: rename the column to Farness, or divide into it. Either fixes
 the direction; the name and the number currently disagree.*
+
+---
+
+## 6. Metric MDS is not offered
+
+**Status:** deliberate omission. Decided 8 September 2026; recorded 18 September 2026.
+
+UCINET's *Tools | Scaling/Decomposition* has three MDS items: *Classic MDS*,
+*Metric MDS* and *Non-metric MDS*. Its Metric MDS minimizes stress by a per-point
+Nelder-Mead simplex (`metricmds` in `Tools/G1Tools/ummds.pas`) after rescaling
+the data to [0, 1] and adding a triangle-inequality constant. `xmds()` offers
+`classical` and `nonmetric` only. Classical scaling answers the metric question
+in closed form and non-metric scaling answers the ordinal one; reproducing
+UCINET's particular simplex would reproduce an implementation rather than a
+method. A reader who needs UCINET's metric MDS numbers runs UCINET.
+
+Note also that UCINET's *Classic MDS* preprocesses the matrix (rescaling and the
+triangle constant, `preprocess` in `Xmmds.pas`) before Torgerson scaling, so its
+coordinates differ from `xmds(method = "classical")`, which is `stats::cmdscale()`
+on the dissimilarities as given. There is no golden for classical MDS for this
+reason; it is tested against `cmdscale()`, against a known exact configuration
+and against borgworld.
+
+## 7. `type =` is required
+
+**Status:** deliberate difference. Decided 8 September 2026.
+
+UCINET's dialogs default the *Similarities / Dissimilarities* control, and not
+consistently: Metric MDS to *Similarities*, Johnson's menu form to
+*Dissimilarities*, the `hiclus()` command to *similarities*. `xmds()` and
+`xhclust()` have no default and stop with a message naming both values. A
+matrix of 0/1 ties, a matrix of geodesic distances and a matrix of
+co-membership counts have the same shape, and a guess that is wrong one time in
+ten comes back as a plausible map that is inside out.
+
+## 8. MDS orientation and correspondence-analysis axis signs
+
+**Status:** not a difference in results, but the most likely "the numbers don't
+match" question in chapter 6. Recorded 18 September 2026.
+
+An MDS configuration is determined only up to rotation, reflection and
+translation; a correspondence-analysis axis only up to sign. UCINET, borgworld
+and xucinet each fix them differently: UCINET's `fixnegatives` and
+`forceagreement` in `Xcorresp.pas` flip score matrices by rule, `svd()` and
+`cmdscale()` return whatever LAPACK returns. A map that looks rotated or
+mirror-imaged against UCINET's is the same map. The goldens are compared after
+Procrustes alignment (MDS) or column by column up to sign (CA), and both help
+pages say so.
+
+## 9. Stress denominators
+
+**Status:** deliberate difference. Decided 18 September 2026 (design question 4a).
+
+`xmds()` reports Kruskal's stress formula 1 with the sum of squared *data* in
+the denominator, for both methods, so that a classical and a non-metric
+solution of the same matrix are on one scale. UCINET's `stressform1` in
+`ummds.pas` divides by the sum of squared *configuration distances*. The two
+agree only at perfect fit. UCINET's non-metric routine is MINISSA
+(Guttman-Lingoes), not Kruskal's algorithm, so its stress is also reached by a
+different route; the golden test accepts our stress if it is within 0.02 of
+UCINET's or lower.
+
+## 10. Correspondence analysis reports inertia, not a share of singular values
+
+**Status:** deliberate difference in the printed table; the scores agree.
+Decided 18 September 2026 (design question 4d).
+
+UCINET's table is headed `SINGULAR VALUES` and its `PERCENT` column is each
+singular value's share of the *sum of singular values*. `xcorrespondence()`
+prints the singular value, its square (the principal inertia) and the share of
+*total inertia*, which is what "variance explained" means in correspondence
+analysis elsewhere. To compare with UCINET's `VALUE` column, read our
+`Singular value` column; the `PERCENT` columns are not comparable.
+
+UCINET also refuses a table with more columns than rows ("run Data|Transpose
+first"). That is an implementation limit, not a property of the method;
+`xcorrespondence()` accepts either shape.
+
+## 11. Johnson's clustering: level collapsing and tie-breaking
+
+**Status:** (a) matched; (b) documented difference. Recorded 18 September 2026.
+
+(a) UCINET's `Johnson2` (`Tools/G1Tools/Uclus.pas`) records a new partition
+only when the merge distance changes, so tied merges collapse into one level.
+`xhclust()` does the same, which is why its partition table can have fewer
+than `n - 1` columns and why it differs from `hclust()`'s one-per-step view
+(and from borgworld's `bhiclus`, which follows `hclust()`).
+
+(b) Where merge distances tie, `GetClosestPair` takes the first tied pair in
+original index order and `stats::hclust()` uses its own rule. The merge
+*levels* are the same either way; the *partitions* at a tied level can differ,
+and both are correct. Datasets on which this happens are listed here as the
+goldens find them: none yet (the batch has not been run).
+
+Two smaller notes. `Corr` in the cluster-adequacy table is signed so that
+higher is better for both input types; for dissimilarity input UCINET prints
+the raw correlation, which is the same number with the opposite sign. And
+UCINET's table carries `Q`, `Q-prime` and `E-I` beside `Corr`; ours carries
+`Modularity` (UCINET's `Q`, same formula) and `Silhouette`, and omits
+`Q-prime` and `E-I` until the community-detection routines define them once.
+
+## 12. Plots use equal axis scaling
+
+**Status:** a difference from borgworld, not from UCINET. Decided 18 September
+2026 (design question 5).
+
+The MDS and correspondence-analysis maps are drawn with `asp = 1`. In a scaling
+plot the distances are the result, so unequal axis scaling is a wrong picture,
+not a style choice; UCINET's scatterplot viewer sets uniform axes for the same
+reason. borgworld's `bclassicalmds` and `bnonmetricmds` plots do not.
