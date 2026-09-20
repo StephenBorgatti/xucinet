@@ -1,7 +1,12 @@
 # xucinet — status
 
-Updated 18 Sep 2026 (Cowork session; Claude Code should correct anything here it knows
+Updated 20 Sep 2026 (Cowork session; Claude Code should correct anything here it knows
 better). Overwrite the first three sections each session; append to the last two.
+
+**Order of work changed 20 Sep 2026: code every remaining routine first, one UCINET goldens
+batch at the end.** Design questions for all remaining chapters are batched in
+`dev/design/remaining-chapters-questions.md`; the prompt per chapter is in
+`asnr2e/docs/prompts/` (read `README.md` and `prompt-conventions.md` there first).
 
 ## Where things stand
 
@@ -25,9 +30,12 @@ better). Overwrite the first three sections each session; append to the last two
   new submission). UCINET goldens
   not generated: `inst/goldens/multivariate/` holds a README naming the fixtures the tests
   expect and an exempt `UCINET-VERSION`; the golden tests skip until prompt 2 is run.
-- Chapters 5, 7, 8, 11, 12, 13, 14 routines not started. The merged book text already
-  names them; the list of what the text asserts is in `asnr2e/docs/plan.md`
-  ("Decoupling decision", requirements list).
+- Chapters 5, 7, 8, 11, 12, 13, 14 routines not started. About 55 exported functions
+  remain against the crosswalk (counted 20 Sep from NAMESPACE): ch5 transformations 15
+  (`R/transform.R` holds only an internal dichotomiser), ch7 2, ch8 6, ch10 8, ch11 8,
+  ch12 5, ch13 3 plus 2-mode branches, ch14 7. The merged book text already names them;
+  the list of what the text asserts is in `asnr2e/docs/plan.md` ("Decoupling decision",
+  requirements list). Coding order (dependencies first): 5, 10, 8, 11, 12, 13, 14, 7.
 - Machine: repo cloned to `C:\Dev\xucinet` on the new computer 16 Sep. R toolchain
   working 20 Sep: R 4.6.1, Rtools45 (`C:\rtools45`), devtools 2.5.2 / roxygen2 8.1.0 /
   testthat 3.3.2 / rcmdcheck 1.4.0 in `%LOCALAPPDATA%\R\win-library\4.6`, Pandoc 3.11
@@ -42,32 +50,37 @@ better). Overwrite the first three sections each session; append to the last two
   `C:\Dev\tools\G2Tools` (repo StephenBorgatti/tools), both on Delphi 13 since 14 Sep. The
   Dropbox copies are stale. See `asnr2e/docs/plan.md`, "UCINET, Tools and NetDraw repositories".
 
-## Done this session (18 Sep 2026, Cowork)
+## Done this session (20 Sep 2026, Cowork)
 
-- Steve answered the chapter 6 design questions (recorded at the top of
-  `dev/design/ch06-questions.md`): off-diagonal max everywhere; CA input rules as
-  recommended with full-spectrum inertia; UCINET's text dendrogram; MOCA keeps Corr,
-  Modularity, Silhouette and drops Gamma; configuration plot by default with `xshepard()`.
-- Ported the three routines from borgworld (commit 6b0f0df) and wrote their tests; ran
-  `devtools::document()`, `devtools::test()` and `devtools::check()` in the cloud.
-- Found a bug in borgworld's `bcophenetic()` (indexes a `dist` with `lower.tri()` of its
-  matrix form; reports 0.08 for cities where the value is 0.71). The port computes it
-  correctly; borgworld needs the fix.
-- `MASS`, `graphics`, `grDevices` added to Imports (isoMDS and base plotting); `cluster` to
-  Suggests (only for a cross-check test).
+(18 Sep session: chapter 6 routines ported from borgworld and tested; `bcophenetic()` bug
+found in borgworld, still to be fixed there; MASS, graphics, grDevices to Imports.)
+
+- Decided to code all remaining routines before generating any more goldens (coauthors
+  need to see the package near complete; goldens are Steve's alone and can wait).
+- Wrote `dev/design/remaining-chapters-questions.md`: 44 design questions with
+  recommendations for chapters 5, 10, 8, 11, 12, 13, 14, 7 plus three cross-cutting ones
+  (igraph to Imports; transformations return `xucinet`; attribute lookup and type rule).
+  Steve answers the table at the top once.
+- Wrote the Claude Code prompts in `asnr2e/docs/prompts/`: `README.md`,
+  `prompt-conventions.md` (standing rules: three test layers, golden tests written now with
+  `skip_if_no_golden()`, batch lines appended per chapter, `dev/COVERAGE.md` regenerated
+  per chapter as the page for coauthors), one file per chapter, `goldens-sweep.md` (the
+  single batch at the end, two prompts).
 
 ## Next
 
-1. Verify the toolchain on the new machine: `devtools::check()` passes, `gh auth status`
-   OK, pkgdown builds.
-2. Chapter 6: Claude Code reviews the Cowork-written files, runs `devtools::check()` on
-   Windows, commits (Refs the chapter 6 issue), then prompt 2 (goldens batch, fixture names
-   in `inst/goldens/multivariate/README.md`); Steve runs the batch; then re-run the golden
-   tests and fill ledger entry 11(b) with any tie-breaking datasets found. Prompt 3 is
-   already done except for the golden comparison.
-3. xplot() (SPEC D13) — needed to finish the chapter 7 text merge.
-4. Chapter 10 whole-network routines (xcohesion et al.), then 8, 11, 12, 13, 14 in the
-   order the book requirements list gives.
+1. Steve answers `dev/design/remaining-chapters-questions.md` (table at the top; blank =
+   as recommended) and commits.
+2. Claude Code runs the chapter prompts in order: ch05, ch10, ch08, ch11, ch12, ch13,
+   ch14, ch07 (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after
+   `prompt-conventions.md`). Each is one session; each ends with `dev/COVERAGE.md`
+   regenerated.
+3. Chapter 6 golden tests stay skipped; the fixtures named in
+   `inst/goldens/multivariate/README.md` join the sweep.
+4. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`, prompts A and B) when Steve has
+   a free hour with UCINET; `Config/ucinet/reference` bumps then.
+5. Then the asnr2e side: generators and practices per chapter (ch09 first, then 6, 5, 10,
+   …), and the ch07 merge completion once xplot exists.
 
 ## Decisions
 
@@ -82,6 +95,11 @@ better). Overwrite the first three sections each session; append to the last two
   `type`, `dim`, `k`, `method`, `labels` in the D4 vocabulary; off-diagonal max conversion;
   UCINET's text dendrogram; MOCA = Corr, Modularity (UCINET's formula), Silhouette;
   D13 narrowed to network plots; `save=` deferred for all routines.
+- 20 Sep 2026: code first, goldens last. All remaining routines are coded chapter by
+  chapter (5, 10, 8, 11, 12, 13, 14, 7) with hand-computed, cross-check and skipping
+  golden tests; one UCINET batch at the end turns the golden tests on. Design questions
+  batched into one document. `dev/COVERAGE.md` (crosswalk row → status) is regenerated
+  each chapter as the progress page for coauthors.
 
 ## Open questions for Steve
 
