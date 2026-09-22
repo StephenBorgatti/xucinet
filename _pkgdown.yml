@@ -36,6 +36,7 @@ reference:
   - xsave
   - xdisplay
   - xhelp
+  - xattributetomatrix
 
 - title: Data | file formats
   desc: >
@@ -75,6 +76,7 @@ reference:
   - xdichotomize
   - xnormalize
   - xrecode
+  - xcombinenodes
 
 - title: Tools | Similarities & Distances
   desc: Comparing the rows, the columns or the relations of a dataset.
