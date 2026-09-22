@@ -76,7 +76,7 @@ test_that("valued data sums values, and normalizes by the largest of them", {
 
 test_that("weighted = FALSE dichotomizes first", {
   res <- xdegree(baker_journals, weighted = FALSE)
-  m <- dichotomize(as.matrix(baker_journals))
+  m <- dichotomize_matrix(as.matrix(baker_journals))
   diag(m) <- 0
   expect_equal(res$nodes$Outdeg, unname(rowSums(m)), tolerance = tol)
   expect_equal(res$nodes$nOutdeg, res$nodes$Outdeg / 19, tolerance = tol)

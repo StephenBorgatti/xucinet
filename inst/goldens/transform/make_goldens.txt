@@ -1,0 +1,106 @@
+// ===========================================================================
+// xucinet golden fixtures - Chapter 5, transformations and data management
+//
+// Produces the UCINET results the chapter 5 routines are written against:
+// xsymmetrize, xdichotomize, xnormalize, xgeodesic, xsimilarities,
+// xattributetomatrix, xcombinenodes.
+//
+// This batch is part of the single goldens sweep at the end of the coding
+// run (decision of 20 Sep 2026). Until it is run, every chapter 5 golden
+// test skips. See ../../../asnr2e/docs/prompts/goldens-sweep.md.
+//
+// HOW TO RUN
+//   1. Open UCINET.
+//   2. In the command line box at the bottom of the main window:
+//        ->cd <this folder>
+//        ->run make_goldens.txt
+//   3. Then do PART B, which is the handful of routines the command line
+//      does not reach and has to be driven from the menus.
+//   4. Commit everything UCINET writes into this folder, plus the logs:
+//        log_make_goldens.txt   the session log for PART A
+//        log_menu.txt           one continuous log covering PART B
+//   5. Set the build number from Help | About in UCINET-VERSION.
+//
+// SAVING THE LOG - save UCINET's own log file rather than copying out of the
+// window. The printed layouts are checked byte for byte, and a paste that
+// loses a leading space reads as a bug in the R code.
+//
+// Last run: not yet.
+//
+// THE INPUTS. campnet, camp92, hightech and davis ship with the package;
+// g9_disc is in ../centrality/ and is copied here by the sweep so that this
+// folder runs on its own.
+// ===========================================================================
+
+
+// ---------------------------------------------------------------------------
+// PART A - the command line
+// ---------------------------------------------------------------------------
+
+// --- Symmetrize (Transform | Symmetrize) -----------------------------------
+// Dialog: Method = Maximum / Minimum / Average; Missing = (default).
+// The diagonal is not touched by any of them.
+g5_sym_campnet_max = symm(campnet max)
+g5_sym_campnet_min = symm(campnet min)
+g5_sym_campnet_avg = symm(campnet average)
+
+// --- Dichotomize (Transform | Dichotomize) ---------------------------------
+// Dialog: Operator = GT; Cutoff = the value below; diagonal included.
+// camp92 is valued, so there is something to threshold; relation 1
+// (MostInteractionsT2) is the one the tests read.
+g5_dich_camp92_1 = dichot(camp92 GT 1)
+g5_dich_camp92_3 = dichot(camp92 GT 3)
+// Multi-relation: all three of hightech at once, to pin that the stack
+// survives and each relation is thresholded on its own.
+g5_dich_hightech = dichot(hightech GT 0)
+
+// --- Normalize (Transform | Normalize) -------------------------------------
+// Dialog: Which dimension = Rows / Columns / Both; Method = Sum / Maximum.
+// "Both" iterates; the log records how many iterations it took, which is the
+// number the R implementation's iteration limit is checked against.
+g5_norm_campnet_rowsum = norm(campnet rows sum)
+g5_norm_campnet_colmax = norm(campnet columns maximum)
+g5_norm_campnet_both   = norm(campnet both sum)
+
+// --- Geodesic distances (Network | Cohesion | Geodesic Distances) ----------
+// Dialog defaults throughout. g5_geo_disc is the one that matters most: it
+// shows what UCINET actually stores for an unreachable pair, which the R
+// default (NA) is then checked against and `unreachable =` reproduces.
+g5_geo_campnet = geo(campnet)
+g5_geo_disc    = geo(g9_disc)
+
+// --- Similarities (Tools | Similarities & Distances) -----------------------
+// Dialog: Measure = Correlation / Euclidean distance / Jaccard;
+// Rows or Columns as below; "diagonal valid" = No for the 1-mode cases.
+g5_simil_campnet_corr = simil(campnet rows correlation)
+g5_simil_campnet_eucl = simil(campnet rows euclidean)
+// davis is 2-mode, so the diagonal question does not arise.
+g5_simil_davis_jacc   = simil(davis columns jaccard)
+
+
+// ---------------------------------------------------------------------------
+// PART B - the menus
+//
+// Attribute to matrix and Collapse both take an attribute file, which the
+// command line form does not accept, so these four are menu runs.
+// ---------------------------------------------------------------------------
+
+// --- Data | Attribute To Matrix --------------------------------------------
+// Input dataset:   camp92_attr
+// Attribute:       Gender
+// Method:          Exact matches          -> save as g5_attr_camp92_same
+// Run it again with
+// Method:          Absolute difference    -> save as g5_attr_camp92_absdiff
+//
+// Both outputs are 18 x 18 with the camp92 labels.
+
+// --- Transform | Collapse --------------------------------------------------
+// Input dataset:   campnet
+// Collapse rows and columns by: camp92_attr column Gender
+// Method:          Sum                    -> save as g5_coll_campnet_sum
+// Run it again with
+// Method:          Density                -> save as g5_coll_campnet_den
+//
+// Both outputs are 2 x 2 (the two Gender groups). For Density, note in the
+// log what UCINET puts on the diagonal: the within-group cell divides by
+// n(n-1) for a 1-mode network, and the fixture is what settles it.

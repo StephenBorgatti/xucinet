@@ -20,38 +20,38 @@ Fill the table, or strike through a recommendation inline. A blank row means "as
 | # | decision |
 |---|---|
 | G1 | |
-| G2 | |
+| G2 | Settled 20 Sep 2026 in conversation (rules a–f as written below). |
 | G3 | |
-| 5.1 | |
+| 5.1 | xdichotomize function maxcor. This is the method of Borgatti, S. P., & Quintane, E. (2018). Techniques: Dichotomizing a network. Connections, 38(1), 1-11. |
 | 5.2 | |
 | 5.3 | |
 | 5.4 | |
-| 5.5 | |
+| 5.5 |xjoin() should have mode = c('col','row','mat') parameter where col is default. choosing col appends columns (a 50x3 matrix and a 50x4 become a 50x7 matrix). row appends rows, and mat adds multiple matrices to the dataset, as in the sampson dataset. xmultiplex should be included |
 | 5.6 | |
-| 5.7 | |
-| 5.8 | |
+| 5.7 |Need to add Row (or Receiver) and Col (or Sender) methods. Row creates a matrix whose rows are the attribute vector. every row is identical. Col creates a matrix whose cols are the vector. every column is the same. these are used to test receiver and sender effects in qap regressions  |
+| 5.8 |the two-dataset call `xmatch(net, attr)` should return the list |
 | 5.9 | |
-| 5.10 | |
-| 5.11 | |
+| 5.10 |Let's go with alternative (a duplicate option)|
+| 5.11 |go with the alternative: drop them and have the aliases stop with a message. |
 | 10.1 | |
-| 10.2 | |
+| 10.2 | fold overall clustering coefficient into xtransitivity report. do not calculate node level clustering coef. Add note to ucinet bug list: remove node leveel clustering coef|
 | 10.3 | |
-| 10.4 | |
+| 10.4 | Output the same measures as ucinet network>whole networks>multiple measures|
 | 10.5 | |
-| 10.6 | |
+| 10.6 |Use ucinet's Network>Mixing tables w/ expected values as a model for xdensitybygroups; for xhomophily, copy ucinet's Network>Whole networks|homophily>categorical; drop keyplayer|
 | 8.1 | |
 | 8.2 | |
 | 8.3 | |
 | 8.4 | |
-| 11.1 | |
+| 11.1 | data should be symmetrized by maximum|
 | 11.2 | |
 | 11.3 | |
 | 11.4 | |
 | 11.5 | |
-| 12.1 | |
-| 12.2 | |
-| 12.3 | |
-| 12.4 | |
+| 12.1 | copy ucinet's options for how to handle the diagonal. default should be reciprocal |
+| 12.2 | Not sure what this procedure is doing. nor the algorithm. will it be written in R? slow|
+| 12.3 | is this different from xblockmodel? how to implement? tabu search in R will be too slow. see if existing package exists that we can import |
+| 12.4 | copy ucinet's current code for network>core-periphery>categorical |
 | 13.1 | |
 | 13.2 | |
 | 13.3 | |
@@ -61,7 +61,7 @@ Fill the table, or strike through a recommendation inline. A blank row means "as
 | 14.4 | |
 | 14.5 | |
 | 7.1 | |
-| 7.2 | |
+| 7.2 | dont use underscores|
 | 7.3 | |
 
 ---
@@ -80,16 +80,62 @@ the golden shows a difference (tie-breaking in Louvain, Girvan-Newman on ties), 
 records it and the routine keeps a `method=` or `seed=` argument that reproduces UCINET when it
 can. Decision needed before chapter 11 starts.
 
-**G2. Transformations return a network, not a report.** Chapter 5 routines (xdichotomize,
-xsymmetrize, xtranspose, xnormalize, xrecode, ximpute, xcombine, xcombinenodes, xjoin, xunpack,
-xattributetomatrix, xbipartite, xaffiliations) produce a dataset, and UCINET's log for them is
-one line plus the matrix. Recommendation: they return a `xucinet` object (so they chain and feed
-any other routine), silently, with the title set the way UCINET names the output dataset
-(`campnet-sym`, `campnet-geo`, `davis-aff`), and with a `history` attribute recording the
-operation. `xgeodesic` and `xsimilarities` are the two that also print a UCINET-style report in
-UCINET; recommendation: they return `xucinet_output` with the matrix in `$matrices`, and
-`as_xucinet()` on such an object takes the first matrix, so `xmds(xgeodesic(net), type = "d")`
-works. Alternative: everything returns `xucinet_output` and nothing chains without `$matrices`.
+**G2. Datasets versus reports, and how results feed the next routine.** Settled with Steve in
+the Cowork session of 20 Sep 2026 (revised from the first draft, which had xgeodesic and
+xsimilarities returning reports). Six rules:
+
+(a) *Dataset or report.* A routine returns a `xucinet` dataset when what UCINET writes is a
+matrix you would save and use as input again: every transformation (xdichotomize, xsymmetrize,
+xtranspose, xnormalize, xrecode, ximpute, xcombine, xcombinenodes, xjoin, xunpack,
+xattributetomatrix, xmultiplex) and also xgeodesic, xsimilarities, xaffiliations, xbipartite.
+The user who types `mycorr <- xsimilarities(net, method = "correlation")` gets a dataset, as in
+UCINET: `mycorr$data`, `mycorr[1, 2]`, `xsave(mycorr, ...)` all work, `mycorr` prints as
+`print.xucinet` (plain matrix with title), `xdisplay(mycorr)` gives UCINET's layout. The title
+is set the way UCINET names the output dataset (`campnet-sym`, `campnet-geo`, `campnet-cor`)
+and a `history` attribute records the operation and any notice (cells filled, duplicates
+summed). A routine returns a `xucinet_output` report when what UCINET writes is a set of
+results about the network: node tables, summaries, or a matrix together with tables (structural
+equivalence with its clustering, structural holes with its dyadic matrices, cliques). Outputs
+that are rarely input to anything (a frequency distribution, a triad census) are reports and
+need no coercion path. There is no third class; a report is not to be used as a dataset, and
+chapter 5 teaches one dataset class.
+
+(b) *Coercion of a report, matrix first.* When a routine's `net` or `x` argument receives a
+`xucinet_output`, `xnet()`/`as_xucinet()` take a matrix if the object has one (the first of
+`$matrices`, with a one-line message naming it and how to choose another; one matrix per
+relation becomes a multi-relation dataset), and `$nodes` only if it has none. So
+`xmds(xstructuralequivalence(net), type = "s")` scales the similarity matrix, not the cluster
+column. When the matrix is taken, `$nodes` is attached as `$attributes` of the resulting
+dataset, keyed by label, so `xplot(xstructuralequivalence(net), node_color = "Cluster")` works.
+When `$nodes` is taken (xcentrality, xdegree, any node-level routine) it becomes a
+node-by-variable 2-mode dataset with the mode set explicitly, id columns (`Cluster`,
+`Component`, `Faction`, `Core`) excluded by a marker on the data frame, and a message saying
+what was kept. Arguments that want a node vector (`attribute =`, `node_size =`, `partition =`)
+read `$nodes` and take the named column, or the first numeric one.
+
+(c) *Node-level reports behave as data frames.* Centrality scores are used far more often as
+regressors than read as a table. So for every `xucinet_output` with a node table:
+`as.data.frame(res)` returns `$nodes` joined with the network's attribute table by label;
+`$` falls through to the node table when the name is not a slot (`mycent$Betweenness`); and
+because `model.frame()` calls `as.data.frame()` on a classed `data` argument,
+`lm(Betweenness ~ gender, data = mycent)` and `xregression(Betweenness ~ gender, data = mycent)`
+both work. Printing is unchanged (the report). The chapter 14 prompt assumes `data = <any
+result>`.
+
+(d) *Titles in pipes.* `xnet(net, substitute(net))` keeps the caller's expression as the title
+only for bare matrices and data frames; a `xucinet` or a report that carries a title keeps it.
+Otherwise `campnet |> xsymmetrize() |> xdegree()` would be headed by the nested call, and a
+magrittr pipe by `.`.
+
+(e) *Pipes.* The native pipe works with every routine because the data are the first argument
+(D4); formula-first routines (xregression, xmrqap, xautoregression) take `data = _`. No
+magrittr dependency. Chapter 5 shows one pipe example and otherwise uses nested or stepwise
+calls.
+
+(f) *xsimilarities default.* `mode = "cols"` is the default, so `xsimilarities(xcentrality(net))`
+correlates the measures. (xmds and xhclust keep `type=` required; nothing is inferred there.)
+The name `xcorrelation` for the chapter 14 permutation test is questioned (a valuable name for a
+rarely used routine); tabled, see 14.1.
 
 **G3. Attribute arguments.** Chapters 8, 10, 12, 14 take a node attribute. D4 says `attribute`
 accepts a vector, a column name, or `data$column`. Recommendation for the column-name case:
@@ -108,79 +154,227 @@ Routines: xdichotomize, xsymmetrize, xtranspose, xnormalize, xgeodesic, xcombine
 xattributetomatrix, xmatch, xjoin, xunpack, xrecode, ximpute, xsimilarities, xmultiplex;
 projects (5.11); `xread()` change (5.10). Signatures are in the crosswalk chapter 5 block.
 
-**5.1. xdichotomize.** Crosswalk: `xdichotomize(net, cutoff=NULL, op=">", density=NULL,
-method=c("value", ...))`, and the ch05 text names `method="maxcor"`. UCINET's Dichotomize dialog
-has the six operators (GT, GE, LT, LE, EQ, NE) and a cutoff. Recommendation: `cutoff` with `op`
-(the six operators as strings `">"`, `">="`, `"<"`, `"<="`, `"=="`, `"!="`), default `> 0`;
-`density =` chooses the cutoff that gives the requested density (the largest cutoff whose
-density is at least the target); the diagonal is thresholded like every other cell (Phase 0
-decision, ledger entry 1). Question: what is `method="maxcor"` in the ch05 text? If it is not a
-UCINET option, either define it (the cutoff maximising the correlation between the binary and
-the original matrix) or remove it from the text.
+*Sections 5.1–5.7 rewritten 21 Sep 2026 from the UCINET source (`C:\Dev\ucinet\Source`; units
+named in each). The first draft was from memory and was wrong in several places.*
 
-**5.2. xsymmetrize methods.** UCINET's Symmetrize offers maximum, minimum, average, sum, upper
-half, lower half, and four more (difference, product, division, and "upper > lower"). Crosswalk
-lists `max, min, sum, mean, upper, lower`. Recommendation: the six in the crosswalk plus
-`"product"` and `"difference"`, since they cost nothing; `method = "max"` default as in UCINET.
-A directed network becomes `directed = FALSE` on output.
+**5.1. xdichotomize.** Transform | Dichotomize (`uc_Dichotomize.pas`/`.dfm`). The rule is "if
+x(i,j) *op* value then y(i,j) = then-value else else-value": operators Greater Than (default),
+Greater Than or Equal to, Equal to, Less Than or Equal to, Less Than, Not equal to; cutoff
+value 0; then-value 1 and else-value 0 (either may be `NA`). "Diagonals of output matrix":
+set to zero, set to missing, set to then-value, set to else-value (**the default**), follow the
+rule. Output name `<input>_GT_0` (dots in the cutoff become `p`); the log prints the matrix,
+number of 1s, number of cells, density. There is no density-target option and no "maxcor"
+anywhere in UCINET; the older CLI `dichot` (`xdichotomize.pas`) accepts `mean` as the cutoff.
+Two things to settle. (i) The ch05 text (written in the 8 Sep rewrite) says
+`xdichotomize(cutoff =, density =, method = "maxcor")`. Steve, 21 Sep: "maxcor" is what
+Transform | Dichotomize Interactive does (`uc_DichotomizationApp.pas`): for every distinct
+value v of X it dichotomises X with the chosen operator at v (off-diagonal cells unless the
+diagonal is valid, missing cells excluded) and tabulates the z-score of v, its frequency, the
+Pearson correlation between the dichotomised matrix and X, the number of ones and the density,
+and the user picks a row. In xucinet, `method = "maxcor"` picks the row with the largest
+correlation automatically. Decided: implement it that way; `cutoff` and `density` remain as
+the other two ways of choosing the cutoff, so `method = c("cutoff","density","maxcor")` with
+`cutoff` the default; the chosen cutoff, its correlation and density go into `history`.
+Ledger entry: not a UCINET batch routine (UCINET's is interactive). Open detail: whether the
+whole table is worth exposing (`xdichotomize(net, method = "maxcor", table = TRUE)` printing
+it, or a separate small function); recommendation: no, the three `history` numbers suffice.
+(ii) The diagonal. The menu default writes the else-value (0) on the
+diagonal; the Phase 0 goldens made with the CLI showed the rule applied to the diagonal
+(ledger entry 1, "UCINET 6.849 no longer zeroes it"). Claude Code compares the CLI unit with
+the form and reports; recommendation: R follows the menu form (`diagonal = c("else","zero",
+"missing","then","rule")`, default `"else"`), and entry 1 is corrected. Signature:
+`xdichotomize(net, cutoff = 0, op = ">", then = 1, else = 0, density = NULL, diagonal =
+"else")`, op as the six strings `">"`, `">="`, `"=="`, `"<="`, `"<"`, `"!="`; multi-relation
+input handled per relation; 2-mode allowed (no diagonal question).
 
-**5.3. xnormalize.** UCINET's Normalize dialog: which (rows, columns, both, whole matrix) and
-criterion (sum, mean, maximum, minimum, Euclidean norm, standard deviation / z-score), with
-"both" iterating until convergence. Crosswalk: `by = c("rows","cols","matrix")`,
-`method = c("sum","max","mean", ...)`. Recommendation: add `by = "both"` with UCINET's iterative
-procedure and UCINET's iteration limit, and the full criterion list. Default: rows, sum.
+**5.2. xsymmetrize.** Transform | Symmetrize (`xsymmetrize.pas`, engine `usym.symmetrize` in
+G2Tools). Sixteen methods, in dialog order: Maximum (default), Minimum, Average, Sum,
+Difference, Product, Division, Lower Half, Upper Half, Upper > Lower, Upper >= Lower, Upper =
+Lower, Upper <= Lower, Upper < Lower, Upper NOT EQUAL Lower, abs(diff)/sum. Missing-value rule:
+"Choose non-missing value" (default) or "Both missing". Square 1-mode only. The log prints,
+per relation, the density before, the number and percentage of symmetric pairs, the number and
+percentage of reciprocated dyads, the matrix, the density after, and the correlation with the
+input. Recommendation: all sixteen under lowercase names (`"max"`, `"min"`, `"mean"`, `"sum"`,
+`"difference"`, `"product"`, `"division"`, `"lower"`, `"upper"`, `"upper>lower"` … or spelled
+`"gt"`, `"ge"`, `"eq"`, `"le"`, `"lt"`, `"ne"`, and `"absdiffsum"`), `method = "max"` default,
+`missing = c("nonmissing","both")`; the six summary statistics go into `history`; the result
+has `directed = FALSE`.
 
-**5.4. xgeodesic.** Crosswalk: `xgeodesic(net, directed=NULL, unreachable=NA)`. UCINET's
-Geodesic Distance dialog stores unreachable pairs as a user-chosen value and offers nearness
-transformations. Recommendation: `unreachable = NA` default in R (UCINET's stored value is
-whatever the dialog default is; the golden will show it, and `unreachable =` reproduces it);
-`weighted = FALSE` default, with `weighted = TRUE` giving Dijkstra on tie values as costs;
-`method = c("distance","frequency")` to also return the number of geodesics, which xbetweenness
-already computes internally; nearness transformations left out (the ch05 text does not use
-them). Returns `xucinet_output` (see G2).
+**5.3. xnormalize.** Transform | Normalize (`Xstdize.pas`, dialog `Normdlg`). Dimension:
+Matrix, Rows, Columns (**the default**, `dim = 3`), Both. Method: Marginal (sum, the default),
+Mean, Std-Dev, Z-Score, Euclidean, Maximum, SQRT-Marginal, Correspondence. Targets: marginal
+sum 1 (a "constant" field, default 0, is added to cells first), mean 0, standard deviation 1,
+Euclidean norm 1, maximum 1; "Both" iterates rows and columns until every margin is within the
+tolerance (0.001) or 100 iterations, and warns on non-convergence. "Diagonal valid?" defaults
+to **Yes**; when No, the diagonal is set missing before normalising. Non-square data force the
+diagonal valid. Recommendation: `xnormalize(net, by = c("cols","rows","matrix","both"), method
+= c("sum","mean","sd","zscore","euclidean","max","sqrtsum","correspondence"), diagonal = TRUE,
+tolerance = 0.001, maxit = 100)`, defaults as UCINET's; the iteration count in `history`.
 
-**5.5. xcombine and xjoin.** xjoin stacks networks into a multi-relation dataset (Data | Join),
-xunpack splits one; xcombine collapses relations into one matrix by min, max, sum or mean
-(Transform | Matrix operations | Between datasets | Statistical summaries). Recommendation:
-`xcombine(net, relations = NULL, method = c("max","min","sum","mean"))` also accepts a list of
-separate networks with matching labels, since users will often have them separately; `xjoin`
-accepts any number of networks or a list, checks labels match (reorders by label if they do
-not, with a message), and takes relation names from the argument names or the titles.
-`xmultiplex` (Transform | Multiplex) codes each cell by which relations are present
-(UCINET's combination coding); confirm it is wanted, since only 5.9 mentions it.
+**5.4. xgeodesic.** Network | Cohesion | Geodesic Distances (`uc_geodesicdistances.pas`/
+`.dfm`). Input: non-valued adjacency only (the dialog's only "type of data" item; valued
+distances are a different routine, not in the crosswalk). Output transformation: none
+(default) or reciprocal distances. Undefined (unreachable) pairs: with no transformation,
+missing (default), N, or largest distance + 1; with reciprocal, missing, 1/N, 1/(largest+1),
+or zero (default). Diagonal: missing, 0 (default with no transformation), 1. The log prints
+the matrix, the average and standard deviation of the off-diagonal distances, and a frequency
+table of distance values. Recommendation: `xgeodesic(net, directed = NULL, unreachable =
+c("missing","n","max+1"), reciprocal = FALSE, diagonal = 0)`, returning a dataset (G2 a) with
+the average, sd and frequency table in `history`; `weighted =` and `method = "frequency"` from
+the first draft are dropped, since neither is in this routine (the count of geodesics is
+UCINET's separate "No. of Geodesics" routine and xbetweenness already computes it
+internally). The shared geodesic code in `R/centrality-internals.R` is the engine.
 
-**5.6. xcombinenodes.** UCINET's Transform | Collapse aggregates rows and columns by an attribute
-with sum, average, maximum, minimum, or density. Recommendation: exactly those five,
-`method = "sum"` default as UCINET; the result is a group-by-group `xucinet` with the group
-labels; for density the diagonal uses within-group possible ties, n(n-1) for 1-mode.
+**5.5. xjoin, xunpack, xcombine, xmultiplex; time stack.** (a) Data | Join | Join Matrices
+(`uc_JoinMatrices.pas`): stacks datasets of identical dimensions into one multi-relation
+dataset; datasets of the wrong size are skipped with a log line; relation labels by matrix
+name, filename + matrix name, filename + number, or "smart labels" (default: filename when a
+dataset has one matrix, filename-matrixname when names collide). Join Rows and Join Columns
+are the other two items (append as rows or columns). (b) Data | Unpack (`uc_UnPack.pas`):
+writes each selected relation of a stack as its own dataset, with an optional prefix. (c)
+Transform | Matrix Operations | Between datasets | Statistical summaries
+(`xbetweendatasetaggregations.pas`): over several separate datasets, cellwise Sum, Average,
+Minimum, Maximum, Elementwise multiplication, with "use boolean math", "ignore diagonal in
+square matrices" and a missing-values flag. Within dataset | Aggregations
+(`xwithindatasetaggregations.pas`) does the same across the relations of one stack (Sum
+default, Average, Minimum, Maximum, Std Deviation; "rows & cols - aggregate across matrices"
+is the option that yields one matrix; diagonal valid default No). (d) Transform | Graph
+Theoretic | Multiplex (`uc_MultiplexCoder.pas`): codes each cell as the integer whose binary
+digits say which relations have a tie there (relation k contributes 2^(k-1)); the log prints
+a legend. (e) Transform | Time Stack (`uc_timestack.pas`): stacks networks with different node
+sets, matching on labels, nodes to keep Intersection or Union (default), absent nodes as
+missing (default) or zeros, plus a node-by-network id vector. Recommendation: `xjoin(...,
+names = NULL)` accepts networks or a list with identical labels and stacks them (relation
+names from the arguments, titles, or `names`); `xunpack(net, relation = NULL)` returns a list
+of one-relation datasets, or one when `relation` is given; `xcombine(net, relations = NULL,
+method = c("sum","mean","min","max","sd","product"), diagonal = FALSE)` collapses the relations
+of a stack (or a list of separate networks) into one matrix, the union of the two UCINET
+menus; `xmultiplex(net)` as UCINET's coder with the legend in `history`. Time Stack is not a
+separate function: `xjoin(xmatch(t1, t2, t3, nodes = "union", fill = NA))` does it, and the
+help page for xjoin says so.
 
-**5.7. xattributetomatrix.** UCINET's Data | Attribute to matrix offers exact matches,
-difference, absolute difference, sum, product, and the "same or different" coding. Crosswalk:
-`method = c("same","diff","absdiff","sum", ...)`. Recommendation: `same` (1 if equal), `diff`
-(a_i - a_j), `absdiff`, `sum`, `product`, `max`, `min`; also `xattributetomatrix(a, b)` for two
-attributes (UCINET's "exact match" between two vectors is not needed; drop). Output: 1-mode
-`xucinet`, symmetric where the method is, labels from the attribute's names or the network
-passed as `net =`.
+**5.6. xcombinenodes.** Two UCINET routines. Transform | Aggregate | Collapse (`Xcollaps.pas`)
+takes typed instructions ("ROWS 1 2 3", "COLS …", "BOTH …", "MATRICES …"), methods Average,
+Sum (default), Maximum, Minimum, diagonal valid default No. Transform | Aggregate | Block -
+Aggregate by Partitions (`uc_blockmatrix.pas`) takes a row partition and a column partition
+from attribute datasets matched by label, methods Average (default), Count > 0, Maximum,
+Minimum, Std Deviation, Sum, "utilize diagonal (reflexive ties)" unchecked by default, and
+prints the number-of-ties and density tables plus an autocorrelation. The crosswalk's
+`xcombinenodes(net, attribute, method = c("sum","mean","density","max"))` is the second
+routine, and UCINET's "density" there is the Average of the cells. Recommendation:
+`xcombinenodes(net, attribute, method = c("mean","sum","count","max","min","sd"), diagonal =
+FALSE)`, `attribute` per G3, `mean` default as UCINET's Block; the Collapse instruction
+format is not reproduced (a partition vector covers it). Group labels from the attribute
+values.
 
-**5.8. xmatch.** `xmatch(net, attributes, by = "rownames")` reorders an attribute data frame
-to the network's node order. Recommendation: `by` names a column or `"rownames"`; nodes absent
-from the attributes get NA rows with a message listing them; attribute rows for nodes not in
-the network are dropped with a message; the result is the reordered data frame, and
-`xmatch(net, attributes, attach = TRUE)` returns the network with `$attributes` set. Labels are
-matched exactly (case-sensitive), because UCINET labels are.
+**5.7. xattributetomatrix.** Data | Attribute to matrix (`uc_AttributeToMatrix.pas`, formulas
+in `G2Tools\uattributetomatrix.pas`). Methods: Exact Matches (default; 1 if equal), Difference
+(a_i − a_j, asymmetric), Absolute Difference, Squared Difference, Product, Sum, Identity
+Coefficient (2·a_i·a_j / (a_i² + a_j²)), Dup. rows (receiver effect: cell (i,j) = a_j), Dup.
+columns (sender effect: cell (i,j) = a_i), Min/Max (min(a_i,a_j)/max(a_i,a_j), 1 when equal).
+Attribute normalisation first: none (default), centre, standardise. Missing attribute values
+give missing cells. Output names `<input>-same<var>`, `-diff`, `-absdiff`, `-sqrdiff`,
+`-prod`, `-sum`, `-ident`, `-receiver`, `-sender`, `-minmax`. Recommendation:
+`xattributetomatrix(attribute, method = c("same","diff","absdiff","sqrdiff","product","sum",
+"identity","receiver","sender","minmax"), normalize = c("none","center","standardize"), net =
+NULL)` where `attribute` is a vector, a column name of `net$attributes`, or `data$col`; labels
+from the vector's names or from `net`; returns a 1-mode `xucinet`, `directed = TRUE` for the
+three asymmetric methods and `FALSE` otherwise. The two-attribute form from the first draft is
+dropped (not in UCINET).
 
-**5.9. xsimilarities and ximpute and xrecode.** (a) xsimilarities (Tools | Similarities &
-Distances): measures correlation, Euclidean distance, simple matching, Jaccard, positive
-matches, cosine (UCINET lists more); `mode = c("rows","cols")`; for 1-mode data UCINET's dialog
-has "diagonal valid" defaulting to no. Recommendation: those six, diagonal excluded for 1-mode
-unless `diagonal = TRUE`, and for directed 1-mode data the profile is the row and column
-concatenated only when `method = "profile"` is chosen in chapter 12 (see 12.1); here plain rows
-or columns. (b) ximpute (Data | Missing values): methods reconstruction (fill a_ij from a_ji),
-zero, row mean, column mean, overall mean; recommendation: `method = c("reconstruction","zero",
-"mean")` with `mean` meaning the overall mean, and a message giving the number of cells filled.
-(c) xrecode: `xrecode(net, from, to)` where `from` is a vector of values or a list of
-`c(low, high)` ranges and `to` the replacement for each; values not matched are unchanged.
-Confirm these three or say what to drop.
+**5.8. xmatch.** Revised 20 Sep 2026 after Steve pointed out that UCINET has one routine for
+matching a network to an attribute dataset and another for matching two networks, each with
+the choice of intersection, union, or one dataset as the authority, and that the R function
+should take any number of datasets (three time points, keep the nodes present in all).
+Recommendation: `xmatch(..., nodes = c("first","intersection","union","last"), by =
+"rownames", fill = NA, attach = FALSE)`. `...` is any mix of networks and attribute data
+frames; one function serves both UCINET routines because R dispatches on class. `nodes` picks
+the node set and order: `first` (default; the ch05 case, network then attributes), `last`,
+`intersection` (nodes in every dataset, ordered as in the first), `union` (every node
+anywhere, ordered by first appearance, absent nodes filled with `fill`; Claude Code reads what
+UCINET fills with under union and sets the default to match). `by` names the label column of a
+data frame or `"rownames"`. Labels match exactly (case-sensitive), as UCINET's do. A message
+reports per dataset how many nodes were dropped and added. Networks keep class, mode,
+directedness, relation stack and title; data frames stay data frames. Returns a named list in
+argument order (names from the arguments or titles): `m <- xmatch(t1, t2, t3, nodes =
+"intersection"); m$t1`. With exactly one network and one or more data frames, `attach = TRUE`
+returns the network alone with the frames joined into `$attributes`, which is the form the
+ch05 text uses. Open for Steve: whether the two-dataset call `xmatch(net, attr)` should
+return the list (consistent) or just the reordered attribute frame (simpler in the chapter). Source
+check 21 Sep: Data | Match datasets has Match 1-Mode Datasets, Match 2-Mode Datasets, Match
+1-Mode Net w/ Attrib Data (`uc_MatchNetAttrib`: keep network nodes, attribute nodes,
+intersection, union (default); sort by first occurrence (default), alphabetical, numerical;
+case sensitive on) and Match Multiple Datasets (`uc_MatchAnyDatasets`: primary (default),
+intersection, union; sort by primary order (default), lexicographic, numerical; rows and
+columns kept identical for 1-mode). Absent cells under union are left at the allocation value
+(zero, to be confirmed by Claude Code); Time Stack offers missing (default) or zeros. So
+`nodes = c("first","intersection","union","last")` matches UCINET's choices, `fill = NA` is the
+Time Stack default and `fill = 0` the Match default; a `sort = c("first","alphabetical",
+"numerical")` argument is added.
+
+**5.9. xsimilarities, ximpute, xrecode.** Rewritten 21 Sep 2026 from the UCINET source
+(`C:\Dev\ucinet\Source`, units named below); the first draft listed measures from memory and
+invented a "Data | Missing values" routine that does not exist.
+
+*(a) xsimilarities.* UCINET's current routine is Tools | Similarities & Distances
+(`uc_SimDis.pas`/`.dfm`; the CLI `similarities` command and Tools | Legacy Routines |
+Similarities are the older `xsimilarities.pas`, five measures only). One dialog, two radio
+groups. Similarity measures, in dialog order: Pearson correlation, covariance, cross-products,
+average cross-products, matches, Jaccard, valued Jaccard, identity coefficient, cosine/Tucker's,
+Cohen's kappa, Yule's Q. Dissimilarity measures: Euclidean distance, Manhattan distance, average
+absolute difference, normed SSD, proportion of non-matches, Jaccard distance, Hamming distance,
+sum of squared differences. Mode: rows, columns, matrices; the dialog default is **Columns**
+(`pMode.ItemIndex = 1`). "Diagonal values are valid" is unchecked by default and forced on for
+data that are not 1-mode; when not valid, `setdiagonal(bna)` makes the diagonal missing before
+the profiles are compared, so cells (i,i) and (j,j) drop out of every pair. "Matrices" mode
+vectorises each relation (off-diagonal cells unless the diagonal is valid) and compares
+relations. The log prints the matrix and then `Cronbach's Alpha` for it. Output name:
+`<input>-<first three letters of the measure>-<R|C|M>` (`campnet-Pea-C`). Recommendation:
+one function, `xsimilarities(net, method = "correlation", mode = c("cols","rows","relations"),
+diagonal = FALSE)`, with `method` accepting all nineteen measures under lowercase names
+(`"correlation"`, `"covariance"`, `"crossproducts"`, `"avgcrossproducts"`, `"matches"`,
+`"jaccard"`, `"valuedjaccard"`, `"identity"`, `"cosine"`, `"kappa"`, `"yulesq"`, `"euclidean"`,
+`"manhattan"`, `"avgabsdiff"`, `"nssd"`, `"nonmatches"`, `"jaccarddistance"`, `"hamming"`,
+`"ssd"`), ported from `utsimilarity.pas`/`usim.pas` in G2Tools so the numbers match; returns a
+`xucinet` dataset (G2 a) titled as UCINET names it; the result carries a `history` line saying
+whether the measure is a similarity or a dissimilarity (xmds and xhclust still require
+`type=`; nothing is inferred). Question: keep Cronbach's alpha (in `history`, or dropped)?
+Recommendation: dropped from R, since it is a by-product of the correlation case only.
+
+*(b) Missing values.* UCINET has three Transform-menu items. (1) **Replace Missing Values**
+(`uc_replacena.pas`): fills each missing cell of the input from a source dataset of the same
+shape, transposed by default ("Matrix containing replacement values needs to be transposed",
+checked), and the source may be the input itself, which is reconstruction from the transpose;
+output `-rna`. (2) **Znidarsic et al Imputation of Ties** (`uc_ImputeMissing.pas`, algorithms in
+`G2Tools\uimputemissing.pas`): methods RE (reconstruct from transpose; ties among missing
+respondents: zero, 1 if density >= cutoff, random with p = density, leave missing; dialog
+default zero, cutoff 0.5), MEAN (mean of incoming ties, for valued data; round to integer
+checked, round-half-up), MO (modal incoming, for binary), **REMO** (RE then MO; the dialog
+default), TM (global mean, rounding as MEAN), kNNMedian (k = 3), NTI (set all missing to a
+value, default 0), RAND, COPY (copy friends' choices). The diagonal is set to missing before
+imputation and is not imputed; output `-imp`; log title "Imputation of Missing Values for
+Networks". (3) **Give Non-Responders Missing Rows** (`uc_MissingRows.pas`): marks the rows of
+non-responders, chosen by an attribute, as missing; a preparation step for (2). The 3e text
+(5.5.5, "Impute missing ties") and the 1e name xImputeMissingData refer to (2). Recommendation:
+`ximpute(net, method = c("remo","re","mo","mean","tm","knn","nti","random","copy"), ties =
+c("zero","density","random","missing"), cutoff = 0.5, round = TRUE, k = 3, value = 0, seed =
+NULL)` as a port of `uimputemissing.pas` with the dialog defaults; `xreplacemissing(net, source
+= net, transpose = TRUE)` for (1), a separate function because it is a separate UCINET routine
+(alternative: `ximpute(method = "replace", source = )`, one export fewer); (3) not implemented
+unless the ch05 text mentions it (Claude Code checks with the lint). Both return `xucinet`
+datasets with the number of cells filled in `history`.
+
+*(c) xrecode.* Transform | Recode (`Xrecode.pas`, `xRecodeDlg.pas`): a schedule of rules
+"values *first* to *last* become *newvalue*", ranges inclusive; every rule is tested against
+the **original** cell value and the last matching rule wins; applies to selected rows,
+columns and matrices (default ALL); "Include diagonal values?" defaults to No for square data
+and is forced to Yes otherwise; missing cells are left alone; output `-Rec`; the log prints the
+schedule and the matrix. Recommendation: `xrecode(net, from, to, diagonal = FALSE, rows = NULL,
+cols = NULL, relations = NULL)` where `from` is a numeric vector of single values or a
+two-column matrix (or list of `c(low, high)`) of inclusive ranges and `to` the replacement per
+rule, with UCINET's semantics (original value tested, last rule wins); `rows`/`cols` take
+labels or indices. Transform | Reverse (`reversevalues`) is a special case (`xrecode` with a
+computed schedule) and gets no function unless the text uses it.
 
 **5.10. xread on duplicate edgelist pairs.** The ch05 text says duplicates are summed; the code
 keeps the last value. Recommendation: sum, with a message giving the number of duplicated
@@ -422,7 +616,10 @@ frame (or omitted, in which case names are looked up in the calling environment 
 `net$attributes` if `net` is given); for QAP routines `nets` is a named list of networks or a
 multi-relation `xucinet`, and the formula names are relation names. `xqap(net1, net2)` and
 `xcorrelation(x, y)` keep the two-argument form (no formula). Everything lowercase still: the
-formula variables are user names, which is fine.
+formula variables are user names, which is fine. `data =` accepts any node-level result object
+(G2 c). Tabled 20 Sep: whether `xcorrelation` is the right name for the node-level permutation
+correlation, since it is a valuable name and the routine is rarely used; to be decided before
+the chapter 14 prompt runs, with the crosswalk updated if it changes.
 
 **14.2. p-values and tails.** UCINET reports, for permutation tests, the proportion of
 permutations as large, as small, and (in recent versions) as extreme, and the QAP correlation

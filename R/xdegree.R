@@ -63,7 +63,7 @@ xdegree <- function(net, relation = NULL, directed = NULL, weighted = NULL,
   # `if edgeweights.checked then maxval := summarizematrix(m).max
   #                        else begin m.dichotomize(opgt,0); maxval := 1 end`
   if (isFALSE(weighted)) {
-    m <- dichotomize(m)
+    m <- dichotomize_matrix(m)
     maxval <- 1
     assumptions <- c(assumptions, "Data dichotomized at > 0.")
   } else {

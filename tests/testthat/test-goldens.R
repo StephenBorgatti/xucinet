@@ -155,19 +155,17 @@ test_that("dichotomising reproduces UCINET cell for cell, diagonal included", {
   expect_true(any(diag(m) > 0))                 # there is something to preserve
   expect_true(any(diag(gold) == 1))             # and UCINET now preserves it
 
-  for (tm in c(FALSE, TRUE)) {                  # twomode no longer changes it
-    ours <- dichotomize(m, twomode = tm)
-    expect_equal(unname(ours), unname(gold), tolerance = tol)
-  }
+  ours <- dichotomize_matrix(m)
+  expect_equal(unname(ours), unname(gold), tolerance = tol)
 })
 
 test_that("dichotomising 2-mode data keeps the diagonal", {
   # Zeroing it would delete real ties: for davis it would drop 12 of the 89
   # attendances, because cell (i,i) is woman i at event i.
   m <- as.matrix(davis)
-  expect_equal(sum(dichotomize(m, twomode = TRUE)), 89)
-  # And with the argument wrong, since nothing depends on it any more.
-  expect_equal(sum(dichotomize(m, twomode = FALSE)), 89)
+  expect_equal(sum(dichotomize_matrix(m)), 89)
+  # And through the exported routine, which thresholds the diagonal too.
+  expect_equal(sum(as.matrix(xdichotomize(davis))), 89)
   # and this is what zeroing it would have cost
   z <- m; diag(z) <- 0
   expect_equal(sum(z), 77)

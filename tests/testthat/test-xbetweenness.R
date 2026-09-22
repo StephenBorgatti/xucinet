@@ -84,7 +84,7 @@ test_that("the report prints the statistics block, unlike degree", {
 test_that("a valued matrix is treated as the graph underneath it", {
   # copyfromtmat dichotomises at > 0, so betweenness never sees the values.
   expect_equal(xbetweenness(baker_journals)$nodes$Betweenness,
-               xbetweenness(dichotomize(as.matrix(baker_journals)))$nodes$Betweenness,
+               xbetweenness(dichotomize_matrix(as.matrix(baker_journals)))$nodes$Betweenness,
                tolerance = tol)
   expect_true(any(grepl("dichotomized", xbetweenness(baker_journals)$assumptions)))
 })

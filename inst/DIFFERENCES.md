@@ -275,3 +275,55 @@ The MDS and correspondence-analysis maps are drawn with `asp = 1`. In a scaling
 plot the distances are the result, so unequal axis scaling is a wrong picture,
 not a style choice; UCINET's scatterplot viewer sets uniform axes for the same
 reason. borgworld's `bclassicalmds` and `bnonmetricmds` plots do not.
+
+## 13. Dichotomize: the diagonal follows the menu form, not the CLI
+
+**Status:** a choice between two UCINET behaviours. Decided 22 September 2026
+(design question 5.1(ii)).
+
+UCINET dichotomizes in two places and they do not agree about the diagonal.
+
+`G2Tools\udichotomize.pas`, the older command-line form, has five operators
+(no "not equal"), a hard-wired 1/0 result, and a single boolean `diagok`:
+apply the rule to the diagonal or leave the diagonal alone. It is forced on
+for a non-square matrix.
+
+`uc_Dichotomize.pas` with `uc_Dichotomize.dfm`, the Transform | Dichotomize
+menu form, has six operators, a configurable "then" and "else" value either of
+which may be missing, and a five-way `yDiagonals` radio group: set to zero,
+set to missing, set to the "then" value, set to the "else" value, or follow
+the dichotomization rule. Its `ItemIndex` is 3, so **the default writes the
+"else" value on the diagonal**.
+
+`xdichotomize()` follows the menu form, because that is the routine a reader
+of the book will use: `diagonal = "else"` is the default and `"rule"` is one
+of the five choices. The Phase 0 goldens were made with the command line and
+so show the rule applied to the diagonal; a golden regenerated from the menu
+will not, which is what `inst/goldens/transform/` is for.
+
+The internal helper the analysis routines call, `dichotomize_matrix()`, keeps
+the command-line behaviour unchanged, because that is what `copyfromtmat`
+hands to `xdegree()`, `xdensity()` and the rest.
+
+## 14. Dichotomize by density or by correlation are not UCINET batch routines
+
+**Status:** an addition to UCINET. Decided 22 September 2026 (design question
+5.1(i)).
+
+`xdichotomize(method = "density")` and `xdichotomize(method = "maxcor")`
+choose the cutoff from the data instead of taking one.
+
+Neither is a batch routine in UCINET. There is no density target anywhere in
+Transform | Dichotomize. `maxcor` is what Transform | Dichotomize Interactive
+(`uc_DichotomizationApp.pas`) does by hand: for every distinct value of the
+matrix it dichotomizes at that value and tabulates the value's z-score, its
+frequency, the Pearson correlation between the dichotomized matrix and the
+original, the number of ones and the density, and the user reads the table and
+picks a row. `method = "maxcor"` picks the row with the largest correlation
+without asking, and records the cutoff, the density and the correlation in the
+result's `history`. The table itself is not exposed; the three numbers in
+`history` are what a script needs.
+
+The older command-line form also accepts `mean` as a cutoff, which is a third
+way of computing one; it is not offered here, since the menu form has no such
+option and `cutoff = mean(as.matrix(net))` says it plainly.

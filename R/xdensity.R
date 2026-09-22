@@ -54,7 +54,7 @@ xdensity <- function(net, relation = NULL, directed = NULL, weighted = NULL,
   twomode <- identical(net$mode, "2-mode")
   valued <- any(m != 0 & m != 1, na.rm = TRUE)
   if (isFALSE(weighted) && valued) {
-    m <- dichotomize(m, twomode = twomode)
+    m <- dichotomize_matrix(m)
     assumptions <- c(assumptions, "Data dichotomized at > 0.")
   }
   cells <- if (diagonal || twomode) as.vector(m) else m[row(m) != col(m)]
