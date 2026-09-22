@@ -64,10 +64,32 @@ reference:
   - xattributes
   - "`[.xucinet`"
 
+- title: Transform
+  desc: >
+    Routines that produce a dataset rather than a report, so they chain into
+    any other function. Each is titled the way UCINET names the dataset it
+    saves, and carries a `history` attribute.
+  contents:
+  - xtranspose
+  - xsymmetrize
+  - xdichotomize
+  - xnormalize
+  - xrecode
+
+- title: Tools | Similarities & Distances
+  desc: Comparing the rows, the columns or the relations of a dataset.
+  contents:
+  - xsimilarities
+
 - title: Network | Whole Networks
   desc: Whole-network measures.
   contents:
   - xdensity
+
+- title: Network | Cohesion
+  desc: Distances through the network.
+  contents:
+  - xgeodesic
 
 - title: Network | Centrality
   desc: >
