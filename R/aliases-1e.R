@@ -146,6 +146,16 @@ xucinet_1e_notes <- c(
   xHierarchicalCluster = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xhclust."
 )
 
+# Aliases whose 2.0 target is not coming. These stop with the explanation
+# below rather than the generic "not written yet" message, which would be a
+# lie: nothing is going to land.
+xucinet_1e_withdrawn <- c(
+  xCreateProject = "xucinet 2.0 has no project object. A UCINET project was a folder of datasets; here you read each dataset with xread() and keep them in whatever R structure suits, a list most often. See ?xread and ?xmatch.",
+  xAddToProject = "xucinet 2.0 has no project object. Read the dataset with xread() and keep it beside the others; xmatch() lines several up on one node set and xjoin() stacks them into one multi-relation dataset.",
+  xAddAttributesToProject = "xucinet 2.0 has no project object. Attributes live in their own data frame; xmatch(net, attributes, attach = TRUE) puts them on the network.",
+  xRemoveFromProject = "xucinet 2.0 has no project object. Datasets are ordinary R objects, so drop one the way you would drop any other; xunpack() is what splits a multi-relation dataset into separate ones."
+)
+
 #' The 1e alias table
 #'
 #' @return A named character vector: 1e name to 2.0 name.
@@ -160,6 +170,10 @@ alias_1e <- function(old, new, ...) {
   # [[ ]] on a named vector errors for a name that is not there, and most
   # aliases have no note.
   note <- if (old %in% names(xucinet_1e_notes)) xucinet_1e_notes[[old]] else ""
+  if (old %in% names(xucinet_1e_withdrawn)) {
+    stop(old, "() was an ASNR 1e name, and xucinet 2.0 has no replacement ",
+         "for it.\n  ", xucinet_1e_withdrawn[[old]], call. = FALSE)
+  }
   fn <- get0(new, envir = asNamespace("xucinet"), mode = "function")
   if (is.null(fn)) {
     stop(old, "() was the ASNR 1e name for what xucinet 2.0 calls ", new, "().\n",

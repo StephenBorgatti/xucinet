@@ -421,6 +421,50 @@ the damage -- so a reader who takes it literally gets the sign wrong.
 
 ---
 
+## 15. RAND imputation overwrites observed ties, and can impute a missing value
+
+**Status:** reported here, not yet reported to Steve. xucinet implements the
+correct behaviour; the differences ledger says so.
+
+`timputation.runrandom` in `G2Tools\uimputemissing.pas` has two defects, one
+in each branch.
+
+The binary branch rewrites the whole matrix:
+
+```pascal
+procedure runbin;
+begin
+  den:= d.getaverage(false);
+  for i:= 1 to d.n do
+    for j:= 1 to d.n do if i <> j then
+      if random < den
+        then y.cell[i,j]:= 1
+        else y.cell[i,j]:= 0;
+end;
+```
+
+There is no `if d.isna(i,j)` test, so every observed tie is thrown away and
+replaced by a coin flip. The other eight methods all test it. An imputation
+routine that discards the data it was given cannot be what was meant.
+
+The valued branch builds its pool without checking validity:
+
+```pascal
+for i:= 1 to d.n do
+  for j:= 1 to d.n do if i <> j then
+    list.Add(d.cell[i,j]);
+```
+
+Missing cells go into the list, so a cell drawn at random may itself be
+missing and the "imputed" matrix still has holes in it.
+
+**What xucinet does:** `ximpute(method = "random")` fills only the missing
+cells, and draws from the observed ties. Ledger entry 15.
+
+**Fix:** a validity test in each branch.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps

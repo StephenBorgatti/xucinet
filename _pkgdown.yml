@@ -82,6 +82,8 @@ reference:
   - xcombinenodes
   - xcombine
   - xmultiplex
+  - ximpute
+  - xreplacemissing
 
 - title: Tools | Similarities & Distances
   desc: Comparing the rows, the columns or the relations of a dataset.

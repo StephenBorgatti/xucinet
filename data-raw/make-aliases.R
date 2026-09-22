@@ -5,7 +5,10 @@
 # change to the crosswalk. Run with the working directory at the package root:
 #   source("data-raw/make-aliases.R")
 
-crosswalk <- "C:/Users/sborg2/GitHub/asnr2e/crosswalk/ASNR2e_routine_crosswalk_v1.xlsx"
+# The book repo is the sibling of this one, as dev/CLAUDE.md describes it.
+# An absolute path was here until 22 September 2026 and broke when the repos
+# moved to C:\Dev; relative to the package root it follows them.
+crosswalk <- "../asnr2e/crosswalk/ASNR2e_routine_crosswalk_v1.xlsx"
 
 # ---- what the crosswalk says ------------------------------------------------
 
@@ -63,6 +66,32 @@ overrides <- c(
 # left pointing at a function nobody will write.
 drop <- c("xEigenvector",
           "xReachBetweennessCentrality", "xBetaReachBetweennessCentrality")
+
+# Aliases whose 2.0 target is not coming. The alias still resolves - a 1e
+# reader's script should say what happened rather than "object not found" -
+# but the generic "not written yet, wait for it" message would be a lie, so
+# each carries its own explanation and the wrapper stops with that instead.
+#
+# Projects: design question 5.11, answered 22 September 2026. The chapter 5
+# rewrite is built on xread() and nothing in the package accepts a project, so
+# the four project aliases are retired rather than given a shell to call.
+withdrawn <- c(
+  xCreateProject = paste(
+    "xucinet 2.0 has no project object. A UCINET project was a folder of",
+    "datasets; here you read each dataset with xread() and keep them in",
+    "whatever R structure suits, a list most often. See ?xread and ?xmatch."),
+  xAddToProject = paste(
+    "xucinet 2.0 has no project object. Read the dataset with xread() and",
+    "keep it beside the others; xmatch() lines several up on one node set",
+    "and xjoin() stacks them into one multi-relation dataset."),
+  xAddAttributesToProject = paste(
+    "xucinet 2.0 has no project object. Attributes live in their own data",
+    "frame; xmatch(net, attributes, attach = TRUE) puts them on the network."),
+  xRemoveFromProject = paste(
+    "xucinet 2.0 has no project object. Datasets are ordinary R objects, so",
+    "drop one the way you would drop any other; xunpack() is what splits a",
+    "multi-relation dataset into separate ones.")
+)
 
 # A few aliases need a sentence the generic message cannot give.
 notes <- c(
@@ -146,6 +175,13 @@ sprintf('xucinet_1e_map <- c(\n%s\n)',
 sprintf('xucinet_1e_notes <- c(\n%s\n)',
         paste(sprintf('  %s = %s', names(notes), q(unname(notes))), collapse = ",\n")),
 '',
+'# Aliases whose 2.0 target is not coming. These stop with the explanation',
+'# below rather than the generic "not written yet" message, which would be a',
+'# lie: nothing is going to land.',
+sprintf('xucinet_1e_withdrawn <- c(\n%s\n)',
+        paste(sprintf('  %s = %s', names(withdrawn), q(unname(withdrawn))),
+              collapse = ",\n")),
+'',
 "#' The 1e alias table",
 "#'",
 "#' @return A named character vector: 1e name to 2.0 name.",
@@ -160,6 +196,10 @@ sprintf('xucinet_1e_notes <- c(\n%s\n)',
 '  # [[ ]] on a named vector errors for a name that is not there, and most',
 '  # aliases have no note.',
 '  note <- if (old %in% names(xucinet_1e_notes)) xucinet_1e_notes[[old]] else ""',
+'  if (old %in% names(xucinet_1e_withdrawn)) {',
+'    stop(old, "() was an ASNR 1e name, and xucinet 2.0 has no replacement ",',
+'         "for it.\\n  ", xucinet_1e_withdrawn[[old]], call. = FALSE)',
+'  }',
 '  fn <- get0(new, envir = asNamespace("xucinet"), mode = "function")',
 '  if (is.null(fn)) {',
 '    stop(old, "() was the ASNR 1e name for what xucinet 2.0 calls ", new, "().\\n",',

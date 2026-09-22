@@ -40,9 +40,13 @@ test_that("a wrapper whose target is unwritten says so, and says which", {
   map <- xucinet_1e_names()
   written <- vapply(map, exists, logical(1),
                     envir = asNamespace("xucinet"), mode = "function")
-  skip_if(all(written), "every 2.0 target now exists")
+  # A withdrawn alias also has no target, but it is not waiting for one, so it
+  # says something different and is tested on its own below.
+  withdrawn <- names(map) %in% names(xucinet_1e_withdrawn)
+  waiting <- !written & !withdrawn
+  skip_if(!any(waiting), "every 2.0 target now exists or is withdrawn")
 
-  old <- names(map)[!written][1]
+  old <- names(map)[waiting][1]
   new <- map[[old]]
   f <- get(old, envir = asNamespace("xucinet"))
 
@@ -140,5 +144,35 @@ test_that("the negative-tie aliases explain what to do instead", {
     f <- get(nm, envir = asNamespace("xucinet"))
     expect_message(f(campnet), "negative-tie matrix")
     expect_message(f(campnet), "xpncentrality")
+  }
+})
+
+test_that("a withdrawn alias says so, instead of promising it is coming", {
+  # Design question 5.11: xucinet 2.0 has no project object, so the four
+  # project aliases are not waiting for anything. The generic message would
+  # tell the reader to wait for a function nobody is going to write.
+  for (old in names(xucinet_1e_withdrawn)) {
+    f <- get(old, envir = asNamespace("xucinet"))
+    msg <- tryCatch({ f(campnet); "" }, error = conditionMessage)
+    expect_match(msg, "no replacement for it", info = old)
+    expect_match(msg, "ASNR 1e name", info = old)
+    # and specifically not the "wait for it" wording, which would send the
+    # reader off to watch for a function nobody is going to write
+    expect_false(grepl("not written yet", msg, fixed = TRUE), info = old)
+    expect_false(grepl("the day", msg, fixed = TRUE), info = old)
+  }
+})
+
+test_that("every withdrawn alias explains what to do instead", {
+  for (old in names(xucinet_1e_withdrawn)) {
+    expect_match(xucinet_1e_withdrawn[[old]], "xucinet 2.0 has no project object",
+                 info = old)
+    # each points at a routine that does exist, so the reader has somewhere
+    # to go rather than just being told no
+    named <- vapply(c("xread", "xmatch", "xjoin", "xunpack"),
+                    function(fn) grepl(fn, xucinet_1e_withdrawn[[old]],
+                                       fixed = TRUE),
+                    logical(1))
+    expect_true(any(named), info = old)
   }
 })

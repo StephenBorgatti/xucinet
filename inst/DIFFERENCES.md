@@ -327,3 +327,23 @@ result's `history`. The table itself is not exposed; the three numbers in
 The older command-line form also accepts `mean` as a cutoff, which is a third
 way of computing one; it is not offered here, since the menu form has no such
 option and `cutoff = mean(as.matrix(net))` says it plainly.
+
+## 15. Random imputation fills only the missing cells
+
+**Status:** UCINET fix pending. `dev/UCINET-ISSUES.md` issue 15, raised
+22 September 2026.
+
+`ximpute(method = "random")` replaces the missing cells and leaves the
+observed ties alone, drawing the replacements from the ties that were
+actually observed.
+
+UCINET's `runrandom` does neither. Its binary branch has no `isna` test, so it
+overwrites every off-diagonal cell with a fresh coin flip and the observed
+network is lost. Its valued branch builds the pool it draws from without
+checking validity, so a missing cell can be drawn and the result still has
+holes. Both are in `G2Tools\uimputemissing.pas`; the other eight methods test
+`d.isna(i,j)` before writing.
+
+A known defect is not a number worth matching, so this is one of the places
+where xucinet is deliberately not UCINET. When it is fixed, the fixtures are
+regenerated and this entry goes.
