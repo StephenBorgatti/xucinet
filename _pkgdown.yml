@@ -37,6 +37,9 @@ reference:
   - xdisplay
   - xhelp
   - xattributetomatrix
+  - xmatch
+  - xjoin
+  - xunpack
 
 - title: Data | file formats
   desc: >
@@ -77,6 +80,8 @@ reference:
   - xnormalize
   - xrecode
   - xcombinenodes
+  - xcombine
+  - xmultiplex
 
 - title: Tools | Similarities & Distances
   desc: Comparing the rows, the columns or the relations of a dataset.

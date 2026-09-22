@@ -13,6 +13,7 @@ xread(
   directed = NULL,
   mode = NULL,
   title = NULL,
+  duplicates = c("sum", "last", "error"),
   ...
 )
 }
@@ -31,6 +32,9 @@ from the shape of the data (only relevant for csv/xlsx).}
 \item{labels}{Logical; does the first row/column hold node labels? (csv/xlsx)}
 
 \item{directed, mode, title}{Passed to \code{\link[=as_xucinet]{as_xucinet()}}.}
+
+\item{duplicates}{For an edge list, what to do when the same pair is listed
+more than once. See \code{\link[=xfromedgelist]{xfromedgelist()}}; \code{"sum"} by default.}
 
 \item{...}{Reserved.}
 }

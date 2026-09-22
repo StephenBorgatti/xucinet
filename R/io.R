@@ -14,6 +14,8 @@
 #' @param sheet Sheet name or number for `.xlsx` files.
 #' @param labels Logical; does the first row/column hold node labels? (csv/xlsx)
 #' @param directed,mode,title Passed to [as_xucinet()].
+#' @param duplicates For an edge list, what to do when the same pair is listed
+#'   more than once. See [xfromedgelist()]; `"sum"` by default.
 #' @param ... Reserved.
 #' @return An `xucinet` object.
 #' @section Shipped datasets:
@@ -23,7 +25,9 @@
 #' wins over a dataset of the same name.
 #' @export
 xread <- function(file, filetype = NULL, layout = NULL, sheet = 1, labels = TRUE,
-                  directed = NULL, mode = NULL, title = NULL, ...) {
+                  directed = NULL, mode = NULL, title = NULL,
+                  duplicates = c("sum", "last", "error"), ...) {
+  duplicates <- match.arg(duplicates)
   if (is.null(filetype)) {
     shipped <- shipped_dataset(file)
     if (!is.null(shipped)) {
@@ -58,7 +62,7 @@ xread <- function(file, filetype = NULL, layout = NULL, sheet = 1, labels = TRUE
     matrix   = as_xucinet(grid_to_matrix(g, has_header), directed = directed,
                           mode = mode, title = title),
     edgelist = xfromedgelist(grid_to_edgelist(g, has_header), directed = directed,
-                             mode = mode, title = title),
+                             duplicates = duplicates, mode = mode, title = title),
     nodelist = xfromnodelist(grid_to_nodelist(g, has_header), directed = directed,
                              mode = mode, title = title)
   )
@@ -152,10 +156,16 @@ read_xlsx_grid <- function(file, sheet = 1) {
 #'   the result is a rectangle rather than a square over their union. That is
 #'   evidence rather than proof - a strict hierarchy has disjoint columns and
 #'   is still 1-mode - so pass `mode` to settle it either way.
+#' @param duplicates What to do when the same pair is listed more than once:
+#'   `"sum"` (the default) adds the values up, as the chapter 5 text says;
+#'   `"last"` keeps the last one, which is what the reader did before; and
+#'   `"error"` refuses. The count is reported and recorded in the result's
+#'   `history` attribute.
 #' @param title Dataset name.
 #' @return An `xucinet` object.
 #' @export
 xfromedgelist <- function(df, from = 1, to = 2, weight = NULL, directed = NULL,
+                          duplicates = c("sum", "last", "error"),
                           mode = NULL, title = NULL) {
   if (is.null(title)) title <- deparse1(substitute(df))
   s <- as.character(df[[from]]); r <- as.character(df[[to]])
@@ -165,9 +175,35 @@ xfromedgelist <- function(df, from = 1, to = 2, weight = NULL, directed = NULL,
   } else {
     rlab <- clab <- unique(c(s, r))
   }
+  duplicates <- match.arg(duplicates)
+  dups <- 0L
   build <- function(w, rows = rep(TRUE, nrow(df))) {
     m <- matrix(0, length(rlab), length(clab), dimnames = list(rlab, clab))
-    m[cbind(s[rows], r[rows])] <- w
+    si <- match(s[rows], rlab); ri <- match(r[rows], clab)
+    # One linear index per edge, so that a pair listed twice is visible.
+    lin <- si + (ri - 1L) * nrow(m)
+    w <- rep_len(w, length(lin))
+    repeated <- sum(duplicated(lin))
+    if (repeated) {
+      dups <<- dups + repeated
+      if (identical(duplicates, "error")) {
+        bad <- unique(paste0(s[rows][duplicated(lin)], " -> ",
+                             r[rows][duplicated(lin)]))
+        stop(repeated, " pair", if (repeated == 1) " is" else "s are",
+             " listed more than once in the edge list, and duplicates = ",
+             "\"error\".\n  First: ", paste(utils::head(bad, 3), collapse = ", "),
+             "\n  Use duplicates = \"sum\" to add them up, or \"last\" to keep ",
+             "the last value.", call. = FALSE)
+      }
+    }
+    if (identical(duplicates, "sum")) {
+      # The ch05 text says duplicates are summed; the accumulation has to be
+      # explicit, because m[idx] <- w keeps only the last value written.
+      acc <- tapply(w, lin, sum)
+      m[as.integer(names(acc))] <- acc
+    } else {
+      m[cbind(si, ri)] <- w
+    }
     m
   }
   extra <- if (is.null(weight)) setdiff(seq_along(df), c(from, to)) else weight
@@ -189,18 +225,33 @@ xfromedgelist <- function(df, from = 1, to = 2, weight = NULL, directed = NULL,
       lapply(extra, function(k) build(suppressWarnings(as.numeric(df[[k]])))),
       names(df)[extra])
   }
+  # The ch05 text says duplicates are summed, so say when it happened rather
+  # than let a silently doubled tie value look like data.
+  note <- function(net) {
+    if (dups) {
+      message("xfromedgelist(): ", dups, " duplicated pair",
+              if (dups == 1) "" else "s",
+              switch(duplicates, sum = " summed", last = " overwritten"))
+      attr(net, "history") <- c(
+        attr(net, "history"),
+        paste0(dups, " duplicated pair", if (dups == 1) "" else "s",
+               switch(duplicates, sum = " summed", last = " overwritten")))
+    }
+    net
+  }
+
   if (twomode) {
     # Directedness has no meaning across two node sets, and symmetrising a
     # rectangle is not defined.
-    return(new_xucinet(if (length(mats) == 1L) mats[[1L]] else mats,
-                       mode = "2-mode", directed = NA, title = title))
+    return(note(new_xucinet(if (length(mats) == 1L) mats[[1L]] else mats,
+                            mode = "2-mode", directed = NA, title = title)))
   }
   if (is.null(directed)) {
     directed <- any(vapply(mats, function(m) !isTRUE(isSymmetric(unname(m))), logical(1)))
   }
   if (!directed) mats <- lapply(mats, function(m) pmax(m, t(m)))
-  new_xucinet(if (length(mats) == 1L) mats[[1L]] else mats,
-              mode = "1-mode", directed = directed, title = title)
+  note(new_xucinet(if (length(mats) == 1L) mats[[1L]] else mats,
+                   mode = "1-mode", directed = directed, title = title))
 }
 
 # Two columns that share no values are almost always two node sets: actors and

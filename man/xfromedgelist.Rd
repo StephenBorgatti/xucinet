@@ -10,6 +10,7 @@ xfromedgelist(
   to = 2,
   weight = NULL,
   directed = NULL,
+  duplicates = c("sum", "last", "error"),
   mode = NULL,
   title = NULL
 )
@@ -22,6 +23,12 @@ weight column.}
 
 \item{directed}{Logical; \code{NULL} detects (an edge list is treated as directed
 unless every tie appears in both directions).}
+
+\item{duplicates}{What to do when the same pair is listed more than once:
+\code{"sum"} (the default) adds the values up, as the chapter 5 text says;
+\code{"last"} keeps the last one, which is what the reader did before; and
+\code{"error"} refuses. The count is reported and recorded in the result's
+\code{history} attribute.}
 
 \item{mode}{\code{"1-mode"}, \code{"2-mode"}, or \code{NULL} (default) to decide from the
 data: two columns sharing no values are taken to be two node sets, and
