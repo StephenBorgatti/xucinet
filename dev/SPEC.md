@@ -71,15 +71,15 @@ Why not igraph as the core: igraph objects hide the matrix, drop dimnames semant
 relies on, and make "identical output" harder. Why not bare matrices: no home for mode/
 directedness/title/multi-relation metadata.
 
-### D2. The "project" concept — OPEN (lean yes, simplified)
+### D2. The "project" concept — RESOLVED (demoted)
 
 Old xUCINET bundled networks + attributes into a "project" list (mirroring a UCINET folder of
 files). Keep the concept but make it trivial: a project is just a named list with class
 `xucinet_project`; `xcreateproject()`, `xaddtoproject()` survive as conveniences; **no function
 requires a project**. All analysis functions take the network directly.
 
-Question for Steve: was the project structure something users liked, or friction? If friction,
-demote to "supported for book compatibility, not featured."
+Steve confirmed that the project structure was friction. It is therefore supported for book
+compatibility but not featured.
 
 ### D3. Function naming — RESOLVED (2026-07-27): all lowercase
 
@@ -313,13 +313,14 @@ Resolved 2026-07-27 (discussion with Steve):
 - GitHub account: **stephenborgatti** → repo github.com/stephenborgatti/xucinet.
 - Package name: **`xucinet`** — all lowercase, matching the D3 everything-lowercase
   invariant (function names, arguments, values, datasets, package). Confirmed by Steve.
+- v0.x "project" structure: demote to supported-for-book-compatibility, not featured; Steve
+  confirmed that the project structure was friction. (D2)
 
 Still open:
-1. Keep or demote the v0.x "project" structure (default in spec: keep, thin, optional).
-2. Session log file feature `xlogfile()` (recommend yes).
-3. ERGM/ALAAM exposure: wrap statnet minimally, or leave out of 2.0? (Recommend: out of 2.0,
+1. Session log file feature `xlogfile()` (recommend yes).
+2. ERGM/ALAAM exposure: wrap statnet minimally, or leave out of 2.0? (Recommend: out of 2.0,
    document the `as_network()` bridge.)
-4. Scope confirmation for Phase 1 (see PLAN.md) — anything that must move earlier?
+3. Scope confirmation for Phase 1 (see PLAN.md) — anything that must move earlier?
 
 ---
 
@@ -526,8 +527,57 @@ Consequences:
   reads the summary from that function rather than computing it again, so the two
   cannot disagree (question 10.5). `xcentralization()` therefore covers a measure only
   when the centrality routine for that measure reports its centralization; `xcloseness()`
-  and `xeigenvector()` are to gain theirs (Steve, 23 September 2026).
+  and `xeigenvector()` are to gain theirs (Steve, 23 September 2026). `xeigenvector()`'s
+  comes from the current Eigenvector dialog. `xcloseness()`'s comes from UCINET's legacy
+  Closeness routine, since the current Closeness dialog prints none; it is checked against
+  `runcentralization` in `Xdpmat.pas`, and the ledger records where it comes from.
 - Where a UCINET routine returns results at a lower level than its menu position (the
   Clustering Coefficient routine's node column is the known case), xucinet does not
   reproduce it, and `inst/DIFFERENCES.md` records the difference.
 - Each help page cross-references the functions for the same concept at other levels.
+
+Further decisions, 23 September 2026 (Steve, on the audit in `dev/STATUS.md`, open
+question 2):
+
+5. **Arguments choose what is printed, not what exists.** An argument may change the
+   values a function computes, or what its report prints, but not which slots or columns
+   the object has. Where an argument chooses among several outputs, the function computes
+   all of them and the argument controls only the printed report (or is dropped). Where an
+   output is undefined for the data, its column is present and missing.
+6. **Named exception: `xstructuralholes()`.** Its dyadic matrices (dyadic constraint,
+   redundancy and the like) sit beside the node table. Burt's measures are defined through
+   these dyadic terms, section 8.6.1 explains constraint through them, and D5 lists them
+   as part of the routine's output. The exception covers the dyadic matrices only; rule 4
+   and item 5 still apply to the function's columns. It is an exception, not a principle:
+   "a lower-level table is allowed when the main result decomposes into it" would also
+   readmit the node-level clustering coefficient, whose mean is the overall coefficient.
+   Any further exception is added here by name.
+
+   **Second named exception: `xcliques()`** (Steve, 23 September 2026, accepting Cowork's
+   recommendation). Its actor-by-actor co-membership matrix (dyad level) sits beside the
+   cliques. Chapter 11 uses it (the bimodal method and the clustering of the
+   co-membership matrix), the crosswalk names `xcliques(net)$comembership`, and UCINET's
+   Cliques routine computes it, saves it and clusters it, though it no longer prints the
+   matrix itself. As with structural holes, the exception covers that matrix only.
+
+Applications (23 September 2026):
+
+- `xhomophily()` drops its mixing matrix; `xmixing()` provides it.
+- `xreciprocity()` drops its node table. Node-level reciprocity becomes a column of
+  `xegonet()`.
+- `xreciprocity()` always returns both the dyad-based and the arc-based ratio (as design
+  answer 10.1 said); `method` sets which is printed first.
+- `xtransitivity()` always returns both the triplet and the triad version; `method` sets
+  what is printed.
+- `xegoaltersimilarity()` always returns a column for every measure; `method` sets what is
+  printed.
+- `xcentralization()` returns all four centralizations in one row, missing where a measure
+  has none; `measure` sets what is printed.
+- `xhclust()` always has a `Cluster` column, missing when `k = NULL`.
+- `xstructuralholes(method)`: fixed columns; `method` changes values only.
+- `xgirvannewman()` returns a partition column for every component count it reaches;
+  `k` sets only which partitions are printed (Steve, 23 September 2026, accepting
+  Cowork's recommendation).
+- Input-driven differences are not affected: attribute type (`xaltercomposition`,
+  `xegoaltersimilarity`), the set of relations (`xtiecomposition`), and `dim` (`xmds`,
+  `xcorrespondence`).

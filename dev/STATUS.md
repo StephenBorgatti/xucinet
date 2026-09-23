@@ -22,8 +22,8 @@ batch at the end.** Design questions for all remaining chapters are batched in
   `xhomophily`, `xdensitybygroups`, beside the Phase 0 `xdensity`; plus `xmixing`
   (23 Sep, #16). `xdensitybygroups()` returns the density table only; `xmixing()` returns
   the observed table and the expected table and ratio under all three models (ledger
-  26). `xcentralization()` covers degree, betweenness and eigenvector; closeness waits on
-  open question 1. `xcohesion` is golden-tested against the Phase 0 fixtures; the rest
+  26). `xcentralization()` covers degree, betweenness and eigenvector; closeness is Next
+  0(b). `xcohesion` is golden-tested against the Phase 0 fixtures; the rest
   wait on `inst/goldens/cohesion/`.
 - Chapter 8 (ego networks) complete 23 Sep, issue #14: `xegonet`, `xstructuralholes`,
   `xtiecomposition`, `xvaluedtiecomposition`, `xaltercomposition`, `xegoaltersimilarity`,
@@ -34,8 +34,8 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - Chapter 5 complete 22 Sep, issue #12: seventeen transformations; goldens named in
   `inst/goldens/transform/`. `xnormalize()` was brought into line with `Xstdize.pas` on
   23 Sep (#16).
-- Steve's 23 Sep answers (the former Next 0, issue #16) are all carried out except the
-  closeness centralization (open question 1).
+- Steve's first 23 Sep answers (issue #16) are all carried out; his later ones (closeness
+  centralization, the level-of-analysis changes) are Next 0.
 - Chapter 11 (subgroups) complete 23 Sep, issue #17: `xcliques`, `xfactions`,
   `xgirvannewman`, `xlouvain`, `xfastgreedy`, `xlabelpropagation`, `xcommunities`, with
   shared internals in `R/community-internals.R` (UCINET's modularity, a port of Delphi's
@@ -69,8 +69,13 @@ batch at the end.** Design questions for all remaining chapters are batched in
   in `xeigenvector()` and `xcentralization()`; (e) `xmixing()` new and `xdensitybygroups()`
   reduced to the density table, as revised by Steve; (f) `xhomophily(weighted = FALSE)`
   dichotomizes every measure; (g) cross-check packages installed; (h) crosswalk CSV
-  regenerated (see "Where things stand"); (i) audit, open question 2; (j) this section;
-  (k) T3 in `asnr2e/docs/text-changes.md` records the `xmixing()` decision.
+  regenerated (see "Where things stand"); (i) the level-of-analysis audit, since
+  answered (Decisions); (j) this section; (k) T3 in `asnr2e/docs/text-changes.md`
+  records the `xmixing()` decision.
+- **Speed-ups (issue #19, d7f1668):** Girvan-Newman on igraph's edge betweenness,
+  incremental scoring in Louvain and factions, factions' starting distances from igraph.
+  Same partitions as before (tests keep the old versions as references); on a 200-node
+  network 5.4 s, 4.8 s and 11 s became 0.2, 0.06 and 0.4.
 - Ledger entries 23 (Correspondence and SQRT-Marginal under Matrix), 24 (homophily binary
   treatment), 25 (mixing tables skip missing cells), 26 (Mixing Tables split in two).
   UCINET issue 25 (Mixing Tables sums missing cells as 1e38); issue 23 extended to
@@ -121,6 +126,23 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   single batch at the end, two prompts).
 
 ## Next
+
+0. **Before chapter 12, Claude Code applies Steve's 23 Sep answers:**
+   (a) **Level of analysis** (SPEC addendum 23 Sep, items 5 and 6 and "Applications") to
+   the functions listed there: `xhomophily`, `xreciprocity`, `xegonet` (new reciprocity
+   column), `xtransitivity`, `xegoaltersimilarity`, `xcentralization`, `xhclust`,
+   `xstructuralholes`, `xgirvannewman` (a partition column for every component count
+   reached; `k` sets only what is printed) and `xcliques` (unchanged: its co-membership
+   matrix is now a named exception). Snapshot updates, 1e alias checks, and
+   `text-changes.md` entries wherever a chapter describes the old output (check 8.6.2 and
+   10.2.2 for reciprocity, 10.5 for the homophily report). The `xegonet()` reciprocity
+   column follows UCINET's node-level reciprocity if one exists in the Reciprocity
+   routine or the ego-network units; if the definition has to be chosen, stop and ask.
+   (b) **Closeness centralization:** port the figure from the legacy Closeness routine
+   (`xcloseness.pas`, "Network Centralization = ") into `xcloseness()$summary`, check it
+   against `runcentralization` in `Xdpmat.pas`, add a ledger entry saying UCINET's
+   current Closeness dialog does not print it, and let `xcentralization(measure =
+   "closeness")` return it. Its golden joins the sweep.
 
 1. Claude Code runs the remaining chapter prompts in order: ch12, ch13, ch14, ch07
    (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after `prompt-conventions.md`).
@@ -186,26 +208,34 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   matrix (max-symmetrized, diagonal ignored, values kept), so methods compare directly.
   Girvan-Newman's `Cluster` is its partition with the highest modularity. Walktrap and
   QuickClus are dropped.
+- 23 Sep 2026 (Steve, via Cowork; former open question 2): the level-of-analysis audit.
+  SPEC addendum 23 Sep, items 5 and 6 and "Applications": an argument changes values or
+  what is printed, never which slots or columns exist; where it chooses among outputs,
+  all are computed and it chooses what is printed. `xhomophily()` drops its mixing
+  matrix (it is `xmixing()`'s); `xreciprocity()` drops its node table (node-level
+  reciprocity becomes an `xegonet()` column) and always has both ratios;
+  `xtransitivity` both versions; `xegoaltersimilarity` every measure; `xcentralization`
+  all four in one row; `xhclust` always has `Cluster`; `xstructuralholes` fixed columns
+  and a named exception for its dyadic matrices. Input-driven differences stand.
+- 23 Sep 2026 (Steve; former open question 6, Cowork's recommendation accepted):
+  `xgirvannewman()` returns a partition column for every component count it reaches, and
+  `k` sets only what is printed; `xcliques()`'s co-membership matrix is a second named
+  exception (SPEC item 6), since the text and the crosswalk use it and UCINET computes,
+  saves and clusters it.
+- 23 Sep 2026 (Steve; former open question 1): `xcloseness()` carries the closeness
+  centralization from UCINET's legacy Closeness routine, checked against
+  `runcentralization` in `Xdpmat.pas`, with a ledger entry, since the current Closeness
+  dialog prints none.
+- 23 Sep 2026 (Steve, issue #19): Girvan-Newman takes edge betweenness from igraph inside
+  UCINET's removal loop; Louvain and factions stay native and score moves incrementally.
+  All three give the partitions of the straightforward versions, which the tests keep as
+  references.
 
 ## Open questions for Steve
 
-1. **Closeness centralization.** Steve asked for `xcloseness()` to carry the
-   centralization UCINET reports. Only the menu item *Closeness (legacy)*
-   (`xcloseness.pas`, "Network Centralization = ") prints one; the current Closeness
-   dialog that `xcloseness()` follows (`uc_ClosenessMeasures.pas`) prints none. Carry the
-   legacy figure over (with a ledger entry saying the current dialog does not print it),
-   or leave closeness without one? Until then `xcentralization(measure = "closeness")`
-   stops and says why.
-2. **Level-of-analysis audit (item 0(i)).** Lower-level tables: `xreciprocity()` (a node
-   table beside the whole-network ratios), `xhomophily()` (the group mixing matrix beside
-   the whole-network measures), `xstructuralholes()` (dyadic matrices beside the node
-   table; SPEC D5 lists these as part of its output, so the rule and D5 disagree here).
-   Slots or columns that depend on an argument: `xstructuralholes(method)`, `xhclust(k)`
-   (adds `Cluster`), `xreciprocity(method)`, `xtransitivity(method)`,
-   `xegoaltersimilarity(method)` (one column per chosen measure),
-   `xcentralization(measure)`. Input-driven and probably fine: `xaltercomposition` and
-   `xegoaltersimilarity` by attribute type, `xtiecomposition` by relations,
-   `xmds`/`xcorrespondence` by `dim`. Which should change?
+(Questions 1, 2 and 6 were answered on 23 Sep and are under "Decisions"; the remaining
+ones keep their numbers because other notes refer to them.)
+
 3. **Chapter 8 items (issue #15):** the six chapter 8 signatures in `crosswalk.py`
    (`xegonet` has neither `directed` nor `include_ego`); whether `direction` is the right
    argument name; which of UCINET bugs 17-20 will be fixed. (The `xmixing` signature
@@ -231,8 +261,3 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
    `xlabelpropagation(net, seed = NULL, relation = NULL)`; and the Walktrap row marked
    dropped. Book text: T10 (factions measures) and T11 (Louvain is deterministic) in
    `asnr2e/docs/text-changes.md`.
-6. **Level-of-analysis, chapter 11 additions to question 2.** `xcliques()` returns the
-   actor-by-actor co-membership matrix (dyad level) beside the cliques, because the text
-   and the crosswalk ask for it; `xgirvannewman()` has one partition column per
-   component count, so its columns depend on `k`. Both are listed here so question 2 can
-   be answered once for everything.
