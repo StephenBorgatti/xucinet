@@ -97,3 +97,28 @@ line; and both the raw and the normalized column groups being optional, so a
 four-column table is the default tick state and not a fixed shape. The third is
 recorded as ledger entry 5 in `inst/DIFFERENCES.md`, since we deliberately
 always emit all four.
+
+## Chapter 8: ego networks
+
+Added 23 September 2026 (issue #14). Copied unchanged from
+`C:\Dev\ucinet\Source` at commit c7b4956 (`Ucinet/Source`) and `C:\Dev\tools`
+at commit 207958a (`Tools/G1Tools`, `Tools/G2Tools`).
+
+| file | taken from | what the port uses it for |
+|---|---|---|
+| `Xegonet.pas`, `EgoNetDlg.dfm` | `Ucinet/Source` | Egonet Basic Measures: `densitydsl` (the sixteen columns) and the *Ego network type* combo |
+| `uc_egonettiecomposition.pas` + `.dfm` | `Ucinet/Source` | Egonet Tie Composition: the form, its defaults, and the `addmat` call that drops the diagonal checkbox (UCINET issue 18) |
+| `utegotiecomp2.pas` | `Tools/G2Tools` | `tegotiecomp.addmat` (the six *Which ties matter?* cases) and `calc` (Ties, f/p columns, Blau, IQV) |
+| `uc_egonetvaluedtiecomposition.pas` + `.dfm` | `Ucinet/Source` | Egonet Valued Tie Composition: `analyzer` (UCINET issue 19) |
+| `utunivariate.pas` | `Tools/G1Tools` | `tunivariate.addcase` / `addcasewt` / `calc`: population SD, EstSD, CV, and which statistics are missing when there are no cases |
+| `uc_EgoNetComposition.pas` + `.dfm` | `Ucinet/Source` | Alter Composition, categorical: the form |
+| `uegocomposition.pas` | `Tools/G2Tools` | `massagematrix` (the four egonet definitions) and `egonetaltercomposition` |
+| `utfrequencies5.pas` | `Tools/G2Tools` | `tfrequencies`: tie-weighted counts, categories sorted by value, `getheterogeneity` |
+| `uc_EgoNetStrength.pas` + `.dfm` | `Ucinet/Source` | Alter Composition, continuous: `runstats`, and the filter that never filters (UCINET issue 20) |
+| `uc_EgoNetHomophily.pas` + `.dfm` | `Ucinet/Source` | Ego-Alter Similarity, categorical: the form |
+| `utindividualhomophily.pas` | `Tools/G1Tools` | the thirteen measures from the two-by-two table |
+| `uc_EgoNetHomophilyCont.pas` + `.dfm` | `Ucinet/Source` | Ego-Alter Similarity, continuous: the six-measure checklist, default `-AbsDiff` |
+| `utindividualhomophilycont.pas`, `utcorr.pas`, `uNormalize.pas`, `umath.pas` | `Tools/G2Tools`, `Tools/G1Tools` | the similarity functions, the correlation, the attribute normalizations |
+| `uc_structuralholes.pas` + `.dfm` | `Ucinet/Source` | Structural Holes: dialog defaults, `runegonetworksingle`, `runwholenetwork` |
+| `uEgonetStructuralHoles.pas`, `uEgonet.pas` | `Tools/G1Tools`, `Tools/G2Tools` | the ego-network model's arithmetic; `whichegometh` |
+| `ucentralitymeasures.pas`, `ubetween.pas`, `ugeodist.pas` | `Tools/G1Tools` | ego betweenness (`brandesbetweenness`, `calculatebrandesbetweenness`) and `bFloyd` |

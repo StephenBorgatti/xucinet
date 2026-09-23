@@ -490,6 +490,112 @@ routine's output, or move it behind an option that is off by default.
 
 ---
 
+## 17. Egonet Basic Measures reports zeros for an ego with no alters
+
+**Status:** reported here 23 September 2026 (chapter 8, issue #14), not yet
+reported to Steve. xucinet implements the correct behaviour; ledger entry 18.
+
+`densitydsl` in `Xegonet.pas` handles the empty ego network like this:
+
+```pascal
+if m.rdsl.n = 0 then begin
+  npairs:= bna; avgdist:= bna; avgrdist:= bna; diam:= bna;
+  numweak:= bna; pweak:= bna; efficiency:= bna; cratio:= bna;
+  goto cleanup;
+  end;
+```
+
+and the sixteen `x.cell^[ego]^[k] := ...` assignments come after the label it
+jumps past. So the missing values are set and never stored; the output row
+stays as `allocsize` left it, all zeros. An isolate gets Density 0, Diameter 0,
+nBroker 0 and so on, which read as measured values rather than undefined ones.
+
+A smaller case of the same thing: with one alter there are no pairs, and
+`avgrdist` is set to 0 before the loop and never divided, so AvgRecipDist is 0
+where it is undefined.
+
+**What xucinet does:** counts (Size, Ties, Pairs, nWeakComp, 2StepReach,
+2StepPct, Broker, nClosed, EgoBetween) are 0 for an isolate; the ratios
+(Density, AvgRecipDist, Diameter, CompRatio, ReachEffic, nBroker, nEgoBetween)
+are missing. AvgRecipDist is missing with one alter.
+
+**Fix:** store the row before `cleanup`, or fill it with the missing values in
+the early exit.
+
+A related wording point, not a bug in the numbers: column 14, nClosed, is
+documented in the log as "the number of closed triads ego is involved in" but
+holds `nties`, the directed tie count among alters, which on symmetric data is
+twice the number of closed triads. xucinet reproduces the number; either the
+footnote or the value should change.
+
+---
+
+## 18. Egonet Tie Composition ignores "Include ties to self"
+
+**Status:** reported here 23 September 2026, not yet reported to Steve.
+xucinet implements the correct behaviour; ledger entry 19.
+
+`TEgonetTieComposition.run` declares `diagok` and never reads the
+`DiagonalOk` checkbox into it, and calls
+`etc.addmat(net, whichties.ItemIndex, op, cut)` without the fifth argument, so
+`addmat`'s `diagok` is always its default, `false`. The checkbox does nothing.
+The valued-tie form next to it does read its own checkbox.
+
+**What xucinet does:** `xtiecomposition(diagonal = TRUE)` counts ties to self.
+
+**Fix:** `etc.addmat(net, whichties.ItemIndex, op, cut, diagonalok.Checked)`.
+
+---
+
+## 19. Egonet Valued Tie Composition, "Both in and out", uses the wrong cell
+
+**Status:** reported here 23 September 2026, not yet reported to Steve.
+xucinet implements the correct behaviour; ledger entry 19.
+
+In `analyzer` in `uc_egonetvaluedtiecomposition.pas`, case 0:
+
+```pascal
+if net.istie(i,m,op,cut) then uni.addcase(net.cell[i,m]);
+if net.istie(m,i,op,cut) then uni.addcase(net.cell[i,m]);
+```
+
+The second line tests the incoming tie `x(m,i)` and then adds the outgoing
+value `x(i,m)`, which is usually zero or missing when the tie is one-way. Case
+2 (incoming only) correctly adds `net.cell[m,i]`.
+
+**What xucinet does:** `xvaluedtiecomposition(direction = "both")` adds the
+incoming tie's own value.
+
+**Fix:** `uni.addcase(net.cell[m,i])` on the second line.
+
+---
+
+## 20. Egonet Alter Composition | Continuous: the SD filters never filter
+
+**Status:** reported here 23 September 2026, not yet reported to Steve. The
+filters are left out of `xaltercomposition()`; ledger entry 20.
+
+Three defects in `uc_EgoNetStrength.pas`, all in code the default settings do
+not reach:
+
+1. `runfilteredstats` contains a local `qualifies` function and never calls
+   it; its body is a copy of `runstats`. Ticking either filter changes nothing.
+2. Both edit boxes are parsed into the same variable:
+   `trystrtofloat(sdabove.Text, highsd)` and then
+   `trystrtofloat(sdbelow.Text, highsd)`, so `lowsd` is never set.
+3. With *Ignore tie strengths*, `meas.setdim(meas.nr, nvar-1, ...)` keeps
+   seven of the nine columns, dropping `Num` and `WtdNum`. `nvar` is 8, a
+   leftover from before `CV` was added; the intent was evidently to drop
+   `WtdNum` alone.
+
+**What xucinet does:** no filter arguments, since there is no behaviour to
+reproduce; all nine columns always.
+
+**Fix:** call `qualifies` in `runfilteredstats`, parse the second box into
+`lowsd`, and use `setdim(meas.nr, meas.nc - 1, ...)`.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps

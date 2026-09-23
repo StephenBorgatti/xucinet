@@ -146,6 +146,15 @@ xucinet_1e_notes <- c(
   xHierarchicalCluster = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xhclust."
 )
 
+# Arguments an alias fixes, because its 1e name picked one variant of a 2.0
+# function that now does both. The caller's own value wins.
+xucinet_1e_args <- list(
+  xAlterCompositionCat = list(type = "categorical"),
+  xAlterCompositionCon = list(type = "continuous"),
+  xEgoAlterSimilarityCat = list(type = "categorical"),
+  xEgoAlterSimilarityCon = list(type = "continuous")
+)
+
 # Aliases whose 2.0 target is not coming. These stop with the explanation
 # below rather than the generic "not written yet" message, which would be a
 # lie: nothing is going to land.
@@ -184,6 +193,13 @@ alias_1e <- function(old, new, ...) {
   }
   message(old, "() is the ASNR 1e name. xucinet 2.0 calls it ", new, "().",
           if (nzchar(note)) paste0("\n  ", note) else "")
+  # Built as a call and evaluated here, so that `...` is forwarded unevaluated
+  # and the 2.0 function still sees the caller's expression for its title.
+  fixed <- xucinet_1e_args[[old]]
+  if (!is.null(fixed)) {
+    fixed <- fixed[setdiff(names(fixed), ...names())]
+    return(eval(as.call(c(list(fn, quote(...)), fixed))))
+  }
   fn(...)
 }
 

@@ -376,3 +376,90 @@ reader to find it.
 Dichotomizing first would make the report self-consistent and would no longer
 be UCINET. Users who want that can pass
 `xreciprocity(xdichotomize(net, diagonal = "rule"))`.
+
+## 17. Structural holes: UCINET's ego-network model, not igraph's constraint
+
+**Status:** deliberate, following UCINET. Recorded 23 September 2026 (issue
+#14). SPEC D7 names constraint as a danger zone; this is why.
+
+`xstructuralholes()` defaults to UCINET's *ego network model*, in which
+everything is computed inside each node's ego network. `igraph::constraint()`
+computes Burt's measure over the whole network. With `z` the tie values and
+`S` the set of nodes the proportions are taken over:
+
+    p(i,j) = (z(i,j) + z(j,i)) / sum over k in S of (z(i,k) + z(k,i))
+    c(i,j) = (p(i,j) + sum over q of p(i,q) p(q,j))^2
+    constraint(i) = sum over i's contacts j of c(i,j)
+
+- **igraph:** `S` is every node, for `p(i,·)` and for `p(q,·)` alike.
+- **UCINET, ego-network model (the default here):** `S` is ego's network
+  only, so `p(q,j)` for an alter `q` is `q`'s share of its ties *inside ego's
+  network*. An alter with many ties outside it looks more exclusively tied to
+  ego's other contacts than it is, and constraint comes out higher.
+- **UCINET, whole-network model (`method = "whole"`):** `S` is every node, as
+  in igraph. On an undirected binary network the two agree to rounding, and the
+  test suite asserts that; it also asserts that the default does *not* agree,
+  so a silent convergence would be noticed.
+
+Two further conventions differ. UCINET reports constraint as missing for an
+ego with one alter (the dialog's *Set pendants to NA*) where the formula gives
+1, and igraph returns `NaN` for an isolate where UCINET's dialog gives missing
+constraint and effective size 0. Both dialog values are arguments here
+(`isolate`, `pendant`).
+
+## 18. Egonet basic measures: an isolate's ratios are missing, not zero
+
+**Status:** UCINET fix pending. `dev/UCINET-ISSUES.md` issue 17, raised
+23 September 2026.
+
+`xegonet()` reports an ego with no alters as having Size, Ties, Pairs and the
+other counts 0, and Density, AvgRecipDist, Diameter, CompRatio, ReachEffic,
+nBroker and nEgoBetween missing. UCINET reports zeros throughout: its code sets
+those values to missing and then jumps past the lines that store them. For an
+ego with one alter, AvgRecipDist is missing here and 0 in UCINET, because there
+are no pairs to average over.
+
+Matched, though UCINET may itself have it wrong: **nClosed** is the tie count
+among alters, as UCINET computes it, although UCINET's footnote describes it
+as the number of closed triads, which is half of that on symmetric data.
+
+## 19. Tie composition: the diagonal checkbox, and incoming values under "both"
+
+**Status:** UCINET fix pending. `dev/UCINET-ISSUES.md` issues 18 and 19,
+raised 23 September 2026.
+
+- `xtiecomposition(diagonal = TRUE)` counts ties to self. UCINET's *Include
+  ties to self* box is never passed to the routine that counts, so it has no
+  effect there.
+- `xvaluedtiecomposition(direction = "both")` adds the value of each incoming
+  tie. UCINET adds the value of the *outgoing* cell for it, which is usually
+  zero. The defaults (*Undirected (OR)* for the count, *Outgoing only* for the
+  values) are not affected.
+
+## 20. Continuous alter composition: no SD filters, and always nine columns
+
+**Status:** UCINET fix pending. `dev/UCINET-ISSUES.md` issue 20, raised
+23 September 2026.
+
+UCINET's Egonet Alter Composition | Continuous dialog offers to filter out
+alters more than a given number of standard deviations above or below the
+mean. In the source the filter is never applied, so `xaltercomposition()` has
+no arguments for it rather than arguments that would do what UCINET does,
+which is nothing.
+
+With *Ignore tie strengths* UCINET's table loses `Num` as well as `WtdNum`;
+here `weighting = "none"` keeps all nine columns, `WtdNum` then equalling
+`Num`.
+
+## 21. Ego-network routines report the first relation, not every relation
+
+**Status:** deliberate, 23 September 2026 (issue #14).
+
+UCINET's Valued Tie Composition, both Ego-Alter Similarity forms and the
+`holes()` command loop over every relation of a multi-relation dataset and
+print one table each. `xvaluedtiecomposition()`, `xegoaltersimilarity()`,
+`xstructuralholes()`, `xaltercomposition()` and `xegonet()` do what every
+xucinet node-level routine does: they use the relation named by `relation`,
+the first by default, and say in the report which one it was. Use
+`relation =` to pick another. `xtiecomposition()` is the exception, since
+comparing the relations is its purpose: it uses them all, as UCINET does.

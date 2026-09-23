@@ -8,8 +8,8 @@ against the xucinet 2.0 function that serves it.
 | status | meaning | count |
 |---|---|---|
 | done | written, tested, and checked against UCINET goldens | 14 |
-| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 33 |
-| not started | no function yet | 37 |
+| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 39 |
+| not started | no function yet | 31 |
 | dropped | will not be written; the reason is given below | 1 |
 
 ## Chapter 5
@@ -60,12 +60,12 @@ against the xucinet 2.0 function that serves it.
 
 | section | topic | UCINET | 2.0 function | status |
 |---|---|---|---|---|
-| 8.2 | Egonet tie composition (degree per relation, heterogeneity) | Network\|Ego Networks\|Egonet Tie Composition | `xtiecomposition()` | not started |
-| 8.3 | Valued tie composition | Network\|Ego Networks\|Egonet Valued Tie Composition | `xvaluedtiecomposition()` | not started |
-| 8.4.1–8.4.2 | Alter composition, categorical and continuous | Network\|Ego Networks\|Egonet Alter Composition\|Categorical / Continuous | `xaltercomposition()` | not started |
-| 8.5.1–8.5.2 | Ego–alter similarity (homophily), categorical and continuous | Network\|Ego Networks\|Ego-Alter Similarity\|Categorical / Continuous | `xegoaltersimilarity()` | not started |
-| 8.6.1 | Structural holes (constraint, effective size, efficiency, hierarchy) | Network\|Ego Networks\|Structural Holes | `xstructuralholes()` | not started |
-| 8.6.2 | Egonet basic measures (size, ties, density, components, ...) | Network\|Ego Networks\|Egonet Basic Measures | `xegonet()` | not started |
+| 8.2 | Egonet tie composition (degree per relation, heterogeneity) | Network\|Ego Networks\|Egonet Tie Composition | `xtiecomposition()` | coded, goldens pending |
+| 8.3 | Valued tie composition | Network\|Ego Networks\|Egonet Valued Tie Composition | `xvaluedtiecomposition()` | coded, goldens pending |
+| 8.4.1–8.4.2 | Alter composition, categorical and continuous | Network\|Ego Networks\|Egonet Alter Composition\|Categorical / Continuous | `xaltercomposition()` | coded, goldens pending |
+| 8.5.1–8.5.2 | Ego–alter similarity (homophily), categorical and continuous | Network\|Ego Networks\|Ego-Alter Similarity\|Categorical / Continuous | `xegoaltersimilarity()` | coded, goldens pending |
+| 8.6.1 | Structural holes (constraint, effective size, efficiency, hierarchy) | Network\|Ego Networks\|Structural Holes | `xstructuralholes()` | coded, goldens pending |
+| 8.6.2 | Egonet basic measures (size, ties, density, components, ...) | Network\|Ego Networks\|Egonet Basic Measures | `xegonet()` | coded, goldens pending |
 
 ## Chapter 9
 

@@ -1,5 +1,31 @@
 # xucinet 2.0.0.9000 (development)
 
+## Chapter 8: ego networks (23 September 2026)
+
+* `xegonet()`: the sixteen columns of Egonet Basic Measures - size, ties,
+  pairs, density, reciprocal distance, diameter, weak components, two-step
+  reach, brokerage and ego betweenness - for the undirected, out- or
+  in-neighbourhood. The crosswalk's `include_ego` is gone: the dialog has no
+  such option.
+* `xstructuralholes()`: effective size, efficiency, constraint, hierarchy,
+  ego betweenness and the rest, with the dyadic redundancy and dyadic
+  constraint matrices. UCINET's ego-network model by default, its
+  whole-network model with `method = "whole"`; ledger entry 17 sets both
+  beside `igraph::constraint()`.
+* `xtiecomposition()` and `xvaluedtiecomposition()`: how each ego's ties are
+  spread over the relations of a multi-relation network, and what their values
+  are.
+* `xaltercomposition()` and `xegoaltersimilarity()`: one function each for
+  UCINET's categorical and continuous menu items, deciding which from the
+  attribute (design question G3) unless `type =` says. The 1e aliases
+  `xAlterCompositionCat()` and the rest set `type` for you.
+* One `direction` argument across the chapter says which ties define the ego
+  network, each function offering its own dialog's choices and default.
+* Four UCINET bugs found and not copied: `dev/UCINET-ISSUES.md` issues 17-20,
+  ledger entries 18-20. Ledger entry 21 records that these routines report the
+  first relation of a multi-relation dataset, as every node-level routine here
+  does, where UCINET loops over them all.
+
 ## Chapter 10: whole-network measures (23 September 2026)
 
 * `xcohesion()`: the 33-measure block of Network | Whole-Network Measures,

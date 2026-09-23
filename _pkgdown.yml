@@ -131,6 +131,20 @@ reference:
   - xhubsauthorities
   - xinduced
 
+- title: Network | Ego Networks
+  desc: >
+    Chapter 8. Each node's own neighbourhood: its size and density, how its
+    ties and alters are composed, whether alters resemble ego, and Burt's
+    structural holes. One `direction` argument says which ties define the
+    ego network, with each dialog's own default.
+  contents:
+  - xegonet
+  - xstructuralholes
+  - xtiecomposition
+  - xvaluedtiecomposition
+  - xaltercomposition
+  - xegoaltersimilarity
+
 - title: Tools | Scaling/Decomposition
   desc: >
     Chapter 6. Multidimensional scaling and correspondence analysis of a

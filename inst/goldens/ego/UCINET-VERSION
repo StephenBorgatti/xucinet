@@ -1,0 +1,7 @@
+UCINET: n/a
+Generated: not yet
+Notes: Chapter 8 goldens (egonet basic measures, structural holes, tie
+    composition, alter composition, ego-alter similarity). The batch has not
+    been run. Until it is, every test that calls
+    skip_if_no_golden(<name>, "ego") skips, and this family is exempt from
+    the reference-build check.

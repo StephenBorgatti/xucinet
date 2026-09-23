@@ -108,6 +108,16 @@ notes <- c(
   xHierarchicalCluster = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xhclust."
 )
 
+# Aliases that name one variant of a 2.0 function that does both: the 1e had
+# separate categorical and continuous functions where 2.0 has one with type=.
+# The wrapper sets the argument unless the caller has set it already.
+args <- list(
+  xAlterCompositionCat   = list(type = "categorical"),
+  xAlterCompositionCon   = list(type = "continuous"),
+  xEgoAlterSimilarityCat = list(type = "categorical"),
+  xEgoAlterSimilarityCon = list(type = "continuous")
+)
+
 map <- unlist(pairs)
 map[names(overrides)] <- overrides
 
@@ -175,6 +185,14 @@ sprintf('xucinet_1e_map <- c(\n%s\n)',
 sprintf('xucinet_1e_notes <- c(\n%s\n)',
         paste(sprintf('  %s = %s', names(notes), q(unname(notes))), collapse = ",\n")),
 '',
+'# Arguments an alias fixes, because its 1e name picked one variant of a 2.0',
+"# function that now does both. The caller's own value wins.",
+sprintf('xucinet_1e_args <- list(\n%s\n)',
+        paste(sprintf('  %s = list(%s)', names(args),
+                      vapply(args, function(a) paste(sprintf('%s = %s', names(a),
+                             vapply(a, q, character(1))), collapse = ", "),
+                             character(1))), collapse = ",\n")),
+'',
 '# Aliases whose 2.0 target is not coming. These stop with the explanation',
 '# below rather than the generic "not written yet" message, which would be a',
 '# lie: nothing is going to land.',
@@ -210,6 +228,13 @@ sprintf('xucinet_1e_withdrawn <- c(\n%s\n)',
 '  }',
 '  message(old, "() is the ASNR 1e name. xucinet 2.0 calls it ", new, "().",',
 '          if (nzchar(note)) paste0("\\n  ", note) else "")',
+'  # Built as a call and evaluated here, so that `...` is forwarded unevaluated',
+'  # and the 2.0 function still sees the caller\'s expression for its title.',
+'  fixed <- xucinet_1e_args[[old]]',
+'  if (!is.null(fixed)) {',
+'    fixed <- fixed[setdiff(names(fixed), ...names())]',
+'    return(eval(as.call(c(list(fn, quote(...)), fixed))))',
+'  }',
 '  fn(...)',
 '}',
 '')

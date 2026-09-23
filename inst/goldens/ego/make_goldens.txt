@@ -1,0 +1,107 @@
+// ===========================================================================
+// xucinet golden fixtures - Chapter 8, ego networks
+//
+// For xegonet, xstructuralholes, xtiecomposition, xvaluedtiecomposition,
+// xaltercomposition and xegoaltersimilarity. Part of the single goldens sweep
+// at the end of the coding run (decision of 20 Sep 2026).
+//
+// HOW TO RUN
+//   1. Open UCINET.
+//   2. ->cd <this folder>
+//      ->run make_goldens.txt
+//   3. Then PART B, the menu runs.
+//   4. Commit everything written here, plus log_make_goldens.txt and
+//      log_menu.txt, and set the build number in UCINET-VERSION.
+//
+// Last run: not yet.
+//
+// INPUTS. campnet, camp92, campattr, hightech and sampson ship with UCINET
+// (campattr is Borgatti_Camp92_Attributes; hightech's attributes are
+// Krackhardt_HighTech_Attributes). g9_disc and g9_iso are in ../centrality/
+// and the sweep copies them here.
+// ===========================================================================
+
+
+// ---------------------------------------------------------------------------
+// PART A - the command line
+// ---------------------------------------------------------------------------
+
+// --- Structural holes, ego-network model ------------------------------------
+// holes(<net> [method]); the method is the egonet definition, union by
+// default, which is also the dialog's default ("Union - either kind"). The
+// command writes Term1-Term3 after the dialog's eleven columns; the tests use
+// the first eleven. It loops over every relation; the tests read the first.
+g8_holes_campnet  = holes(campnet)
+g8_holes_hightech = holes(hightech)
+g8_holes_sampson  = holes(sampson)
+g8_holes_iso      = holes(g9_iso)
+g8_holes_disc     = holes(g9_disc)
+
+// --- Egonet alter composition, categorical ----------------------------------
+// egocomp(<net> <attr> [type:BOTH|out|in|recip] [ignoreown:NO|yes]); the
+// defaults are the dialog's.
+g8_egocomp_campnet_gender = egocomp(campnet campattr$gender)
+
+// --- Ego-alter similarity, categorical ---------------------------------------
+// categohom(<net> <attr> [type:OUT|in|any|recip]) takes the first column of
+// the attribute dataset, so pull Gender out first. Outgoing is the dialog's
+// default too.
+gen = col(campattr 1)
+g8_egohom_campnet_gender = categohom(campnet gen type:outgoing)
+
+
+// ---------------------------------------------------------------------------
+// PART B - the menus
+// ---------------------------------------------------------------------------
+
+// --- Network | Ego Networks | Egonet Basic Measures -------------------------
+// Input network:      campnet
+// Ego network type:   UNDIRECTED (the default)
+//   -> output dataset   g8_egonet_campnet
+// Again with OUT-NEIGHBORHOOD  -> g8_egonet_campnet_out
+// Again with IN-NEIGHBORHOOD   -> g8_egonet_campnet_in
+// And g9_iso, UNDIRECTED       -> g8_egonet_iso
+// Please keep the log: the isolate's row is the one UCINET issue 17 is about.
+
+// --- Network | Ego Networks | Structural Holes -------------------------------
+// Input dataset:          campnet
+// Method:                 Ego network model (the default)
+// How to define ego net:  Union - either kind (the default)
+// Diagonal valid:         unchecked
+// Symmetrize by sum ala Burt: checked (the default)
+// Constraint, isolates / pendants:     NA / NA (the defaults)
+// Effective size, isolates / pendants: 0 / 1 (the defaults)
+//   -> Output dyadic redundancy   g8_holes_campnet_dr
+//   -> Output dyadic constraint   g8_holes_campnet_dc
+// The node-level measures are already in g8_holes_campnet from part A.
+
+// --- Network | Ego Networks | Egonet Tie Composition -------------------------
+// Input (multi-relational) network:  sampson
+// Which ties matter?:                Undirected (OR) (the default)
+// Valid ties:                        Not equal to 0 (the default)
+// Include ties to self:              unchecked
+//   -> Output Scores   g8_tiecomp_sampson
+
+// --- Network | Ego Networks | Egonet Valued Tie Composition ------------------
+// Input network:        camp92
+// Which ties matter?:   Outgoing only (the default)
+// Valid ties:           Not equal to 0 (the default)
+// Include ties to self: unchecked
+//   -> Output Scores   g8_vtiecomp_camp92
+// It writes one table per relation; the tests read the first.
+
+// --- Network | Ego Networks | Egonet Alter Composition | Continuous -----------
+// Input Network Dataset:     hightech
+// Input Attribute dataset:   the hightech attributes, Column, Age
+// Definition of Ego Network: Both incoming and outgoing ties (the default)
+// Valued tie data:           Treat tie strengths as analytical weights (default)
+// Filters:                   neither ticked
+//   -> Output Strength Dataset   g8_compcont_hightech_age
+
+// --- Network | Ego Networks | Ego-Alter Similarity | Continuous --------------
+// Input Network Dataset:     hightech
+// Input Attribute Dataset:   the hightech attributes, Column, Age
+// Definition of Ego Network: Outgoing ties only (the default)
+// Attribute Normalization:   None (the default)
+// Measures:                  tick ALL SIX (only -AbsDiff is ticked by default)
+//   -> Output Measures Dataset   g8_egohomcont_hightech_age
