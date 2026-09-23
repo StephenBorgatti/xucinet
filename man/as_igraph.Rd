@@ -35,8 +35,6 @@ an \code{xucinet} object.
 \examples{
 m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3,
             dimnames = list(c("a","b","c"), c("a","b","c")))
-if (requireNamespace("igraph", quietly = TRUE)) {
-  g <- as_igraph(m)
-  as_xucinet(g)
-}
+g <- as_igraph(m)
+as_xucinet(g)
 }

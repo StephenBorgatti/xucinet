@@ -115,7 +115,6 @@ as_xucinet.character <- function(x, directed = NULL, mode = NULL, title = NULL, 
 #' @export
 as_xucinet.igraph <- function(x, directed = NULL, mode = NULL, title = NULL, ...) {
   if (is.null(title)) title <- deparse1(substitute(x))
-  need_pkg("igraph", "Converting an igraph object")
   wt <- edge_weight_attr(x)
   # A bipartite igraph carries a logical vertex attribute "type"; UCINET calls
   # that 2-mode, with the FALSE vertices as rows.
@@ -347,13 +346,10 @@ resolve_index <- function(idx, labels, what) {
 #' @examples
 #' m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3,
 #'             dimnames = list(c("a","b","c"), c("a","b","c")))
-#' if (requireNamespace("igraph", quietly = TRUE)) {
-#'   g <- as_igraph(m)
-#'   as_xucinet(g)
-#' }
+#' g <- as_igraph(m)
+#' as_xucinet(g)
 #' @export
 as_igraph <- function(net, relation = NULL) {
-  need_pkg("igraph", "as_igraph()")
   net <- as_xucinet(net)
   m <- export_matrix(net, relation, "igraph")
   if (net$mode == "2-mode") {

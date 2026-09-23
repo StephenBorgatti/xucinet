@@ -19,13 +19,13 @@ Depends:
     R (>= 4.1)
 Imports:
     graphics,
+    igraph,
     MASS,
     stats,
     tools,
     utils
 Suggests:
     cluster,
-    igraph,
     network,
     sna,
     tidygraph,
