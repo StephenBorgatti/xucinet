@@ -24,6 +24,12 @@
 * Report objects gain `hide` (a matrix kept but not printed) and `epilogue`
   (lines printed last).
 * Ledger entries 27-30; UCINET issue 27.
+* Faster, same answers (issue #19): `xgirvannewman()` takes edge betweenness
+  from `igraph::edge_betweenness()`; `xlouvain()` scores moves by the change in
+  modularity; `xfactions()` scores moves from group totals and takes its
+  starting distances from `igraph::distances()`. On a 200-node network the
+  three went from 5.4, 4.8 and over 11 seconds to 0.2, 0.1 and 0.4. Tests hold
+  each to the partitions of the straightforward version.
 
 ## Steve's answers of 23 September 2026
 

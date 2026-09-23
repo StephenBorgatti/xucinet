@@ -87,23 +87,27 @@ xgirvannewman <- function(net, k = 10, relation = NULL) {
 
 # girvannewmanclustering: the partitions, one column per new component count,
 # in the order they were found (fewest clusters first).
+#
+# Edge betweenness comes from igraph::edge_betweenness() (issue #19): on an
+# undirected graph it counts each pair of nodes once, which is the lower
+# triangle of UCINET's getedgebetweenness matrix, and agrees with it to
+# rounding error, far inside the four decimals UCINET rounds to. The removal
+# rule and the recording of partitions stay UCINET's.
 girvan_newman_partitions <- function(a, maxc) {
   n <- nrow(a)
   cols <- list()
   seen <- integer(0)
   maxit <- n * (n - 1) / 2
   it <- 0
+  g <- igraph::graph_from_adjacency_matrix(unname(a), mode = "undirected")
   repeat {
     it <- it + 1
-    eb <- brandes_edges(a)$edge
-    low <- lower.tri(eb)
-    vals <- round(eb[low], 4)
-    maxval <- if (length(vals)) max(vals) else 0
+    if (igraph::ecount(g) == 0) break
+    vals <- round(igraph::edge_betweenness(g, directed = FALSE), 4)
+    maxval <- max(vals)
     if (!(maxval > 0)) break
-    cut <- which(low & round(eb, 4) >= maxval, arr.ind = TRUE)
-    a[cut] <- 0
-    a[cut[, 2:1, drop = FALSE]] <- 0
-    part <- components_of(a)
+    g <- igraph::delete_edges(g, which(vals >= maxval))
+    part <- as.integer(igraph::components(g)$membership)
     nclus <- length(unique(part))
     if (!nclus %in% seen) {
       seen <- c(seen, nclus)

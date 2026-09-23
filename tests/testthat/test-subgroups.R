@@ -355,3 +355,73 @@ test_that("Louvain differs from UCINET until issue 26 is fixed", {
   # From a fixed build this becomes: the same final partition.
   succeed()
 })
+
+# ---- the speed-ups give the same answers (issue #19) --------------------------------
+
+equiv_nets <- function() {
+  set.seed(19)
+  rnd <- function(n, p) {
+    m <- matrix(0, n, n); m[upper.tri(m)] <- rbinom(n * (n - 1) / 2, 1, p)
+    m <- m + t(m); dimnames(m) <- list(paste0("v", 1:n), paste0("v", 1:n)); m
+  }
+  list(campnet = pmax(as.matrix(campnet), t(as.matrix(campnet))),
+       campnet_dir = as.matrix(campnet),
+       zachary = pmax(as.matrix(zachary), t(as.matrix(zachary))),
+       hightech_valued = pmax(as.matrix(hightech, relation = "Advice"),
+                              t(as.matrix(hightech, relation = "Advice"))),
+       random40 = rnd(40, 0.12), random60 = rnd(60, 0.08))
+}
+
+test_that("fast factions search visits the same partitions as the full one", {
+  for (nm in names(equiv_nets())) {
+    m <- equiv_nets()[[nm]]
+    a <- (m > 0) * 1; diag(a) <- 0
+    ties <- which(a > 0, arr.ind = TRUE)
+    n <- nrow(a)
+    for (meth in c("hamming", "phi", "modularity", "entailment")) {
+      for (k in 2:3) {
+        fitof <- factions_fit(meth, ties[, 1], ties[, 2], nrow(ties), n, k)
+        ctx <- list(a = a, method = meth, numedges = nrow(ties))
+        set.seed(k)
+        p0 <- sample.int(k, n, replace = TRUE)
+        expect_identical(factions_tabu(p0, ctx, k, 20, 15),
+                         ref_factions_tabu(p0, fitof, k, 20, 15),
+                         info = paste(nm, meth, k))
+      }
+    }
+  }
+})
+
+test_that("fast Louvain gives the same levels as the full recomputation", {
+  for (nm in names(equiv_nets())) {
+    w <- equiv_nets()[[nm]]
+    w[is.na(w)] <- 0
+    if (nm == "campnet_dir") next          # xlouvain symmetrizes by default
+    expect_identical(louvain_levels(w, nrow(w))$hier,
+                     ref_louvain_levels(w, nrow(w))$hier, info = nm)
+  }
+})
+
+test_that("Girvan-Newman on igraph's edge betweenness gives the same partitions", {
+  cyc <- matrix(0, 4, 4); for (i in 1:4) cyc[i, i %% 4 + 1] <- cyc[i %% 4 + 1, i] <- 1
+  nets <- c(equiv_nets(), list(cycle = cyc))
+  for (nm in names(nets)) {
+    a <- community_adjacency(nets[[nm]])
+    expect_equal(girvan_newman_partitions(a, 10),
+                 ref_girvan_newman_partitions(a, 10), info = nm)
+  }
+})
+
+test_that("the factions start from igraph's distances is the Floyd port's", {
+  for (nm in names(equiv_nets())) {
+    a <- equiv_nets()[[nm]]
+    a[is.na(a)] <- 0
+    a[a > 1] <- 1
+    d <- binary_floyd(a)
+    d[row(d) != col(d) & d == 0] <- 1e38
+    diag(d) <- 0
+    for (k in 2:4) {
+      expect_identical(factions_start(a, k), km1(d, k), info = paste(nm, k))
+    }
+  }
+})

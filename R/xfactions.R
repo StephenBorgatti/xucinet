@@ -146,6 +146,9 @@ factions_optimize <- function(m, nb, method, nstarts, maxit, nban, seed) {
   numedges <- length(ei)
 
   fitof <- factions_fit(method, ei, ej, numedges, n, nb)
+  tie01 <- matrix(0, n, n)
+  tie01[cbind(ei, ej)] <- 1
+  ctx <- list(a = tie01, method = method, numedges = numedges)
 
   if (method == "modularity" && numedges == 0) {
     return(list(part = rep(1L, n), cost = 1, a = a))
@@ -157,7 +160,7 @@ factions_optimize <- function(m, nb, method, nstarts, maxit, nban, seed) {
   for (s in seq_len(nstarts)) {
     delphi_addseed(rng, 31)
     p <- vapply(seq_len(n), function(i) delphi_random(rng, nb) + 1, numeric(1))
-    p <- factions_tabu(as.integer(p), fitof, nb, maxit, nban)
+    p <- factions_tabu(as.integer(p), ctx, nb, maxit, nban)
     fit <- fitof(p)
     if (fit < bestcost) {
       bestcost <- fit
@@ -169,46 +172,61 @@ factions_optimize <- function(m, nb, method, nstarts, maxit, nban, seed) {
 }
 
 # The four fit functions of uc_factions.pas, each a cost to minimize, over the
-# directed off-diagonal ties (ei -> ej).
-factions_fit <- function(method, ei, ej, numedges, n, nb) {
-  force(method)
+# directed off-diagonal ties (ei -> ej). Each is a function of group-level
+# aggregates only - group sizes, the number of ties inside groups, and for
+# modularity each group's inside total and row total - so a candidate move can
+# be scored by adjusting the aggregates (issue #19). They are integers, so the
+# cost of a candidate is the same number a full recomputation gives.
+factions_cost <- function(method, sizes, intra_e, ediag, arow, numedges, n) {
   switch(method,
-    hamming = function(p) {
-      s <- tabulate(p, nb)
-      intra_p <- sum(s * (s - 1))
-      intra_e <- sum(p[ei] == p[ej])
-      intra_p + numedges - 2 * intra_e
-    },
-    phi = function(p) {
-      s <- tabulate(p, nb)
-      intra_p <- sum(s * (s - 1))
-      intra_e <- sum(p[ei] == p[ej])
+    hamming = sum(sizes * (sizes - 1)) + numedges - 2 * intra_e,
+    phi = {
+      intra_p <- sum(sizes * (sizes - 1))
       total <- n * (n - 1)
       a <- intra_e; b <- intra_p - intra_e
       c <- numedges - intra_e; d <- total - intra_p - c
       den <- sqrt((a + b) * (c + d) * (a + c) * (b + d))
       if (den <= 0) 1 else 1 - (a * d - b * c) / den
     },
-    entailment = function(p) {
-      if (numedges == 0) return(0)
-      (numedges - sum(p[ei] == p[ej])) / numedges
-    },
-    modularity = function(p) {
-      e <- matrix(0, nb, nb)
-      tab <- table(factor(p[ei], levels = seq_len(nb)),
-                   factor(p[ej], levels = seq_len(nb)))
-      e[] <- tab
-      ai <- rowSums(e)
-      1 - sum(diag(e) / numedges - (ai / numedges)^2)
-    })
+    entailment = if (numedges == 0) 0 else (numedges - intra_e) / numedges,
+    modularity = 1 - sum(ediag / numedges - (arow / numedges)^2))
+}
+
+# The aggregates of a partition, from the 0/1 tie matrix `a`.
+factions_state <- function(a, p, nb) {
+  g <- matrix(0, length(p), nb)
+  g[cbind(seq_along(p), p)] <- 1
+  og <- a %*% g                              # ties from i into each group
+  ig <- crossprod(a, g)                      # ties into i from each group
+  e <- crossprod(g, a %*% g)                 # group by group tie counts
+  list(sizes = tabulate(p, nb), intra_e = sum(diag(e)), ediag = diag(e),
+       arow = rowSums(e), t = og + ig)
+}
+
+factions_fit <- function(method, ei, ej, numedges, n, nb) {
+  force(method)
+  a <- matrix(0, n, n)
+  a[cbind(ei, ej)] <- 1
+  function(p) {
+    st <- factions_state(a, p, nb)
+    factions_cost(method, st$sizes, st$intra_e, st$ediag, st$arow, numedges, n)
+  }
 }
 
 # getstartingpartition: floyd on the dichotomized matrix (tie values as
 # lengths, unreachable pairs 1e38), then km1 with distances.
+#
+# binaryfloyd is Floyd-Warshall with the tie values as lengths, i.e. ordinary
+# weighted shortest paths, so the distances come from igraph::distances()
+# (issue #19); `binary_floyd()` below is the literal port, kept for the tests.
 factions_start <- function(a, nb) {
-  n <- nrow(a)
-  d <- binary_floyd(a)
-  d[row(d) != col(d) & d == 0] <- 1e38
+  w <- a
+  w[w < 0] <- 0
+  diag(w) <- 0
+  g <- igraph::graph_from_adjacency_matrix(unname(w), mode = "directed",
+                                           weighted = TRUE, diag = FALSE)
+  d <- igraph::distances(g, mode = "out")
+  d[!is.finite(d)] <- 1e38
   diag(d) <- 0
   km1(d, nb)
 }
@@ -275,31 +293,75 @@ km1 <- function(d, nb) {
 }
 
 # tabuoptimize. Returns the best partition the search visited.
-factions_tabu <- function(bestp, fitof, nb, maxit, nban) {
+#
+# The delta of every candidate move (node i from its group a to group g) is
+# scored from the aggregates adjusted for that one move, rather than from a
+# full recomputation (issue #19): sizes a - 1 and g + 1; ties inside groups
+# minus i's ties with the rest of a, plus its ties with g; for modularity the
+# inside totals of a and g adjusted the same way and their row totals by i's
+# outdegree.
+factions_tabu <- function(bestp, ctx, nb, maxit, nban) {
   if (nb < 2) return(bestp)
+  a <- ctx$a; method <- ctx$method; numedges <- ctx$numedges
   n <- length(bestp)
+  outdeg <- rowSums(a)
   p <- bestp
   dok <- matrix(0L, n, nb)
-  currentcost <- fitof(p)
+  cost_of <- function(st) factions_cost(method, st$sizes, st$intra_e, st$ediag,
+                                        st$arow, numedges, n)
+  st <- factions_state(a, p, nb)
+  currentcost <- cost_of(st)
   bestf <- currentcost
   sentinel <- 2 * abs(currentcost) + 1
 
-  delta_all <- function() {
-    sizes <- tabulate(p, nb)
+  delta_all <- function(st) {
+    if (method != "modularity") return(delta_counts(st))
     dl <- matrix(0, n, nb)
     for (i in seq_len(n)) {
-      oldg <- p[i]
+      ga <- p[i]
       for (g in seq_len(nb)) {
-        if (g == oldg) next
-        if (sizes[oldg] < 2) { dl[i, g] <- sentinel; next }
-        q <- p; q[i] <- g
-        dl[i, g] <- fitof(q) - currentcost
+        if (g == ga) next
+        if (st$sizes[ga] < 2) { dl[i, g] <- sentinel; next }
+        sz <- st$sizes; sz[ga] <- sz[ga] - 1; sz[g] <- sz[g] + 1
+        ie <- st$intra_e - st$t[i, ga] + st$t[i, g]
+        ed <- st$ediag; ar <- st$arow
+        if (method == "modularity") {
+          ed[ga] <- ed[ga] - st$t[i, ga]; ed[g] <- ed[g] + st$t[i, g]
+          ar[ga] <- ar[ga] - outdeg[i]; ar[g] <- ar[g] + outdeg[i]
+        }
+        dl[i, g] <- factions_cost(method, sz, ie, ed, ar, numedges, n) - currentcost
       }
     }
     dl
   }
 
-  delta <- delta_all()
+  # Hamming, phi and entailment depend only on the sizes and the inside tie
+  # count, so every candidate is scored at once, cell by cell, with the same
+  # arithmetic factions_cost uses.
+  delta_counts <- function(st) {
+    s <- st$sizes
+    intra_p <- sum(s * (s - 1))
+    sa <- s[p]
+    ta <- st$t[cbind(seq_len(n), p)]
+    ip <- intra_p - 2 * (sa - 1) + matrix(2 * s, n, nb, byrow = TRUE)
+    ie <- st$intra_e - ta + st$t
+    cost <- switch(method,
+      hamming = ip + numedges - 2 * ie,
+      entailment = if (numedges == 0) matrix(0, n, nb) else (numedges - ie) / numedges,
+      phi = {
+        total <- n * (n - 1)
+        a_ <- ie; b_ <- ip - ie
+        c_ <- numedges - ie; d_ <- total - ip - c_
+        den <- sqrt((a_ + b_) * (c_ + d_) * (a_ + c_) * (b_ + d_))
+        ifelse(den <= 0, 1, 1 - (a_ * d_ - b_ * c_) / den)
+      })
+    dl <- cost - currentcost
+    dl[sa < 2, ] <- sentinel
+    dl[cbind(seq_len(n), p)] <- 0
+    dl
+  }
+
+  delta <- delta_all(st)
   changed <- FALSE
   r <- maxit
   while (r > 0) {
@@ -311,9 +373,10 @@ factions_tabu <- function(bestp, fitof, nb, maxit, nban) {
       }
     }
     if (bd >= 0) dok[bi, oj] <- nban
-    if (tabulate(p, nb)[oj] > 1) p[bi] <- bj
-    currentcost <- fitof(p)
-    delta <- delta_all()
+    if (st$sizes[oj] > 1) p[bi] <- bj
+    st <- factions_state(a, p, nb)
+    currentcost <- cost_of(st)
+    delta <- delta_all(st)
     if (currentcost < bestf) {
       bestf <- currentcost
       bestp <- p

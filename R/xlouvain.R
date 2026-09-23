@@ -8,8 +8,10 @@
 #
 # Ported natively rather than run on igraph::cluster_louvain, because UCINET's
 # version is deterministic and igraph's is not: nodes are visited in index
-# order, every candidate move is scored by recomputing Q in full, and a node
-# moves to the neighbouring cluster with the highest Q if that raises Q. Each
+# order, every candidate move is scored by the Q it would give (UCINET
+# recomputes Q in full; here the change in Q is computed directly, which is the
+# same number, issue #19), and a node moves to the neighbouring cluster with
+# the highest Q if that raises Q. Each
 # level's partition is stored; the network is then aggregated (clusters
 # become nodes, renumbered by sorted id, with their internal weight on the
 # diagonal) and the process repeats until a level merges nothing.
@@ -113,6 +115,19 @@ xlouvain <- function(net, symmetrize = c("max", "min", "average", "sum", "none")
 }
 
 # tlouvain.run with the identity start and method 0 (every node, in order).
+#
+# Scored by the change in modularity rather than a full recomputation
+# (issue #19). With S the total weight inside clusters, K_c a cluster's total
+# row sum and m the total weight, Q = (S - sum K_c^2 / m) / m, and moving node
+# i from cluster a to cluster b changes it by
+#
+#   (w_ib - w_ia) / m  -  ((K_a - d_i)^2 + (K_b + d_i)^2 - K_a^2 - K_b^2) / m^2
+#
+# where w_ic is the weight between i and the rest of c, both directions, and
+# d_i is i's row sum. That is exactly the difference getq would compute; only
+# the arithmetic is shorter. A move is made only if it raises Q by more than
+# 1e-12, so that two routes to the same Q are a tie (first candidate wins, as
+# in UCINET) rather than a coin toss decided by rounding.
 louvain_levels <- function(w, maxpart) {
   noriginal <- nrow(w)
   net <- w
@@ -124,40 +139,52 @@ louvain_levels <- function(w, maxpart) {
     colnames(hier) <- paste0(noriginal, "|NA")
     return(list(hier = hier))
   }
+  m <- sumofties
 
   getq <- function(part, net, deg) {
     same <- outer(part, part, "==")
     k <- tapply(deg, part, sum)
-    (sum(net[same]) - sum(k^2) / sumofties) / sumofties
+    (sum(net[same]) - sum(k^2) / m) / m
   }
 
-  part <- seq_len(noriginal)
-  deg <- rowSums(net)
-  currentq <- getq(part, net, deg)
   n <- noriginal
+  part <- seq_len(n)
+  currentq <- NA_real_
   for (it in seq_len(maxpart)) {
+    deg <- rowSums(net)
     neighbors <- lapply(seq_len(n), function(i) which(net[i, ] > 0))
-    # movenodes. The move must beat the Q of leaving the node where it is
-    # (UCINET issue 26: UCINET compares with the Q from before the pass).
+    both <- net + t(net)
+    kc <- numeric(n)
+    kc[seq_len(n)] <- tapply(deg, factor(part, levels = seq_len(n)), sum)
+    kc[is.na(kc)] <- 0
+    # movenodes
     anymoved <- TRUE
     while (anymoved) {
       anymoved <- FALSE
       for (ego in seq_len(n)) {
-        best_cluster <- part[ego]
-        best_q <- getq(part, net, deg)
-        for (cl in unique(part[neighbors[[ego]]])) {
-          old <- part[ego]
-          part[ego] <- cl
-          temp <- getq(part, net, deg)
-          part[ego] <- old
-          if (temp > best_q) {
+        cands <- unique(part[neighbors[[ego]]])
+        a <- part[ego]
+        cands <- cands[cands != a]
+        if (!length(cands)) next
+        s <- both[ego, ]
+        s[ego] <- 0
+        d <- deg[ego]
+        w_a <- sum(s[part == a])
+        best_cluster <- a
+        best_gain <- 0
+        for (cl in cands) {
+          gain <- (sum(s[part == cl]) - w_a) / m -
+            ((kc[a] - d)^2 + (kc[cl] + d)^2 - kc[a]^2 - kc[cl]^2) / m^2
+          if (gain > best_gain + 1e-12) {
             best_cluster <- cl
-            best_q <- temp
+            best_gain <- gain
           }
         }
-        if (part[ego] != best_cluster) {
-          anymoved <- TRUE
+        if (best_cluster != a) {
+          kc[a] <- kc[a] - d
+          kc[best_cluster] <- kc[best_cluster] + d
           part[ego] <- best_cluster
+          anymoved <- TRUE
         }
       }
     }
@@ -169,15 +196,11 @@ louvain_levels <- function(w, maxpart) {
     prev <- if (ncol(hier) == 0) seq_len(noriginal) else hier[, ncol(hier)]
     hier <- cbind(hier, part[prev])
     heads <- c(heads, paste0(nclus, "|", formatC(currentq, format = "f", digits = 3)))
-    # aggregate
+    # aggregate: clusters become nodes, within-cluster weight on the diagonal.
     oldn <- n
-    agg <- matrix(0, nclus, nclus)
-    for (i in seq_len(n)) for (j in seq_len(n)) {
-      agg[part[i], part[j]] <- agg[part[i], part[j]] + net[i, j]
-    }
-    net <- agg
+    net <- t(rowsum(t(rowsum(net, part)), part))
+    dimnames(net) <- NULL
     n <- nclus
-    deg <- rowSums(net)
     if (n == oldn) {
       hier <- hier[, -ncol(hier), drop = FALSE]
       heads <- heads[-length(heads)]
