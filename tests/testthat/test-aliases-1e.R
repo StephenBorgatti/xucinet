@@ -165,14 +165,17 @@ test_that("a withdrawn alias says so, instead of promising it is coming", {
 
 test_that("every withdrawn alias explains what to do instead", {
   for (old in names(xucinet_1e_withdrawn)) {
-    expect_match(xucinet_1e_withdrawn[[old]], "xucinet 2.0 has no project object",
-                 info = old)
+    if (grepl("Project", old)) {
+      expect_match(xucinet_1e_withdrawn[[old]], "xucinet 2.0 has no project object",
+                   info = old)
+    }
     # each points at a routine that does exist, so the reader has somewhere
     # to go rather than just being told no
-    named <- vapply(c("xread", "xmatch", "xjoin", "xunpack"),
-                    function(fn) grepl(fn, xucinet_1e_withdrawn[[old]],
-                                       fixed = TRUE),
-                    logical(1))
-    expect_true(any(named), info = old)
+    fns <- regmatches(xucinet_1e_withdrawn[[old]],
+                      gregexpr("\\bx[a-z]+(?=\\()", xucinet_1e_withdrawn[[old]],
+                               perl = TRUE))[[1]]
+    named <- vapply(fns, function(fn)
+      exists(fn, envir = asNamespace("xucinet"), mode = "function"), logical(1))
+    expect_true(length(named) > 0 && any(named), info = old)
   }
 })

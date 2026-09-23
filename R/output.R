@@ -200,6 +200,12 @@ format_number <- function(v, digits = 3) format_values(v, digits)
 #'   in the object without printing it, for a routine whose UCINET log does not
 #'   show a table it saves, such as the partition matrix of Johnson's
 #'   clustering.
+#' @param hide Names of `matrices` kept in the object but not printed, for a
+#'   matrix UCINET saves without showing it in the log (the clique
+#'   co-membership matrix).
+#' @param epilogue Optional preformatted lines printed after every table, for
+#'   output UCINET places last, such as the clustering diagram that ends the
+#'   Cliques report.
 #' @return An object of class `xucinet_output`.
 #' @keywords internal
 #' @export
@@ -208,13 +214,14 @@ new_xucinet_output <- function(routine, net, nodes = NULL, summary = NULL,
                                subclass = NULL, call = sys.call(-1),
                                nodes_title = NULL, summary_title = NULL,
                                stats_block = FALSE, fields = NULL,
-                               preamble = NULL, print_nodes = TRUE) {
+                               preamble = NULL, print_nodes = TRUE,
+                               hide = character(), epilogue = NULL) {
   structure(
     list(routine = routine, dataset = net$title, nodes = nodes, summary = summary,
          matrices = matrices, assumptions = assumptions, call = call,
          nodes_title = nodes_title, summary_title = summary_title,
          stats_block = stats_block, fields = fields, preamble = preamble,
-         print_nodes = print_nodes),
+         print_nodes = print_nodes, hide = hide, epilogue = epilogue),
     class = c(subclass, "xucinet_output")
   )
 }
@@ -314,8 +321,13 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = NULL, ...) 
   }
 
   for (nm in names(x$matrices)) {
+    if (nm %in% x$hide) next
     cat(nm, "\n\n", sep = "")
     cat_uci_matrix(x$matrices[[nm]], digits)
+    cat("\n")
+  }
+  if (length(x$epilogue)) {
+    cat(x$epilogue, sep = "\n")
     cat("\n")
   }
   invisible(x)

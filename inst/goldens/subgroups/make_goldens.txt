@@ -1,0 +1,45 @@
+// ===========================================================================
+// xucinet golden fixtures - Chapter 11, subgroups
+//
+// For xcliques, xfactions, xgirvannewman and xlouvain. Part of the single
+// goldens sweep at the end of the coding run (decision of 20 Sep 2026).
+// Fast greedy and label propagation run on igraph by decision and have no
+// fixtures here.
+//
+// All of these are menu runs: the dialogs save the datasets named below.
+//
+// HOW TO RUN
+//   1. Open UCINET and do the menu runs below.
+//   2. Commit everything written here, plus log_menu.txt, and set the build
+//      number in UCINET-VERSION.
+//
+// Last run: not yet.
+// ===========================================================================
+
+// --- Network | Subgroups | Cliques -------------------------------------------
+// Minimum size: 3 (the default); Type: Weak (the default); Analyze pattern of
+// overlaps: Yes.
+//   campnet                    -> (Output) Clique indicator matrix  g11_cliq_campnet
+//   hightech, Friendship only  -> g11_cliq_hightech_fr
+//   zachary                    -> g11_cliq_zachary
+// Keep the log: it has the clique list, the participation scores and the
+// clustering of the overlap matrix.
+
+// --- Network | Subgroups | Factions (not "Factions (legacy)") -----------------
+// Measure of fit: Hamming (the default); Number of random starts: 3; Max # of
+// iterations in series: 20; Length of time in penalty box: 15.
+// Random number seed: TYPE 1 (the dialog fills in a random one).
+//   campnet, 2 blocks -> Output partition dataset  g11_fact_campnet_2
+//   campnet, 3 blocks -> g11_fact_campnet_3
+//   zachary, 2 blocks -> g11_fact_zachary_2
+
+// --- Network | Subgroups | Girvan-Newman ---------------------------------------
+// Output partitions with no more than 10 clusters (the default).
+//   zachary -> Output dataset containing partitions  g11_gn_zachary
+//   campnet -> g11_gn_campnet
+
+// --- Network | Subgroups | Louvain Method ---------------------------------------
+// Max partitions: blank; For directed data: Maximum/union (the default); no
+// starting partition.
+//   zachary -> (Output) Partitions  g11_louv_zachary
+// Expected to differ until UCINET issue 26 is fixed; see README.md.

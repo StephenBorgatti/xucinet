@@ -18,7 +18,9 @@ new_xucinet_output(
   stats_block = FALSE,
   fields = NULL,
   preamble = NULL,
-  print_nodes = TRUE
+  print_nodes = TRUE,
+  hide = character(),
+  epilogue = NULL
 )
 }
 \arguments{
@@ -62,6 +64,14 @@ such as the text cluster diagram of Johnson's clustering.}
 in the object without printing it, for a routine whose UCINET log does not
 show a table it saves, such as the partition matrix of Johnson's
 clustering.}
+
+\item{hide}{Names of \code{matrices} kept in the object but not printed, for a
+matrix UCINET saves without showing it in the log (the clique
+co-membership matrix).}
+
+\item{epilogue}{Optional preformatted lines printed after every table, for
+output UCINET places last, such as the clustering diagram that ends the
+Cliques report.}
 }
 \value{
 An object of class \code{xucinet_output}.

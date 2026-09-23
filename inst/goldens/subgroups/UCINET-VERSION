@@ -1,0 +1,6 @@
+UCINET: n/a
+Generated: not yet
+Notes: Chapter 11 goldens (cliques, factions, Girvan-Newman, Louvain). The
+    batch has not been run. Until it is, every test that calls
+    skip_if_no_golden(<name>, "subgroups") skips, and this family is exempt
+    from the reference-build check.

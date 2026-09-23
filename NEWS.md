@@ -1,5 +1,30 @@
 # xucinet 2.0.0.9000 (development)
 
+## Chapter 11: subgroups (23 September 2026)
+
+* igraph moves from Suggests to Imports (design answer G1).
+* `xcliques()`: maximal cliques in the order UCINET finds them (a step-for-step
+  port of its Bron-Kerbosch), participation scores, the co-membership matrix
+  and its average-link clustering. Weak (a tie either way) by default.
+* `xfactions()`: UCINET's Factions, the tabu search with its four fit
+  measures (Hamming, Phi, Modularity, Entailment). Delphi's random number
+  generator is ported, so `seed =` reproduces UCINET's run.
+* `xgirvannewman()`: ported natively, so tied edges are removed together as
+  UCINET removes them; one partition per new component count, each with its
+  modularity.
+* `xlouvain()`: a native, deterministic port of UCINET's Louvain Method,
+  without its two bugs (UCINET issue 26, ledger entry 27). 2-mode input waits
+  on issue #18.
+* `xfastgreedy()` and `xlabelpropagation()` on igraph (ledger entry 28).
+* `xcommunities(method = )` runs any of the five and returns the same shape.
+  Every partition routine reports `Cluster` and a `Modularity` computed the
+  same way.
+* The 1e Walktrap aliases stop and name `xcommunities()`; Walktrap is not in
+  2.0 (design answer 11.5).
+* Report objects gain `hide` (a matrix kept but not printed) and `epilogue`
+  (lines printed last).
+* Ledger entries 27-30; UCINET issue 27.
+
 ## Steve's answers of 23 September 2026
 
 * `xmixing()`, new: Network | Mixing Tables. The observed mixing table, and

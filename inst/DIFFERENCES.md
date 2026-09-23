@@ -538,3 +538,56 @@ divides that report differently, in two ways:
   `xcombinenodes()` gives.
 
 Every number is UCINET's; only the grouping into reports differs.
+
+## 27. Louvain: moves must raise modularity, and each level's Q is its own
+
+**Status:** UCINET fix pending. `dev/UCINET-ISSUES.md` issue 26 (Steve,
+23 September 2026).
+
+`xlouvain()` is a native port of UCINET's Louvain Method: nodes visited in
+index order, each candidate move scored by recomputing modularity in full,
+levels aggregated until nothing merges. It departs from UCINET in two places,
+both bugs in UCINET's `utlouvain.pas`:
+
+- **The move test.** UCINET compares a candidate move with the modularity the
+  pass started from, not with the modularity of leaving the node where it is.
+  Once earlier moves have raised Q, it can make a move that lowers Q, as long
+  as the result still beats the starting value. `xlouvain()` moves a node only
+  if the move raises the current Q.
+- **The reported Q.** UCINET labels each level with the Q from the last node
+  it evaluated, which is not reliably the level's own modularity.
+  `xlouvain()` recomputes Q from each level's final partition.
+
+## 28. Fast greedy and label propagation run on igraph
+
+**Status:** deliberate. Design answer G1 and the chapter 11 prompt, 20 and
+23 September 2026.
+
+`xfastgreedy()` is `igraph::cluster_fast_greedy()`, Clauset, Newman and
+Moore's agglomeration from single nodes. UCINET's own FastGreedy
+(`uc_FastGreedy.pas`) starts by default from a partition built from cliques
+(*Initial Partition* = Clique-based) and switches to a Louvain variant on
+networks of more than 100 nodes, so its partition can differ. With *Initial
+Partition* set to Identity, on 100 nodes or fewer, the two should agree.
+
+`xlabelpropagation()` is `igraph::cluster_label_prop()`. Label propagation is
+random, and UCINET's uses Delphi's generator, so the two agree only by chance
+on a network without clear groups.
+
+## 29. Missing cells in factions and Louvain
+
+**Status:** UCINET fix pending. `dev/UCINET-ISSUES.md` issue 27, raised
+23 September 2026.
+
+`xfactions()` and `xlouvain()` treat a missing cell as no tie. UCINET stores a
+missing value as 1e38: Factions' dichotomize turns it into a tie, and Louvain
+adds it into its modularity as a tie of weight 1e38. On complete data they
+agree.
+
+## 30. Cliques: no clustering of the clique-by-clique overlap
+
+**Status:** deliberate simplification, 23 September 2026.
+
+UCINET's Cliques ends with two hierarchical clusterings: of the actor-by-actor
+co-membership matrix, and of the clique-by-clique overlap matrix. `xcliques()`
+reports the first, which is what chapter 11 uses, and not the second.

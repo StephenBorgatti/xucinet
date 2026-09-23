@@ -132,6 +132,21 @@ reference:
   - xhubsauthorities
   - xinduced
 
+- title: Network | Subgroups
+  desc: >
+    Chapter 11. Cliques, and partitions into cohesive groups. Every partition
+    routine reports `Cluster` for each node and a `Modularity` computed the
+    same way, so the methods can be compared; `xcommunities()` runs any of
+    them.
+  contents:
+  - xcliques
+  - xfactions
+  - xgirvannewman
+  - xlouvain
+  - xfastgreedy
+  - xlabelpropagation
+  - xcommunities
+
 - title: Network | Ego Networks
   desc: >
     Chapter 8. Each node's own neighbourhood: its size and density, how its

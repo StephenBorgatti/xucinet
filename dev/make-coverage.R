@@ -47,7 +47,9 @@ dropped <- c(
   xcreateproject   = "design question 5.11: xucinet 2.0 has no project object",
   xaddtoproject    = "design question 5.11: xucinet 2.0 has no project object",
   xremovefromproject = "design question 5.11: xucinet 2.0 has no project object",
-  xreachbetweenness = "no UCINET equivalent; withdrawn 7 Sep 2026"
+  xreachbetweenness = "no UCINET equivalent; withdrawn 7 Sep 2026",
+  xwalktrap        = "design question 11.5 (after D-7): the third edition does not use Walktrap; the 1e aliases name xcommunities()",
+  drop             = "QuickClus: the crosswalk marks it for dropping; chapter 11 does not use it"
 )
 
 # The first bare lowercase name in the 2.0 column, the way xhelp() reads it.

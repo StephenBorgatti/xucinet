@@ -87,6 +87,18 @@ withdrawn <- c(
   xAddAttributesToProject = paste(
     "xucinet 2.0 has no project object. Attributes live in their own data",
     "frame; xmatch(net, attributes, attach = TRUE) puts them on the network."),
+  # Walktrap: design answer 11.5 (as recommended), following D-7, which drops
+  # it because the third edition does not use it.
+  xWalkTrap = paste(
+    "Walktrap is not in xucinet 2.0: the book's chapter on subgroups uses",
+    "Louvain, fast greedy, Girvan-Newman, label propagation and factions",
+    "instead. xcommunities(net, method = \"louvain\") is the nearest",
+    "replacement; igraph::cluster_walktrap() still computes Walktrap itself."),
+  xWalktrap = paste(
+    "Walktrap is not in xucinet 2.0: the book's chapter on subgroups uses",
+    "Louvain, fast greedy, Girvan-Newman, label propagation and factions",
+    "instead. xcommunities(net, method = \"louvain\") is the nearest",
+    "replacement; igraph::cluster_walktrap() still computes Walktrap itself."),
   xRemoveFromProject = paste(
     "xucinet 2.0 has no project object. Datasets are ordinary R objects, so",
     "drop one the way you would drop any other; xunpack() is what splits a",
@@ -103,7 +115,10 @@ notes <- c(
     "Negative-tie degree is xdegree() on the negative-tie matrix, e.g.",
     "xdegree(net, relation = \"negative\"). For the negative-tie centrality the",
     "3e discusses, see xpncentrality()."),
-  xMDS = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xmds.",
+  xBiCliques = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
+  xBiComembership = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
+  xDualLouvainMethod = "On 2-mode data xlouvain() waits on a decision between UCINET's bipartite modularity and the dual projection the book describes (GitHub issue #18).",
+  xMDS = "type =\"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xmds.",
   xHierarchicalClustering = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xhclust.",
   xHierarchicalCluster = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xhclust."
 )

@@ -698,6 +698,66 @@ astronomically large numbers.
 
 ---
 
+## 26. Louvain: moves are tested against the Q from before the pass, and the reported Q can be wrong
+
+**bug** · **open — fix pending** · found 23 September 2026 (Claude Code, reported by
+Cowork after reading the unit)
+
+`G2Tools/utlouvain.pas`, class `tlouvain`, used by Network | Subgroups | Louvain
+(`uc_Louvain.pas`) and the CLI `louvain` command.
+
+1. *The move test.* `getbestmove` starts from `result.deltaq := currentq` and moves the
+   node to a neighbouring cluster whenever the full Q with the node there (`getdeltaq`,
+   which calls `getq` on the current partition) exceeds that value. `currentq` is set
+   once, before `movenodes`, and is not updated as nodes move during the pass or between
+   sweeps of the `while anymoved` loop. So each node is compared with the Q from before the
+   pass, not with the Q of leaving it where it is. The two differ whenever the node's own
+   cluster is not among its neighbours' clusters, which is every node on the first pass,
+   since the default start is the identity partition. Once earlier moves have raised Q, a
+   node can be moved to a cluster that lowers Q, provided the result still beats the
+   pre-pass value. Standard Louvain compares against staying put.
+2. *The reported Q.* At the end of `movenodes`, `currentq := best.deltaq`, the value from
+   the evaluation of the last node visited. If that node did not move, it is the stale
+   pre-pass Q; if it moved, it is the Q after its move, which is the final Q only if no
+   later sweep changed anything. The Q written into each level's label by `storepart`
+   (`nclus|Q`) is therefore not reliably the modularity of that level's partition. The
+   comment above the assignment says "calculating full q, not deltaq".
+3. Because the acceptance threshold does not rise during a pass, it is not clear that the
+   `while anymoved` loop always terminates; not observed, not tested.
+
+**What xucinet does:** `xlouvain()` is a native, deterministic port (nodes visited in
+order, as UCINET does, which igraph cannot reproduce), with the move tested against the
+current Q (a move is made only if it raises Q) and Q recomputed from each level's final
+partition. Ledger entry 27, "UCINET fix pending" (written 23 Sep, issue #17). The golden
+fixtures for Louvain should come from a fixed build; until then the golden test is marked
+as expected to differ.
+
+**Fix:** in `getbestmove`, initialise `result.deltaq := getq` (the Q of the current
+partition, or equivalently the Q with the node in its own cluster); after the loop in
+`movenodes`, `currentq := getq`.
+
+---
+
+## 27. Factions and Louvain read a missing cell as a tie of 1e38
+
+**bug** · **open — fix pending** · found 23 September 2026 (Claude Code, issue #17)
+
+A missing cell is stored as `bna = 1e38`. Two chapter 11 routines do not test for it:
+
+- `uc_factions.pas`, `dichotomize`: `if rowp[j] > 1 then rowp[j] := 1`, so a missing cell
+  becomes a tie, and `buildedgelist` then counts it.
+- `utlouvain.pas`: `resetneighbors` takes `net.cell[i,j] > 0` as a neighbour, and `getq`
+  adds `net.cell[ii,jj]` unguarded, so a missing cell enters modularity as a tie of
+  weight 1e38. (`getrowsum` does skip it, so the degrees and the total do not match the
+  cells.)
+
+**What xucinet does:** `xfactions()` and `xlouvain()` treat a missing cell as no tie.
+Ledger entry 29.
+
+**Fix:** test `isna` (or `< na`) before using a cell, as `getrowsum` already does.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps

@@ -8,9 +8,9 @@ against the xucinet 2.0 function that serves it.
 | status | meaning | count |
 |---|---|---|
 | done | written, tested, and checked against UCINET goldens | 14 |
-| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 40 |
-| not started | no function yet | 31 |
-| dropped | will not be written; the reason is given below | 1 |
+| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 48 |
+| not started | no function yet | 21 |
+| dropped | will not be written; the reason is given below | 3 |
 
 ## Chapter 5
 
@@ -102,16 +102,16 @@ against the xucinet 2.0 function that serves it.
 
 | section | topic | UCINET | 2.0 function | status |
 |---|---|---|---|---|
-| 11 (all) | Umbrella community-detection call | (none) | `xcommunities()` | not started |
-| 11.2 / 11.2.1 | Cliques, clique co-membership, clique overlap | Network\|Communities/Subgroups\|Cliques | `xcliques()` | not started |
-| 11.2.2 | Bimodal method (cliques + clustering of co-membership; new in 3e) | Cliques + Johnson's Hierarchical Clustering | `xcliques()` | not started |
-| 11.3 | Girvan–Newman | Network\|Communities/Subgroups\|Girvan-Newman | `xgirvannewman()` | not started |
-| 11.4.1 | Factions | Network\|Communities/Subgroups\|Factions | `xfactions()` | not started |
-| 11.4.1 | Fast greedy modularity | Network\|Communities/Subgroups\|Fast Greedy | `xfastgreedy()` | not started |
-| 11.4.1 | QuickClus (3e only) | Network\|Communities/Subgroups\|QuickClus | `drop()` | coded, goldens pending |
-| 11.4.2 | Louvain | Network\|Communities/Subgroups\|Louvain Method | `xlouvain()` | not started |
-| 11.4.2 (ASNR) | Walktrap (ASNR only; not in 3e) | (none) | `xwalktrap()` | not started |
-| 11.5 | Label propagation | Network\|Communities/Subgroups\|LabelPropagation | `xlabelpropagation()` | not started |
+| 11 (all) | Umbrella community-detection call | (none) | `xcommunities()` | coded, goldens pending |
+| 11.2 / 11.2.1 | Cliques, clique co-membership, clique overlap | Network\|Communities/Subgroups\|Cliques | `xcliques()` | coded, goldens pending |
+| 11.2.2 | Bimodal method (cliques + clustering of co-membership; new in 3e) | Cliques + Johnson's Hierarchical Clustering | `xcliques()` | coded, goldens pending |
+| 11.3 | Girvan–Newman | Network\|Communities/Subgroups\|Girvan-Newman | `xgirvannewman()` | coded, goldens pending |
+| 11.4.1 | Factions | Network\|Communities/Subgroups\|Factions | `xfactions()` | coded, goldens pending |
+| 11.4.1 | Fast greedy modularity | Network\|Communities/Subgroups\|Fast Greedy | `xfastgreedy()` | coded, goldens pending |
+| 11.4.1 | QuickClus (3e only) | Network\|Communities/Subgroups\|QuickClus | `drop()` | dropped |
+| 11.4.2 | Louvain | Network\|Communities/Subgroups\|Louvain Method | `xlouvain()` | coded, goldens pending |
+| 11.4.2 (ASNR) | Walktrap (ASNR only; not in 3e) | (none) | `xwalktrap()` | dropped |
+| 11.5 | Label propagation | Network\|Communities/Subgroups\|LabelPropagation | `xlabelpropagation()` | coded, goldens pending |
 
 ## Chapter 12
 
@@ -131,7 +131,7 @@ against the xucinet 2.0 function that serves it.
 | 13.2 / 13.3 | Two-mode to one-mode (affiliations), incl. valued/normalized variants | Data\|Affiliations (2-mode to 1-mode) | `xaffiliations()` | not started |
 | 13.4 | Two-mode to bipartite | Transform\|Graph Theoretic\|Bipartite | `xbipartite()` | not started |
 | 13.5 | Bi-cliques | Network\|2-mode Networks\|BiCliques | `xbicliques()` | not started |
-| 13.5.1 | Dual-projection Louvain (2-mode) | (2-mode Louvain in recent UCINET) | `xlouvain()` | not started |
+| 13.5.1 | Dual-projection Louvain (2-mode) | (2-mode Louvain in recent UCINET) | `xlouvain()` | coded, goldens pending |
 | 13.6 | Two-mode core–periphery | (2-mode core/periphery in recent UCINET) | `xcoreperiphery()` | not started |
 | 13.7.1 / 13.7.2 | Two-mode structural / regular equivalence | Tools\|Similarities & Distances + hierarchical clustering; REGE | `xsimilarities()` | coded, goldens pending |
 
@@ -159,4 +159,6 @@ against the xucinet 2.0 function that serves it.
 - `xaddtoproject()` - design question 5.11: xucinet 2.0 has no project object
 - `xremovefromproject()` - design question 5.11: xucinet 2.0 has no project object
 - `xreachbetweenness()` - no UCINET equivalent; withdrawn 7 Sep 2026
+- `xwalktrap()` - design question 11.5 (after D-7): the third edition does not use Walktrap; the 1e aliases name xcommunities()
+- `drop()` - QuickClus: the crosswalk marks it for dropping; chapter 11 does not use it
 
