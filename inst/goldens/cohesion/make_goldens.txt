@@ -1,0 +1,105 @@
+// ===========================================================================
+// xucinet golden fixtures - Chapter 10, whole-network measures
+//
+// For xreciprocity, xtransitivity, xcyclicality, xcomponents, xhomophily and
+// xdensitybygroups. Part of the single goldens sweep at the end of the coding
+// run (decision of 20 Sep 2026).
+//
+// xcohesion needs nothing here. The Phase 0 density run already saved its
+// whole block for three datasets - ../density/G_CAMPNET_COH, G_BAKER_COH and
+// G_HIGHTECH_COH - and its tests run against those already, all 33 measures
+// on all five columns.
+//
+// HOW TO RUN
+//   1. Open UCINET.
+//   2. ->cd <this folder>
+//      ->run make_goldens.txt
+//   3. Then PART B, the menu runs.
+//   4. Commit everything written here, plus log_make_goldens.txt and
+//      log_menu.txt, and set the build number in UCINET-VERSION.
+//
+// Last run: not yet.
+//
+// INPUTS. campnet, camp92, hightech and sampson ship with the package;
+// g9_disc and g9_iso are in ../centrality/ and the sweep copies them here.
+// ===========================================================================
+
+
+// ---------------------------------------------------------------------------
+// PART A - the command line
+// ---------------------------------------------------------------------------
+
+// --- Reciprocity (Network | Cohesion | Reciprocity) ------------------------
+// Dialog: Method = Hybrid is the default (pMethod.ItemIndex = 2), which at the
+// whole-network level equals Dyad-based. Save all three so that claim can be
+// checked rather than trusted, and save the node-level dataset too.
+g10_recip_campnet_dyad = recip(campnet dyad)
+g10_recip_campnet_arc  = recip(campnet arc)
+g10_recip_sampson      = recip(sampson dyad)
+// camp92 is valued: this is the one that shows the two halves of the report
+// using different tests (ledger entry 16).
+g10_recip_camp92       = recip(camp92 dyad)
+
+// --- Transitivity (Network | Cohesion | Transitivity) ----------------------
+// Dialog: Method = Triplets is the default (Method.ItemIndex = 1); run Triads
+// as well, since the R function offers both.
+g10_trans_campnet_trip = trans(campnet triplets)
+g10_trans_campnet_tri  = trans(campnet triads)
+g10_trans_hightech     = trans(hightech triplets)
+g10_trans_disc         = trans(g9_disc triplets)
+
+// --- Cyclicality (Network | Cohesion | Cyclicality) ------------------------
+g10_cyc_campnet = cyclic(campnet)
+g10_cyc_sampson = cyclic(sampson)
+
+// --- Components (Network | Regions | Components) ---------------------------
+// Dialog: "For directed data" = Weak Components by default
+// (Method.ItemIndex = 0); sort frequencies by Component Size
+// (sortby.ItemIndex = 1). Save the partition vector each time.
+// g9_disc and g9_iso are the ones that matter: several components, and an
+// isolate that must come back as a component of size 1.
+g10_comp_campnet_weak   = comp(campnet weak)
+g10_comp_campnet_strong = comp(campnet strong)
+g10_comp_disc_weak      = comp(g9_disc weak)
+g10_comp_iso_weak       = comp(g9_iso weak)
+// Record from the log, for each run: Component ratio, Heterogeneity,
+// Normalized heterogeneity, Entropy, Normalized entropy. Those five are
+// printed and not saved to a dataset, so the log is the only record of them.
+
+
+// ---------------------------------------------------------------------------
+// PART B - the menus
+//
+// Both of these take an attribute dataset, which the command line form does
+// not accept.
+// ---------------------------------------------------------------------------
+
+// --- Network | Whole Networks | Homophily/Influence | Categorical ----------
+// Input network:          campnet
+// Row partition:          camp92_attr column Gender
+// Ignore tie direction:   unchecked (the default)
+// Reflexive ties allowed: unchecked
+// Treat data as:          Valued (TypeOfData.ItemIndex = 1, the default)
+//   -> save the homophily scores as  g10_hom_campnet_gender
+//
+// Run it again on hightech by department if an attribute file exists for it;
+// otherwise note in the log that it was skipped and why.
+//
+// The seven columns are H, h-star, Corr, Modul Q, Assort, YULES Q and
+// E-I Index. Please save the log as well as the dataset: the within/between
+// matrix printed above the scores is what $matrices$Mixing is checked
+// against, and it is not saved anywhere else.
+
+// --- Network | Mixing Tables w/ Expected Values ----------------------------
+// Input network:    campnet
+// Input attribute:  camp92_attr column Gender
+// Model for expected values: Density (ExpectedModel.ItemIndex = 0, default)
+//   -> observed mixing matrix        g10_mix_campnet_obs
+//   -> expected mixing matrix        g10_mix_campnet_exp
+//   -> density matrix                g10_mix_campnet_den
+//   -> observed/expected ratio       g10_mix_campnet_ratio
+//
+// If it is quick, run it twice more with Configuration and Fixed outdegree
+// and save as g10_mix_campnet_exp_config and g10_mix_campnet_exp_fixedout.
+// Those two models are refused in R at the moment rather than guessed, and
+// these two fixtures are what would let them be written.

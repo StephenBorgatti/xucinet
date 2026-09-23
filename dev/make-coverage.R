@@ -22,7 +22,13 @@ tbl <- utils::read.csv("inst/extdata/crosswalk-routines.csv",
 # The golden family each chapter's fixtures live in. A chapter with no family
 # yet has none, and its routines cannot be further along than "coded".
 family_of <- c("5" = "transform", "6" = "multivariate", "9" = "centrality",
-               "10" = "density")
+               "10" = "cohesion")
+
+# Two chapter 10 routines are checked against the Phase 0 density family
+# rather than their own chapter's, because the Density form and
+# Network | Whole-Network Measures share an engine and that run saved the
+# whole block. A per-chapter family cannot express that, so they say so here.
+family_of_fn <- c(xdensity = "density", xcohesion = "density")
 
 # A family counts as generated once it holds at least one ##h fixture.
 family_has_goldens <- function(family) {
@@ -31,8 +37,9 @@ family_has_goldens <- function(family) {
   if (!dir.exists(d)) return(FALSE)
   length(list.files(d, pattern = "\\.##[hH]$")) > 0
 }
-generated <- vapply(unique(family_of), family_has_goldens, logical(1))
-names(generated) <- unique(family_of)
+families <- unique(c(family_of, family_of_fn))
+generated <- vapply(families, family_has_goldens, logical(1))
+names(generated) <- families
 
 # Routines that will not be written, and why. Kept here rather than in the
 # crosswalk because the crosswalk is the book's, and this is our decision.
@@ -55,8 +62,10 @@ status_of <- function(fn, chapter) {
   if (fn %in% names(dropped)) return("dropped")
   if (is.null(get0(fn, envir = ns, mode = "function"))) return("not started")
   # [[ ]] on a named vector errors for a name that is not there, and most
-  # chapters have no golden family yet.
-  fam <- if (chapter %in% names(family_of)) family_of[[chapter]] else NA_character_
+  # chapters have no golden family yet. A per-function override wins.
+  fam <- if (fn %in% names(family_of_fn)) family_of_fn[[fn]]
+         else if (chapter %in% names(family_of)) family_of[[chapter]]
+         else NA_character_
   if (is.na(fam) || !isTRUE(generated[[fam]])) return("coded, goldens pending")
   "done"
 }

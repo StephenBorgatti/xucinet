@@ -96,6 +96,8 @@ reference:
   - xdensity
   - xcohesion
   - xcentralization
+  - xhomophily
+  - xdensitybygroups
 
 - title: Network | Cohesion
   desc: >

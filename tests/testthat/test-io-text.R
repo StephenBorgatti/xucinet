@@ -403,9 +403,20 @@ test_that("xhelp survives a typo", {
 })
 
 test_that("xhelp marks unwritten routines as planned, from what exists now", {
-  hits <- xhelp("density", max = 0)
-  expect_true(hits$exists[hits$name_2 == "xdensity"][1])
-  expect_false(hits$exists[hits$name_2 == "xdensitybygroups"][1])
+  # Both halves are found rather than named. This test used to assert that
+  # xdensitybygroups did not exist, and broke the day it did - the same trap
+  # the alias test warns about. What matters is that `exists` tracks the
+  # namespace, not which routine happens to be missing this week.
+  hits <- xhelp("", max = 0)
+  expect_true(any(hits$exists))
+  written <- hits$name_2[hits$exists][1]
+  expect_true(exists(sub("[(,].*$", "", trimws(written)),
+                     envir = asNamespace("xucinet"), mode = "function"))
+
+  missing <- hits[!hits$exists, ]
+  skip_if(nrow(missing) == 0, "every crosswalk routine now exists")
+  fn <- sub("[(,].*$", "", trimws(missing$name_2[1]))
+  expect_false(exists(fn, envir = asNamespace("xucinet"), mode = "function"))
 })
 
 test_that("xhelp says so when nothing matches, rather than failing", {

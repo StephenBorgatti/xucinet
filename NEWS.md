@@ -1,5 +1,35 @@
 # xucinet 2.0.0.9000 (development)
 
+## Chapter 10: whole-network measures (23 September 2026)
+
+* `xcohesion()`: the 33-measure block of Network | Whole-Network Measures,
+  golden-tested against the existing Phase 0 density fixtures. `Components`
+  there counts **strongly** connected components, and the K-core index and
+  `Deg Centralization` describe the underlying undirected graph whatever
+  `directed` says, both as UCINET does.
+* `xreciprocity()`: the dyad and arc ratios, always both, with UCINET's six
+  node-level proportions. Valued data are not dichotomized; see ledger entry 16
+  for why the two halves of the report can then disagree.
+* `xtransitivity()`: the twelve triplet measures, including the centred ones of
+  Dekker, Krackhardt and Snijders (2019), or the triad counts under
+  `method = "triads"`. The overall clustering coefficient is folded in and
+  there is no node-level one (design question 10.2).
+* `xcyclicality()`: the same two-paths closed the other way.
+* `xcomponents()`: weak or strong, with membership, sizes and UCINET's
+  heterogeneity figures. `Normalized heterogeneity` is the fragmentation of
+  the network, which is the identity UCINET's log points out.
+* `xcentralization()`: hands back the centrality routine's own figure rather
+  than recomputing it. Degree and betweenness only for now: UCINET reports a
+  closeness and an eigenvector centralization that `xcloseness()` and
+  `xeigenvector()` do not carry, and no golden holds either figure.
+* `xhomophily()`: the seven measures of Homophily | Categorical. Note that
+  `weighted` affects only the mixing matrix, which is UCINET's behaviour.
+* `xdensitybygroups()`: the density, observed, expected and ratio tables of
+  Mixing Tables w/ Expected Values, under the Density model. `test =` arrives
+  with chapter 14.
+* `xkeyplayer` is dropped (design question 10.6) and its crosswalk row with it.
+* Differences ledger entry 16; `dev/UCINET-ISSUES.md` issue 16.
+
 ## Chapter 5: transformations (22 September 2026)
 
 * `xtranspose()`, `xdichotomize()`, `xsymmetrize()`, `xnormalize()` and

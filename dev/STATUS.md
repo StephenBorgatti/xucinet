@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 22 Sep 2026 (Claude Code session; Cowork should correct anything here it knows
+Updated 23 Sep 2026 (Claude Code session; Cowork should correct anything here it knows
 better). Overwrite the first three sections each session; append to the last two.
 
 **Order of work changed 20 Sep 2026: code every remaining routine first, one UCINET goldens
@@ -15,8 +15,17 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - Chapter 9 (centrality) complete: xdegree, xbetweenness, xcloseness, xeigenvector, xbeta,
   xpncentrality, xcentrality, xreach, xbetareach, xhubsauthorities, xinduced; goldens in
   `inst/goldens/centrality/`.
-- Chapter 10: xdensity only (Phase 0 pilot). xcohesion, xcomponents, xreciprocity,
-  xtransitivity, xcentralization, xdensitybygroups, xhomophily not started.
+- Chapter 10 (whole-network measures) **complete 23 Sep, issue #13**: `xcohesion`,
+  `xreciprocity`, `xtransitivity`, `xcyclicality`, `xcomponents`, `xcentralization`,
+  `xhomophily`, `xdensitybygroups`, beside the Phase 0 `xdensity`. `xkeyplayer` is
+  dropped (question 10.6) and its crosswalk row removed. **`xcohesion` is
+  golden-tested already**: the Density form and Network | Whole-Network Measures both
+  call `ucohesion.getcohesion`, so the Phase 0 fixtures `G_CAMPNET_COH`,
+  `G_BAKER_COH` and `G_HIGHTECH_COH` cover all 33 measures on all five columns, to
+  1.8e-07. The rest wait on `inst/goldens/cohesion/`.
+  Two routines are deliberately partial, both for want of a UCINET run:
+  `xcentralization` covers degree and betweenness only, and
+  `xdensitybygroups(model=)` offers the Density model only. See "Open questions".
 - Chapter 6: **written 18 Sep in a Cowork session, committed by Claude Code 20 Sep.**
   `xmds` (classical, nonmetric), `xshepard`, `xcorrespondence`, `xhclust` in `R/`, with
   `R/proximity-internals.R` (coercion, `type=` error, conversion, `plot_coords()`),
@@ -38,11 +47,11 @@ batch at the end.** Design questions for all remaining chapters are batched in
   an explanation rather than the generic "not written yet". Goldens not generated:
   `inst/goldens/transform/` names the eighteen fixtures the tests expect and carries the
   batch; the golden tests skip until the sweep.
-- Chapters 7, 8, 10, 11, 12, 13, 14 routines not started. About 40 exported functions
-  remain against the crosswalk (see `dev/COVERAGE.md`, regenerated 22 Sep: 13 done,
-  27 coded with goldens pending, 45 not started, 1 dropped). The merged book text already
+- Chapters 7, 8, 11, 12, 13, 14 routines not started. About 37 exported functions
+  remain against the crosswalk (see `dev/COVERAGE.md`, regenerated 23 Sep: 14 done,
+  33 coded with goldens pending, 37 not started, 1 dropped). The merged book text already
   names them; the list of what the text asserts is in `asnr2e/docs/plan.md` ("Decoupling
-  decision", requirements list). Remaining coding order: 10, 8, 11, 12, 13, 14, 7.
+  decision", requirements list). Remaining coding order: 8, 11, 12, 13, 14, 7.
 - Machine: repo cloned to `C:\Dev\xucinet` on the new computer 16 Sep. R toolchain
   working 20 Sep: R 4.6.1, Rtools45 (`C:\rtools45`), devtools 2.5.2 / roxygen2 8.1.0 /
   testthat 3.3.2 / rcmdcheck 1.4.0 in `%LOCALAPPDATA%\R\win-library\4.6`, Pandoc 3.11
@@ -57,7 +66,22 @@ batch at the end.** Design questions for all remaining chapters are batched in
   `C:\Dev\tools\G2Tools` (repo StephenBorgatti/tools), both on Delphi 13 since 14 Sep. The
   Dropbox copies are stale. See `asnr2e/docs/plan.md`, "UCINET, Tools and NetDraw repositories".
 
-## Done this session (22 Sep 2026, Claude Code)
+## Done this session (23 Sep 2026, Claude Code)
+
+- **Chapter 10 complete (issue #13).** `xcohesion`, `xreciprocity`, `xtransitivity`,
+  `xcyclicality`, `xcomponents`, `xcentralization`, `xhomophily`, `xdensitybygroups`.
+  `xcohesion` is golden-tested already against the Phase 0 density fixtures, all 33
+  measures on all five columns; the rest await `inst/goldens/cohesion/`.
+- Read out of the source rather than assumed: `Components` in the cohesion block is
+  Tarjan, so strong; `Connectedness` is pair reachability and unrelated to it; the
+  K-core index and `Deg Centralization` are computed after symmetrizing (`//must be
+  last`) and so ignore `directed`; and their denominator is (n-1)(n-2) where the other
+  two centralizations use (n-1)^2.
+- Ledger entry 16 (reciprocity and valued data); `dev/UCINET-ISSUES.md` issue 16 (the
+  node-level clustering coefficient, per question 10.2).
+- `xkeyplayer` dropped and its crosswalk row removed (question 10.6).
+
+(22 Sep 2026, Claude Code:)
 
 - **Chapter 5 complete (issue #12).** Seventeen exports: `xtranspose`, `xdichotomize`,
   `xsymmetrize`, `xnormalize`, `xrecode`, `xgeodesic`, `xsimilarities`,
@@ -100,10 +124,10 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-1. Claude Code runs the remaining chapter prompts in order: ch10, ch08, ch11, ch12,
+1. Claude Code runs the remaining chapter prompts in order: ch08, ch11, ch12,
    ch13, ch14, ch07 (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after
    `prompt-conventions.md`). Each is one session; each ends with `dev/COVERAGE.md`
-   regenerated. Chapter 5 is done (issue #12).
+   regenerated. Chapters 5 (#12) and 10 (#13) are done.
 2. Chapter 6 and chapter 5 golden tests stay skipped; the fixtures named in
    `inst/goldens/multivariate/README.md` and `inst/goldens/transform/README.md` join
    the sweep.
@@ -165,3 +189,29 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 8. **`igraph`, `sna`, `network` and `tidygraph` are not installed on the Windows
    machine**, so the cross-check layer the conventions require skips locally (8 tests).
    They are written and run on CI. Worth installing here?
+9. **`xcentralization()` covers degree and betweenness only.** UCINET reports a
+   closeness centralization (`xcloseness.pas`, "Network Centralization = ") and an
+   eigenvector one (`uc_EigenvectorCentrality.pas`, `getcentralization`), but
+   `xcloseness()` and `xeigenvector()` carry neither, and `log_menu.txt` captured the
+   degree figure only. Question 10.5 says this function must not compute anything of
+   its own, so the two wait on a UCINET run that records them. That is a chapter 9
+   gap rather than a chapter 10 one.
+10. **`xdensitybygroups(model=)` offers the Density model only.** UCINET's Mixing
+   Tables has three - Density (its default), Configuration, Fixed outdegree. The
+   other two are refused rather than guessed; `inst/goldens/cohesion/make_goldens.txt`
+   asks for `g10_mix_campnet_exp_config` and `g10_mix_campnet_exp_fixedout`, which
+   would let them be written.
+11. **Question 10.2 described an argument the dialog does not have.** It proposed
+   `xtransitivity(type = c("adjacency","weak","strong"))`; Transform | Transitivity
+   actually offers Triads / Triplets (Triplets the default) plus a separate
+   Adjacency / Strengths / Costs group for the data. The function follows the dialog:
+   `method = c("triplets","triads")`. Worth correcting in the design file, which was
+   written from memory for chapter 10 - sections 5.1 to 5.7 were rewritten from the
+   source on 21 Sep but chapter 10 was not.
+12. **`xhomophily(weighted=)` affects only the mixing matrix.** `calcwhomophily`
+   takes the raw cell value for the internal and external totals whatever the
+   "Treat data as" radio says, and branches on it only when filling `mrs`. So `H`,
+   `h-star`, `Corr`, `Yules Q` and `E-I Index` are identical either way. That is
+   reproduced, and documented, but it looks like an oversight in UCINET rather than
+   a design: the dialog reads as though it should affect everything. Worth a view on
+   whether it belongs on the bug list.

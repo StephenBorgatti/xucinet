@@ -1,0 +1,10 @@
+UCINET: n/a
+Generated: not yet
+Notes: Chapter 10 goldens (reciprocity, transitivity, cyclicality, components,
+    homophily, density by groups). The batch has not been run. Until it is,
+    every test that calls skip_if_no_golden(<name>, "cohesion") skips, and
+    this family is exempt from the reference-build check.
+    .
+    xcohesion() is NOT here: its fixtures already exist as G_CAMPNET_COH,
+    G_BAKER_COH and G_HIGHTECH_COH in ../density/, made during the Phase 0
+    density run, and its tests run against those today. See README.md.
