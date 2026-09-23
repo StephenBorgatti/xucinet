@@ -12,6 +12,8 @@
 * `xcoreperiphery()`: the categorical and continuous models in one function,
   ported from UCINET's current code; reproducible under `seed` (ledger 35,
   UCINET issue 29). 2-mode waits on a decision.
+* `xrege()`: White and Reitz's REGE as UCINET runs it (`sStdrege`), all
+  relations, 3 iterations, clustered like the profile routine (ledger 36).
 
 ## Level of analysis and closeness centralization (23 September 2026, issue #20)
 

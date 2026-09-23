@@ -94,7 +94,7 @@ se_diagonal <- c(ignore = "Ignore",
 #'   `$matrices` holds the structural equivalence matrix; `$nodes` holds the
 #'   partition at each level of the clustering and `Cluster`; `$hclust` the
 #'   tree.
-#' @seealso [xhclust()], [xsimilarities()], [xblockmodel()].
+#' @seealso [xhclust()], [xsimilarities()], [xblockmodel()], [xrege()].
 #' @examples
 #' xstructuralequivalence(sampson, relations = c("Esteem", "Disesteem"))
 #' @export

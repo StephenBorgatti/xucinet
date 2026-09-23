@@ -51,3 +51,11 @@
 //   baker_journals dichotomized (> 0) -> g12_catcp_baker
 // UCINET randomizes its starts, so run each twice and note whether the
 // partition and the fit in the log change.
+
+// --- Network | Roles & Positions | Maximal Regular Equivalence | REGE ---------
+// Max # of iterations: 3 (the default); Convert to geodesics: No.
+// NOTE: the current build refuses to run REGE in 64-bit UCINET ("This
+// procedure is not available in the 64-bit version"); use the 32-bit build.
+//   campnet -> (Output) REGE similarities  g12_rege_campnet
+//   wiring (all six relations, as the dialog uses them) -> g12_rege_wiring
+// Keep the log: the similarities are printed times 100.

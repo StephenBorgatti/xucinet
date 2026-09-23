@@ -162,3 +162,4 @@ ucinet commit c7b4956, tools commit 207958a.
 | `uc_categoricalcoreperiphery.pas` + `.dfm`, `utcpcat.pas` | `Ucinet/Source`, `Tools/G2Tools` | Categorical core/periphery: dialog defaults, the starting partitions, hill climbing, random starts (UCINET issue 29 is in `evaluate`) |
 | `uc_ContinuousCoreness.pas` + `.dfm`, `utminres.pas`, `utconcentration.pas`, `utbivariate.pas` | `Ucinet/Source`, `Tools/G2Tools`, `Tools/G1Tools` | Continuous core/periphery: MINRES, the concentration table, Gini, heterogeneity, the identity coefficient |
 | `x2mcatcp.pas` | `Ucinet/Source` | 2-mode categorical core/periphery (a genetic algorithm), held for Steve's decision |
+| `Xrege.pas`, `Urege.pas` | `Ucinet/Source`, `Tools/G1Tools` | REGE: the dialog, the 64-bit refusal, `sStdrege` |

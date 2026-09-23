@@ -165,12 +165,14 @@ reference:
 
 - title: Network | Roles & Positions
   desc: >
-    Chapter 12. Structural equivalence by profile similarity, and the
+    Chapter 12. Structural equivalence by profile similarity, regular
+    equivalence by REGE, and the
     blockmodel of a partition: the blocked matrix, block densities, image
     and fit.
   contents:
   - xstructuralequivalence
   - xblockmodel
+  - xrege
 
 - title: Network | Core/Periphery
   desc: >

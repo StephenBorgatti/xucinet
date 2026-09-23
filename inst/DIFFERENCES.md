@@ -692,3 +692,13 @@ deliberate for the others. 23 September 2026.
 - The 2-mode routine is held: UCINET's is a genetic algorithm on the
   row-by-column correlation, while section 13.6 describes dual projection
   (STATUS open question).
+
+## 36. REGE: missing values are treated as no tie
+
+**Status:** deliberate, 23 September 2026.
+
+UCINET's REGE (`Urege.pas`, `sStdrege`) reads the matrix as stored, so a
+missing cell enters its sums as the missing-value code, 1E37, a tie far
+stronger than any real one. `xrege()` sets missing cells to 0 and says so in
+its notes. Everything else is UCINET's, including the refusal of negative
+values and of non-square data.

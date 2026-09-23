@@ -19,6 +19,8 @@ goldens sweep, and until it runs every test that names a fixture below calls
 | `g12_catcp_campnet` | `xcoreperiphery` | categorical partition |
 | `g12_catcp_zachary` | `xcoreperiphery` | categorical partition |
 | `g12_catcp_baker` | `xcoreperiphery` | categorical partition, Baker dichotomized |
+| `g12_rege_campnet` | `xrege` | REGE similarities on 0-1, 3 iterations (32-bit UCINET only) |
+| `g12_rege_wiring` | `xrege` | all six wiring relations |
 
 ## Categorical core/periphery depends on UCINET's random starts
 

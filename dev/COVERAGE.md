@@ -8,8 +8,8 @@ against the xucinet 2.0 function that serves it.
 | status | meaning | count |
 |---|---|---|
 | done | written, tested, and checked against UCINET goldens | 15 |
-| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 49 |
-| not started | no function yet | 21 |
+| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 55 |
+| not started | no function yet | 15 |
 | dropped | will not be written; the reason is given below | 3 |
 
 ## Chapter 5
@@ -96,7 +96,7 @@ against the xucinet 2.0 function that serves it.
 | 10.3.1 | Components; component ratio; fragmentation; connectedness | Network\|Regions\|Components; Network\|Whole Networks\|Multiple Measures | `xcomponents()` | coded, goldens pending |
 | 10.3.2 | Distance-based: average distance, compactness, breadth, proportion reachable | Network\|Whole Networks\|Multiple Measures | `xcohesion()` | done |
 | 10.4 | Centralization (for any centrality measure) | Network\|Whole Networks\|Centralization | `xcentralization()` | coded, goldens pending |
-| 10.4 | Core-peripheriness (continuous CP correlation as a whole-network measure) | Network\|Core/Periphery\|Continuous | `xcoreperiphery()` | not started |
+| 10.4 | Core-peripheriness (continuous CP correlation as a whole-network measure) | Network\|Core/Periphery\|Continuous | `xcoreperiphery()` | coded, goldens pending |
 | 10.5 | Density by groups; homophily (E-I index etc.) | Network\|Mixing/Density Tables; Network\|Whole Networks\|Homophily\|Categorical | `xdensitybygroups()` | coded, goldens pending |
 | 10.5 | Mixing tables: observed, expected, density and observed/expected matrices by group | Network\|Mixing Tables | `xmixing()` | coded, goldens pending |
 
@@ -119,12 +119,12 @@ against the xucinet 2.0 function that serves it.
 
 | section | topic | UCINET | 2.0 function | status |
 |---|---|---|---|---|
-| 12.2 / 12.3 | Structural equivalence, profile similarity | Network\|Roles & Positions\|Structural Equivalence\|Profile | `xstructuralequivalence()` | not started |
-| 12.4 | Blockmodel display: permuted matrix, density table, image matrix | Network\|Mixing Tables\|Density by Groups | `xblockmodel()` | not started |
+| 12.2 / 12.3 | Structural equivalence, profile similarity | Network\|Roles & Positions\|Structural Equivalence\|Profile | `xstructuralequivalence()` | coded, goldens pending |
+| 12.4 | Blockmodel display: permuted matrix, density table, image matrix | Network\|Mixing Tables\|Density by Groups | `xblockmodel()` | coded, goldens pending |
 | 12.5 | Structural-equivalence optimization | Network\|Roles & Positions\|Structural Equivalence\|Optimization | `xblockoptimize()` | not started |
 | 12.6 | Regular-equivalence optimization | Network\|Roles & Positions\|Maximum Regular\|Optimization | `xblockoptimize()` | not started |
-| 12.7 | REGE | Network\|Roles & Positions\|Maximum Regular\|REGE | `xrege()` | not started |
-| 12.8 | Core–periphery, categorical and continuous | Network\|Core/Periphery\|Categorical; ...\|Continuous | `xcoreperiphery()` | not started |
+| 12.7 | REGE | Network\|Roles & Positions\|Maximum Regular\|REGE | `xrege()` | coded, goldens pending |
+| 12.8 | Core–periphery, categorical and continuous | Network\|Core/Periphery\|Categorical; ...\|Continuous | `xcoreperiphery()` | coded, goldens pending |
 
 ## Chapter 13
 
@@ -134,7 +134,7 @@ against the xucinet 2.0 function that serves it.
 | 13.4 | Two-mode to bipartite | Transform\|Graph Theoretic\|Bipartite | `xbipartite()` | not started |
 | 13.5 | Bi-cliques | Network\|2-mode Networks\|BiCliques | `xbicliques()` | not started |
 | 13.5.1 | Dual-projection Louvain (2-mode) | (2-mode Louvain in recent UCINET) | `xlouvain()` | coded, goldens pending |
-| 13.6 | Two-mode core–periphery | (2-mode core/periphery in recent UCINET) | `xcoreperiphery()` | not started |
+| 13.6 | Two-mode core–periphery | (2-mode core/periphery in recent UCINET) | `xcoreperiphery()` | coded, goldens pending |
 | 13.7.1 / 13.7.2 | Two-mode structural / regular equivalence | Tools\|Similarities & Distances + hierarchical clustering; REGE | `xsimilarities()` | coded, goldens pending |
 
 ## Chapter 14

@@ -83,5 +83,5 @@ Network | Roles & Positions | Structural Equivalence | Profile. \emph{Measure} i
 xstructuralequivalence(sampson, relations = c("Esteem", "Disesteem"))
 }
 \seealso{
-\code{\link[=xhclust]{xhclust()}}, \code{\link[=xsimilarities]{xsimilarities()}}, \code{\link[=xblockmodel]{xblockmodel()}}.
+\code{\link[=xhclust]{xhclust()}}, \code{\link[=xsimilarities]{xsimilarities()}}, \code{\link[=xblockmodel]{xblockmodel()}}, \code{\link[=xrege]{xrege()}}.
 }
