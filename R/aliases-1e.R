@@ -101,7 +101,7 @@ xucinet_1e_map <- c(
   xMRQAP = "xmrqap",
   xMultipleTieComposition = "xtiecomposition",
   xNegativeDegreeCentrality = "xdegree",
-  xNegativeWeightedCentrality = "xdegree",
+  xNegativeWeightedCentrality = "xpncentrality",
   xNormalize = "xnormalize",
   xPermuteCor = "xcorrelation",
   xPermuteCorrelation = "xcorrelation",
@@ -139,8 +139,6 @@ xucinet_1e_map <- c(
 
 # Extra guidance for aliases whose replacement is not a simple rename.
 xucinet_1e_notes <- c(
-  xNegativeDegreeCentrality = "Negative-tie degree is xdegree() on the negative-tie matrix, e.g. xdegree(net, relation = \"negative\"). For the negative-tie centrality the 3e discusses, see xpncentrality().",
-  xNegativeWeightedCentrality = "Negative-tie degree is xdegree() on the negative-tie matrix, e.g. xdegree(net, relation = \"negative\"). For the negative-tie centrality the 3e discusses, see xpncentrality().",
   xBiCliques = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
   xBiComembership = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
   xDualLouvainMethod = "On 2-mode data xlouvain() waits on a decision between UCINET's bipartite modularity and the dual projection the book describes (GitHub issue #18).",
@@ -165,8 +163,9 @@ xucinet_1e_withdrawn <- c(
   xCreateProject = "xucinet 2.0 has no project object. A UCINET project was a folder of datasets; here you read each dataset with xread() and keep them in whatever R structure suits, a list most often. See ?xread and ?xmatch.",
   xAddToProject = "xucinet 2.0 has no project object. Read the dataset with xread() and keep it beside the others; xmatch() lines several up on one node set and xjoin() stacks them into one multi-relation dataset.",
   xAddAttributesToProject = "xucinet 2.0 has no project object. Attributes live in their own data frame; xmatch(net, attributes, attach = TRUE) puts them on the network.",
-  xWalkTrap = "Walktrap is not in xucinet 2.0: the book's chapter on subgroups uses Louvain, fast greedy, Girvan-Newman, label propagation and factions instead. xcommunities(net, method = \"louvain\") is the nearest replacement; igraph::cluster_walktrap() still computes Walktrap itself.",
-  xWalktrap = "Walktrap is not in xucinet 2.0: the book's chapter on subgroups uses Louvain, fast greedy, Girvan-Newman, label propagation and factions instead. xcommunities(net, method = \"louvain\") is the nearest replacement; igraph::cluster_walktrap() still computes Walktrap itself.",
+  xWalkTrap = "Walktrap is not in xucinet 2.0: the book's chapter on subgroups uses Louvain, fast greedy, Girvan-Newman, label propagation and factions instead. xlouvain(), or xcommunities() for all five side by side, is the nearest replacement; igraph::cluster_walktrap() still computes Walktrap itself.",
+  xWalktrap = "Walktrap is not in xucinet 2.0: the book's chapter on subgroups uses Louvain, fast greedy, Girvan-Newman, label propagation and factions instead. xlouvain(), or xcommunities() for all five side by side, is the nearest replacement; igraph::cluster_walktrap() still computes Walktrap itself.",
+  xNegativeDegreeCentrality = "Negative-tie degree is degree on the negative-tie relation: xdegree(net, relation = \"negative\"), or xdegree() on the negative-tie matrix.",
   xRemoveFromProject = "xucinet 2.0 has no project object. Datasets are ordinary R objects, so drop one the way you would drop any other; xunpack() is what splits a multi-relation dataset into separate ones."
 )
 
@@ -424,7 +423,7 @@ xMultipleTieComposition <- function(...) alias_1e("xMultipleTieComposition", "xt
 xNegativeDegreeCentrality <- function(...) alias_1e("xNegativeDegreeCentrality", "xdegree", ...)
 #' @rdname xucinet-1e
 #' @export
-xNegativeWeightedCentrality <- function(...) alias_1e("xNegativeWeightedCentrality", "xdegree", ...)
+xNegativeWeightedCentrality <- function(net, ...) negative_weighted_1e(net, substitute(net), ...)
 #' @rdname xucinet-1e
 #' @export
 xNormalize <- function(...) alias_1e("xNormalize", "xnormalize", ...)

@@ -232,3 +232,68 @@
       18 rows, 2 columns, 1 levels.
       
 
+# xcommunities prints
+
+    Code
+      xcommunities(campnet, seed = 1)
+    Output
+      COMMUNITY DETECTION
+      --------------------------------------------------------------------------------
+      
+      Input dataset:                          campnet
+      Note:                                   Data symmetrized by max.
+      Note:                                   Data were symmetrized via the maximum method.
+      Note:                                   Random seed: 1.
+      
+      
+      
+      Cluster membership by method
+      
+                     1 2 3 4 5 
+                     L F G L F 
+                     o a i a a 
+                     u s r b c 
+                     v t v e t 
+                     a G a l i 
+                     i r n P o 
+                     n e N r n 
+                       e e o s 
+                       d w p   
+                       y m     
+                         a     
+                         n     
+                     - - - - - 
+           1   HOLLY 2 1 1 1 1 
+           2  BRAZEY 3 2 2 2 2 
+           3   CAROL 1 3 3 3 1 
+           4     PAM 1 3 3 3 1 
+           5     PAT 1 3 3 3 1 
+           6  JENNIE 1 3 3 3 1 
+           7 PAULINE 1 3 3 3 1 
+           8     ANN 1 3 3 3 1 
+           9 MICHAEL 2 1 1 1 1 
+          10    BILL 2 1 1 1 2 
+          11     LEE 3 2 2 2 2 
+          12     DON 2 1 1 1 1 
+          13    JOHN 3 2 2 2 2 
+          14   HARRY 2 1 1 1 1 
+          15    GERY 3 2 2 2 2 
+          16   STEVE 3 2 2 2 2 
+          17    BERT 3 2 2 2 2 
+          18    RUSS 3 2 2 2 2 
+      
+      18 rows, 5 columns, 1 levels.
+      
+                              1     2 
+                          Clust Modul 
+                            ers arity 
+                          ----- ----- 
+           1      Louvain     3 0.550 
+           2   FastGreedy     3 0.550 
+           3 GirvanNewman     3 0.550 
+           4    LabelProp     3 0.550 
+           5     Factions     2 0.342 
+      
+      5 rows, 2 columns, 1 levels.
+      
+

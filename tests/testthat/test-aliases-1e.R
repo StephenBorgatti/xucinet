@@ -16,6 +16,9 @@ test_that("every 1e name in the table resolves to an exported function", {
 test_that("each wrapper points at the 2.0 name the table says", {
   # Read it out of the function body rather than trusting the table twice over.
   map <- xucinet_1e_names()
+  # A wrapper that is more than a rename calls a hand-written function in
+  # R/aliases-1e-special.R instead; its own test is further down.
+  map <- map[setdiff(names(map), "xNegativeWeightedCentrality")]
   for (old in names(map)) {
     body_txt <- paste(deparse(body(get(old, envir = asNamespace("xucinet")))),
                       collapse = " ")
@@ -134,17 +137,15 @@ test_that("xRegression goes to the regression routine", {
   expect_equal(xucinet_1e_names()[["xPermuteRegression"]], "xregression")
 })
 
-test_that("the negative-tie aliases explain what to do instead", {
-  # Both are degree on a negative-tie matrix rather than routines of their own.
-  # The note used to arrive inside the not-written-yet error; now that xdegree
-  # exists the call succeeds and the note arrives as the message beside it, so
-  # the explanation survives the target landing rather than disappearing with it.
-  for (nm in c("xNegativeDegreeCentrality", "xNegativeWeightedCentrality")) {
-    expect_equal(xucinet_1e_names()[[nm]], "xdegree")
-    f <- get(nm, envir = asNamespace("xucinet"))
-    expect_message(f(campnet), "negative-tie matrix")
-    expect_message(f(campnet), "xpncentrality")
-  }
+test_that("the negative-tie aliases follow Steve's 23 Sep decision", {
+  # xNegativeDegreeCentrality is withdrawn: degree on the negative relation is
+  # just xdegree().
+  expect_error(xNegativeDegreeCentrality(campnet), "xdegree")
+  # xNegativeWeightedCentrality is PN centrality on the negated matrix.
+  expect_equal(xucinet_1e_names()[["xNegativeWeightedCentrality"]], "xpncentrality")
+  neg <- as.matrix(newguinea, relation = "Opposition")
+  expect_message(r <- xNegativeWeightedCentrality(neg), "undirected data only")
+  expect_equal(r$nodes, xpncentrality(-neg)$nodes)
 })
 
 test_that("a withdrawn alias says so, instead of promising it is coming", {

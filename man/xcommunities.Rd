@@ -4,37 +4,39 @@
 \alias{xcommunities}
 \title{Community detection}
 \usage{
-xcommunities(
-  net,
-  method = c("louvain", "fastgreedy", "girvannewman", "labelpropagation", "factions"),
-  ...
-)
+xcommunities(net, ...)
 }
 \arguments{
 \item{net}{A network (any accepted form). 1-mode.}
 
-\item{method}{\code{"louvain"} (the default), \code{"fastgreedy"}, \code{"girvannewman"},
-\code{"labelpropagation"} or \code{"factions"}.}
-
-\item{...}{Passed to the routine: \code{k} for factions, \code{seed} for label
-propagation and factions, and so on.}
+\item{...}{Passed to every routine that takes the argument: \code{k} (the number
+of factions; it also sets what \code{\link[=xgirvannewman]{xgirvannewman()}} would print, which does
+not matter here), \code{seed} (label propagation and factions), \code{relation}, and
+so on. A method that fails is reported as missing, with the reason in
+\verb{$assumptions}.}
 }
 \value{
 An object of class \code{c("xcommunities", "xucinet_output")}.
 }
 \description{
-Runs one of the chapter's community-detection methods and returns the same
-shape whatever the method: \code{Cluster} in \verb{$nodes}, and \code{Clusters} and
-\code{Modularity} in \verb{$summary}, with the method in \verb{$method}. Modularity is computed the same way
-for every method, so partitions found by different methods can be compared
-on it directly.
+Runs all five of the chapter's community-detection methods and puts their
+partitions side by side: \verb{$nodes} has one column per method, the cluster each
+node is in, and \verb{$summary} one row per method with the number of clusters and
+the modularity. Modularity is computed the same way for every method, so the
+partitions can be compared on it directly.
 }
 \details{
-For each method's own report, with its extra tables, call the routine
-itself: \code{\link[=xlouvain]{xlouvain()}}, \code{\link[=xfastgreedy]{xfastgreedy()}}, \code{\link[=xgirvannewman]{xgirvannewman()}},
-\code{\link[=xlabelpropagation]{xlabelpropagation()}} or \code{\link[=xfactions]{xfactions()}}.
+Each column is the \code{Cluster} column of the routine's own result: the
+partition of the top level for Louvain, the highest-modularity partition for
+fast greedy and Girvan-Newman, and the partition found for label propagation
+and factions. Cluster numbers are labels, so the same group can carry
+different numbers in different columns. For each method's own report, with
+its extra tables, call the routine itself.
 }
 \examples{
-xcommunities(campnet)
-xcommunities(campnet, method = "fastgreedy")
+xcommunities(campnet, seed = 1)
+}
+\seealso{
+\code{\link[=xlouvain]{xlouvain()}}, \code{\link[=xfastgreedy]{xfastgreedy()}}, \code{\link[=xgirvannewman]{xgirvannewman()}},
+\code{\link[=xlabelpropagation]{xlabelpropagation()}}, \code{\link[=xfactions]{xfactions()}}.
 }

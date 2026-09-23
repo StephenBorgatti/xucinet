@@ -47,7 +47,20 @@ overrides <- c(
   xPermuteRegression = "xregression",      # not xcorrelation
   # xRegression is a real 0.x export and belongs with the regression routine,
   # not with the correlation row it happens to be listed in.
-  xRegression        = "xregression"
+  xRegression        = "xregression",
+  # PN centrality on the negated matrix (Steve, 23 Sep 2026; issue #21). Its
+  # wrapper is in `special` below.
+  xNegativeWeightedCentrality = "xpncentrality",
+  # Withdrawn (see `withdrawn`); the crosswalk says "dropped", which is not a
+  # function. The map names the routine its message points to.
+  xNegativeDegreeCentrality = "xdegree"
+)
+
+# Aliases whose wrapper is more than a rename: the generated wrapper calls a
+# hand-written function in R/aliases-1e-special.R.
+special <- c(
+  xNegativeWeightedCentrality =
+    "function(net, ...) negative_weighted_1e(net, substitute(net), ...)"
 )
 
 # The twelve names only the 0.x NAMESPACE exported used to be listed here. They
@@ -92,13 +105,18 @@ withdrawn <- c(
   xWalkTrap = paste(
     "Walktrap is not in xucinet 2.0: the book's chapter on subgroups uses",
     "Louvain, fast greedy, Girvan-Newman, label propagation and factions",
-    "instead. xcommunities(net, method = \"louvain\") is the nearest",
+    "instead. xlouvain(), or xcommunities() for all five side by side, is the nearest",
     "replacement; igraph::cluster_walktrap() still computes Walktrap itself."),
   xWalktrap = paste(
     "Walktrap is not in xucinet 2.0: the book's chapter on subgroups uses",
     "Louvain, fast greedy, Girvan-Newman, label propagation and factions",
-    "instead. xcommunities(net, method = \"louvain\") is the nearest",
+    "instead. xlouvain(), or xcommunities() for all five side by side, is the nearest",
     "replacement; igraph::cluster_walktrap() still computes Walktrap itself."),
+  # Steve, 23 Sep 2026 (crosswalk annotation; issue #21).
+  xNegativeDegreeCentrality = paste(
+    "Negative-tie degree is degree on the negative-tie relation:",
+    "xdegree(net, relation = \"negative\"), or xdegree() on the negative-tie",
+    "matrix."),
   xRemoveFromProject = paste(
     "xucinet 2.0 has no project object. Datasets are ordinary R objects, so",
     "drop one the way you would drop any other; xunpack() is what splits a",
@@ -107,14 +125,6 @@ withdrawn <- c(
 
 # A few aliases need a sentence the generic message cannot give.
 notes <- c(
-  xNegativeDegreeCentrality = paste(
-    "Negative-tie degree is xdegree() on the negative-tie matrix, e.g.",
-    "xdegree(net, relation = \"negative\"). For the negative-tie centrality the",
-    "3e discusses, see xpncentrality()."),
-  xNegativeWeightedCentrality = paste(
-    "Negative-tie degree is xdegree() on the negative-tie matrix, e.g.",
-    "xdegree(net, relation = \"negative\"). For the negative-tie centrality the",
-    "3e discusses, see xpncentrality()."),
   xBiCliques = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
   xBiComembership = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
   xDualLouvainMethod = "On 2-mode data xlouvain() waits on a decision between UCINET's bipartite modularity and the dual projection the book describes (GitHub issue #18).",
@@ -157,6 +167,9 @@ if (!anyNA(live)) {
 # and unescaped inner quotes would generate a file that does not parse.
 q <- function(x) encodeString(x, quote = '"')
 body <- vapply(names(map), function(old) {
+  if (old %in% names(special)) {
+    return(sprintf("#' @rdname xucinet-1e\n#' @export\n%s <- %s", old, special[[old]]))
+  }
   sprintf("#' @rdname xucinet-1e\n#' @export\n%s <- function(...) alias_1e(%s, %s, ...)",
           old, q(old), q(map[[old]]))
 }, character(1))

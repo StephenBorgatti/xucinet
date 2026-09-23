@@ -251,7 +251,7 @@ xMultipleTieComposition(...)
 
 xNegativeDegreeCentrality(...)
 
-xNegativeWeightedCentrality(...)
+xNegativeWeightedCentrality(net, ...)
 
 xNormalize(...)
 

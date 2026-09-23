@@ -293,19 +293,33 @@ test_that("label propagation repeats under a seed and leaves R's RNG alone", {
 
 # ---- xcommunities ------------------------------------------------------------------------
 
-test_that("every method returns the same shape", {
-  for (meth in c("louvain", "fastgreedy", "girvannewman", "labelpropagation",
-                 "factions")) {
-    args <- list(campnet, method = meth)
-    if (meth %in% c("labelpropagation", "factions")) args$seed <- 1
-    r <- do.call(xcommunities, args)
-    expect_equal(names(r$nodes), "Cluster", info = meth)
-    expect_equal(names(r$summary), c("Clusters", "Modularity"), info = meth)
-    expect_equal(r$summary$Modularity,
-                 community_modularity(as.matrix(campnet), r$nodes$Cluster),
+test_that("xcommunities puts every method's partition side by side", {
+  # Steve, 23 Sep 2026: a node-by-method membership matrix (issue #21).
+  r <- xcommunities(campnet, seed = 1)
+  meths <- c("Louvain", "FastGreedy", "GirvanNewman", "LabelProp",
+             "Factions")
+  expect_equal(names(r$nodes), meths)
+  expect_equal(rownames(r$nodes), rownames(as.matrix(campnet)))
+  expect_equal(rownames(r$summary), meths)
+  # each column is the routine's own Cluster column, read, not recomputed
+  expect_equal(r$nodes$Louvain, xlouvain(campnet)$nodes$Cluster)
+  expect_equal(r$nodes$Factions, xfactions(campnet, seed = 1)$nodes$Cluster)
+  expect_equal(r$nodes$LabelProp,
+               xlabelpropagation(campnet, seed = 1)$nodes$Cluster)
+  for (meth in meths) {
+    expect_equal(r$summary[meth, "Modularity"],
+                 community_modularity(as.matrix(campnet), r$nodes[[meth]]),
                  info = meth)
-    expect_identical(r$method, meth)
   }
+})
+
+test_that("arguments reach the routines that take them", {
+  r <- xcommunities(campnet, k = 3, seed = 1)
+  expect_equal(r$summary["Factions", "Clusters"], 3)
+})
+
+test_that("xcommunities prints", {
+  expect_snapshot(xcommunities(campnet, seed = 1))
 })
 
 test_that("the 1e Walktrap aliases say what to use instead", {

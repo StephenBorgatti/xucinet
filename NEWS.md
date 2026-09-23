@@ -18,6 +18,12 @@
   Closeness routine (ledger entry 31), and `xcentralization()` returns all
   four centralizations, with `measure = "closeness"` now available.
 * Report objects gain `show_summary`, `show_columns` and `show_matrix_columns`.
+* `xcommunities(net, ...)` runs all five community methods and returns a
+  node-by-method membership table, with clusters and modularity per method; it
+  no longer takes `method =` (Steve, issue #21).
+* 1e aliases: `xNegativeDegreeCentrality()` is withdrawn (use `xdegree()` on
+  the negative relation); `xNegativeWeightedCentrality()` runs
+  `xpncentrality()` on the negated matrix (issue #21).
 
 ## Chapter 11: subgroups (23 September 2026)
 
