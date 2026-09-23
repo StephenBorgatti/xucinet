@@ -563,8 +563,9 @@ question 2):
 Applications (23 September 2026):
 
 - `xhomophily()` drops its mixing matrix; `xmixing()` provides it.
-- `xreciprocity()` drops its node table. Node-level reciprocity becomes a column of
-  `xegonet()`.
+- `xreciprocity()` drops its node table. UCINET's node-level reciprocity table becomes
+  `xegoreciprocity()`, and its Symmetric column is also a column of `xegonet()` (Steve,
+  issue #20).
 - `xreciprocity()` always returns both the dyad-based and the arc-based ratio (as design
   answer 10.1 said); `method` sets which is printed first.
 - `xtransitivity()` always returns both the triplet and the triad version; `method` sets

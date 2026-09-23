@@ -142,10 +142,27 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. Cowork: add `xegoreciprocity(net, relation = NULL)` to `crosswalk.py` (chapter 8,
-   Network | Ego Networks | Egonet Reciprocity) and note on the 10.2.2 row that
-   `xreciprocity()` has no node table; then `inst/extdata/crosswalk-routines.csv` gets the
-   row too (it is hand-edited for chapters 8 and 11 until the master catches up).
+0. Done 23 Sep (Cowork): `xegoreciprocity(net, relation = NULL)` is in `crosswalk.py` (8.6.2,
+   Network | Ego Networks | Egonet Reciprocity) and in `inst/extdata/crosswalk-routines.csv`;
+   the 10.2.2 row says `xreciprocity()` has no node table and its signature has `"hybrid"`.
+   The xlsx is rebuilt. **Steve had annotated the xlsx by hand on 23 Sep** (answers after
+   `**` in the Decision column of 19 rows); those annotations were copied into
+   `crosswalk.py` first, so the rebuild kept them. Three of them are decisions Claude Code
+   needs:
+   - `xcommunities` (11, all): "include this function. The output consists [of] a node by
+     method categorical matrix indicating cluster membership."
+   - `xcoreperiphery` (12.8): "one function. Drop the helpers."
+   - The 0.x negative-tie aliases (Steve, 23 Sep, replacing "unclear"): in
+     `R/aliases-1e.R`, `xNegativeDegreeCentrality` is dropped: its alias stops with a
+     message (as the project aliases do) saying to use `xdegree()` on the negative
+     relation. `xNegativeWeightedCentrality` maps to `xpncentrality()` on the negated
+     matrix, with a message that the two agree for undirected data only (the 0.x formula
+     used NN' where PN centrality, which symmetrizes, uses N^2). Update
+     `test-aliases-1e.R` and the crosswalk CSV rows to match `crosswalk.py`.
+   The other sixteen agree with the recommendation already in the row (xjoin only; one
+   `xcomponents`/`xcohesion`; one `xcliques`; drop QuickClus and Walktrap; `xlouvain`
+   2-mode aware; `xqap`/`xmrqap`/`xlrqap`; `xdensitybygroups(test = TRUE)` for the ANOVA
+   density model; and the chapter 8 and 9 names).
 
 1. Claude Code runs the remaining chapter prompts in order: ch12, ch13, ch14, ch07
    (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after `prompt-conventions.md`).
