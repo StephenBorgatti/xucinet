@@ -20,7 +20,10 @@ new_xucinet_output(
   preamble = NULL,
   print_nodes = TRUE,
   hide = character(),
-  epilogue = NULL
+  epilogue = NULL,
+  show_summary = NULL,
+  show_columns = NULL,
+  show_matrix_columns = NULL
 )
 }
 \arguments{
@@ -72,6 +75,16 @@ co-membership matrix).}
 \item{epilogue}{Optional preformatted lines printed after every table, for
 output UCINET places last, such as the clustering diagram that ends the
 Cliques report.}
+
+\item{show_summary, show_columns}{Which entries of \verb{$summary}, and which
+columns of \verb{$nodes}, the report prints, in the order given. \code{NULL}, the
+default, prints them all. This is how an argument chooses what is printed
+without changing what the object holds (SPEC addendum, 23 September 2026,
+item 5).}
+
+\item{show_matrix_columns}{A named list: for each matrix named, which of its
+columns the report prints. Matrices not named print whole. Girvan-Newman
+uses it to print only the partitions UCINET would reach with \code{k}.}
 }
 \value{
 An object of class \code{xucinet_output}.

@@ -35,8 +35,10 @@ xucinet does what the dialog says.}
 }
 \value{
 An object of class \code{c("xhomophily", "xucinet_output")}, with the
-seven measures in \verb{$summary} under UCINET's headings and the
-within/between mixing matrix in \verb{$matrices}.
+seven measures in \verb{$summary} under UCINET's headings. The group-by-group
+mixing matrix UCINET prints beside them is \code{\link[=xmixing]{xmixing()}}'s \code{Observed} table:
+a whole-network function has no group-level table (SPEC addendum,
+23 September 2026).
 }
 \description{
 UCINET: Network | Whole Networks | Homophily/Influence | Categorical. Seven
@@ -60,6 +62,6 @@ names(gender) <- rownames(camp92_attr)
 xhomophily(campnet, gender)
 }
 \seealso{
-\code{\link[=xdensitybygroups]{xdensitybygroups()}} for the densities the mixing matrix implies,
-and \code{\link[=xattributetomatrix]{xattributetomatrix()}}.
+\code{\link[=xmixing]{xmixing()}} for the mixing matrix, \code{\link[=xdensitybygroups]{xdensitybygroups()}} for the
+densities by group, and \code{\link[=xattributetomatrix]{xattributetomatrix()}}.
 }

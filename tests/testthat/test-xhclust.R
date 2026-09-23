@@ -137,10 +137,13 @@ test_that("the printed report snapshot", {
   expect_snapshot(print(xhclust(cities, type = "d", method = "single", plot = FALSE)))
 })
 
-test_that("k adds a Cluster column without changing the level table", {
+test_that("k fills the Cluster column without changing the rest", {
   a <- xhclust(cities, type = "d", plot = FALSE)
   b <- xhclust(cities, type = "d", k = 3, plot = FALSE)
-  expect_identical(a$nodes, b$nodes[, names(a$nodes)])
+  expect_true(all(is.na(a$nodes$Cluster)))
+  keep <- setdiff(names(a$nodes), "Cluster")
+  expect_identical(a$nodes[keep], b$nodes[keep])
+  expect_true(is.na(a$summary[["Clusters requested"]]))
   expect_identical(b$nodes$Cluster, unname(cutree(a$hclust, k = 3)))
   expect_equal(b$summary[["Clusters requested"]], 3)
   expect_error(xhclust(cities, type = "d", k = 20, plot = FALSE), "between 1 and 9")

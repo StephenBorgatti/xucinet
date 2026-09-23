@@ -16,7 +16,9 @@
 # xij = 3 will not match xji = 2" and then compares values, which matters
 # because the two halves of its own report then disagree: the whole-network
 # ratios test presence (isarc, i.e. > 0) while the node-level table tests
-# equality of values. Ledger entry 16.
+# equality of values. Ledger entry 16. Since 23 Sep 2026 the node-level table
+# is xegoreciprocity()'s, and xegonet() carries its Symmetric column (SPEC
+# addendum 23 Sep: a whole-network function has no node table).
 
 #' Reciprocity
 #'
@@ -34,18 +36,20 @@
 #' UCINET's Hybrid method is the dyad ratio at this level; it differs only for
 #' the group-by-group table, which this function does not produce.
 #'
-#' Valued data are **not** dichotomized, which follows the routine. Its two
-#' halves then use different tests, and that is UCINET's behaviour rather than
-#' an oversight here: see the differences ledger.
+#' Valued data are **not** dichotomized, which follows the routine: a tie is
+#' any positive value. UCINET's node-level reciprocity, which compares the two
+#' values themselves, is [xegoreciprocity()], and its Symmetric proportion is a
+#' column of [xegonet()]; see the differences ledger for why the two can
+#' disagree on valued data.
 #'
 #' @param net A network (any accepted form). 1-mode only.
-#' @param method Which ratio to put first in the report: `"dyad"` (the
-#'   default), `"arc"`, or `"hybrid"`, which is the dyad ratio.
+#' @param method Which ratio to print first: `"dyad"` (the default), `"arc"`,
+#'   or `"hybrid"`, which is the dyad ratio. Both are always computed.
 #' @return An object of class `c("xreciprocity", "xucinet_output")`.
-#'   `$summary` holds both ratios; `$nodes` holds UCINET's six node-level
-#'   proportions, in its order and under its headings.
+#'   `$summary` holds both ratios, dyad then arc.
 #' @seealso [xcohesion()], which reports the same two ratios among its 33
-#'   measures, and [xtransitivity()].
+#'   measures; [xegoreciprocity()] for node-level reciprocity; and
+#'   [xtransitivity()].
 #' @examples
 #' xreciprocity(campnet)
 #' @export
@@ -60,9 +64,7 @@ xreciprocity <- function(net, method = c("dyad", "arc", "hybrid")) {
     assumptions <- c(
       assumptions,
       paste0("Data are valued and have not been dichotomized. The dyad and ",
-             "arc ratios count a tie as any positive value, while the ",
-             "node-level table counts a pair as symmetric only when the two ",
-             "values are equal, so x[i,j] = 3 does not match x[j,i] = 2."))
+             "arc ratios count a tie as any positive value."))
   }
 
   a <- m
@@ -70,64 +72,14 @@ xreciprocity <- function(net, method = c("dyad", "arc", "hybrid")) {
   diag(a) <- 0
 
   rec <- reciprocity_pair((a > 0) * 1)
-  dyad <- rec[["dyad"]]
-  arc <- rec[["arc"]]
-  # `method` chooses the order, not the content.
-  summ <- if (identical(method, "arc")) {
-    list("Arc Reciprocity" = arc, "Dyad Reciprocity" = dyad)
-  } else {
-    list("Dyad Reciprocity" = dyad, "Arc Reciprocity" = arc)
-  }
+  # Both ratios always; `method` chooses which is printed first (SPEC addendum,
+  # 23 Sep 2026, item 5).
+  summ <- list("Dyad Reciprocity" = rec[["dyad"]], "Arc Reciprocity" = rec[["arc"]])
+  shown <- if (identical(method, "arc")) c("Arc Reciprocity", "Dyad Reciprocity")
+           else c("Dyad Reciprocity", "Arc Reciprocity")
 
-  new_xucinet_output("Reciprocity", net, nodes = reciprocity_nodes(a, m),
-                     summary = summ, assumptions = assumptions,
-                     subclass = "xreciprocity",
-                     nodes_title = paste0("Node-level Reciprocity Statistics ",
-                                          "-- All values are Proportions"))
+  new_xucinet_output("Reciprocity", net, summary = summ,
+                     assumptions = assumptions, show_summary = shown,
+                     subclass = "xreciprocity", call = match.call())
 }
 
-# runindividuals: six proportions per node, over the alters ego has any tie
-# with in either direction. Asymmetry is inequality of the two values, not of
-# their presence.
-reciprocity_nodes <- function(a, m) {
-  n <- nrow(a)
-  labs <- rownames(a)
-  out <- data.frame(Node = labs, stringsAsFactors = FALSE)
-  cols <- matrix(NA_real_, n, 6)
-
-  vals <- m
-  vals[is.na(vals)] <- 0
-  for (i in seq_len(n)) {
-    j <- setdiff(seq_len(n), i)
-    contact <- a[i, j] > 0 | a[j, i] > 0
-    j <- j[contact]
-    if (!length(j)) next
-
-    deg <- length(j)
-    out_tie <- a[i, j] > 0
-    in_tie <- a[j, i] > 0
-    uneven <- vals[i, j] != vals[cbind(j, rep(i, length(j)))]
-
-    asym <- sum(uneven)
-    cols[i, 2] <- asym / deg                       # Non-Symmetric
-    cols[i, 1] <- 1 - cols[i, 2]                   # Symmetric
-    if (asym > 0) {
-      cols[i, 3] <- sum(uneven & out_tie) / asym   # Out/NonSym
-      cols[i, 4] <- sum(uneven & in_tie) / asym    # In/NonSym
-    }
-    if (sum(out_tie) > 0) {
-      cols[i, 5] <- 1 - sum(uneven & out_tie) / sum(out_tie)   # Sym/Out
-    }
-    if (sum(in_tie) > 0) {
-      cols[i, 6] <- 1 - sum(uneven & in_tie) / sum(in_tie)     # Sym/In
-    }
-  }
-
-  out[["Symmetric"]] <- cols[, 1]
-  out[["Non-Symmetric"]] <- cols[, 2]
-  out[["Out/NonSym"]] <- cols[, 3]
-  out[["In/NonSym"]] <- cols[, 4]
-  out[["Sym/Out"]] <- cols[, 5]
-  out[["Sym/In"]] <- cols[, 6]
-  out
-}

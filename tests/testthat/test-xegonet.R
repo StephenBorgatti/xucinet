@@ -34,12 +34,12 @@ row_of <- function(res, node) unlist(res$nodes[node, ])
 
 # ---- layer (a): hand-computed ------------------------------------------------
 
-test_that("the columns are UCINET's sixteen, in its order", {
+test_that("the columns are UCINET's sixteen, in its order, then Symmetric", {
   expect_equal(names(xegonet(star())$nodes),
                c("Size", "Ties", "Pairs", "Density", "AvgRecipDist", "Diameter",
                  "nWeakComp", "CompRatio", "2StepReach", "2StepPct",
                  "ReachEffic", "Broker", "nBroker", "nClosed", "EgoBetween",
-                 "nEgoBetween"))
+                 "nEgoBetween", "Symmetric"))
 })
 
 test_that("the centre of a star is a pure broker", {
@@ -170,8 +170,10 @@ test_that("ego betweenness agrees with igraph on the ego network", {
 
 golden_cols <- function(name, res) {
   g <- golden_matrix(name, "ego")
-  expect_equal(unname(as.matrix(res$nodes)), unname(g[, seq_len(ncol(res$nodes))]),
-               tolerance = 1e-5)
+  # UCINET's sixteen columns; Symmetric, the seventeenth, is xegoreciprocity's
+  # and is checked against it.
+  ours <- as.matrix(res$nodes[setdiff(names(res$nodes), "Symmetric")])
+  expect_equal(unname(ours), unname(g[, seq_len(ncol(ours))]), tolerance = 1e-5)
 }
 
 test_that("campnet matches UCINET, undirected", {

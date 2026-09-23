@@ -79,8 +79,9 @@ test_that("weighted = FALSE dichotomizes before every measure (UCINET issue 21)"
   expect_false(isTRUE(all.equal(a$summary[["Corr"]], b$summary[["Corr"]])))
 })
 
-test_that("the mixing matrix totals the ties", {
-  mx <- xhomophily(campnet, gender())$matrices$Mixing
+test_that("the mixing matrix is xmixing's, not part of this report", {
+  expect_null(xhomophily(campnet, gender())$matrices)
+  mx <- xmixing(campnet, gender())$matrices$Observed
   expect_equal(sum(mx), sum(as.matrix(campnet)))
   expect_equal(dim(mx), c(2L, 2L))
 })
@@ -143,7 +144,7 @@ test_that("an attribute can be named as a column", {
   f <- system.file("schema", "campnet-example.uci", package = "xucinet")
   net <- xreaduci(f)
   expect_equal(dim(xdensitybygroups(net, "Gender")$matrices$Density), c(2L, 2L))
-  expect_equal(dim(xhomophily(net, "Gender")$matrices$Mixing), c(2L, 2L))
+  expect_equal(dim(xmixing(net, "Gender")$matrices$Observed), c(2L, 2L))
 })
 
 test_that("xdensitybygroups refuses 2-mode data", {

@@ -9,13 +9,12 @@ xreciprocity(net, method = c("dyad", "arc", "hybrid"))
 \arguments{
 \item{net}{A network (any accepted form). 1-mode only.}
 
-\item{method}{Which ratio to put first in the report: \code{"dyad"} (the
-default), \code{"arc"}, or \code{"hybrid"}, which is the dyad ratio.}
+\item{method}{Which ratio to print first: \code{"dyad"} (the default), \code{"arc"},
+or \code{"hybrid"}, which is the dyad ratio. Both are always computed.}
 }
 \value{
 An object of class \code{c("xreciprocity", "xucinet_output")}.
-\verb{$summary} holds both ratios; \verb{$nodes} holds UCINET's six node-level
-proportions, in its order and under its headings.
+\verb{$summary} holds both ratios, dyad then arc.
 }
 \description{
 UCINET: Network | Cohesion | Reciprocity. How much of a directed network is
@@ -34,14 +33,17 @@ because each mutual dyad contributes two arcs.
 UCINET's Hybrid method is the dyad ratio at this level; it differs only for
 the group-by-group table, which this function does not produce.
 
-Valued data are \strong{not} dichotomized, which follows the routine. Its two
-halves then use different tests, and that is UCINET's behaviour rather than
-an oversight here: see the differences ledger.
+Valued data are \strong{not} dichotomized, which follows the routine: a tie is
+any positive value. UCINET's node-level reciprocity, which compares the two
+values themselves, is \code{\link[=xegoreciprocity]{xegoreciprocity()}}, and its Symmetric proportion is a
+column of \code{\link[=xegonet]{xegonet()}}; see the differences ledger for why the two can
+disagree on valued data.
 }
 \examples{
 xreciprocity(campnet)
 }
 \seealso{
 \code{\link[=xcohesion]{xcohesion()}}, which reports the same two ratios among its 33
-measures, and \code{\link[=xtransitivity]{xtransitivity()}}.
+measures; \code{\link[=xegoreciprocity]{xegoreciprocity()}} for node-level reciprocity; and
+\code{\link[=xtransitivity]{xtransitivity()}}.
 }

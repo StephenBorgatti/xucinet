@@ -13,29 +13,31 @@ xcentralization(
 \arguments{
 \item{net}{A network (any accepted form).}
 
-\item{measure}{\code{"degree"} (the default), \code{"betweenness"} or \code{"eigenvector"}.}
+\item{measure}{Which centralization to print: \code{"degree"} (the default),
+\code{"betweenness"}, \code{"closeness"} or \code{"eigenvector"}.}
 
-\item{...}{Passed to the centrality routine, so its own options - \code{normalize}
-and the rest - still work.}
+\item{...}{Passed to the centrality routines that take them, so \code{directed},
+\code{normalize} and the rest still work.}
 }
 \value{
 An object of class \code{c("xcentralization", "xucinet_output")} whose
-\verb{$summary} is the centralization the centrality routine reported.
+\verb{$summary} holds every centralization the four routines report: degree
+(one figure, or out- and in- for directed data), betweenness, closeness
+(one, or in- and out-) and eigenvector.
 }
 \description{
 How unequally a centrality measure is spread across the network: how far it
 is from a star, where one node has everything.
 }
 \details{
-This is deliberately not a computation. It calls the centrality routine and
-hands back the centralization that routine reports, so that the two can
-never disagree with each other (design question 10.5). Degree
-centralization is a proportion; betweenness and eigenvector centralization
-are percentages, as UCINET reports each.
-
-\code{"closeness"} is not available: the Closeness dialog that \code{\link[=xcloseness]{xcloseness()}}
-follows reports no centralization. Only UCINET's legacy closeness routine
-did.
+This is deliberately not a computation. It calls the four centrality
+routines and hands back the centralization each reports, so that the two can
+never disagree (design question 10.5). All four are always in the result;
+\code{measure} chooses which is printed. Degree centralization is a proportion;
+betweenness, closeness and eigenvector centralization are percentages, as
+UCINET reports each. Closeness centralization is the figure UCINET's legacy
+Closeness routine printed, since its current Closeness dialog prints none,
+and it is missing for a network that is not connected.
 }
 \examples{
 xcentralization(campnet)
@@ -43,6 +45,6 @@ xcentralization(campnet, measure = "betweenness")
 xcentralization(campnet, measure = "eigenvector")
 }
 \seealso{
-\code{\link[=xdegree]{xdegree()}}, \code{\link[=xbetweenness]{xbetweenness()}} and \code{\link[=xeigenvector]{xeigenvector()}}, which report
-the same figures as part of their fuller output.
+\code{\link[=xdegree]{xdegree()}}, \code{\link[=xbetweenness]{xbetweenness()}}, \code{\link[=xcloseness]{xcloseness()}} and \code{\link[=xeigenvector]{xeigenvector()}},
+which report the same figures as part of their fuller output.
 }

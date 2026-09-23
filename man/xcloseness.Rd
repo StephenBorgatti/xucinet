@@ -24,7 +24,11 @@ position. Defaults to the first.}
 }
 \value{
 An \code{xucinet_output} whose \verb{$nodes} holds the three measures, or six
-for directed data.
+for directed data, and whose \verb{$summary} holds the closeness centralization
+as a percentage (in- and out- for directed data). UCINET's current Closeness
+dialog does not print one; the figure is the one its legacy Closeness
+routine printed, from Freeman closeness, and is missing when the network is
+not connected.
 }
 \description{
 UCINET: Network | Centrality | Closeness. How near a node is to all the

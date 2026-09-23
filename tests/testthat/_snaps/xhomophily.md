@@ -21,14 +21,4 @@
       
       1 rows, 7 columns, 1 levels.
       
-      Mixing
-      
-                1  2 
-                1  2 
-               -- -- 
-           1 1 20  4 
-           2 2  5 25 
-      
-      2 rows, 2 columns, 1 levels.
-      
 

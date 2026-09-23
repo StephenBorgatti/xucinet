@@ -48,8 +48,11 @@
 #' someone outside it have no effect; it also reports ego betweenness,
 #' log constraint, indirect constraint and the alters' density. The
 #' **whole-network model** computes the proportions over the whole network, as
-#' Burt's formulas are usually written, and reports the first four measures
-#' plus indirect constraint.
+#' Burt's formulas are usually written, and prints the first four measures
+#' plus indirect constraint, as UCINET does. Both models return the same eleven
+#' columns: under the whole model, Degree and Ln(Constraint) follow its own
+#' counts, and ego betweenness, density, average degree and open pairs, which
+#' describe the ego network itself, are the same as under the ego model.
 #'
 #' @section UCINET equivalent:
 #' Network | Ego Networks | Structural Holes. *Method* is `method`, *How to
@@ -64,7 +67,8 @@
 #'   `"whole"` (the whole network model).
 #' @param direction Who counts as an alter in the ego-network model:
 #'   `"undirected"` (the default, UCINET's *Union*), `"out"`, `"in"` or
-#'   `"reciprocated"` (*Intersection*). Ignored by the whole-network model.
+#'   `"reciprocated"` (*Intersection*). The whole-network model uses it only
+#'   for the ego-network columns.
 #' @param symmetrize Add `z(i,j)` and `z(j,i)` before computing proportions,
 #'   as Burt does? `TRUE` by default.
 #' @param diagonal Keep the diagonal? `FALSE` by default.
@@ -101,10 +105,24 @@ xstructuralholes <- function(net, relation = NULL, method = c("ego", "whole"),
   if (!diagonal) diag(z) <- 0
   labels <- rownames(z)
 
+  ego <- holes_ego(z, direction, symmetrize, isolate, pendant)
   res <- if (method == "ego") {
-    holes_ego(z, direction, symmetrize, isolate, pendant)
+    ego
   } else {
-    holes_whole(z, symmetrize)
+    # The same eleven columns in both models (SPEC addendum, 23 Sep 2026,
+    # item 5; `method` changes values, not columns). UCINET's whole-network
+    # model prints five; the other six describe the ego network itself and do
+    # not depend on how the proportions are taken, so they are the ego
+    # model's, apart from Degree and Ln(Constraint), which follow the whole
+    # model's own counts.
+    w <- holes_whole(z, symmetrize)
+    nodes <- ego$nodes
+    nodes$Degree <- w$degree
+    for (col in names(w$nodes)) nodes[[col]] <- w$nodes[[col]]
+    nodes[["Ln(Constraint)"]] <- ifelse(!is.na(w$nodes$Constraint) &
+                                          w$nodes$Constraint > 0,
+                                        log(w$nodes$Constraint), NA_real_)
+    list(nodes = nodes, dyred = w$dyred, dycon = w$dycon)
   }
   dimnames(res$dyred) <- dimnames(res$dycon) <- list(labels, labels)
   rownames(res$nodes) <- labels
@@ -134,6 +152,8 @@ xstructuralholes <- function(net, relation = NULL, method = c("ego", "whole"),
                     `Dyadic Constraint` = res$dycon),
     assumptions = rel$note, fields = fields,
     nodes_title = "Structural Hole Measures",
+    show_columns = if (method == "whole") c("EffSize", "Efficiency", "Constraint",
+                                            "Hierarchy", "Indirects"),
     subclass = "xstructuralholes", call = match.call())
 }
 
@@ -316,5 +336,5 @@ holes_whole <- function(z, symmetrize) {
   nodes <- data.frame(EffSize = effsize, Efficiency = effic,
                       Constraint = agcon, Hierarchy = hier, Indirects = ind,
                       check.names = FALSE)
-  list(nodes = nodes, dyred = r, dycon = con)
+  list(nodes = nodes, dyred = r, dycon = con, degree = deg)
 }

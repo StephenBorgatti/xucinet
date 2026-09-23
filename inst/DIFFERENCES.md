@@ -377,6 +377,11 @@ Dichotomizing first would make the report self-consistent and would no longer
 be UCINET. Users who want that can pass
 `xreciprocity(xdichotomize(net, diagonal = "rule"))`.
 
+Since 23 September 2026 the two halves live in different functions (entry 32):
+the ratios in `xreciprocity()`, the node table in `xegoreciprocity()` and its
+Symmetric column also in `xegonet()`. The difference in tests is unchanged,
+and each function carries the half of the notice that concerns it.
+
 ## 17. Structural holes: UCINET's ego-network model, not igraph's constraint
 
 **Status:** deliberate, following UCINET. Recorded 23 September 2026 (issue
@@ -591,3 +596,49 @@ agree.
 UCINET's Cliques ends with two hierarchical clusterings: of the actor-by-actor
 co-membership matrix, and of the clique-by-clique overlap matrix. `xcliques()`
 reports the first, which is what chapter 11 uses, and not the second.
+
+## 31. Closeness centralization comes from the legacy Closeness routine
+
+**Status:** deliberate addition, Steve, 23 September 2026.
+
+UCINET's current Network | Centrality | Closeness dialog
+(`uc_ClosenessMeasures.pas`) prints no centralization. `xcloseness()$summary`
+has one anyway, ported from the legacy Closeness routine (`xcloseness.pas`,
+`runFreemanCloseness`, which printed "Network Centralization = "): with
+`c_i = 100 (n - 1) / farness_i`,
+
+    (2n - 3) * sum(max c - c_i) / (n^2 - 3n + 2)      a percentage,
+
+in- and out-versions for directed data. Like the legacy routine it is computed
+only for a connected network; otherwise it is missing and the notice
+"Network centralization not computed for unconnected graphs." is recorded.
+The command line's `centralization()` (`runcentralization` in `Xdpmat.pas`)
+divides the same sum by a star's, which is the same figure as a proportion;
+the test suite checks the two agree. `xcentralization(measure = "closeness")`
+reads it from `xcloseness()`, as it does the other three.
+
+## 32. Level of analysis: what each function returns (SPEC addendum, 23 September 2026)
+
+**Status:** deliberate, Steve, 23 September 2026.
+
+A function returns the output that belongs to its level of analysis, always the
+same fields whatever its arguments, and arguments choose only what is printed.
+Where that moves output away from the UCINET dialog that prints it:
+
+- `xreciprocity()` has no node table; UCINET's Reciprocity dialog prints one
+  under the ratios. The table is `xegoreciprocity()` (UCINET's Egonet
+  Reciprocity menu opens the same dialog), and its Symmetric column is also
+  the seventeenth column of `xegonet()`, which UCINET's Egonet Basic Measures
+  does not have. `method` sets which ratio is printed first.
+- `xhomophily()` has no mixing matrix; it is `xmixing()`'s Observed table.
+- `xtransitivity()` always returns the triplet and the triad measures; the triad
+  ratio is named `Triad Transitivity` so that the two can sit in one list.
+  `method` chooses which are printed, and the printed label changes with it.
+- `xegoaltersimilarity()` returns a column for every continuous measure;
+  `method` chooses which are printed.
+- `xcentralization()` returns all four centralizations in one row.
+- `xhclust()` always has a Cluster column, missing when `k` is not given.
+- `xstructuralholes()` returns the same eleven columns under both models; the
+  whole-network model prints UCINET's five.
+- `xgirvannewman()` goes on cutting until no ties are left and keeps every
+  partition; `k` sets which are printed, stopping where UCINET stops.

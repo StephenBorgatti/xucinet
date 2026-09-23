@@ -30,12 +30,13 @@ test_that("both ratios are always reported, whichever is asked for", {
   }
 })
 
-test_that("method chooses the order, not the content", {
-  a <- xreciprocity(campnet, method = "dyad")$summary
-  b <- xreciprocity(campnet, method = "arc")$summary
-  expect_equal(names(a)[1], "Dyad Reciprocity")
-  expect_equal(names(b)[1], "Arc Reciprocity")
-  expect_equal(a[["Dyad Reciprocity"]], b[["Dyad Reciprocity"]])
+test_that("method chooses the printed order, not the content", {
+  a <- xreciprocity(campnet, method = "dyad")
+  b <- xreciprocity(campnet, method = "arc")
+  expect_identical(a$summary, b$summary)
+  expect_null(a$nodes)
+  expect_equal(a$show_summary[1], "Dyad Reciprocity")
+  expect_equal(b$show_summary[1], "Arc Reciprocity")
 })
 
 test_that("hybrid is the dyad ratio at the whole-network level", {
@@ -59,43 +60,12 @@ test_that("the ratios agree with xcohesion's, which UCINET validated", {
   expect_equal(s[["Arc Reciprocity"]], co["Arc Reciprocity", 1], tolerance = tol)
 })
 
-test_that("the node table is UCINET's six proportions in its order", {
-  n <- xreciprocity(campnet)$nodes
-  expect_equal(names(n), c("Node", "Symmetric", "Non-Symmetric", "Out/NonSym",
-                           "In/NonSym", "Sym/Out", "Sym/In"))
-  expect_equal(nrow(n), 18)
-  # Symmetric and Non-Symmetric partition the contacts
-  ok <- !is.na(n$Symmetric)
-  expect_equal(n$Symmetric[ok] + n$`Non-Symmetric`[ok], rep(1, sum(ok)))
-})
-
-test_that("node-level reciprocity is what it says, by hand", {
-  n <- xreciprocity(hand4())$nodes
-  # a has contacts b (mutual) and c (one-way out): half symmetric
-  expect_equal(n$Symmetric[n$Node == "a"], 0.5)
-  expect_equal(n$`Out/NonSym`[n$Node == "a"], 1)   # the lone asymmetry is outgoing
-  expect_equal(n$`In/NonSym`[n$Node == "a"], 0)
-  # b has only a, and it is mutual
-  expect_equal(n$Symmetric[n$Node == "b"], 1)
-})
-
 test_that("valued data are not dichotomized, and the notice explains why", {
   # The routine prints "Data are valued. Remember that xij = 3 will not match
-  # xji = 2" and then compares values. Ledger entry 16.
+  # xji = 2" and then compares values. Ledger entry 16. The "3 does not
+  # match" half now belongs to xegoreciprocity(), whose table it concerns.
   a <- xreciprocity(baker_journals)
   expect_true(any(grepl("not been dichotomized", a$assumptions)))
-  expect_true(any(grepl("3 does not match", a$assumptions)))
-})
-
-test_that("node-level symmetry is value equality, not just presence", {
-  # A pair of unequal positive values is a tie both ways but not symmetric.
-  m <- blank3()
-  m["a", "b"] <- 3; m["b", "a"] <- 2
-  n <- xreciprocity(m)$nodes
-  expect_equal(n$Symmetric[n$Node == "a"], 0)
-  # while the whole-network arc ratio counts it as reciprocated, because that
-  # half of the report tests presence
-  expect_equal(xreciprocity(m)$summary[["Arc Reciprocity"]], 1)
 })
 
 test_that("xreciprocity refuses 2-mode data", {
@@ -162,9 +132,18 @@ test_that("the centred measures follow FinalizeTransitivity", {
 # ---- xtransitivity, triads ---------------------------------------------------
 
 test_that("the triad report is UCINET's three counts", {
-  s <- xtransitivity(campnet, method = "triads")$summary
-  expect_equal(names(s)[1:3], c("Trans", "Trans+InTrans", "Transitivity"))
-  expect_equal(s[["Transitivity"]], s[["Trans"]] / s[["Trans+InTrans"]])
+  res <- xtransitivity(campnet, method = "triads")
+  s <- res$summary
+  expect_equal(res$show_summary, c("Trans", "Trans+InTrans", "Triad Transitivity",
+                                   "Clustering Coefficient"))
+  expect_equal(s[["Triad Transitivity"]], s[["Trans"]] / s[["Trans+InTrans"]])
+})
+
+test_that("both versions are always returned; method chooses what is printed", {
+  a <- xtransitivity(campnet)
+  b <- xtransitivity(campnet, method = "triads")
+  expect_identical(a$summary, b$summary)
+  expect_true(all(c("Transitivity", "Triad Transitivity") %in% names(a$summary)))
 })
 
 test_that("the census covers every triple exactly once", {
@@ -218,14 +197,14 @@ test_that("the transitive and intransitive sets are UCINET's", {
   s2 <- xtransitivity(cyc, method = "triads")$summary
   expect_equal(s2[["Trans"]], 0)
   expect_equal(s2[["Trans+InTrans"]], 1)
-  expect_equal(s2[["Transitivity"]], 0)
+  expect_equal(s2[["Triad Transitivity"]], 0)
 })
 
 test_that("a vacuous triple counts in neither", {
   # 003 and 012 are neither transitive nor intransitive.
   s <- xtransitivity(blank3(), method = "triads")$summary
   expect_equal(s[["Trans+InTrans"]], 0)
-  expect_true(is.na(s[["Transitivity"]]))
+  expect_true(is.na(s[["Triad Transitivity"]]))
 })
 
 # ---- xcyclicality ------------------------------------------------------------

@@ -9,11 +9,14 @@ xtransitivity(net, method = c("triplets", "triads"))
 \arguments{
 \item{net}{A network (any accepted form). 1-mode only.}
 
-\item{method}{\code{"triplets"} (the dialog's default) or \code{"triads"}.}
+\item{method}{Which version to print: \code{"triplets"} (the dialog's default) or
+\code{"triads"}. Both are always computed.}
 }
 \value{
 An object of class \code{c("xtransitivity", "xucinet_output")}, with the
-measures in \verb{$summary} under UCINET's headings.
+measures of both versions in \verb{$summary} under UCINET's headings (the triad
+version's \code{Transitivity} as \verb{Triad Transitivity}), and the overall
+clustering coefficient.
 }
 \description{
 UCINET: Network | Cohesion | Transitivity. How often a two-step path is

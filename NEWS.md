@@ -1,5 +1,24 @@
 # xucinet 2.0.0.9000 (development)
 
+## Level of analysis and closeness centralization (23 September 2026, issue #20)
+
+* A function returns the same fields whatever its arguments; arguments choose
+  what is printed (SPEC addendum, 23 September 2026). Ledger entry 32.
+* `xreciprocity()` is whole-network only. The node table is the new
+  `xegoreciprocity()` (Network | Ego Networks | Egonet Reciprocity), and
+  `xegonet()` gains its `Symmetric` column.
+* `xhomophily()` no longer returns the mixing matrix; it is `xmixing()`'s.
+* `xtransitivity()` always returns the triplet and the triad measures (the
+  triad ratio as `Triad Transitivity`); `xegoaltersimilarity()` always returns
+  every continuous measure; `xhclust()` always has a `Cluster` column;
+  `xstructuralholes()` returns the same eleven columns under both models.
+* `xgirvannewman()` keeps every partition down to isolates; `k` sets which are
+  printed.
+* `xcloseness()$summary` has a closeness centralization, from UCINET's legacy
+  Closeness routine (ledger entry 31), and `xcentralization()` returns all
+  four centralizations, with `measure = "closeness"` now available.
+* Report objects gain `show_summary`, `show_columns` and `show_matrix_columns`.
+
 ## Chapter 11: subgroups (23 September 2026)
 
 * igraph moves from Suggests to Imports (design answer G1).

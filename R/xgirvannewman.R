@@ -15,8 +15,10 @@
 # Dialog: "Output partitions with no more than 10 clusters" (MaxClus.Text =
 # 10). Directed data are symmetrized by maximum ("Data were symmetrized via
 # the maximum method."). A partition is recorded whenever a removal step
-# produces a component count not seen before; the loop stops when that count
-# reaches the maximum or no edges are left.
+# produces a component count not seen before. UCINET stops when that count
+# reaches the maximum; here the loop runs until no edges are left and `k` sets
+# only which partitions are printed (SPEC addendum, 23 Sep 2026, Steve
+# accepting Cowork's recommendation), so the object holds every partition.
 #
 # UCINET prints the partitions but no modularity for them; the modularity of
 # each is added here as a short summary of the partitions (SPEC addendum,
@@ -32,8 +34,11 @@
 #'
 #' `$matrices$Partitions` has one column per partition, headed as UCINET heads
 #' them (`C2`, `C3`, ...), from fewest clusters to most, and
-#' `$matrices$Modularity` the modularity of each. `Cluster` in the node table is
-#' the partition with the highest modularity, and `$summary` reports that one.
+#' `$matrices$Modularity` the modularity of each. Cutting goes on until no ties
+#' are left, so both hold every partition the process passes through; `k` only
+#' limits which of them are printed, as UCINET's cut-off would. `Cluster` in the
+#' node table is the partition with the highest modularity, and `$summary`
+#' reports that one.
 #'
 #' Ties in edge betweenness are removed together, as in UCINET. igraph's
 #' `cluster_edge_betweenness()` removes them one at a time, so on networks with
@@ -45,7 +50,9 @@
 #'
 #' @param net A network (any accepted form). 1-mode. Directed data are
 #'   symmetrized by maximum; values are ignored.
-#' @param k The most clusters to go to. UCINET's default is 10.
+#' @param k Print the partitions up to the first with at least this many
+#'   clusters, where UCINET stops. UCINET's default is 10. Every partition is
+#'   in the result whatever `k` is.
 #' @param relation Which relation of a multi-relation dataset, by name or
 #'   position. Defaults to the first.
 #' @return An object of class `c("xgirvannewman", "xucinet_output")`.
@@ -64,7 +71,7 @@ xgirvannewman <- function(net, k = 10, relation = NULL) {
   }
   a <- community_adjacency(m)
 
-  parts <- girvan_newman_partitions(a, k)
+  parts <- girvan_newman_partitions(a, Inf)
   if (!ncol(parts)) {
     stop("xgirvannewman(): the network has no ties to remove.", call. = FALSE)
   }
@@ -72,6 +79,11 @@ xgirvannewman <- function(net, k = 10, relation = NULL) {
   q <- apply(parts, 2, function(p) community_modularity(m, p))
   best <- which.max(q)
   qmat <- matrix(q, 1, length(q), dimnames = list("Modularity", colnames(parts)))
+  nclus <- apply(parts, 2, function(p) length(unique(p)))
+  # UCINET records a partition, then stops if it has reached k clusters, so its
+  # log ends with the first partition at or past k.
+  last <- which(nclus >= k)[1]
+  shown <- colnames(parts)[seq_len(if (is.na(last)) ncol(parts) else last)]
 
   new_xucinet_output(
     "Girvan-Newman", net,
@@ -81,6 +93,7 @@ xgirvannewman <- function(net, k = 10, relation = NULL) {
     assumptions = assumptions,
     fields = c("Maximum no. of clusters:" = format(k)),
     print_nodes = FALSE,
+    show_matrix_columns = list(Partitions = shown, Modularity = shown),
     summary_title = "Partition with the highest modularity",
     subclass = "xgirvannewman", call = match.call())
 }

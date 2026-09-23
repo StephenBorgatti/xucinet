@@ -82,32 +82,36 @@ vals <- function() c(a = 1, b = 2, c = 4, d = 7, e = 11, f = 16)
 
 test_that("-AbsDiff is the default and is Pearson's r of ties on similarity", {
   res <- xegoaltersimilarity(six(), vals())
-  expect_equal(names(res$nodes), "-AbsDiff")
+  expect_equal(res$show_columns, "-AbsDiff")
   tie <- c(1, 1, 0, 0, 0)
   sim <- -abs(1 - c(2, 4, 7, 11, 16))
-  expect_equal(res$nodes["a", 1], stats::cor(tie, sim), tolerance = tol)
+  expect_equal(res$nodes["a", "-AbsDiff"], stats::cor(tie, sim), tolerance = tol)
 })
 
-test_that("several measures come back in the dialog's order", {
-  nd <- xegoaltersimilarity(six(), vals(),
-                            method = c("negabsdiff", "zegers", "absdiff"))$nodes
-  expect_equal(names(nd), c("Zegers", "Absolute difference", "-AbsDiff"))
+test_that("every measure is returned; method chooses what is printed", {
+  res <- xegoaltersimilarity(six(), vals(),
+                             method = c("negabsdiff", "zegers", "absdiff"))
+  nd <- res$nodes
+  expect_equal(res$show_columns, c("Zegers", "Absolute difference", "-AbsDiff"))
+  expect_equal(names(nd), c("Zegers", "MinOverMax", "Absolute difference",
+                            "Difference Squared", "Product", "-AbsDiff"))
   expect_equal(nd$`Absolute difference`, -nd$`-AbsDiff`)
 })
 
 test_that("an ego with no ties has no correlation", {
-  expect_true(is.na(xegoaltersimilarity(six(), vals())$nodes["b", 1]))
+  expect_true(is.na(xegoaltersimilarity(six(), vals())$nodes["b", "-AbsDiff"]))
 })
 
 test_that("normalization moves the attribute, not the difference measures", {
-  a <- xegoaltersimilarity(six(), vals())$nodes
-  b <- xegoaltersimilarity(six(), vals(), normalize = "additive")$nodes
-  z <- xegoaltersimilarity(six(), vals(), normalize = "interval")$nodes
+  diffs <- c("Absolute difference", "Difference Squared", "-AbsDiff")
+  a <- xegoaltersimilarity(six(), vals())$nodes[diffs]
+  b <- xegoaltersimilarity(six(), vals(), normalize = "additive")$nodes[diffs]
+  z <- xegoaltersimilarity(six(), vals(), normalize = "interval")$nodes[diffs]
   expect_equal(a, b)
   expect_equal(a, z)
   pz <- xegoaltersimilarity(six(), vals(), method = "product",
-                            normalize = "additive")$nodes
-  pa <- xegoaltersimilarity(six(), vals(), method = "product")$nodes
+                            normalize = "additive")$nodes$Product
+  pa <- xegoaltersimilarity(six(), vals(), method = "product")$nodes$Product
   expect_false(isTRUE(all.equal(pz, pa)))
 })
 
@@ -127,7 +131,7 @@ test_that("the 1e aliases set the type", {
   expect_message(a <- xEgoAlterSimilarityCat(campnet, g), "1e name")
   expect_equal(names(a$nodes)[1], "H")
   expect_message(b <- xEgoAlterSimilarityCon(campnet, g), "1e name")
-  expect_equal(names(b$nodes), "-AbsDiff")
+  expect_equal(b$show_columns, "-AbsDiff")
 })
 
 test_that("the report prints", {

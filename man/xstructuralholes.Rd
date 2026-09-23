@@ -26,7 +26,8 @@ position. Defaults to the first.}
 
 \item{direction}{Who counts as an alter in the ego-network model:
 \code{"undirected"} (the default, UCINET's \emph{Union}), \code{"out"}, \code{"in"} or
-\code{"reciprocated"} (\emph{Intersection}). Ignored by the whole-network model.}
+\code{"reciprocated"} (\emph{Intersection}). The whole-network model uses it only
+for the ego-network columns.}
 
 \item{symmetrize}{Add \code{z(i,j)} and \code{z(j,i)} before computing proportions,
 as Burt does? \code{TRUE} by default.}
@@ -69,8 +70,11 @@ computes everything inside each node's ego network, so ties from an alter to
 someone outside it have no effect; it also reports ego betweenness,
 log constraint, indirect constraint and the alters' density. The
 \strong{whole-network model} computes the proportions over the whole network, as
-Burt's formulas are usually written, and reports the first four measures
-plus indirect constraint.
+Burt's formulas are usually written, and prints the first four measures
+plus indirect constraint, as UCINET does. Both models return the same eleven
+columns: under the whole model, Degree and Ln(Constraint) follow its own
+counts, and ego betweenness, density, average degree and open pairs, which
+describe the ego network itself, are the same as under the ego model.
 }
 \section{UCINET equivalent}{
 

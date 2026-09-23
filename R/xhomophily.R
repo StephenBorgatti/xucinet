@@ -44,10 +44,12 @@
 #' @param diagonal Allow reflexive ties? `FALSE` by default.
 #' @param data A data frame to look `attribute` up in.
 #' @return An object of class `c("xhomophily", "xucinet_output")`, with the
-#'   seven measures in `$summary` under UCINET's headings and the
-#'   within/between mixing matrix in `$matrices`.
-#' @seealso [xdensitybygroups()] for the densities the mixing matrix implies,
-#'   and [xattributetomatrix()].
+#'   seven measures in `$summary` under UCINET's headings. The group-by-group
+#'   mixing matrix UCINET prints beside them is [xmixing()]'s `Observed` table:
+#'   a whole-network function has no group-level table (SPEC addendum,
+#'   23 September 2026).
+#' @seealso [xmixing()] for the mixing matrix, [xdensitybygroups()] for the
+#'   densities by group, and [xattributetomatrix()].
 #' @examples
 #' gender <- camp92_attr$Gender
 #' names(gender) <- rownames(camp92_attr)
@@ -86,7 +88,7 @@ xhomophily <- function(net, attribute, directed = NULL, weighted = TRUE,
 
   new_xucinet_output(
     "Whole-Network Alter-Ego Similarity Measures", net,
-    summary = hom$summary, matrices = list(Mixing = hom$mixing),
+    summary = hom$summary,
     assumptions = assumptions, subclass = "xhomophily",
     summary_title = "Whole Network Ego-Alter Similarity Measures")
 }

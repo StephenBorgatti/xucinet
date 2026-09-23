@@ -23,8 +23,8 @@ Required; see Details.}
 \item{method}{Linkage: \code{"average"} (UCINET's default, \code{WTD_AVERAGE}),
 \code{"single"} or \code{"complete"}.}
 
-\item{k}{Optional number of clusters. Adds a \code{Cluster} column to \verb{$nodes}
-holding \code{cutree(hc, k)}; the level table itself is unchanged.}
+\item{k}{Optional number of clusters. Fills the \code{Cluster} column of \verb{$nodes}
+with \code{cutree(hc, k)}; the level table itself is unchanged.}
 
 \item{plot}{Draw the dendrogram with base graphics. The text cluster diagram
 is printed regardless.}
@@ -33,10 +33,11 @@ is printed regardless.}
 An \code{xucinet_output} of subclass \code{xhclust}. \verb{$nodes} is the
 partition indicator matrix as a data frame, one column per distinct merge
 level, named as UCINET names them (\verb{1(8)206} is level 1, eight clusters,
-merge distance 206), plus \code{Cluster} when \code{k} is given. As in UCINET, which
-saves this matrix but does not print it, it is not part of the printed
-report. \verb{$summary} holds
-the cophenetic correlation and the number of levels. \verb{$matrices} holds
+merge distance 206), plus \code{Cluster}, which is missing unless \code{k} is
+given. As in UCINET, which saves this matrix but does not print it, it is
+not part of the printed report. \verb{$summary} holds the cophenetic
+correlation, the number of levels and the number of clusters requested
+(missing without \code{k}). \verb{$matrices} holds
 \verb{Measures of cluster adequacy} (\code{Corr}, \code{Modularity}, \code{Silhouette} by
 level) and \verb{Cluster sizes} (proportion of items in each cluster, by
 level). \verb{$hclust} is the underlying \code{stats::hclust} object, so \code{cutree()}

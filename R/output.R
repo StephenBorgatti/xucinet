@@ -206,6 +206,14 @@ format_number <- function(v, digits = 3) format_values(v, digits)
 #' @param epilogue Optional preformatted lines printed after every table, for
 #'   output UCINET places last, such as the clustering diagram that ends the
 #'   Cliques report.
+#' @param show_summary,show_columns Which entries of `$summary`, and which
+#'   columns of `$nodes`, the report prints, in the order given. `NULL`, the
+#'   default, prints them all. This is how an argument chooses what is printed
+#'   without changing what the object holds (SPEC addendum, 23 September 2026,
+#'   item 5).
+#' @param show_matrix_columns A named list: for each matrix named, which of its
+#'   columns the report prints. Matrices not named print whole. Girvan-Newman
+#'   uses it to print only the partitions UCINET would reach with `k`.
 #' @return An object of class `xucinet_output`.
 #' @keywords internal
 #' @export
@@ -215,13 +223,17 @@ new_xucinet_output <- function(routine, net, nodes = NULL, summary = NULL,
                                nodes_title = NULL, summary_title = NULL,
                                stats_block = FALSE, fields = NULL,
                                preamble = NULL, print_nodes = TRUE,
-                               hide = character(), epilogue = NULL) {
+                               hide = character(), epilogue = NULL,
+                               show_summary = NULL, show_columns = NULL,
+                               show_matrix_columns = NULL) {
   structure(
     list(routine = routine, dataset = net$title, nodes = nodes, summary = summary,
          matrices = matrices, assumptions = assumptions, call = call,
          nodes_title = nodes_title, summary_title = summary_title,
          stats_block = stats_block, fields = fields, preamble = preamble,
-         print_nodes = print_nodes, hide = hide, epilogue = epilogue),
+         print_nodes = print_nodes, hide = hide, epilogue = epilogue,
+         show_summary = show_summary, show_columns = show_columns,
+         show_matrix_columns = show_matrix_columns),
     class = c(subclass, "xucinet_output")
   )
 }
@@ -283,6 +295,9 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = NULL, ...) 
     if (is.null(x$summary)) return(invisible(NULL))
     if (!is.null(x$summary_title)) cat(x$summary_title, "\n\n", sep = "")
     s <- x$summary
+    if (!is.null(x$show_summary)) {
+      s <- if (is.data.frame(s)) s[, x$show_summary, drop = FALSE] else s[x$show_summary]
+    }
     if (is.list(s) && !is.data.frame(s)) {
       m <- matrix(vapply(s, function(v) as.numeric(v)[1], numeric(1)), nrow = 1,
                   dimnames = list(x$dataset, names(s)))
@@ -301,11 +316,12 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = NULL, ...) 
 
   if (show_nodes) {
     nodes <- x$nodes
+    if (!is.null(x$show_columns)) nodes <- nodes[, x$show_columns, drop = FALSE]
     # The statistics describe the measure, not the view of it, so they are taken
     # from the full table before any sorting or subsetting (SPEC ch 9 decision 2).
     block <- if (isTRUE(stats)) uci_stats_block(nodes) else NULL
     if (!is.null(sort_col)) {
-      nodes <- nodes[order(nodes[[sort_col]], decreasing = TRUE), , drop = FALSE]
+      nodes <- nodes[order(x$nodes[[sort_col]], decreasing = TRUE), , drop = FALSE]
     }
     if (!is.null(x$nodes_title)) cat(x$nodes_title, "\n\n", sep = "")
     # A node table is saved as a plain dataset rather than a table, so decimals
@@ -322,8 +338,11 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = NULL, ...) 
 
   for (nm in names(x$matrices)) {
     if (nm %in% x$hide) next
+    mat <- x$matrices[[nm]]
+    keep <- x$show_matrix_columns[[nm]]
+    if (!is.null(keep)) mat <- mat[, keep, drop = FALSE]
     cat(nm, "\n\n", sep = "")
-    cat_uci_matrix(x$matrices[[nm]], digits)
+    cat_uci_matrix(mat, digits)
     cat("\n")
   }
   if (length(x$epilogue)) {

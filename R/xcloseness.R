@@ -35,7 +35,11 @@
 #' @param undefined What to do with unreachable pairs: `"max1"` (default),
 #'   `"n"`, `"zero"` or `"avg"`.
 #' @return An `xucinet_output` whose `$nodes` holds the three measures, or six
-#'   for directed data.
+#'   for directed data, and whose `$summary` holds the closeness centralization
+#'   as a percentage (in- and out- for directed data). UCINET's current Closeness
+#'   dialog does not print one; the figure is the one its legacy Closeness
+#'   routine printed, from Freeman closeness, and is missing when the network is
+#'   not connected.
 #' @examples
 #' xcloseness(campnet)
 #' @export
@@ -122,9 +126,35 @@ xcloseness <- function(net, relation = NULL, directed = NULL,
     "(Reciprocal) Handle undefined distances: Set reciprocal distance to zero",
     "(Reciprocal) Output options: Averages")
 
+  # Closeness centralization, from UCINET's legacy Closeness routine
+  # (xcloseness.pas, runFreemanCloseness; ucinet c7b4956), since the current
+  # Closeness dialog prints none (Steve, 23 Sep 2026; ledger entry 31). With
+  # c_i = 100 (n - 1) / farness_i it is
+  #   (2n - 3) * sum(max c - c_i) / (n^2 - 3n + 2)          a percentage,
+  # the in- and out-versions for directed data, and it is computed only for a
+  # connected network ("Network centralization not computed for unconnected
+  # graphs"). The CLI's centralization() divides the same sum by a star's,
+  # which is the same number as a proportion.
+  connected <- !anyNA(d[row(d) != col(d)])
+  cz <- function(p) {
+    c100 <- 100 * p
+    if (!connected || n < 3) return(NA_real_)
+    (2 * n - 3) * sum(max(c100) - c100) / (n^2 - 3 * n + 2)
+  }
+  summary <- if (sym) {
+    list(`Network Centralization (%)` = cz(nodes$FreeClo))
+  } else {
+    list(`Network in-Centralization (%)` = cz(nodes$InClose),
+         `Network out-Centralization (%)` = cz(nodes$OutClose))
+  }
+  if (!connected) {
+    assumptions <- c(assumptions,
+                     "Network centralization not computed for unconnected graphs.")
+  }
+
   out <- new_xucinet_output(
     "Closeness centrality measures", net,
-    nodes = nodes, assumptions = assumptions,
+    nodes = nodes, summary = summary, assumptions = assumptions,
     nodes_title = NULL,
     stats_block = FALSE,          # uc_ClosenessMeasures.pas prints none
     subclass = "xcloseness", call = match.call())

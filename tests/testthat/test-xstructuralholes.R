@@ -23,12 +23,14 @@ triangle <- function() {
 
 # ---- layer (a): hand-computed ------------------------------------------------
 
-test_that("the columns are UCINET's, for each model", {
+test_that("both models return the same columns; whole prints UCINET's five", {
   expect_equal(names(xstructuralholes(star())$nodes),
                c("Degree", "EffSize", "Efficiency", "Constraint", "Hierarchy",
                  "EgoBet", "Ln(Constraint)", "Indirects", "Density", "AvgDeg",
                  "Open Pairs"))
   expect_equal(names(xstructuralholes(star(), method = "whole")$nodes),
+               names(xstructuralholes(star())$nodes))
+  expect_equal(xstructuralholes(star(), method = "whole")$show_columns,
                c("EffSize", "Efficiency", "Constraint", "Hierarchy", "Indirects"))
   expect_equal(names(xstructuralholes(star())$matrices),
                c("Dyadic Redundancy", "Dyadic Constraint"))

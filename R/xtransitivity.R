@@ -40,9 +40,12 @@
 #' engine does.
 #'
 #' @param net A network (any accepted form). 1-mode only.
-#' @param method `"triplets"` (the dialog's default) or `"triads"`.
+#' @param method Which version to print: `"triplets"` (the dialog's default) or
+#'   `"triads"`. Both are always computed.
 #' @return An object of class `c("xtransitivity", "xucinet_output")`, with the
-#'   measures in `$summary` under UCINET's headings.
+#'   measures of both versions in `$summary` under UCINET's headings (the triad
+#'   version's `Transitivity` as `Triad Transitivity`), and the overall
+#'   clustering coefficient.
 #' @seealso [xcyclicality()] for the same counts closed the other way, and
 #'   [xcohesion()], whose `Transitivity/Closure` is this routine's
 #'   `Transitivity`.
@@ -59,12 +62,20 @@ xtransitivity <- function(net, method = c("triplets", "triads")) {
   a <- binary_offdiag(m)
   assumptions <- if (is_valued(m)) "Data dichotomized at > 0." else character(0)
 
-  summ <- if (identical(method, "triads")) triad_summary(a) else triplet_summary(a)
+  # Both versions always (SPEC addendum, 23 Sep 2026, item 5); `method` chooses
+  # which is printed. The triad version's own "Transitivity" is stored as
+  # "Triad Transitivity" so that the two can sit in one summary.
+  trip <- triplet_summary(a)
+  triad <- triad_summary(a)
+  names(triad)[names(triad) == "Transitivity"] <- "Triad Transitivity"
   # Question 10.2: the overall clustering coefficient belongs in this report.
-  summ[["Clustering Coefficient"]] <- clustering_overall(a)
+  summ <- c(trip, triad, list("Clustering Coefficient" = clustering_overall(a)))
+  shown <- c(if (identical(method, "triads")) names(triad) else names(trip),
+             "Clustering Coefficient")
 
   new_xucinet_output("Transitivity", net, summary = summ,
                      assumptions = assumptions, subclass = "xtransitivity",
+                     show_summary = shown, call = match.call(),
                      summary_title = if (identical(method, "triads"))
                        "Triad Transitivity" else "Triplet Transitivity")
 }

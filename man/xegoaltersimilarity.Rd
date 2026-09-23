@@ -30,8 +30,9 @@ position. Defaults to the first.}
 \item{direction}{Which ties are ego's: \code{"out"} (the default, as in UCINET),
 \code{"undirected"} (a tie in either direction), \code{"in"} or \code{"reciprocated"}.}
 
-\item{method}{Continuous only: one or more of \code{"negabsdiff"} (the default),
-\code{"zegers"}, \code{"minovermax"}, \code{"absdiff"}, \code{"sqdiff"}, \code{"product"}.}
+\item{method}{Continuous only: which measures to print, one or more of
+\code{"negabsdiff"} (the default), \code{"zegers"}, \code{"minovermax"}, \code{"absdiff"},
+\code{"sqdiff"}, \code{"product"}. All six are always computed.}
 
 \item{normalize}{Continuous only: rescale the attribute first? \code{"none"} (the
 default), \code{"additive"} (subtract the mean), \code{"ratio"} (divide by the root
@@ -67,8 +68,9 @@ by its maximum), \code{EI} (\code{(b-a)/(a+b)}), \code{Jaccard}, \verb{Yules Q},
 ties has every measure missing.
 
 \strong{Continuous.} For each ego, the correlation between its row of tie values
-and the similarity of ego to each other node on the attribute. One column per
-measure in \code{method}: \code{"negabsdiff"} (the dialog's default, minus the
+and the similarity of ego to each other node on the attribute. One column for
+each of six measures, all always computed; \code{method} chooses which are
+printed: \code{"negabsdiff"} (the dialog's default, minus the
 absolute difference, so that higher is more similar), \code{"zegers"}
 (\verb{2xy/(x^2+y^2)}), \code{"minovermax"}, \code{"absdiff"}, \code{"sqdiff"} and \code{"product"}.
 The two difference measures are reverse measures: a positive value means

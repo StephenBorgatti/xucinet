@@ -1,0 +1,36 @@
+// ===========================================================================
+// xucinet golden fixtures - Chapter 9/10, third batch: closeness centralization
+//
+// Why: xcloseness()$summary now carries a closeness centralization (Steve,
+// 23 Sep 2026; ledger entry 31), ported from the legacy Closeness routine
+// (xcloseness.pas, runFreemanCloseness). That routine is no longer on a menu:
+// TMainForm.Freeman1Click still calls it, but no menu item in ucinet.dfm is
+// wired to it. The command line's centralization() (Xdpmat.pas,
+// runcentralization) computes the same sum of differences from the maximum,
+// divided by a star's, so it should equal ours divided by 100. This batch pins
+// that.
+//
+// HOW TO RUN
+//   1. Check Help | About: the build must be 6.849 (Config/ucinet/reference).
+//   2. In the command window, from this folder:
+//
+//        campsym = symmetrize(campnet)
+//        g9_cz_campsym = centralization(campsym)
+//        g9_cz_campsym_raw = centralization(campsym raw)
+//        g9_cz_campnet = centralization(campnet)
+//
+//      If symmetrize() is not a command-language function in this build, use
+//      Transform | Symmetrize (maximum) on campnet and save the result as
+//      campsym, then run the other three lines.
+//   3. Save UCINET's session log here as log_cz.txt and commit whatever it
+//      writes into this folder.
+//
+// WHAT TO EXPECT (from xucinet, before the run):
+//   campsym is connected, so xcloseness(campsym)$summary[["Network
+//   Centralization (%)"]] is 19.11093, and the closeness row of g9_cz_campsym
+//   should read 0.1911 if the two routines agree. campnet itself is not
+//   strongly connected, so xcloseness() reports no in- or out-centralization;
+//   g9_cz_campnet shows what the command line does instead.
+//
+// Last run: not yet.
+// ===========================================================================

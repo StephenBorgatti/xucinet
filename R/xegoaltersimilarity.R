@@ -41,8 +41,9 @@
 #' ties has every measure missing.
 #'
 #' **Continuous.** For each ego, the correlation between its row of tie values
-#' and the similarity of ego to each other node on the attribute. One column per
-#' measure in `method`: `"negabsdiff"` (the dialog's default, minus the
+#' and the similarity of ego to each other node on the attribute. One column for
+#' each of six measures, all always computed; `method` chooses which are
+#' printed: `"negabsdiff"` (the dialog's default, minus the
 #' absolute difference, so that higher is more similar), `"zegers"`
 #' (`2xy/(x^2+y^2)`), `"minovermax"`, `"absdiff"`, `"sqdiff"` and `"product"`.
 #' The two difference measures are reverse measures: a positive value means
@@ -57,8 +58,9 @@
 #' @inheritParams xaltercomposition
 #' @param direction Which ties are ego's: `"out"` (the default, as in UCINET),
 #'   `"undirected"` (a tie in either direction), `"in"` or `"reciprocated"`.
-#' @param method Continuous only: one or more of `"negabsdiff"` (the default),
-#'   `"zegers"`, `"minovermax"`, `"absdiff"`, `"sqdiff"`, `"product"`.
+#' @param method Continuous only: which measures to print, one or more of
+#'   `"negabsdiff"` (the default), `"zegers"`, `"minovermax"`, `"absdiff"`,
+#'   `"sqdiff"`, `"product"`. All six are always computed.
 #' @param normalize Continuous only: rescale the attribute first? `"none"` (the
 #'   default), `"additive"` (subtract the mean), `"ratio"` (divide by the root
 #'   of the sum of squared deviations) or `"interval"` (z-scores).
@@ -115,7 +117,10 @@ xegoaltersimilarity <- function(net, attribute, type = NULL, relation = NULL,
     # The checklist's order, whatever order `method` gives them in.
     method <- names(meths)[names(meths) %in% method]
     a <- normalize_attribute_vec(as.numeric(att$values), normalize)
-    nodes <- similarity_continuous(x, a, meths[method])
+    # Every measure is computed; `method` chooses the columns printed (SPEC
+    # addendum, 23 Sep 2026, item 5).
+    nodes <- similarity_continuous(x, a, meths)
+    shown <- vapply(meths[method], `[[`, character(1), "label")
     rownames(nodes) <- rownames(m)
     notes <- if (any(method %in% c("absdiff", "sqdiff"))) {
       c("The difference-based measures are reverse measures of ego-alter similarity or homophily.",
@@ -132,6 +137,7 @@ xegoaltersimilarity <- function(net, attribute, type = NULL, relation = NULL,
                                       ratio = "Ratio (mean ssq))",
                                       interval = "Interval (z-score)")[[normalize]]),
       nodes_title = "Node-level alter-ego similarity",
+      show_columns = unname(shown),
       subclass = "xegoaltersimilarity", call = match.call())
   }
 }

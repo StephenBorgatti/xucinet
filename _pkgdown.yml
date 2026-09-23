@@ -155,6 +155,7 @@ reference:
     ego network, with each dialog's own default.
   contents:
   - xegonet
+  - xegoreciprocity
   - xstructuralholes
   - xtiecomposition
   - xvaluedtiecomposition

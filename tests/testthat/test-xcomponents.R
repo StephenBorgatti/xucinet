@@ -124,16 +124,23 @@ test_that("centralization is taken from the centrality routine, not recomputed",
 })
 
 test_that("betweenness centralization comes from xbetweenness", {
-  expect_equal(
-    xcentralization(campnet, measure = "betweenness")$summary[[1]],
-    xbetweenness(campnet)$summary[["Network Centralization Index (%)"]])
+  key <- "Network Centralization Index (%)"
+  expect_equal(xcentralization(campnet, measure = "betweenness")$summary[[key]],
+               xbetweenness(campnet)$summary[[key]])
 })
 
-test_that("an undirected network gives the single figure", {
+test_that("the result holds all four measures whichever is printed", {
+  # SPEC addendum, 23 Sep 2026, item 5: `measure` chooses what is printed.
   s <- xcentralization(campnet, directed = FALSE)$summary
-  expect_equal(names(s), "Centralization")
+  expect_equal(names(s), c("Centralization", "Network Centralization Index (%)",
+                           "Network Centralization (%)",
+                           "Eigenvector centralization (%)"))
   expect_equal(s[["Centralization"]],
                xdegree(campnet, directed = FALSE)$summary[["Centralization"]])
+  expect_identical(xcentralization(campnet, directed = FALSE,
+                                   measure = "eigenvector")$summary, s)
+  expect_equal(xcentralization(campnet, measure = "closeness")$show_summary,
+               c("Network in-Centralization (%)", "Network out-Centralization (%)"))
 })
 
 test_that("degree centralization agrees with the cohesion block", {
@@ -146,14 +153,43 @@ test_that("degree centralization agrees with the cohesion block", {
                tolerance = 1e-6)
 })
 
-test_that("closeness says why it is not available", {
-  # The Closeness dialog reports no centralization; only the legacy routine did.
-  expect_error(xcentralization(campnet, measure = "closeness"), "legacy")
+test_that("closeness centralization comes from xcloseness", {
+  key <- "Network Centralization (%)"
+  expect_equal(
+    xcentralization(campnet, directed = FALSE, measure = "closeness")$summary[[key]],
+    xcloseness(campnet, directed = FALSE)$summary[[key]])
+})
+
+test_that("closeness centralization is the legacy routine's figure", {
+  # xcloseness.pas: (2n - 3) * sum(max c - c) / (n^2 - 3n + 2), c in percent.
+  # A star scores 100 and a complete graph 0.
+  star <- matrix(0, 5, 5, dimnames = list(letters[1:5], letters[1:5]))
+  star[1, -1] <- star[-1, 1] <- 1
+  key <- "Network Centralization (%)"
+  expect_equal(xcloseness(star)$summary[[key]], 100)
+  full <- matrix(1, 5, 5, dimnames = list(letters[1:5], letters[1:5]))
+  diag(full) <- 0
+  expect_equal(xcloseness(full)$summary[[key]], 0)
+  # runcentralization (Xdpmat.pas) divides the sum of differences by the
+  # star's, which is the same figure as a proportion.
+  cl <- xcloseness(campnet, directed = FALSE)$nodes$FreeClo
+  starc <- xcloseness(matrix(c(0, rep(1, 17), rep(c(1, rep(0, 17)), 17)), 18, 18,
+                             dimnames = list(1:18, 1:18)))$nodes$FreeClo
+  expect_equal(xcloseness(campnet, directed = FALSE)$summary[[key]],
+               100 * sum(max(cl) - cl) / sum(max(starc) - starc))
+})
+
+test_that("closeness centralization is missing for an unconnected network", {
+  m <- matrix(0, 4, 4, dimnames = list(letters[1:4], letters[1:4]))
+  m[1, 2] <- m[2, 1] <- m[3, 4] <- m[4, 3] <- 1
+  res <- xcloseness(m)
+  expect_true(is.na(res$summary[["Network Centralization (%)"]]))
+  expect_true(any(grepl("not computed for unconnected", res$assumptions)))
 })
 
 test_that("eigenvector centralization comes from xeigenvector", {
   expect_equal(
-    xcentralization(campnet, measure = "eigenvector")$summary[[1]],
+    xcentralization(campnet, measure = "eigenvector")$summary[["Eigenvector centralization (%)"]],
     xeigenvector(campnet)$summary[["Eigenvector centralization (%)"]])
 })
 

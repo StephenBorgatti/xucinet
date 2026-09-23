@@ -57,6 +57,10 @@
 #'     ego is in, which on symmetric data is half of it.}
 #'   \item{EgoBetween}{Betweenness of ego within its own ego network.}
 #'   \item{nEgoBetween}{EgoBetween normalized, as a percentage.}
+#'   \item{Symmetric}{The proportion of ego's contacts (either direction) whose
+#'     tie with ego has the same value both ways: UCINET's node-level
+#'     reciprocity, computed on the values before dichotomizing. The other five
+#'     node-level reciprocity proportions are [xegoreciprocity()]'s.}
 #' }
 #'
 #' @section UCINET equivalent:
@@ -69,7 +73,7 @@
 #' @param direction `"undirected"` (UCINET's default, UNDIRECTED), `"out"`
 #'   (OUT-NEIGHBORHOOD) or `"in"` (IN-NEIGHBORHOOD).
 #' @return An object of class `c("xegonet", "xucinet_output")`. `$nodes` has
-#'   one row per ego in original node order and the sixteen columns above.
+#'   one row per ego in original node order and the seventeen columns above.
 #' @seealso [xstructuralholes()] for effective size and constraint.
 #' @examples
 #' xegonet(campnet)
@@ -86,6 +90,11 @@ xegonet <- function(net, relation = NULL,
   # `if m.cell[i,j] > 1 then begin m.cell[i,j] := 1; bin := false end`. A
   # missing cell is no tie.
   m[is.na(m)] <- 0
+  # Node-level reciprocity (Steve, 23 Sep 2026): UCINET's Symmetric proportion,
+  # on the values, before they are dichotomized.
+  a0 <- m
+  diag(a0) <- 0
+  symmetric <- reciprocity_nodes(a0, m)$Symmetric
   if (any(m != 0 & m != 1)) {
     assumptions <- c(assumptions, "Data matrix was dichotomized.")
   }
@@ -107,7 +116,8 @@ xegonet <- function(net, relation = NULL,
 
   new_xucinet_output(
     "Ego Networks: Basic Measures", net,
-    nodes = as.data.frame(x, check.names = FALSE),
+    nodes = data.frame(as.data.frame(x, check.names = FALSE),
+                       Symmetric = symmetric, check.names = FALSE),
     assumptions = assumptions,
     fields = c("Ego network type:" = toupper(switch(direction,
                                                    undirected = "undirected",

@@ -196,9 +196,18 @@ test_that("modularity is reported per partition, and the best is Cluster", {
                community_modularity(as.matrix(campnet), r$nodes$Cluster))
 })
 
-test_that("k caps the number of clusters", {
+test_that("k sets what is printed, not what is kept", {
+  # SPEC addendum, 23 Sep 2026: every partition is in the result; the report
+  # stops at the first with at least k clusters, where UCINET stops.
+  all <- xgirvannewman(campnet)
   r <- xgirvannewman(campnet, k = 3)
-  expect_true(max(as.integer(sub("C", "", colnames(r$matrices$Partitions)))) <= 3)
+  expect_identical(r$matrices, all$matrices)
+  expect_identical(r$nodes, all$nodes)
+  shown <- r$show_matrix_columns$Partitions
+  nclus <- as.integer(sub("C", "", shown))
+  expect_true(all(nclus[-length(nclus)] < 3))
+  expect_true(nclus[length(nclus)] >= 3)
+  expect_equal(max(apply(all$matrices$Partitions, 2, max)), nrow(all$nodes))
 })
 
 test_that("the first split agrees with igraph where no edges tie", {

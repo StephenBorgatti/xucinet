@@ -10,7 +10,9 @@ xgirvannewman(net, k = 10, relation = NULL)
 \item{net}{A network (any accepted form). 1-mode. Directed data are
 symmetrized by maximum; values are ignored.}
 
-\item{k}{The most clusters to go to. UCINET's default is 10.}
+\item{k}{Print the partitions up to the first with at least this many
+clusters, where UCINET stops. UCINET's default is 10. Every partition is
+in the result whatever \code{k} is.}
 
 \item{relation}{Which relation of a multi-relation dataset, by name or
 position. Defaults to the first.}
@@ -27,8 +29,11 @@ each time the number of components grows.
 \details{
 \verb{$matrices$Partitions} has one column per partition, headed as UCINET heads
 them (\code{C2}, \code{C3}, ...), from fewest clusters to most, and
-\verb{$matrices$Modularity} the modularity of each. \code{Cluster} in the node table is
-the partition with the highest modularity, and \verb{$summary} reports that one.
+\verb{$matrices$Modularity} the modularity of each. Cutting goes on until no ties
+are left, so both hold every partition the process passes through; \code{k} only
+limits which of them are printed, as UCINET's cut-off would. \code{Cluster} in the
+node table is the partition with the highest modularity, and \verb{$summary}
+reports that one.
 
 Ties in edge betweenness are removed together, as in UCINET. igraph's
 \code{cluster_edge_betweenness()} removes them one at a time, so on networks with

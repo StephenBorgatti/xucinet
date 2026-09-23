@@ -17,7 +17,7 @@ position. Defaults to the first.}
 }
 \value{
 An object of class \code{c("xegonet", "xucinet_output")}. \verb{$nodes} has
-one row per ego in original node order and the sixteen columns above.
+one row per ego in original node order and the seventeen columns above.
 }
 \description{
 UCINET: Network | Ego Networks | Egonet Basic Measures. Sixteen descriptions
@@ -57,6 +57,10 @@ number as Ties. UCINET's footnote calls it the number of closed triads
 ego is in, which on symmetric data is half of it.}
 \item{EgoBetween}{Betweenness of ego within its own ego network.}
 \item{nEgoBetween}{EgoBetween normalized, as a percentage.}
+\item{Symmetric}{The proportion of ego's contacts (either direction) whose
+tie with ego has the same value both ways: UCINET's node-level
+reciprocity, computed on the values before dichotomizing. The other five
+node-level reciprocity proportions are \code{\link[=xegoreciprocity]{xegoreciprocity()}}'s.}
 }
 }
 \section{UCINET equivalent}{

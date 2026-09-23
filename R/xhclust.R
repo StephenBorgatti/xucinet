@@ -13,7 +13,8 @@
 #   - Gamma is not reported (question 8); modularity follows UCINET's formula
 #     in umoca.pas rather than borgworld's pairwise loop, which leaves the
 #     diagonal out of the null model;
-#   - k = adds a Cluster column and one summary line (question 12).
+#   - k = fills a Cluster column and one summary line (question 12); since
+#     23 Sep 2026 both are always present, missing without k.
 
 #' Johnson's hierarchical clustering
 #'
@@ -52,17 +53,18 @@
 #'   Required; see Details.
 #' @param method Linkage: `"average"` (UCINET's default, `WTD_AVERAGE`),
 #'   `"single"` or `"complete"`.
-#' @param k Optional number of clusters. Adds a `Cluster` column to `$nodes`
-#'   holding `cutree(hc, k)`; the level table itself is unchanged.
+#' @param k Optional number of clusters. Fills the `Cluster` column of `$nodes`
+#'   with `cutree(hc, k)`; the level table itself is unchanged.
 #' @param plot Draw the dendrogram with base graphics. The text cluster diagram
 #'   is printed regardless.
 #' @return An `xucinet_output` of subclass `xhclust`. `$nodes` is the
 #'   partition indicator matrix as a data frame, one column per distinct merge
 #'   level, named as UCINET names them (`1(8)206` is level 1, eight clusters,
-#'   merge distance 206), plus `Cluster` when `k` is given. As in UCINET, which
-#'   saves this matrix but does not print it, it is not part of the printed
-#'   report. `$summary` holds
-#'   the cophenetic correlation and the number of levels. `$matrices` holds
+#'   merge distance 206), plus `Cluster`, which is missing unless `k` is
+#'   given. As in UCINET, which saves this matrix but does not print it, it is
+#'   not part of the printed report. `$summary` holds the cophenetic
+#'   correlation, the number of levels and the number of clusters requested
+#'   (missing without `k`). `$matrices` holds
 #'   `Measures of cluster adequacy` (`Corr`, `Modularity`, `Silhouette` by
 #'   level) and `Cluster sizes` (proportion of items in each cluster, by
 #'   level). `$hclust` is the underlying `stats::hclust` object, so `cutree()`
@@ -129,7 +131,12 @@ xhclust <- function(x, type, method = c("average", "single", "complete"),
   colnames(sizes) <- colnames(moca)
 
   nodes <- as.data.frame(part, check.names = FALSE, stringsAsFactors = FALSE)
-  summary <- list("Cophenetic" = coph_corr, "Levels" = npart)
+  summary <- list("Cophenetic" = coph_corr, "Levels" = npart,
+                  "Clusters requested" = NA_integer_)
+  # `Cluster` and `Clusters requested` are always there, missing when k is not
+  # given (SPEC addendum, 23 Sep 2026, item 5: arguments do not change which
+  # columns exist).
+  nodes$Cluster <- NA_integer_
   if (!is.null(k)) {
     k <- as.integer(k)
     if (is.na(k) || k < 1L || k > n) {
@@ -167,6 +174,7 @@ xhclust <- function(x, type, method = c("average", "single", "complete"),
     nodes_title = "Partition indicator matrix",
     # UCINET saves the partition matrix and does not print it (Steve, 23 Sep).
     print_nodes = FALSE,
+    show_summary = c("Cophenetic", "Levels", if (!is.null(k)) "Clusters requested"),
     stats_block = FALSE,
     subclass = "xhclust", call = match.call())
   out$hclust <- hc
