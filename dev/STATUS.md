@@ -36,14 +36,21 @@ batch at the end.** Design questions for all remaining chapters are batched in
   23 Sep (#16).
 - Steve's 23 Sep answers (the former Next 0, issue #16) are all carried out except the
   closeness centralization (open question 1).
-- Chapters 7, 11, 12, 13, 14 not started. `dev/COVERAGE.md` (23 Sep): 14 done, 40 coded
-  with goldens pending, 31 not started, 1 dropped. Remaining coding order: 11, 12, 13, 14,
-  7.
+- Chapter 11 (subgroups) complete 23 Sep, issue #17: `xcliques`, `xfactions`,
+  `xgirvannewman`, `xlouvain`, `xfastgreedy`, `xlabelpropagation`, `xcommunities`, with
+  shared internals in `R/community-internals.R` (UCINET's modularity, a port of Delphi's
+  `Random`, the common Cluster/Modularity output). igraph is in Imports (G1). Cliques,
+  factions, Girvan-Newman and Louvain are native ports; fast greedy and label propagation
+  run on igraph. `xlouvain()` fixes UCINET issue 26 as Steve decided, and refuses 2-mode
+  input until open question 4 (issue #18). Goldens named in `inst/goldens/subgroups/`.
+- Chapters 7, 12, 13, 14 not started. `dev/COVERAGE.md` (23 Sep): 14 done, 48 coded with
+  goldens pending, 21 not started, 3 dropped (Walktrap and QuickClus now counted as
+  dropped). Remaining coding order: 12, 13, 14, 7.
 - `inst/extdata/crosswalk-routines.csv` was regenerated from the rebuilt crosswalk on
-  23 Sep, but the chapter 8 rows and the `xmixing` row are kept as the package has them:
-  the master `crosswalk.py` still has the pre-chapter-8 signatures (issue #15) and an
-  `xmixing` signature with `model =`. Re-running `data-raw/make-crosswalk.R` before the
-  master is fixed will revert them.
+  23 Sep; its chapter 8 and chapter 11 rows are edited by hand to the signatures the
+  package has, because the master `crosswalk.py` does not have them yet (issue #15 for
+  chapter 8; chapter 11 is open question 5). Re-running `data-raw/make-crosswalk.R` before
+  the master is updated will revert them.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
@@ -70,9 +77,19 @@ batch at the end.** Design questions for all remaining chapters are batched in
   SQRT-Marginal.
 - Units vendored: `Xstdize.pas`, `uc_MixingTables`, `unetmixingmodels.pas`,
   `uc_EigenvectorCentrality`.
-- asnr2e: `docs/text-changes.md` committed locally (135b202), not pushed, because the
-  asnr2e branch also carries two earlier unpushed commits that are not this session's.
-  Cowork's later rewording of T3 is uncommitted there.
+- **Chapter 11 (issue #17).** igraph to Imports (a214749, its own commit), then the seven
+  routines (067c056). Read from the source: Cliques' default Type is Weak, which is the
+  maximum-symmetrize of answer 11.1; the clique order is Bron-Kerbosch version 2's,
+  ported step for step; Factions' measures are Hamming, Phi, Modularity and Entailment
+  (not the correlation the prompt named) and its randomness is Delphi's LCG, now
+  reproducible from the seed; Girvan-Newman removes all tied top edges at once, so it is
+  native rather than igraph; UCINET's Louvain is deterministic, and its 2-mode version
+  is Barber's bipartite modularity, not dual projection (issue #18); UCINET's FastGreedy
+  starts from cliques by default. Ledger entries 27-30; UCINET issue 27 (missing cells
+  in factions and Louvain). Report objects gain `hide =` and `epilogue =`.
+- asnr2e: `docs/text-changes.md` is committed locally (135b202, then a9f1d25 with T10 and
+  T11 for chapter 11 and Cowork's T3/T9 edits), not pushed, because the asnr2e branch
+  also carries two earlier unpushed commits that are not this session's.
 
 ## Done earlier on 23 Sep 2026 (Cowork)
 
@@ -105,12 +122,15 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-1. Claude Code runs the remaining chapter prompts in order: ch11, ch12, ch13, ch14, ch07
+1. Claude Code runs the remaining chapter prompts in order: ch12, ch13, ch14, ch07
    (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after `prompt-conventions.md`).
-   Each is one session and ends with `dev/COVERAGE.md` regenerated. Chapter 11 needs G1
-   (igraph to Imports), blank in the answers table, so as recommended.
-2. Golden tests for chapters 5, 6, 8 and 10 stay skipped; the fixtures named in
-   `inst/goldens/{transform,multivariate,ego,cohesion}/README.md` join the sweep.
+   Each is one session and ends with `dev/COVERAGE.md` regenerated. Chapter 12 has
+   answers 12.1-12.4 in the table, two of them questions back to Claude Code (12.2, 12.3).
+   **2-mode Louvain:** still waits for open question 4 (issue #18) before the 2-mode
+   branch of `xlouvain()` is written; it may land with chapter 13.
+2. Golden tests for chapters 5, 6, 8, 10 and 11 stay skipped; the fixtures named in
+   `inst/goldens/{transform,multivariate,ego,cohesion,subgroups}/README.md` join the
+   sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
 3. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`) when Steve has a free hour with
    UCINET; `Config/ucinet/reference` bumps then.
 4. Then the asnr2e side: generators and practices per chapter, and the ch07 merge
@@ -150,11 +170,22 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   diagonal missing in the result; `by = "both"` starts with a column pass and stops when
   every margin is within tolerance of its target. The earlier behaviour came from citing
   `uNormalize.pas` and was not a decision.
+- 23 Sep 2026 (Steve, via Cowork): Louvain is a native port of UCINET's, without its
+  move-test and reported-Q bugs (UCINET-ISSUES 26).
 - 23 Sep 2026 (Claude Code, chapter 8, answers G3 and 8.1-8.4 as recommended): one
   `direction` argument for the chapter; `xegonet` follows the dialog (no `include_ego`,
   no `directed`); ego routines report the first relation (ledger 21) except
   `xtiecomposition`; text attributes appear in a node table by category number; the
   continuous alter-composition SD filters are not offered, since UCINET's do nothing.
+- 23 Sep 2026 (Claude Code, chapter 11, G1 and 11.2-11.5 as recommended, 11.1 as
+  answered): igraph in Imports. Where UCINET's routine is deterministic and cheap to port
+  (Girvan-Newman, Louvain) it is ported rather than run on igraph, since igraph's
+  versions are different algorithms (one-edge-at-a-time removal; randomized order); fast
+  greedy and label propagation stay on igraph as the prompt says. `xfactions(method =)`
+  offers UCINET's four measures. Every partition routine reports `Modularity` on the same
+  matrix (max-symmetrized, diagonal ignored, values kept), so methods compare directly.
+  Girvan-Newman's `Cluster` is its partition with the highest modularity. Walktrap and
+  QuickClus are dropped.
 
 ## Open questions for Steve
 
@@ -177,6 +208,31 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
    `xmds`/`xcorrespondence` by `dim`. Which should change?
 3. **Chapter 8 items (issue #15):** the six chapter 8 signatures in `crosswalk.py`
    (`xegonet` has neither `directed` nor `include_ego`); whether `direction` is the right
-   argument name; which of UCINET bugs 17-20 will be fixed. `crosswalk.py` also needs the
-   `xmixing` signature without `model =`: `xmixing(net, attribute, relation = NULL,
-   directed = TRUE, data = NULL)`.
+   argument name; which of UCINET bugs 17-20 will be fixed. (The `xmixing` signature
+   without `model =` has been in `crosswalk.py` and the xlsx since the Cowork commit of
+   23 Sep; only the chapter 8 rows remain.)
+4. **2-mode Louvain (design question 11.4).** UCINET's 2-mode Louvain
+   (`uc_2modelouvain.pas`, engine `G2Tools/u2modelouvain.pas`) maximizes Barber's
+   bipartite modularity Q_b: one level of local moving, no aggregation, nodes visited in
+   a random order under a seed, communities spanning both modes. The book (13.5.1,
+   Figure 13.5, Practice 13.x) describes and uses dual projection instead (Everett and
+   Borgatti 2013: Louvain on each projection, then combine). Options: (a) `xlouvain()` on
+   2-mode data does bipartite modularity as UCINET does, and 13.5.1 is rewritten;
+   (b) it does dual projection, as the text says, with a ledger entry; (c) both, chosen by
+   an argument (the slot structure is the same either way). Recorded as
+   `asnr2e/docs/text-changes.md` T9.
+5. **Chapter 11 signatures for `crosswalk.py`** (issue #17). The package's copy has
+   them; the master needs them: `xcliques(net, min = 3, type = c("weak","strong"),
+   relation = NULL)`, `xfactions(net, k = 2, method = c("hamming","phi","modularity",
+   "entailment"), restarts = 3, maxit = 20, penalty = 15, seed = NULL, relation = NULL)`,
+   `xgirvannewman(net, k = 10, relation = NULL)`, `xlouvain(net, symmetrize =
+   c("max","min","average","sum","none"), maxlevels = NULL, relation = NULL)` (no
+   `resolution`: UCINET's Louvain has none), `xfastgreedy(net, relation = NULL)`,
+   `xlabelpropagation(net, seed = NULL, relation = NULL)`; and the Walktrap row marked
+   dropped. Book text: T10 (factions measures) and T11 (Louvain is deterministic) in
+   `asnr2e/docs/text-changes.md`.
+6. **Level-of-analysis, chapter 11 additions to question 2.** `xcliques()` returns the
+   actor-by-actor co-membership matrix (dyad level) beside the cliques, because the text
+   and the crosswalk ask for it; `xgirvannewman()` has one partition column per
+   component count, so its columns depend on `k`. Both are listed here so question 2 can
+   be answered once for everything.
