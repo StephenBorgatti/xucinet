@@ -47,11 +47,18 @@ batch at the end.** Design questions for all remaining chapters are batched in
   an explanation rather than the generic "not written yet". Goldens not generated:
   `inst/goldens/transform/` names the eighteen fixtures the tests expect and carries the
   batch; the golden tests skip until the sweep.
-- Chapters 7, 8, 11, 12, 13, 14 routines not started. About 37 exported functions
+- Chapter 8 (ego networks) **complete 23 Sep, issue #14**: `xegonet`,
+  `xstructuralholes`, `xtiecomposition`, `xvaluedtiecomposition`, `xaltercomposition`,
+  `xegoaltersimilarity`, with shared internals in `R/ego-internals.R` (the `direction`
+  vocabulary, the G3 attribute-type rule, UCINET's tie test). Goldens not generated:
+  `inst/goldens/ego/` names seventeen fixtures and carries the batch (three CLI
+  commands, the rest menu runs). The 1e Cat/Con aliases set `type=` through a new
+  fixed-argument table in `data-raw/make-aliases.R`.
+- Chapters 7, 11, 12, 13, 14 routines not started. About 31 exported functions
   remain against the crosswalk (see `dev/COVERAGE.md`, regenerated 23 Sep: 14 done,
-  33 coded with goldens pending, 37 not started, 1 dropped). The merged book text already
+  39 coded with goldens pending, 31 not started, 1 dropped). The merged book text already
   names them; the list of what the text asserts is in `asnr2e/docs/plan.md` ("Decoupling
-  decision", requirements list). Remaining coding order: 8, 11, 12, 13, 14, 7.
+  decision", requirements list). Remaining coding order: 11, 12, 13, 14, 7.
 - Machine: repo cloned to `C:\Dev\xucinet` on the new computer 16 Sep. R toolchain
   working 20 Sep: R 4.6.1, Rtools45 (`C:\rtools45`), devtools 2.5.2 / roxygen2 8.1.0 /
   testthat 3.3.2 / rcmdcheck 1.4.0 in `%LOCALAPPDATA%\R\win-library\4.6`, Pandoc 3.11
@@ -62,11 +69,36 @@ batch at the end.** Design questions for all remaining chapters are batched in
   without them it fails on `\textfont 0 is undefined` in the DESCRIPTION URL.
   And `devtools::check()` passes `--no-manual` itself, so the PDF manual is only
   exercised by a plain `R CMD check --as-cran`.
+  R is not on the Git Bash PATH: prefix `export PATH="/c/Program Files/R/R-4.6.1/bin:$PATH"`,
+  and put any `Rscript -e` code containing `|` in a file, because the shell hands it to
+  cmd.exe. There is no Python on this machine.
 - UCINET source for porting: `C:\Dev\ucinet\Source` (repo StephenBorgatti/ucinet) and
   `C:\Dev\tools\G2Tools` (repo StephenBorgatti/tools), both on Delphi 13 since 14 Sep. The
   Dropbox copies are stale. See `asnr2e/docs/plan.md`, "UCINET, Tools and NetDraw repositories".
 
-## Done this session (23 Sep 2026, Claude Code)
+## Done this session (23 Sep 2026, Claude Code, second session)
+
+- **Chapter 8 complete (issue #14).** Six exports, read out of the Ego Networks forms in
+  `C:\Dev\ucinet\Source` (c7b4956) and their G1Tools/G2Tools units (207958a), all
+  vendored in `inst/reference/delphi/` with a README section mapping menu item to unit.
+  Egonet Basic Measures turned out to be the old `Xegonet.pas`, not a `uc_` form; its
+  sixteen columns and formulas are listed in #14.
+- Found in the source rather than assumed: the categorical alter composition weights
+  its counts by tie strength; "Both incoming and outgoing" in the composition dialogs is
+  a max-symmetrize, while "Both in and out" in the tie-composition dialogs counts a
+  reciprocated tie twice; the continuous ego-alter similarity default measure is
+  `-AbsDiff` (the only box `FormCreate` ticks); Structural Holes defaults to the
+  ego-network model, not Burt's whole-network form.
+- Four UCINET bugs: `dev/UCINET-ISSUES.md` 17-20, ledger entries 18-20. Ledger 17 sets
+  the constraint formulas beside igraph's; ledger 21 records the first-relation
+  convention.
+- `xstructuralholes(method = "whole")` is asserted equal to `igraph::constraint()` on
+  symmetric campnet, and the default ego model asserted *not* equal; both skip locally
+  (no igraph) and run on CI.
+- Issue #15 (label `steve`, created this session because the label did not exist yet):
+  crosswalk signatures, the `direction` name, UCINET bugs 17-20.
+
+(23 Sep 2026, Claude Code, first session:)
 
 - **Chapter 10 complete (issue #13).** `xcohesion`, `xreciprocity`, `xtransitivity`,
   `xcyclicality`, `xcomponents`, `xcentralization`, `xhomophily`, `xdensitybygroups`.
@@ -124,13 +156,13 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-1. Claude Code runs the remaining chapter prompts in order: ch08, ch11, ch12,
-   ch13, ch14, ch07 (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after
+1. Claude Code runs the remaining chapter prompts in order: ch11, ch12, ch13, ch14,
+   ch07 (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after
    `prompt-conventions.md`). Each is one session; each ends with `dev/COVERAGE.md`
-   regenerated. Chapters 5 (#12) and 10 (#13) are done.
-2. Chapter 6 and chapter 5 golden tests stay skipped; the fixtures named in
-   `inst/goldens/multivariate/README.md` and `inst/goldens/transform/README.md` join
-   the sweep.
+   regenerated. Chapters 5 (#12), 10 (#13) and 8 (#14) are done. Chapter 11 needs
+   G1 (igraph to Imports), which the answers table leaves blank, i.e. as recommended.
+2. Chapter 6, 5, 10 and 8 golden tests stay skipped; the fixtures named in
+   `inst/goldens/{multivariate,transform,cohesion,ego}/README.md` join the sweep.
 3. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`, prompts A and B) when Steve has
    a free hour with UCINET; `Config/ucinet/reference` bumps then.
 4. Then the asnr2e side: generators and practices per chapter (ch09 first, then 6, 5, 10,
@@ -154,6 +186,14 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   golden tests; one UCINET batch at the end turns the golden tests on. Design questions
   batched into one document. `dev/COVERAGE.md` (crosswalk row → status) is regenerated
   each chapter as the progress page for coauthors.
+- 23 Sep 2026 (Claude Code, chapter 8, answers G3 and 8.1-8.4 taken as recommended):
+  one `direction` argument for the whole chapter, values `undirected`/`both`/`out`/
+  `in`/`reciprocated`/`equal`, each function offering its dialog's subset and default;
+  `xegonet` follows the dialog, so no `include_ego` and no `directed`; node-level ego
+  routines report the first relation with a note, as every node-level routine does
+  (ledger 21), except `xtiecomposition`, which uses all of them; text attributes appear
+  in a node table by category number, because `$nodes` stays numeric; the continuous
+  alter-composition SD filters are not offered, since UCINET's do nothing.
 
 ## Open questions for Steve
 
@@ -215,3 +255,16 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
    reproduced, and documented, but it looks like an oversight in UCINET rather than
    a design: the dialog reads as though it should affect everything. Worth a view on
    whether it belongs on the bug list.
+13. **Chapter 8 crosswalk signatures (issue #15).** `asnr2e/crosswalk/crosswalk.py`
+   needs the six chapter 8 signatures now in `inst/extdata/crosswalk-routines.csv`.
+   The one that matters is `xegonet`: the crosswalk's `directed = NULL,
+   include_ego = FALSE` match nothing in the Egonet Basic Measures dialog, whose only
+   control is the neighbourhood combo, so it is `direction =` instead. The book names
+   the functions only, so no chapter text changes.
+14. **Is `direction` the right name (issue #15)?** One argument for "which ties define
+   the ego network" across chapter 8, since D4's `directed` is TRUE/FALSE and cannot
+   hold six choices.
+15. **UCINET bugs 17-20 (issue #15)**, found reading the chapter 8 source: isolates get
+   zeros in Egonet Basic Measures; Tie Composition ignores *Include ties to self*;
+   Valued Tie Composition "Both" adds the wrong cell; the continuous alter-composition
+   SD filters never filter. Which will be fixed, and in which build?
