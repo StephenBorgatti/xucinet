@@ -94,11 +94,23 @@ reference:
   desc: Whole-network measures.
   contents:
   - xdensity
+  - xcohesion
+  - xcentralization
 
 - title: Network | Cohesion
-  desc: Distances through the network.
+  desc: >
+    Distances, reciprocity and closure. What the network looks like as a
+    structure rather than node by node.
   contents:
   - xgeodesic
+  - xreciprocity
+  - xtransitivity
+  - xcyclicality
+
+- title: Network | Regions
+  desc: The pieces a network falls into.
+  contents:
+  - xcomponents
 
 - title: Network | Centrality
   desc: >

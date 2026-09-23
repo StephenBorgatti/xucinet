@@ -347,3 +347,32 @@ holes. Both are in `G2Tools\uimputemissing.pas`; the other eight methods test
 A known defect is not a number worth matching, so this is one of the places
 where xucinet is deliberately not UCINET. When it is fixed, the fixtures are
 regenerated and this entry goes.
+
+## 16. Reciprocity treats valued data two ways in one report, as UCINET does
+
+**Status:** reproduced, not corrected. Recorded 22 September 2026.
+
+`xreciprocity()` does not dichotomize, because Network | Cohesion |
+Reciprocity does not. It prints
+
+> Data are valued. Remember that xij = 3 will not match xji = 2
+
+and then computes. The consequence is that the two halves of its own report
+use different tests:
+
+- the whole-network **Dyad** and **Arc** ratios come from
+  `tnodelist.getreciprocity`, which asks `isarc`, i.e. whether the value is
+  above zero. A pair `(3, 2)` is reciprocated.
+- the **node-level** table comes from `runindividuals`, which tests
+  `m.cell[i,j] <> m.cell[j,i]`, equality of the values themselves. The same
+  pair `(3, 2)` is non-symmetric.
+
+So a valued network can show an arc reciprocity of 1 above a node table in
+which nobody is symmetric. That is what the warning is for, and it is
+UCINET's behaviour rather than an oversight here, so the notice is reproduced
+in `$assumptions` and spells the consequence out rather than leaving the
+reader to find it.
+
+Dichotomizing first would make the report self-consistent and would no longer
+be UCINET. Users who want that can pass
+`xreciprocity(xdichotomize(net, diagonal = "rule"))`.

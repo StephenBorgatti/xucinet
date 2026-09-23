@@ -465,6 +465,31 @@ cells, and draws from the observed ties. Ledger entry 15.
 
 ---
 
+## 16. The node-level clustering coefficient should be withdrawn
+
+**Status:** Steve's decision, 22 September 2026 (design question 10.2), recorded
+here so the UCINET side follows. Not a defect in the arithmetic.
+
+UCINET's Clustering Coefficient routine reports an overall coefficient, a
+weighted overall coefficient, and a coefficient per node. Steve's instruction
+for chapter 10 was to keep the overall figure, fold it into the transitivity
+report, and **not** compute the node-level one; and to note here that it should
+come out of UCINET too.
+
+The reason is that the per-node coefficient invites a reading it does not
+support. It is the density of ego's neighbourhood, so it falls as degree rises
+almost mechanically, and a node with fewer than two neighbours has none at all.
+Ranking nodes by it, which is what a per-node column invites, mostly ranks them
+by inverse degree.
+
+**What xucinet does:** `xtransitivity()` carries `Clustering Coefficient` in its
+`$summary`, and there is no node-level column and no `xclustering()` export.
+
+**Fix in UCINET:** drop the per-node column from the Clustering Coefficient
+routine's output, or move it behind an option that is off by default.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps
