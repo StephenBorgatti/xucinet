@@ -22,9 +22,9 @@ batch at the end.** Design questions for all remaining chapters are batched in
   `xhomophily`, `xdensitybygroups`, beside the Phase 0 `xdensity`; plus `xmixing`
   (23 Sep, #16). `xdensitybygroups()` returns the density table only; `xmixing()` returns
   the observed table and the expected table and ratio under all three models (ledger
-  26). `xcentralization()` covers degree, betweenness and eigenvector; closeness is Next
-  0(b). `xcohesion` is golden-tested against the Phase 0 fixtures; the rest
-  wait on `inst/goldens/cohesion/`.
+  26). `xcentralization()` returns all four centralizations (degree, betweenness,
+  closeness, eigenvector). `xcohesion` is golden-tested against the Phase 0 fixtures;
+  the rest wait on `inst/goldens/cohesion/`.
 - Chapter 8 (ego networks) complete 23 Sep, issue #14: `xegonet`, `xstructuralholes`,
   `xtiecomposition`, `xvaluedtiecomposition`, `xaltercomposition`, `xegoaltersimilarity`,
   with shared internals in `R/ego-internals.R`. Goldens named in `inst/goldens/ego/`.
@@ -34,8 +34,8 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - Chapter 5 complete 22 Sep, issue #12: seventeen transformations; goldens named in
   `inst/goldens/transform/`. `xnormalize()` was brought into line with `Xstdize.pas` on
   23 Sep (#16).
-- Steve's first 23 Sep answers (issue #16) are all carried out; his later ones (closeness
-  centralization, the level-of-analysis changes) are Next 0.
+- All of Steve's 23 Sep answers are carried out: issue #16, then (#20, 623240d) the
+  level-of-analysis changes and closeness centralization, with `xegoreciprocity()` new.
 - Chapter 11 (subgroups) complete 23 Sep, issue #17: `xcliques`, `xfactions`,
   `xgirvannewman`, `xlouvain`, `xfastgreedy`, `xlabelpropagation`, `xcommunities`, with
   shared internals in `R/community-internals.R` (UCINET's modularity, a port of Delphi's
@@ -62,6 +62,21 @@ batch at the end.** Design questions for all remaining chapters are batched in
 
 ## Done this session (23 Sep 2026, Claude Code)
 
+- **Next 0, Steve's later 23 Sep answers (issue #20, 623240d).** Level of analysis:
+  `xreciprocity()` whole-network only, its node table the new `xegoreciprocity()` (Steve:
+  "add only the Symmetric column" to `xegonet()`, which now has seventeen columns);
+  `xhomophily()` without the mixing matrix; `xtransitivity()` both versions (the triad
+  ratio renamed `Triad Transitivity`); `xegoaltersimilarity()` every measure;
+  `xcentralization()` all four; `xhclust()` always `Cluster`; `xstructuralholes()` eleven
+  columns under both models, the whole model printing UCINET's five; `xgirvannewman()`
+  every partition, printing up to the first with at least `k` clusters, which is exactly
+  what UCINET prints (the snapshot did not change). Report objects gain `show_summary`,
+  `show_columns`, `show_matrix_columns`. Closeness centralization ported from
+  `xcloseness.pas` into `xcloseness()$summary`. Ledger 31 (closeness centralization), 32
+  (level of analysis), 16 updated. Golden batch `inst/goldens/centrality/make_goldens_3.txt`
+  (CLI `centralization()`, since the legacy routine has no menu item any more). Book:
+  T12 in `asnr2e/docs/text-changes.md` (4dd73fe, local); chapters 6 and 8-11 checked for
+  descriptions of the old output and found none.
 - **Chapter 8 (issue #14)**, then **Steve's 23 Sep answers (issue #16)**:
   (a) `xhclust()` keeps the partition matrix in `$nodes` without printing it (new
   `print_nodes` field of `new_xucinet_output()`); (b) `xdichotomize(elsevalue =)`;
@@ -127,22 +142,10 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. **Before chapter 12, Claude Code applies Steve's 23 Sep answers:**
-   (a) **Level of analysis** (SPEC addendum 23 Sep, items 5 and 6 and "Applications") to
-   the functions listed there: `xhomophily`, `xreciprocity`, `xegonet` (new reciprocity
-   column), `xtransitivity`, `xegoaltersimilarity`, `xcentralization`, `xhclust`,
-   `xstructuralholes`, `xgirvannewman` (a partition column for every component count
-   reached; `k` sets only what is printed) and `xcliques` (unchanged: its co-membership
-   matrix is now a named exception). Snapshot updates, 1e alias checks, and
-   `text-changes.md` entries wherever a chapter describes the old output (check 8.6.2 and
-   10.2.2 for reciprocity, 10.5 for the homophily report). The `xegonet()` reciprocity
-   column follows UCINET's node-level reciprocity if one exists in the Reciprocity
-   routine or the ego-network units; if the definition has to be chosen, stop and ask.
-   (b) **Closeness centralization:** port the figure from the legacy Closeness routine
-   (`xcloseness.pas`, "Network Centralization = ") into `xcloseness()$summary`, check it
-   against `runcentralization` in `Xdpmat.pas`, add a ledger entry saying UCINET's
-   current Closeness dialog does not print it, and let `xcentralization(measure =
-   "closeness")` return it. Its golden joins the sweep.
+0. Cowork: add `xegoreciprocity(net, relation = NULL)` to `crosswalk.py` (chapter 8,
+   Network | Ego Networks | Egonet Reciprocity) and note on the 10.2.2 row that
+   `xreciprocity()` has no node table; then `inst/extdata/crosswalk-routines.csv` gets the
+   row too (it is hand-edited for chapters 8 and 11 until the master catches up).
 
 1. Claude Code runs the remaining chapter prompts in order: ch12, ch13, ch14, ch07
    (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after `prompt-conventions.md`).
@@ -230,6 +233,15 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   UCINET's removal loop; Louvain and factions stay native and score moves incrementally.
   All three give the partitions of the straightforward versions, which the tests keep as
   references.
+- 23 Sep 2026 (Steve, issue #20): `xegonet()` gains only the Symmetric column of UCINET's
+  node-level reciprocity; the full six-column table is a new function,
+  `xegoreciprocity()`.
+- 23 Sep 2026 (Claude Code, issue #20): the legacy Closeness routine is not reachable from
+  any menu in the current source (`Freeman1Click` is not wired in `ucinet.dfm`), so the
+  closeness centralization golden comes from the CLI `centralization()`, which divides the
+  same sum by a star's; the test suite checks that identity on our side. `xgirvannewman()`
+  prints up to and including the first partition with at least `k` clusters, because that
+  is where UCINET's loop stops.
 
 ## Open questions for Steve
 
