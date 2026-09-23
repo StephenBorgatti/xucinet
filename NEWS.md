@@ -24,6 +24,11 @@
 * 1e aliases: `xNegativeDegreeCentrality()` is withdrawn (use `xdegree()` on
   the negative relation); `xNegativeWeightedCentrality()` runs
   `xpncentrality()` on the negated matrix (issue #21).
+* The six ego-network routines take `ties =` instead of `direction =`, and
+  `"undirected"` is now `"any"` (Steve; SPEC addendum; issue #22).
+  `direction` stays in the centrality routines.
+* `xinverseweighteddegree()`: UCINET's Inverse-Weighted Degree, with the three
+  faults of UCINET issue 28 corrected (ledger entry 33; issue #22).
 
 ## Chapter 11: subgroups (23 September 2026)
 

@@ -34,3 +34,14 @@
 //
 // Last run: not yet.
 // ===========================================================================
+
+// ===========================================================================
+// PART B - Inverse-Weighted Degree (menu only; xinverseweighteddegree())
+//
+// Network | Centrality | Inverse-Weighted Degree, on campnet, output left at
+// its default (normalized). Save the output dataset here as g9_iwd_campnet.
+// campnet is binary, single-relation, with an empty diagonal, so none of the
+// three faults of UCINET issue 28 can show: the numbers should be ours
+// (nOutIWD, nInIWD). Expected first row, HOLLY: 0.041, 0.078.
+// Keep the log with the rest of log_cz.txt.
+// ===========================================================================

@@ -4,7 +4,7 @@
 \alias{xegonet}
 \title{Egonet basic measures}
 \usage{
-xegonet(net, relation = NULL, direction = c("undirected", "out", "in"))
+xegonet(net, relation = NULL, ties = c("any", "out", "in"))
 }
 \arguments{
 \item{net}{A network (any accepted form). 1-mode.}
@@ -12,7 +12,7 @@ xegonet(net, relation = NULL, direction = c("undirected", "out", "in"))
 \item{relation}{Which relation of a multi-relation dataset, by name or
 position. Defaults to the first.}
 
-\item{direction}{\code{"undirected"} (UCINET's default, UNDIRECTED), \code{"out"}
+\item{ties}{\code{"any"} (UCINET's default, UNDIRECTED), \code{"out"}
 (OUT-NEIGHBORHOOD) or \code{"in"} (IN-NEIGHBORHOOD).}
 }
 \value{
@@ -27,7 +27,7 @@ between alters who are not tied.
 }
 \details{
 The ego network of a node is its alters and the ties among them. Which nodes
-count as alters is \code{direction}: anyone ego is tied to in either direction
+count as alters is \code{ties}: anyone ego is tied to in either direction
 (the default), only those ego sends ties to, or only those ego receives them
 from. The data are dichotomized at > 0, as UCINET does.
 
@@ -66,12 +66,12 @@ node-level reciprocity proportions are \code{\link[=xegoreciprocity]{xegorecipro
 \section{UCINET equivalent}{
 
 Network | Ego Networks | Egonet Basic Measures. The combo box \emph{Ego network
-type} is \code{direction}.
+type} is \code{ties}.
 }
 
 \examples{
 xegonet(campnet)
-xegonet(campnet, direction = "out")
+xegonet(campnet, ties = "out")
 }
 \seealso{
 \code{\link[=xstructuralholes]{xstructuralholes()}} for effective size and constraint.

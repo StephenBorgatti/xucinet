@@ -9,7 +9,7 @@ xegoaltersimilarity(
   attribute,
   type = NULL,
   relation = NULL,
-  direction = c("out", "undirected", "in", "reciprocated"),
+  ties = c("out", "any", "in", "reciprocated"),
   method = "negabsdiff",
   normalize = c("none", "additive", "ratio", "interval"),
   data = NULL
@@ -27,8 +27,8 @@ decide from the attribute.}
 \item{relation}{Which relation of a multi-relation dataset, by name or
 position. Defaults to the first.}
 
-\item{direction}{Which ties are ego's: \code{"out"} (the default, as in UCINET),
-\code{"undirected"} (a tie in either direction), \code{"in"} or \code{"reciprocated"}.}
+\item{ties}{Which ties are ego's: \code{"out"} (the default, as in UCINET),
+\code{"any"} (a tie in either direction), \code{"in"} or \code{"reciprocated"}.}
 
 \item{method}{Continuous only: which measures to print, one or more of
 \code{"negabsdiff"} (the default), \code{"zegers"}, \code{"minovermax"}, \code{"absdiff"},
@@ -79,7 +79,7 @@ ego is tied to people unlike itself.
 \section{UCINET equivalent}{
 
 Network | Ego Networks | Ego-Alter Similarity | Categorical, and ... |
-Continuous. \emph{Definition of Ego Network} is \code{direction}; the continuous
+Continuous. \emph{Definition of Ego Network} is \code{ties}; the continuous
 dialog's \emph{Measures} checklist is \code{method} and \emph{Attribute Normalization} is
 \code{normalize}.
 }

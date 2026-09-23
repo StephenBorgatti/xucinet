@@ -53,7 +53,7 @@
 #'
 #' @section UCINET equivalent:
 #' Network | Ego Networks | Egonet Alter Composition | Categorical, and ... |
-#' Continuous. *Definition of Ego Network* is `direction`, *Ignore ego's own
+#' Continuous. *Definition of Ego Network* is `ties`, *Ignore ego's own
 #' category* is `ignoreown`, and the continuous dialog's *Valued tie data* is
 #' `weighting`.
 #'
@@ -64,7 +64,7 @@
 #'   decide from the attribute.
 #' @param relation Which relation of a multi-relation dataset, by name or
 #'   position. Defaults to the first.
-#' @param direction Who counts as an alter: `"undirected"` (the default, a tie
+#' @param ties Who counts as an alter: `"any"` (the default, a tie
 #'   in either direction), `"out"`, `"in"` or `"reciprocated"`.
 #' @param ignoreown Categorical only: leave out alters in ego's own category?
 #'   `FALSE` by default.
@@ -80,13 +80,13 @@
 #' xaltercomposition(hightech, "Age", data = hightech_attr)
 #' @export
 xaltercomposition <- function(net, attribute, type = NULL, relation = NULL,
-                              direction = c("undirected", "out", "in",
+                              ties = c("any", "out", "in",
                                             "reciprocated"),
                               ignoreown = FALSE,
                               weighting = c("analytic", "none", "multiply"),
                               data = NULL) {
   net <- xnet(net, substitute(net))
-  direction <- match_direction(direction, c("undirected", "out", "in",
+  ties <- match_ties(ties, c("any", "out", "in",
                                             "reciprocated"),
                                "xaltercomposition()")
   weighting <- match.arg(weighting)
@@ -98,10 +98,10 @@ xaltercomposition <- function(net, attribute, type = NULL, relation = NULL,
   kind <- attribute_type(att$values, type, "xaltercomposition()")
   assumptions <- c(rel$note, kind$note)
 
-  x <- ego_rows(m, direction)
-  dir_label <- c(undirected = "Both incoming and outgoing ties",
+  x <- ego_rows(m, ties)
+  dir_label <- c(any = "Both incoming and outgoing ties",
                  out = "Outgoing ties only", `in` = "Incoming ties only",
-                 reciprocated = "Reciprocal ties only")[[direction]]
+                 reciprocated = "Reciprocal ties only")[[ties]]
 
   if (kind$type == "categorical") {
     res <- composition_categorical(x, att$values, att$name, ignoreown)

@@ -436,7 +436,7 @@ raised 23 September 2026.
 - `xtiecomposition(diagonal = TRUE)` counts ties to self. UCINET's *Include
   ties to self* box is never passed to the routine that counts, so it has no
   effect there.
-- `xvaluedtiecomposition(direction = "both")` adds the value of each incoming
+- `xvaluedtiecomposition(ties = "both")` adds the value of each incoming
   tie. UCINET adds the value of the *outgoing* cell for it, which is usually
   zero. The defaults (*Undirected (OR)* for the count, *Outgoing only* for the
   values) are not affected.
@@ -642,3 +642,21 @@ Where that moves output away from the UCINET dialog that prints it:
   whole-network model prints UCINET's five.
 - `xgirvannewman()` goes on cutting until no ties are left and keeps every
   partition; `k` sets which are printed, stopping where UCINET stops.
+
+## 33. Inverse-weighted degree: diagonal, totals and normalization
+
+**Status:** UCINET fix pending (UCINET issue 28). Steve, 23 September 2026.
+
+`xinverseweighteddegree()` ports Network | Centrality | Inverse-Weighted Degree
+(`uc_iwdcentrality.pas`, `Tiwdcentrality.run`) with its three faults corrected:
+
+- the diagonal is always excluded (UCINET tests a `diagok` flag that is never
+  set, so whether it counts is undefined);
+- the row and column totals are those of the relation analysed (UCINET
+  accumulates them across the relations of a multi-relation dataset);
+- the normalized score is `raw / (n - 1)` (UCINET multiplies by the largest
+  value in the matrix, which leaves binary data unchanged and scales valued
+  data up).
+
+On binary, single-relation data with an empty diagonal the numbers are
+UCINET's.

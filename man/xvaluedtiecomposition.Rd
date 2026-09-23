@@ -7,7 +7,7 @@
 xvaluedtiecomposition(
   net,
   relation = NULL,
-  direction = c("out", "in", "both", "reciprocated", "equal"),
+  ties = c("out", "in", "both", "reciprocated", "equal"),
   op = c("!=", ">", ">=", "==", "<=", "<"),
   cutoff = 0,
   diagonal = FALSE
@@ -19,7 +19,7 @@ xvaluedtiecomposition(
 \item{relation}{Which relation of a multi-relation dataset, by name or
 position. Defaults to the first.}
 
-\item{direction}{Which of ego's ties count: \code{"out"} (the default), \code{"in"},
+\item{ties}{Which of ego's ties count: \code{"out"} (the default), \code{"in"},
 \code{"both"} (out and in, a reciprocated pair contributing both values),
 \code{"reciprocated"} (both values of each reciprocated pair) or \code{"equal"}
 (reciprocated with the same value both ways).}
@@ -46,13 +46,13 @@ everything else missing.
 \section{UCINET equivalent}{
 
 Network | Ego Networks | Egonet Valued Tie Composition. \emph{Which ties matter?}
-is \code{direction}; the valid-ties operator and value are \code{op} and \code{cutoff};
+is \code{ties}; the valid-ties operator and value are \code{op} and \code{cutoff};
 \emph{Include ties to self} is \code{diagonal}.
 }
 
 \examples{
 xvaluedtiecomposition(camp92)
-xvaluedtiecomposition(camp92, direction = "in")
+xvaluedtiecomposition(camp92, ties = "in")
 }
 \seealso{
 \code{\link[=xtiecomposition]{xtiecomposition()}}.

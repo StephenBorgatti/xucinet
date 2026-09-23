@@ -9,7 +9,7 @@ xaltercomposition(
   attribute,
   type = NULL,
   relation = NULL,
-  direction = c("undirected", "out", "in", "reciprocated"),
+  ties = c("any", "out", "in", "reciprocated"),
   ignoreown = FALSE,
   weighting = c("analytic", "none", "multiply"),
   data = NULL
@@ -27,7 +27,7 @@ decide from the attribute.}
 \item{relation}{Which relation of a multi-relation dataset, by name or
 position. Defaults to the first.}
 
-\item{direction}{Who counts as an alter: \code{"undirected"} (the default, a tie
+\item{ties}{Who counts as an alter: \code{"any"} (the default, a tie
 in either direction), \code{"out"}, \code{"in"} or \code{"reciprocated"}.}
 
 \item{ignoreown}{Categorical only: leave out alters in ego's own category?
@@ -77,7 +77,7 @@ tie before anything else; \code{"none"} ignores tie values.
 \section{UCINET equivalent}{
 
 Network | Ego Networks | Egonet Alter Composition | Categorical, and ... |
-Continuous. \emph{Definition of Ego Network} is \code{direction}, \emph{Ignore ego's own
+Continuous. \emph{Definition of Ego Network} is \code{ties}, \emph{Ignore ego's own
 category} is \code{ignoreown}, and the continuous dialog's \emph{Valued tie data} is
 \code{weighting}.
 }

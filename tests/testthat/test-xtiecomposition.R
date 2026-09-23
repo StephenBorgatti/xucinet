@@ -27,7 +27,7 @@ test_that("columns are Ties, a count and a proportion per relation, Blau, IQV", 
                c("Ties", "fFriend", "fAdvice", "pFriend", "pAdvice", "Blau", "IQV"))
 })
 
-test_that("undirected counts a tie either way once", {
+test_that("any counts a tie either way once", {
   nd <- xtiecomposition(two_rel())$nodes
   expect_equal(unlist(nd["a", ]),
                c(Ties = 2, fFriend = 1, fAdvice = 1, pFriend = 0.5, pAdvice = 0.5,
@@ -37,21 +37,21 @@ test_that("undirected counts a tie either way once", {
 })
 
 test_that("both counts a reciprocated tie twice", {
-  nd <- xtiecomposition(two_rel(), direction = "both")$nodes
+  nd <- xtiecomposition(two_rel(), ties = "both")$nodes
   expect_equal(nd["a", "fFriend"], 2)
   expect_equal(nd["a", "Ties"], 3)
 })
 
 test_that("out, in and reciprocated", {
-  expect_equal(xtiecomposition(two_rel(), direction = "out")$nodes["c", "Ties"], 0)
-  expect_equal(xtiecomposition(two_rel(), direction = "in")$nodes["c", "Ties"], 1)
-  nd <- xtiecomposition(two_rel(), direction = "reciprocated")$nodes
+  expect_equal(xtiecomposition(two_rel(), ties = "out")$nodes["c", "Ties"], 0)
+  expect_equal(xtiecomposition(two_rel(), ties = "in")$nodes["c", "Ties"], 1)
+  nd <- xtiecomposition(two_rel(), ties = "reciprocated")$nodes
   expect_equal(nd["a", "Ties"], 1)
   expect_equal(nd["a", "fAdvice"], 0)
 })
 
 test_that("an ego with no ties has missing proportions and heterogeneity", {
-  nd <- xtiecomposition(two_rel(), direction = "out")$nodes
+  nd <- xtiecomposition(two_rel(), ties = "out")$nodes
   expect_equal(nd["c", "fFriend"], 0)
   expect_true(all(is.na(unlist(nd["c", c("pFriend", "pAdvice", "Blau", "IQV")]))))
 })
@@ -63,14 +63,14 @@ test_that("a zero is never a tie, whatever the test", {
 
 test_that("the valid-tie test selects values", {
   m <- valued()
-  expect_equal(xtiecomposition(m, direction = "out", op = ">", cutoff = 3)$nodes["a", "Ties"], 1)
-  expect_equal(xtiecomposition(m, direction = "out", op = "==", cutoff = 3)$nodes["a", "Ties"], 1)
+  expect_equal(xtiecomposition(m, ties = "out", op = ">", cutoff = 3)$nodes["a", "Ties"], 1)
+  expect_equal(xtiecomposition(m, ties = "out", op = "==", cutoff = 3)$nodes["a", "Ties"], 1)
 })
 
 test_that("equal counts only reciprocated ties with the same value", {
   m <- valued()
   m["b", "a"] <- 3                               # a <-> b with 3 both ways
-  nd <- xtiecomposition(m, direction = "equal")$nodes
+  nd <- xtiecomposition(m, ties = "equal")$nodes
   expect_equal(nd["a", "Ties"], 1)               # a-c is 5 and 2
 })
 
@@ -78,12 +78,12 @@ test_that("diagonal = TRUE counts ties to self (UCINET issue 18)", {
   expect_differs_from_ucinet(18)
   m <- valued()
   m["a", "a"] <- 1
-  expect_equal(xtiecomposition(m, direction = "out")$nodes["a", "Ties"], 2)
-  expect_equal(xtiecomposition(m, direction = "out", diagonal = TRUE)$nodes["a", "Ties"], 3)
+  expect_equal(xtiecomposition(m, ties = "out")$nodes["a", "Ties"], 2)
+  expect_equal(xtiecomposition(m, ties = "out", diagonal = TRUE)$nodes["a", "Ties"], 3)
 })
 
 test_that("one relation reduces to degree, and says so", {
-  res <- xtiecomposition(campnet, direction = "out")
+  res <- xtiecomposition(campnet, ties = "out")
   a <- (as.matrix(campnet) > 0) * 1
   diag(a) <- 0
   expect_equal(res$nodes$Ties, unname(rowSums(a)))
@@ -116,23 +116,23 @@ test_that("out-ties by default", {
 })
 
 test_that("in-ties", {
-  r <- unlist(xvaluedtiecomposition(valued(), direction = "in")$nodes["a", ])
+  r <- unlist(xvaluedtiecomposition(valued(), ties = "in")$nodes["a", ])
   expect_equal(unname(r), c(1, 2, 2, 0, 2, 2, 0))
 })
 
 test_that("both takes the incoming tie's own value (UCINET issue 19)", {
   expect_differs_from_ucinet(19)
   # 3 and 5 out, 2 in from c. UCINET adds x(a,c) = 5 for the incoming tie.
-  r <- unlist(xvaluedtiecomposition(valued(), direction = "both")$nodes["a", ])
+  r <- unlist(xvaluedtiecomposition(valued(), ties = "both")$nodes["a", ])
   expect_equal(r[["# of ties"]], 3)
   expect_equal(r[["Sum of values"]], 10)
 })
 
 test_that("reciprocated and equal", {
-  r <- unlist(xvaluedtiecomposition(valued(), direction = "reciprocated")$nodes["a", ])
+  r <- unlist(xvaluedtiecomposition(valued(), ties = "reciprocated")$nodes["a", ])
   expect_equal(r[["# of ties"]], 2)              # both values of the a-c pair
   expect_equal(r[["Sum of values"]], 7)
-  r2 <- unlist(xvaluedtiecomposition(valued(), direction = "equal")$nodes["a", ])
+  r2 <- unlist(xvaluedtiecomposition(valued(), ties = "equal")$nodes["a", ])
   expect_equal(r2[["# of ties"]], 0)
   expect_true(all(is.na(r2[-1])))
 })

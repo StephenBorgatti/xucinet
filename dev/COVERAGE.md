@@ -7,8 +7,8 @@ against the xucinet 2.0 function that serves it.
 
 | status | meaning | count |
 |---|---|---|
-| done | written, tested, and checked against UCINET goldens | 14 |
-| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 48 |
+| done | written, tested, and checked against UCINET goldens | 15 |
+| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 49 |
 | not started | no function yet | 21 |
 | dropped | will not be written; the reason is given below | 3 |
 
@@ -66,6 +66,7 @@ against the xucinet 2.0 function that serves it.
 | 8.5.1–8.5.2 | Ego–alter similarity (homophily), categorical and continuous | Network\|Ego Networks\|Ego-Alter Similarity\|Categorical / Continuous | `xegoaltersimilarity()` | coded, goldens pending |
 | 8.6.1 | Structural holes (constraint, effective size, efficiency, hierarchy) | Network\|Ego Networks\|Structural Holes | `xstructuralholes()` | coded, goldens pending |
 | 8.6.2 | Egonet basic measures (size, ties, density, components, ...) | Network\|Ego Networks\|Egonet Basic Measures | `xegonet()` | coded, goldens pending |
+| 8.6.2 | Egonet reciprocity (node-level reciprocity) | Network\|Ego Networks\|Egonet Reciprocity | `xegoreciprocity()` | coded, goldens pending |
 
 ## Chapter 9
 
@@ -83,6 +84,7 @@ against the xucinet 2.0 function that serves it.
 | 9.4.3 | Hubs and authorities (new in 3e) | Network\|Centrality\|Hubs & Authorities | `xhubsauthorities()` | done |
 | 9.6.1 | PN centrality (negative ties) | Network\|Centrality\|PN | `xpncentrality()` | done |
 | 9.7 | Induced centrality | Network\|Centrality\|Induced | `xinduced()` | done |
+| 9 (not in text) | Inverse-weighted degree centrality | Network\|Centrality\|Inverse-Weighted Degree | `xinverseweighteddegree()` | done |
 
 ## Chapter 10
 

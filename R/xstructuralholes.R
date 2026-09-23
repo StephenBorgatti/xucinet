@@ -56,7 +56,7 @@
 #'
 #' @section UCINET equivalent:
 #' Network | Ego Networks | Structural Holes. *Method* is `method`, *How to
-#' define ego net* is `direction`, *Symmetrize by sum ala Burt* is
+#' define ego net* is `ties`, *Symmetrize by sum ala Burt* is
 #' `symmetrize`, *Diagonal valid* is `diagonal`, and the *Set isolates to* and
 #' *Set pendants to* boxes are `isolate` and `pendant`.
 #'
@@ -65,8 +65,8 @@
 #'   position. Defaults to the first.
 #' @param method `"ego"` (the default, UCINET's ego network model) or
 #'   `"whole"` (the whole network model).
-#' @param direction Who counts as an alter in the ego-network model:
-#'   `"undirected"` (the default, UCINET's *Union*), `"out"`, `"in"` or
+#' @param ties Who counts as an alter in the ego-network model:
+#'   `"any"` (the default, UCINET's *Union*), `"out"`, `"in"` or
 #'   `"reciprocated"` (*Intersection*). The whole-network model uses it only
 #'   for the ego-network columns.
 #' @param symmetrize Add `z(i,j)` and `z(j,i)` before computing proportions,
@@ -85,15 +85,15 @@
 #' xstructuralholes(campnet, method = "whole")
 #' @export
 xstructuralholes <- function(net, relation = NULL, method = c("ego", "whole"),
-                             direction = c("undirected", "out", "in",
+                             ties = c("any", "out", "in",
                                            "reciprocated"),
                              symmetrize = TRUE, diagonal = FALSE,
                              isolate = c(0, NA), pendant = c(1, NA)) {
   net <- xnet(net, substitute(net))
   method <- match.arg(method)
-  direction <- match_direction(direction,
-                               c("undirected", "out", "in", "reciprocated"),
-                               "xstructuralholes()")
+  ties <- match_ties(ties,
+                     c("any", "out", "in", "reciprocated"),
+                     "xstructuralholes()")
   if (length(isolate) != 2L || length(pendant) != 2L) {
     stop("xstructuralholes(): isolate and pendant are each a pair of values, ",
          "effective size then constraint, e.g. isolate = c(0, NA).", call. = FALSE)
@@ -105,7 +105,7 @@ xstructuralholes <- function(net, relation = NULL, method = c("ego", "whole"),
   if (!diagonal) diag(z) <- 0
   labels <- rownames(z)
 
-  ego <- holes_ego(z, direction, symmetrize, isolate, pendant)
+  ego <- holes_ego(z, ties, symmetrize, isolate, pendant)
   res <- if (method == "ego") {
     ego
   } else {
@@ -129,11 +129,11 @@ xstructuralholes <- function(net, relation = NULL, method = c("ego", "whole"),
 
   fields <- if (method == "ego") {
     c("Method:" = "Ego Network -- connections 2 links beyond ego are ignored",
-      "Egonet definition:" = unname(c(undirected = "Union - either kind",
+      "Egonet definition:" = unname(c(any = "Union - either kind",
                                       out = "Outgoing ties only",
                                       `in` = "Incoming ties only",
                                       reciprocated = "Intersection - Reciprocated"
-                                      )[direction]),
+                                      )[ties]),
       "Constraint: isolates set to " = format(isolate[2]),
       "Constraint: pendants set to " = format(pendant[2]),
       "Effective size: isolates set to " = format(isolate[1]),
@@ -159,7 +159,7 @@ xstructuralholes <- function(net, relation = NULL, method = c("ego", "whole"),
 
 # ---- the ego-network model: tegonetstructuralholes ---------------------------
 
-holes_ego <- function(z, direction, symmetrize, isolate, pendant) {
+holes_ego <- function(z, ties, symmetrize, isolate, pendant) {
   n <- nrow(z)
   cols <- c("Degree", "EffSize", "Efficiency", "Constraint", "Hierarchy",
             "EgoBet", "Ln(Constraint)", "Indirects", "Density", "AvgDeg",
@@ -170,10 +170,10 @@ holes_ego <- function(z, direction, symmetrize, isolate, pendant) {
 
   for (k in seq_len(n)) {
     # identifyegonet: ego first, then its alters in node order.
-    alters <- switch(direction,
+    alters <- switch(ties,
                      out = which(z[k, ] > 0),
                      `in` = which(z[, k] > 0),
-                     undirected = which(z[k, ] > 0 | z[, k] > 0),
+                     any = which(z[k, ] > 0 | z[, k] > 0),
                      reciprocated = which(z[k, ] > 0 & z[, k] > 0))
     alters <- setdiff(alters, k)
     idx <- c(k, alters)

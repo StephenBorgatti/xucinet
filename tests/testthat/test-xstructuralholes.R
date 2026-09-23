@@ -115,13 +115,13 @@ test_that("tie values are used, and summed across the diagonal ala Burt", {
   expect_equal(r2$Constraint, (3 / 5)^2 + 2 * (1 / 5)^2)
 })
 
-test_that("direction defines the ego network", {
+test_that("ties defines the ego network", {
   m <- matrix(0, 3, 3, dimnames = list(letters[1:3], letters[1:3]))
   m["a", "b"] <- 1
   m["c", "a"] <- 1
   expect_equal(xstructuralholes(m)$nodes["a", "Degree"], 2)
-  expect_equal(xstructuralholes(m, direction = "out")$nodes["a", "Degree"], 1)
-  expect_equal(xstructuralholes(m, direction = "reciprocated")$nodes["a", "Degree"], 0)
+  expect_equal(xstructuralholes(m, ties = "out")$nodes["a", "Degree"], 1)
+  expect_equal(xstructuralholes(m, ties = "reciprocated")$nodes["a", "Degree"], 0)
 })
 
 test_that("the diagonal is ignored unless it is valid", {

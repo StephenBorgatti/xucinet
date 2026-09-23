@@ -142,40 +142,30 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. Done 23 Sep (Cowork): `xegoreciprocity(net, relation = NULL)` is in `crosswalk.py` (8.6.2,
-   Network | Ego Networks | Egonet Reciprocity) and in `inst/extdata/crosswalk-routines.csv`;
-   the 10.2.2 row says `xreciprocity()` has no node table and its signature has `"hybrid"`.
-   The xlsx is rebuilt. **Steve had annotated the xlsx by hand on 23 Sep** (answers after
-   `**` in the Decision column of 19 rows); those annotations were copied into
-   `crosswalk.py` first, so the rebuild kept them. Three of them are decisions Claude Code
-   needs:
-   - `xcommunities` (11, all): "include this function. The output consists [of] a node by
-     method categorical matrix indicating cluster membership."
-   - `xcoreperiphery` (12.8): "one function. Drop the helpers."
-   - The 0.x negative-tie aliases (Steve, 23 Sep, replacing "unclear"): in
-     `R/aliases-1e.R`, `xNegativeDegreeCentrality` is dropped: its alias stops with a
-     message (as the project aliases do) saying to use `xdegree()` on the negative
-     relation. `xNegativeWeightedCentrality` maps to `xpncentrality()` on the negated
-     matrix, with a message that the two agree for undirected data only (the 0.x formula
-     used NN' where PN centrality, which symmetrizes, uses N^2). Update
-     `test-aliases-1e.R` and the crosswalk CSV rows to match `crosswalk.py`.
-   The other sixteen agree with the recommendation already in the row (xjoin only; one
-   `xcomponents`/`xcohesion`; one `xcliques`; drop QuickClus and Walktrap; `xlouvain`
-   2-mode aware; `xqap`/`xmrqap`/`xlrqap`; `xdensitybygroups(test = TRUE)` for the ANOVA
-   density model; and the chapter 8 and 9 names).
+0. Done 23 Sep (Claude Code): Steve's crosswalk annotations (issue #21, 400c341):
+   `xcommunities(net, ...)` runs all five methods and returns a node-by-method
+   membership table (columns `Louvain`, `FastGreedy`, `GirvanNewman`, `LabelProp`,
+   `Factions`); `xNegativeDegreeCentrality` withdrawn; `xNegativeWeightedCentrality` runs
+   `xpncentrality()` on the negated matrix. `xcoreperiphery` as one function waits for
+   chapter 12. **Cowork: rebuild the crosswalk xlsx** (`build_xlsx.py`); `crosswalk.py`
+   has the new `xcommunities` signature (asnr2e 3df45ec) but there is no Python here.
+1. Done 23 Sep (Claude Code, issue #22): `xinverseweighteddegree()` with UCINET issue 28
+   corrected (ledger 33; golden step in `centrality/make_goldens_3.txt`, part B), and
+   `direction` renamed `ties` (`"undirected"` now `"any"`) in the six ego-network
+   routines; the package CSV matches `crosswalk.py`.
 
-1. Claude Code runs the remaining chapter prompts in order: ch12, ch13, ch14, ch07
+2. Claude Code runs the remaining chapter prompts in order: ch12, ch13, ch14, ch07
    (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after `prompt-conventions.md`).
    Each is one session and ends with `dev/COVERAGE.md` regenerated. Chapter 12 has
    answers 12.1-12.4 in the table, two of them questions back to Claude Code (12.2, 12.3).
    **2-mode Louvain:** still waits for open question 4 (issue #18) before the 2-mode
    branch of `xlouvain()` is written; it may land with chapter 13.
-2. Golden tests for chapters 5, 6, 8, 10 and 11 stay skipped; the fixtures named in
+3. Golden tests for chapters 5, 6, 8, 10 and 11 stay skipped; the fixtures named in
    `inst/goldens/{transform,multivariate,ego,cohesion,subgroups}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
-3. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`) when Steve has a free hour with
+4. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`) when Steve has a free hour with
    UCINET; `Config/ucinet/reference` bumps then.
-4. Then the asnr2e side: generators and practices per chapter, and the ch07 merge
+5. Then the asnr2e side: generators and practices per chapter, and the ch07 merge
    completion once xplot exists.
 
 ## Decisions
@@ -270,6 +260,12 @@ ones keep their numbers because other notes refer to them.)
    argument name; which of UCINET bugs 17-20 will be fixed. (The `xmixing` signature
    without `model =` has been in `crosswalk.py` and the xlsx since the Cowork commit of
    23 Sep; only the chapter 8 rows remain.)
+   → Partly answered 23 Sep (Steve, via Cowork). The argument is renamed `ties`, with
+   `"undirected"` becoming `"any"` (Next 2; SPEC addendum). The chapter 8 rows of
+   `crosswalk.py` now carry the package's signatures with `ties`. Still open: whether
+   UCINET issues 17-20 go on the 6.850 list.
+   → Answered 23 Sep (Steve): yes, all four are scheduled for 6.850 (UCINET-ISSUES 17-20
+   updated). Question 3 is closed.
 4. **2-mode Louvain (design question 11.4).** UCINET's 2-mode Louvain
    (`uc_2modelouvain.pas`, engine `G2Tools/u2modelouvain.pas`) maximizes Barber's
    bipartite modularity Q_b: one level of local moving, no aggregation, nodes visited in

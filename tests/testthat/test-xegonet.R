@@ -99,17 +99,17 @@ test_that("an isolate gets missing ratios, not UCINET's zeros (issue 17)", {
   expect_equal(row_of(xegonet(star_iso()), "a")[["2StepPct"]], 75)
 })
 
-test_that("direction picks the neighbourhood", {
+test_that("ties picks the neighbourhood", {
   p <- path3()
-  expect_equal(xegonet(p, direction = "out")$nodes["b", "Size"], 1)
-  expect_equal(xegonet(p, direction = "in")$nodes["b", "Size"], 1)
+  expect_equal(xegonet(p, ties = "out")$nodes["b", "Size"], 1)
+  expect_equal(xegonet(p, ties = "in")$nodes["b", "Size"], 1)
   r <- row_of(xegonet(p), "b")
   expect_equal(r[["Size"]], 2)
   # a -> b -> c: one ordered pair through b, not halved because the ego network
   # is not symmetric, over (3-1)(3-2).
   expect_equal(r[["EgoBetween"]], 1)
   expect_equal(r[["nEgoBetween"]], 50)
-  expect_equal(xegonet(p, direction = "out")$nodes["c", "Size"], 0)
+  expect_equal(xegonet(p, ties = "out")$nodes["c", "Size"], 0)
 })
 
 test_that("valued data are dichotomized with UCINET's notice", {
@@ -145,9 +145,9 @@ test_that("Size is degree in the chosen direction", {
   # Size counts neighbours, which is what xdegree counts on binary data.
   a <- (as.matrix(campnet) > 0) * 1
   diag(a) <- 0
-  expect_equal(xegonet(campnet, direction = "out")$nodes$Size,
+  expect_equal(xegonet(campnet, ties = "out")$nodes$Size,
                unname(rowSums(a)))
-  expect_equal(xegonet(campnet, direction = "in")$nodes$Size,
+  expect_equal(xegonet(campnet, ties = "in")$nodes$Size,
                unname(colSums(a)))
 })
 
@@ -184,8 +184,8 @@ test_that("campnet matches UCINET, undirected", {
 test_that("campnet matches UCINET, out- and in-neighbourhoods", {
   skip_if_no_golden("g8_egonet_campnet_out", "ego")
   skip_if_no_golden("g8_egonet_campnet_in", "ego")
-  golden_cols("g8_egonet_campnet_out", xegonet(campnet, direction = "out"))
-  golden_cols("g8_egonet_campnet_in", xegonet(campnet, direction = "in"))
+  golden_cols("g8_egonet_campnet_out", xegonet(campnet, ties = "out"))
+  golden_cols("g8_egonet_campnet_in", xegonet(campnet, ties = "in"))
 })
 
 test_that("g9_iso matches UCINET apart from the isolate (issue 17)", {

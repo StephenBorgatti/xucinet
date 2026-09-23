@@ -112,6 +112,8 @@ Fixed vocabulary, used identically everywhere. First argument is always the netw
 | `directed` | override auto-detection | `NULL` = auto-detect from symmetry, report assumption in output |
 | `weighted` | use values vs. dichotomize | routine-appropriate UCINET default; auto-binarize **with the same warning UCINET prints** |
 | `normalize` | normalized version of measure | UCINET's dialog default |
+| `direction` | which version of a node measure: `"out"` or `"in"` (centrality routines) | UCINET's dialog default |
+| `ties` | which of ego's ties define the neighbourhood or are counted (ego-network routines): `"out"`, `"in"`, `"reciprocated"`, `"any"`; the tie-composition routines add `"both"` and `"equal"` | UCINET's dialog default |
 | `mode` | for 2-mode data: `"rows"`, `"cols"`, `"both"` | `"both"` |
 | `attribute` | node attribute vector / column name / `data$column` | — |
 | `nperm` | permutations for tests | UCINET's default (e.g. 5000 for QAP) |
@@ -582,3 +584,25 @@ Applications (23 September 2026):
 - Input-driven differences are not affected: attribute type (`xaltercomposition`,
   `xegoaltersimilarity`), the set of relations (`xtiecomposition`), and `dim` (`xmds`,
   `xcorrespondence`).
+
+---
+
+## Addendum, 23 September 2026 — `ties` for the ego-network routines
+
+Steve's decision, 23 September 2026 (STATUS open question 3). The ego-network routines
+(`xegonet`, `xaltercomposition`, `xegoaltersimilarity`, `xstructuralholes`,
+`xtiecomposition`, `xvaluedtiecomposition`) take `ties =`, not `direction =`. The argument
+says which of ego's ties qualify, so `ties = "in"` means ego's incoming ties.
+
+- `"out"`: ego's outgoing ties; `"in"`: ego's incoming ties; `"reciprocated"`: ties in
+  both directions; `"any"`: a tie in either direction, counted once (the value called
+  `"undirected"` until now).
+- The two tie-composition routines also offer `"both"` (outgoing and incoming counted
+  separately, so a reciprocated tie counts twice) and `"equal"` (reciprocated with the
+  same value both ways). Their help pages spell out the difference between `"any"` and
+  `"both"`.
+- `direction` stays in the centrality routines (`xbeta`, `xreach`, `xbetareach`, ...),
+  where it chooses between in- and out-versions of a node measure. The two names are both
+  in D4.
+- Defaults are unchanged: each follows its UCINET dialog (`"any"` for most, `"out"` for
+  `xvaluedtiecomposition` and `xegoaltersimilarity`).

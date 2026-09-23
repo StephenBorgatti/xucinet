@@ -3,10 +3,10 @@
 # Every Ego Networks dialog in UCINET has its own way of saying which ties
 # define ego's neighbourhood - "Which ties matter?", "Definition of Ego
 # Network", "Ego network type", "How to define ego net" - with its own list of
-# choices and its own default. The R functions share one argument, `direction`,
+# choices and its own default. The R functions share one argument, `ties`,
 # and one vocabulary for it, and each offers the subset its dialog has:
 #
-#   "undirected"    a tie either way           (Undirected (OR); Both incoming
+#   "any"           a tie either way           (Undirected (OR); Both incoming
 #                                               and outgoing; UNDIRECTED; Union)
 #   "both"          in and out counted apart   (Both in and out)
 #   "out"           outgoing ties only
@@ -16,13 +16,13 @@
 #   "equal"         reciprocated with x(i,j) = x(j,i)
 #
 # Note that "Both incoming and outgoing ties" in the composition dialogs is a
-# max-symmetrize (massagematrix, case 0), which is "undirected" here, whereas
+# max-symmetrize (massagematrix, case 0), which is "any" here, whereas
 # "Both in and out" in the tie-composition dialogs really does count a
 # reciprocated tie twice. The same English, two different operations; the R
 # vocabulary keeps them apart.
 
-ego_direction_labels <- c(
-  undirected = "Undirected (either direction)",
+ego_ties_labels <- c(
+  any = "Undirected (either direction)",
   both = "Both in and out",
   out = "Outgoing ties only",
   `in` = "Incoming ties only",
@@ -31,14 +31,14 @@ ego_direction_labels <- c(
 
 # match.arg with the choices named in the error, which match.arg's own message
 # does not do helpfully when the choice vector is long.
-match_direction <- function(direction, choices, fn) {
-  if (length(direction) > 1L) return(choices[1L])
-  d <- tolower(as.character(direction))
+match_ties <- function(ties, choices, fn) {
+  if (length(ties) > 1L) return(choices[1L])
+  d <- tolower(as.character(ties))
   hit <- pmatch(d, choices)
   if (is.na(hit)) {
-    stop(fn, ": direction must be one of ",
+    stop(fn, ": ties must be one of ",
          paste0("\"", choices, "\"", collapse = ", "), ".\n",
-         "  Got \"", direction, "\".", call. = FALSE)
+         "  Got \"", ties, "\".", call. = FALSE)
   }
   choices[hit]
 }
@@ -48,15 +48,15 @@ match_direction <- function(direction, choices, fn) {
 # (massagematrix in uegocomposition.pas, uc_EgoNetStrength.pas,
 # uc_EgoNetHomophily.pas and uc_EgoNetHomophilyCont.pas, all the same four
 # cases):
-#   undirected    max of x(i,j) and x(j,i), both cells
+#   any           max of x(i,j) and x(j,i), both cells
 #   out           unchanged
 #   in            transposed
 #   reciprocated  min of the two, both cells
 # A missing value in either cell stays missing, as max() and min() of a value
 # and bna do in the Delphi.
-ego_rows <- function(m, direction) {
-  switch(direction,
-         undirected = pmax(m, t(m)),
+ego_rows <- function(m, ties) {
+  switch(ties,
+         any = pmax(m, t(m)),
          out = m,
          `in` = t(m),
          reciprocated = pmin(m, t(m)))

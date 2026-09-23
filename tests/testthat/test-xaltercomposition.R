@@ -53,16 +53,16 @@ test_that("tie values weight the counts, as UCINET's addcase(value, weight) does
   expect_equal(r[["p2"]], 4 / 6)
 })
 
-test_that("direction defines the alters", {
+test_that("ties defines the alters", {
   m <- matrix(0, 3, 3, dimnames = list(letters[1:3], letters[1:3]))
   m["a", "b"] <- 1
   m["c", "a"] <- 1
   g <- c(a = 1, b = 1, c = 2)
   expect_equal(xaltercomposition(m, g, type = "categorical")$nodes["a", "f2"], 1)
   expect_equal(xaltercomposition(m, g, type = "categorical",
-                                 direction = "out")$nodes["a", "f2"], 0)
+                                 ties = "out")$nodes["a", "f2"], 0)
   expect_equal(xaltercomposition(m, g, type = "categorical",
-                                 direction = "in")$nodes["a", "f2"], 1)
+                                 ties = "in")$nodes["a", "f2"], 1)
 })
 
 test_that("a text attribute is categorical without being told", {

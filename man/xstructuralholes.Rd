@@ -8,7 +8,7 @@ xstructuralholes(
   net,
   relation = NULL,
   method = c("ego", "whole"),
-  direction = c("undirected", "out", "in", "reciprocated"),
+  ties = c("any", "out", "in", "reciprocated"),
   symmetrize = TRUE,
   diagonal = FALSE,
   isolate = c(0, NA),
@@ -24,8 +24,8 @@ position. Defaults to the first.}
 \item{method}{\code{"ego"} (the default, UCINET's ego network model) or
 \code{"whole"} (the whole network model).}
 
-\item{direction}{Who counts as an alter in the ego-network model:
-\code{"undirected"} (the default, UCINET's \emph{Union}), \code{"out"}, \code{"in"} or
+\item{ties}{Who counts as an alter in the ego-network model:
+\code{"any"} (the default, UCINET's \emph{Union}), \code{"out"}, \code{"in"} or
 \code{"reciprocated"} (\emph{Intersection}). The whole-network model uses it only
 for the ego-network columns.}
 
@@ -79,7 +79,7 @@ describe the ego network itself, are the same as under the ego model.
 \section{UCINET equivalent}{
 
 Network | Ego Networks | Structural Holes. \emph{Method} is \code{method}, \emph{How to
-define ego net} is \code{direction}, \emph{Symmetrize by sum ala Burt} is
+define ego net} is \code{ties}, \emph{Symmetrize by sum ala Burt} is
 \code{symmetrize}, \emph{Diagonal valid} is \code{diagonal}, and the \emph{Set isolates to} and
 \emph{Set pendants to} boxes are \code{isolate} and \code{pendant}.
 }

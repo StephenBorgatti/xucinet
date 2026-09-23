@@ -35,7 +35,7 @@
 #' proportions and heterogeneity.
 #'
 #' On a single relation the count is just degree - out-degree, in-degree or
-#' their union according to `direction` - and the proportions are trivially 1,
+#' their union according to `ties` - and the proportions are trivially 1,
 #' which the report notes.
 #'
 #' A tie is any cell passing the test `op`/`cutoff` (by default, any value other
@@ -44,13 +44,13 @@
 #'
 #' @section UCINET equivalent:
 #' Network | Ego Networks | Egonet Tie Composition. *Which ties matter?* is
-#' `direction`; the valid-ties operator and value are `op` and `cutoff`;
+#' `ties`; the valid-ties operator and value are `op` and `cutoff`;
 #' *Include ties to self* is `diagonal`.
 #'
 #' @param net A network (any accepted form), usually with several relations.
 #' @param relations Which relations to use, by name or position. `NULL`, the
 #'   default, uses them all, as UCINET does.
-#' @param direction Which of ego's ties count: `"undirected"` (the default, a
+#' @param ties Which of ego's ties count: `"any"` (the default, a
 #'   tie in either direction counted once), `"both"` (in and out counted
 #'   separately, so a reciprocated tie counts twice), `"out"`, `"in"`,
 #'   `"reciprocated"`, or `"equal"` (reciprocated with the same value both ways).
@@ -65,13 +65,13 @@
 #' xtiecomposition(sampson)
 #' @export
 xtiecomposition <- function(net, relations = NULL,
-                            direction = c("undirected", "both", "out", "in",
+                            ties = c("any", "both", "out", "in",
                                           "reciprocated", "equal"),
                             op = c("!=", ">", ">=", "==", "<=", "<"),
                             cutoff = 0, diagonal = FALSE) {
   net <- xnet(net, substitute(net))
   require_1mode(net, "xtiecomposition()")
-  direction <- match_direction(direction, c("undirected", "both", "out", "in",
+  ties <- match_ties(ties, c("any", "both", "out", "in",
                                             "reciprocated", "equal"),
                                "xtiecomposition()")
   op <- match_op(op, "xtiecomposition()")
@@ -91,7 +91,7 @@ xtiecomposition <- function(net, relations = NULL,
 
   freq <- vapply(mats, function(m) {
     tie <- is_tie_matrix(m, op, cutoff)
-    ego_tie_counts(m, tie, direction, diagonal)
+    ego_tie_counts(m, tie, ties, diagonal)
   }, numeric(n))
   dim(freq) <- c(n, nm)
 
@@ -116,7 +116,7 @@ xtiecomposition <- function(net, relations = NULL,
   new_xucinet_output(
     "Node-level Tie Composition Measures", net,
     nodes = nodes, assumptions = assumptions,
-    fields = c("Which ties to count?" = ego_direction_labels[[direction]],
+    fields = c("Which ties to count?" = ego_ties_labels[[ties]],
                "Valid ties operator:" = tie_op_labels[[op]],
                "Valid ties value:" = format(cutoff)),
     nodes_title = "Node-level tie composition measures",
@@ -135,13 +135,13 @@ xtiecomposition <- function(net, relations = NULL,
 #'
 #' @section UCINET equivalent:
 #' Network | Ego Networks | Egonet Valued Tie Composition. *Which ties matter?*
-#' is `direction`; the valid-ties operator and value are `op` and `cutoff`;
+#' is `ties`; the valid-ties operator and value are `op` and `cutoff`;
 #' *Include ties to self* is `diagonal`.
 #'
 #' @inheritParams xtiecomposition
 #' @param relation Which relation of a multi-relation dataset, by name or
 #'   position. Defaults to the first.
-#' @param direction Which of ego's ties count: `"out"` (the default), `"in"`,
+#' @param ties Which of ego's ties count: `"out"` (the default), `"in"`,
 #'   `"both"` (out and in, a reciprocated pair contributing both values),
 #'   `"reciprocated"` (both values of each reciprocated pair) or `"equal"`
 #'   (reciprocated with the same value both ways).
@@ -150,15 +150,15 @@ xtiecomposition <- function(net, relations = NULL,
 #' @seealso [xtiecomposition()].
 #' @examples
 #' xvaluedtiecomposition(camp92)
-#' xvaluedtiecomposition(camp92, direction = "in")
+#' xvaluedtiecomposition(camp92, ties = "in")
 #' @export
 xvaluedtiecomposition <- function(net, relation = NULL,
-                                  direction = c("out", "in", "both",
+                                  ties = c("out", "in", "both",
                                                 "reciprocated", "equal"),
                                   op = c("!=", ">", ">=", "==", "<=", "<"),
                                   cutoff = 0, diagonal = FALSE) {
   net <- xnet(net, substitute(net))
-  direction <- match_direction(direction, c("out", "in", "both", "reciprocated",
+  ties <- match_ties(ties, c("out", "in", "both", "reciprocated",
                                             "equal"), "xvaluedtiecomposition()")
   op <- match_op(op, "xvaluedtiecomposition()")
   rel <- ego_relation(net, relation, "xvaluedtiecomposition()")
@@ -172,7 +172,7 @@ xvaluedtiecomposition <- function(net, relation = NULL,
                 dimnames = list(rownames(m), cols))
   for (i in seq_len(n)) {
     others <- if (diagonal) seq_len(n) else seq_len(n)[-i]
-    v <- ego_tie_values(m, tie, i, others, direction)
+    v <- ego_tie_values(m, tie, i, others, ties)
     out[i, ] <- univariate(v)
   }
 
@@ -181,7 +181,7 @@ xvaluedtiecomposition <- function(net, relation = NULL,
     nodes = as.data.frame(out, check.names = FALSE),
     assumptions = c(rel$note,
                     "The program assumes all non-zero values are ties."),
-    fields = c("Which ties define egonet?" = ego_direction_labels[[direction]],
+    fields = c("Which ties define egonet?" = ego_ties_labels[[ties]],
                "Valid ties operator:" = tie_op_labels[[op]],
                "Valid ties value:" = format(cutoff),
                "Include ties to self?" = if (diagonal) "YES" else "NO"),
@@ -196,15 +196,15 @@ relation_list <- function(net) {
 }
 
 # addmat, for one relation: a count per ego.
-ego_tie_counts <- function(m, tie, direction, diagonal) {
+ego_tie_counts <- function(m, tie, ties, diagonal) {
   n <- nrow(m)
   keep <- if (diagonal) matrix(TRUE, n, n) else row(tie) != col(tie)
   tt <- t(tie)
   same <- abs(m - t(m)) < 1e-6
   same[is.na(same)] <- FALSE
-  x <- switch(direction,
+  x <- switch(ties,
               both = tie + tt,
-              undirected = tie | tt,
+              any = tie | tt,
               out = tie,
               `in` = tt,
               reciprocated = tie & tt,
@@ -213,12 +213,12 @@ ego_tie_counts <- function(m, tie, direction, diagonal) {
 }
 
 # analyzer, for one ego: the values that go into its statistics.
-ego_tie_values <- function(m, tie, i, others, direction) {
+ego_tie_values <- function(m, tie, i, others, ties) {
   out_ok <- tie[i, others]
   in_ok <- tie[others, i]
   xo <- m[i, others]
   xi <- m[others, i]
-  switch(direction,
+  switch(ties,
          out = xo[out_ok],
          `in` = xi[in_ok],
          both = c(xo[out_ok], xi[in_ok]),

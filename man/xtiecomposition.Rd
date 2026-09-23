@@ -7,7 +7,7 @@
 xtiecomposition(
   net,
   relations = NULL,
-  direction = c("undirected", "both", "out", "in", "reciprocated", "equal"),
+  ties = c("any", "both", "out", "in", "reciprocated", "equal"),
   op = c("!=", ">", ">=", "==", "<=", "<"),
   cutoff = 0,
   diagonal = FALSE
@@ -19,7 +19,7 @@ xtiecomposition(
 \item{relations}{Which relations to use, by name or position. \code{NULL}, the
 default, uses them all, as UCINET does.}
 
-\item{direction}{Which of ego's ties count: \code{"undirected"} (the default, a
+\item{ties}{Which of ego's ties count: \code{"any"} (the default, a
 tie in either direction counted once), \code{"both"} (in and out counted
 separately, so a reciprocated tie counts twice), \code{"out"}, \code{"in"},
 \code{"reciprocated"}, or \code{"equal"} (reciprocated with the same value both ways).}
@@ -47,7 +47,7 @@ by its maximum \code{1 - 1/R} for \code{R} relations. An ego with no ties has mi
 proportions and heterogeneity.
 
 On a single relation the count is just degree - out-degree, in-degree or
-their union according to \code{direction} - and the proportions are trivially 1,
+their union according to \code{ties} - and the proportions are trivially 1,
 which the report notes.
 
 A tie is any cell passing the test \code{op}/\code{cutoff} (by default, any value other
@@ -57,7 +57,7 @@ zeros to missing before testing.
 \section{UCINET equivalent}{
 
 Network | Ego Networks | Egonet Tie Composition. \emph{Which ties matter?} is
-\code{direction}; the valid-ties operator and value are \code{op} and \code{cutoff};
+\code{ties}; the valid-ties operator and value are \code{op} and \code{cutoff};
 \emph{Include ties to self} is \code{diagonal}.
 }
 

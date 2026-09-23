@@ -492,8 +492,9 @@ routine's output, or move it behind an option that is off by default.
 
 ## 17. Egonet Basic Measures reports zeros for an ego with no alters
 
-**Status:** reported here 23 September 2026 (chapter 8, issue #14), not yet
-reported to Steve. xucinet implements the correct behaviour; ledger entry 18.
+**Status:** reported here 23 September 2026 (chapter 8, issue #14). **Scheduled for
+UCINET 6.850** (Steve, 23 September 2026). xucinet implements the correct behaviour;
+ledger entry 18.
 
 `densitydsl` in `Xegonet.pas` handles the empty ego network like this:
 
@@ -532,8 +533,8 @@ footnote or the value should change.
 
 ## 18. Egonet Tie Composition ignores "Include ties to self"
 
-**Status:** reported here 23 September 2026, not yet reported to Steve.
-xucinet implements the correct behaviour; ledger entry 19.
+**Status:** reported here 23 September 2026. **Scheduled for UCINET 6.850** (Steve,
+23 September 2026). xucinet implements the correct behaviour; ledger entry 19.
 
 `TEgonetTieComposition.run` declares `diagok` and never reads the
 `DiagonalOk` checkbox into it, and calls
@@ -549,8 +550,8 @@ The valued-tie form next to it does read its own checkbox.
 
 ## 19. Egonet Valued Tie Composition, "Both in and out", uses the wrong cell
 
-**Status:** reported here 23 September 2026, not yet reported to Steve.
-xucinet implements the correct behaviour; ledger entry 19.
+**Status:** reported here 23 September 2026. **Scheduled for UCINET 6.850** (Steve,
+23 September 2026). xucinet implements the correct behaviour; ledger entry 19.
 
 In `analyzer` in `uc_egonetvaluedtiecomposition.pas`, case 0:
 
@@ -572,8 +573,8 @@ incoming tie's own value.
 
 ## 20. Egonet Alter Composition | Continuous: the SD filters never filter
 
-**Status:** reported here 23 September 2026, not yet reported to Steve. The
-filters are left out of `xaltercomposition()`; ledger entry 20.
+**Status:** reported here 23 September 2026. **Scheduled for UCINET 6.850** (Steve,
+23 September 2026). The filters are left out of `xaltercomposition()`; ledger entry 20.
 
 Three defects in `uc_EgoNetStrength.pas`, all in code the default settings do
 not reach:
@@ -755,6 +756,41 @@ A missing cell is stored as `bna = 1e38`. Two chapter 11 routines do not test fo
 Ledger entry 29.
 
 **Fix:** test `isna` (or `< na`) before using a cell, as `getrowsum` already does.
+
+---
+
+## 28. Inverse-Weighted Degree: an unset diagonal flag, totals carried across relations, and a doubtful normalization
+
+**bug** · **open — fix pending** · found 23 September 2026 (Cowork, reading the unit)
+
+`uc_iwdcentrality.pas`, `Tiwdcentrality.run` (Network | Centrality | Inverse-Weighted
+Degree).
+
+1. `diagok` is a local boolean that is never assigned, and both loops test
+   `(i<>j) or diagok`. Delphi does not initialize local variables, so whether the diagonal
+   counts is undefined. The dialog has no diagonal option.
+2. The row and column totals `r` and `c` are allocated once, before the loop over
+   relations, and never reset inside it. For a multi-relation dataset every relation after
+   the first is weighted by totals accumulated over all earlier relations. `maxval` is reset
+   per relation; the totals are not.
+3. The normalized scores are `maxval * raw / (n-1)`. Each term `x(i,j)/c(j)` or
+   `x(i,j)/r(i)` is at most 1 whatever the scale of the data, so the maximum possible
+   raw score is n-1 and `raw/(n-1)` would normalize it. Multiplying by `maxval` leaves
+   binary data unchanged but scales valued data up by its largest value. Steve,
+   23 September 2026: the normalized score is `raw/(n-1)` for binary and valued data
+   alike; the `maxval` factor is a bug.
+
+What the routine computes, for the record: column 1 (`OutIWD`) is
+sum over j of x(i,j)/c(j), i's ties weighted by the inverse of each alter's indegree;
+column 2 (`InIWD`) is sum over i of x(i,j)/r(i), the column sums of the row-stochastic
+matrix. For symmetric data only the first is reported, as `IWD`. Missing cells are recoded
+(`recodena`) before summing. The default output is normalized.
+
+**What xucinet does:** `xinverseweighteddegree()` excludes the diagonal, computes the totals
+per relation, and normalizes as `raw/(n-1)`. Ledger entry with the code.
+
+**Fix:** `diagok := false` (or a dialog option); zero `r` and `c` at the top of the loop
+over relations; drop `maxval*` from the normalization.
 
 ---
 

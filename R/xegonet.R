@@ -27,7 +27,7 @@
 #' between alters who are not tied.
 #'
 #' The ego network of a node is its alters and the ties among them. Which nodes
-#' count as alters is `direction`: anyone ego is tied to in either direction
+#' count as alters is `ties`: anyone ego is tied to in either direction
 #' (the default), only those ego sends ties to, or only those ego receives them
 #' from. The data are dichotomized at > 0, as UCINET does.
 #'
@@ -65,24 +65,24 @@
 #'
 #' @section UCINET equivalent:
 #' Network | Ego Networks | Egonet Basic Measures. The combo box *Ego network
-#' type* is `direction`.
+#' type* is `ties`.
 #'
 #' @param net A network (any accepted form). 1-mode.
 #' @param relation Which relation of a multi-relation dataset, by name or
 #'   position. Defaults to the first.
-#' @param direction `"undirected"` (UCINET's default, UNDIRECTED), `"out"`
+#' @param ties `"any"` (UCINET's default, UNDIRECTED), `"out"`
 #'   (OUT-NEIGHBORHOOD) or `"in"` (IN-NEIGHBORHOOD).
 #' @return An object of class `c("xegonet", "xucinet_output")`. `$nodes` has
 #'   one row per ego in original node order and the seventeen columns above.
 #' @seealso [xstructuralholes()] for effective size and constraint.
 #' @examples
 #' xegonet(campnet)
-#' xegonet(campnet, direction = "out")
+#' xegonet(campnet, ties = "out")
 #' @export
 xegonet <- function(net, relation = NULL,
-                    direction = c("undirected", "out", "in")) {
+                    ties = c("any", "out", "in")) {
   net <- xnet(net, substitute(net))
-  direction <- match_direction(direction, c("undirected", "out", "in"), "xegonet()")
+  ties <- match_ties(ties, c("any", "out", "in"), "xegonet()")
   rel <- ego_relation(net, relation, "xegonet()")
   m <- rel$m
   assumptions <- rel$note
@@ -107,10 +107,10 @@ xegonet <- function(net, relation = NULL,
 
   for (i in seq_len(n)) {
     others <- setdiff(seq_len(n), i)
-    alters <- switch(direction,
+    alters <- switch(ties,
                      out = others[b[i, others] > 0],
                      `in` = others[b[others, i] > 0],
-                     undirected = others[b[i, others] > 0 | b[others, i] > 0])
+                     any = others[b[i, others] > 0 | b[others, i] > 0])
     x[i, ] <- egonet_row(b, i, alters)
   }
 
@@ -119,8 +119,8 @@ xegonet <- function(net, relation = NULL,
     nodes = data.frame(as.data.frame(x, check.names = FALSE),
                        Symmetric = symmetric, check.names = FALSE),
     assumptions = assumptions,
-    fields = c("Ego network type:" = toupper(switch(direction,
-                                                   undirected = "undirected",
+    fields = c("Ego network type:" = toupper(switch(ties,
+                                                   any = "undirected",
                                                    out = "out-neighborhood",
                                                    `in` = "in-neighborhood"))),
     nodes_title = "Density Measures",

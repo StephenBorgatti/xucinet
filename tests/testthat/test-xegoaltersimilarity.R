@@ -44,11 +44,11 @@ test_that("an ego with no ties has every measure missing", {
   expect_equal(r[["Attribute"]], 1)
 })
 
-test_that("out-ties by default; direction changes the rows", {
+test_that("out-ties by default; ties changes the rows", {
   expect_true(is.na(xegoaltersimilarity(six(), groups(),
                                         type = "categorical")$nodes["b", "H"]))
   expect_equal(xegoaltersimilarity(six(), groups(), type = "categorical",
-                                   direction = "in")$nodes["b", "H"], 1)
+                                   ties = "in")$nodes["b", "H"], 1)
 })
 
 test_that("valued data are dichotomized", {

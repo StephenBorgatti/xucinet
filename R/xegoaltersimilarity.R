@@ -51,13 +51,13 @@
 #'
 #' @section UCINET equivalent:
 #' Network | Ego Networks | Ego-Alter Similarity | Categorical, and ... |
-#' Continuous. *Definition of Ego Network* is `direction`; the continuous
+#' Continuous. *Definition of Ego Network* is `ties`; the continuous
 #' dialog's *Measures* checklist is `method` and *Attribute Normalization* is
 #' `normalize`.
 #'
 #' @inheritParams xaltercomposition
-#' @param direction Which ties are ego's: `"out"` (the default, as in UCINET),
-#'   `"undirected"` (a tie in either direction), `"in"` or `"reciprocated"`.
+#' @param ties Which ties are ego's: `"out"` (the default, as in UCINET),
+#'   `"any"` (a tie in either direction), `"in"` or `"reciprocated"`.
 #' @param method Continuous only: which measures to print, one or more of
 #'   `"negabsdiff"` (the default), `"zegers"`, `"minovermax"`, `"absdiff"`,
 #'   `"sqdiff"`, `"product"`. All six are always computed.
@@ -73,14 +73,14 @@
 #' xegoaltersimilarity(hightech, "Age", data = hightech_attr)
 #' @export
 xegoaltersimilarity <- function(net, attribute, type = NULL, relation = NULL,
-                                direction = c("out", "undirected", "in",
+                                ties = c("out", "any", "in",
                                               "reciprocated"),
                                 method = "negabsdiff",
                                 normalize = c("none", "additive", "ratio",
                                               "interval"),
                                 data = NULL) {
   net <- xnet(net, substitute(net))
-  direction <- match_direction(direction, c("out", "undirected", "in",
+  ties <- match_ties(ties, c("out", "any", "in",
                                             "reciprocated"),
                                "xegoaltersimilarity()")
   normalize <- match.arg(normalize)
@@ -91,10 +91,10 @@ xegoaltersimilarity <- function(net, attribute, type = NULL, relation = NULL,
                        "xegoaltersimilarity()")
   kind <- attribute_type(att$values, type, "xegoaltersimilarity()")
   assumptions <- c(rel$note, kind$note)
-  x <- ego_rows(m, direction)
-  dir_label <- c(undirected = "Both incoming and outgoing ties",
+  x <- ego_rows(m, ties)
+  dir_label <- c(any = "Both incoming and outgoing ties",
                  out = "Outgoing ties only", `in` = "Incoming ties only",
-                 reciprocated = "Reciprocal ties only")[[direction]]
+                 reciprocated = "Reciprocal ties only")[[ties]]
 
   if (kind$type == "categorical") {
     nodes <- similarity_categorical(x, att$values, att$name)
