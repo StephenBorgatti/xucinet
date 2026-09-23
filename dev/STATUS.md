@@ -43,14 +43,18 @@ batch at the end.** Design questions for all remaining chapters are batched in
   factions, Girvan-Newman and Louvain are native ports; fast greedy and label propagation
   run on igraph. `xlouvain()` fixes UCINET issue 26 as Steve decided, and refuses 2-mode
   input until open question 4 (issue #18). Goldens named in `inst/goldens/subgroups/`.
-- Chapters 7, 12, 13, 14 not started. `dev/COVERAGE.md` (23 Sep): 14 done, 48 coded with
-  goldens pending, 21 not started, 3 dropped (Walktrap and QuickClus now counted as
-  dropped). Remaining coding order: 12, 13, 14, 7.
+- Chapter 12 (equivalence) mostly done 23 Sep, issue #23: `xstructuralequivalence`,
+  `xblockmodel`, `xcoreperiphery` (categorical and continuous), `xrege`. Waiting on Steve:
+  `xblockoptimize` (issue #24, open question 6), 2-mode core/periphery (issue #25, open
+  question 7), the profile-similarity diagonal default (open question 8, T13). Goldens
+  named in `inst/goldens/equivalence/`.
+- Chapters 7, 13, 14 not started. `dev/COVERAGE.md` (23 Sep): 15 done, 55 coded with
+  goldens pending, 15 not started, 3 dropped. Remaining coding order: 13, 14, 7.
 - `inst/extdata/crosswalk-routines.csv` was regenerated from the rebuilt crosswalk on
-  23 Sep; its chapter 8 and chapter 11 rows are edited by hand to the signatures the
-  package has, because the master `crosswalk.py` does not have them yet (issue #15 for
-  chapter 8; chapter 11 is open question 5). Re-running `data-raw/make-crosswalk.R` before
-  the master is updated will revert them.
+  23 Sep; its chapter 8, 11 and 12 rows are edited by hand to the package's signatures.
+  `crosswalk.py` now has the chapter 8 and 12 signatures too (asnr2e, 23 Sep) but still
+  the old chapter 11 ones (open question 5), and the xlsx has not been rebuilt since, so
+  re-running `data-raw/make-crosswalk.R` now would revert rows.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
@@ -62,6 +66,26 @@ batch at the end.** Design questions for all remaining chapters are batched in
 
 ## Done this session (23 Sep 2026, Claude Code)
 
+- **Chapter 12 (issue #23; 144c4fe, 6a77f25).** `xstructuralequivalence()` (Xse.pas,
+  ug2sim `sesim2`): every relation stacked, five diagonal treatments, seven measures,
+  dialog defaults (Euclidean, Reciprocal1, transpose). The prompt asked to add WPGMA to
+  `xhclust()`; UCINET's "weighted average" is size-weighted, i.e. UPGMA, already
+  `"average"`, so nothing was added. The book's Sampson numbers (Matrix 12.3) come from
+  Reciprocal2, not the default: T13. `xblockmodel()`: the report of Block - Aggregate by
+  Partitions (blocked matrix ported from `blockdisplay`, autocorrelation) plus an image
+  matrix (ledger 34). `xcoreperiphery()`: categorical (`utcpcat`) and continuous (MINRES,
+  concentration) in one function, both always fitted; Baker's journals reproduce Figure
+  12.10 and Table 12.2 exactly; UCINET issue 29 (off-diagonal blocks lose cells when a
+  density is set), ledger 35. `xrege()` (`sStdrege`), checked against a literal
+  translation; UCINET's REGE is 1-mode only and refuses to run in 64-bit builds; ledger 36.
+  Units vendored; golden batch `inst/goldens/equivalence/`.
+- **Issues #21, #22 (400c341, aa72176).** `xcommunities(net, ...)` as a node-by-method
+  membership table; the negative-tie aliases; `xinverseweighteddegree()` (UCINET issue 28,
+  ledger 33); `direction` renamed `ties` in the ego routines. The alias generator
+  (`data-raw/make-aliases.R`) now supports hand-written wrappers
+  (`R/aliases-1e-special.R`).
+- asnr2e: everything committed and pushed (crosswalk, prompts, STATUS, plan, CLAUDE.md,
+  T12, T13, the chapter 12 and `xcommunities` signatures).
 - **Next 0, Steve's later 23 Sep answers (issue #20, 623240d).** Level of analysis:
   `xreciprocity()` whole-network only, its node table the new `xegoreciprocity()` (Steve:
   "add only the Symmetric column" to `xegonet()`, which now has seventeen columns);
@@ -142,26 +166,18 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. Done 23 Sep (Claude Code): Steve's crosswalk annotations (issue #21, 400c341):
-   `xcommunities(net, ...)` runs all five methods and returns a node-by-method
-   membership table (columns `Louvain`, `FastGreedy`, `GirvanNewman`, `LabelProp`,
-   `Factions`); `xNegativeDegreeCentrality` withdrawn; `xNegativeWeightedCentrality` runs
-   `xpncentrality()` on the negated matrix. `xcoreperiphery` as one function waits for
-   chapter 12. **Cowork: rebuild the crosswalk xlsx** (`build_xlsx.py`); `crosswalk.py`
-   has the new `xcommunities` signature (asnr2e 3df45ec) but there is no Python here.
-1. Done 23 Sep (Claude Code, issue #22): `xinverseweighteddegree()` with UCINET issue 28
-   corrected (ledger 33; golden step in `centrality/make_goldens_3.txt`, part B), and
-   `direction` renamed `ties` (`"undirected"` now `"any"`) in the six ego-network
-   routines; the package CSV matches `crosswalk.py`.
-
-2. Claude Code runs the remaining chapter prompts in order: ch12, ch13, ch14, ch07
+0. **Cowork:** rebuild the crosswalk xlsx (`build_xlsx.py`): `crosswalk.py` has new
+   signatures for `xcommunities` and the chapter 12 routines that the xlsx does not.
+1. **Chapter 12 leftovers, once Steve answers:** `xblockoptimize` (open question 6,
+   issue #24), 2-mode core/periphery (open question 7, issue #25), the profile-similarity
+   diagonal default (open question 8, T13).
+2. Claude Code runs the remaining chapter prompts in order: ch13, ch14, ch07
    (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after `prompt-conventions.md`).
-   Each is one session and ends with `dev/COVERAGE.md` regenerated. Chapter 12 has
-   answers 12.1-12.4 in the table, two of them questions back to Claude Code (12.2, 12.3).
-   **2-mode Louvain:** still waits for open question 4 (issue #18) before the 2-mode
-   branch of `xlouvain()` is written; it may land with chapter 13.
-3. Golden tests for chapters 5, 6, 8, 10 and 11 stay skipped; the fixtures named in
-   `inst/goldens/{transform,multivariate,ego,cohesion,subgroups}/README.md` join the
+   Each is one session and ends with `dev/COVERAGE.md` regenerated. **2-mode:** Louvain
+   (open question 4, #18) and core/periphery (open question 7, #25) both wait for Steve and
+   may land with chapter 13.
+3. Golden tests for chapters 5, 6, 8, 10, 11 and 12 stay skipped; the fixtures named in
+   `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
 4. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`) when Steve has a free hour with
    UCINET; `Config/ucinet/reference` bumps then.
@@ -249,6 +265,20 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   same sum by a star's; the test suite checks that identity on our side. `xgirvannewman()`
   prints up to and including the first partition with at least `k` clusters, because that
   is where UCINET's loop stops.
+- 23 Sep 2026 (Claude Code, issue #23): UCINET's "weighted average" linkage is
+  size-weighted (`wtdavgcomp`, UPGMA), so the profile and REGE clusterings use
+  `xhclust(method = "average")` and no WPGMA method was added, contrary to the prompt.
+- 23 Sep 2026 (Claude Code, issue #23): `xstructuralequivalence()` defaults to UCINET's
+  current dialog (Euclidean, Reciprocal1, transpose), design answer 12.1 included; the
+  book's Matrix 12.3 is Reciprocal2 (open question 8). The ug2sim measures are ported
+  rather than taken from `xsimilarities()`, because the two units differ at the edges.
+- 23 Sep 2026 (Claude Code, issue #23): `xblockmodel()` reports the current Block -
+  Aggregate by Partitions routine, not the legacy Block, with an added image matrix.
+  `xcoreperiphery()` always fits both models (level-of-analysis rule); its random starts
+  use the Delphi generator under `seed`, though UCINET itself calls `randomize`.
+- 23 Sep 2026 (Claude Code, issue #21): `xcommunities()` has no `method` argument: it
+  always runs all five, as Steve's note describes a node-by-method matrix.
+
 
 ## Open questions for Steve
 
@@ -286,3 +316,16 @@ ones keep their numbers because other notes refer to them.)
    `xlabelpropagation(net, seed = NULL, relation = NULL)`; and the Walktrap row marked
    dropped. Book text: T10 (factions measures) and T11 (Louvain is deterministic) in
    `asnr2e/docs/text-changes.md`.
+6. **`xblockoptimize` (design 12.3, issue #24).** Steve asked whether it differs from
+   `xblockmodel` (yes: it searches for the partition, `xblockmodel` summarizes a given
+   one), how to implement it, and whether a package exists. Options: (a) a native port of
+   UCINET's optimization routine, as factions was (factions' tabu search runs a 200-node
+   network in 0.4 s in R); (b) the CRAN package blockmodeling, fast, but with criterion
+   functions that are not UCINET's. Recommendation (a).
+7. **2-mode core/periphery (design 12.4, 13.6; issue #25).** UCINET's 2-mode routine
+   (`x2mcatcp.pas`) is a genetic algorithm on the row-by-column correlation, not the dual
+   projection the design note and 13.6 describe. Options: port UCINET's, do dual
+   projection, or both. Same shape as open question 4.
+8. **Profile similarity's diagonal default (design 12.1; T13).** UCINET's dialog and the
+   answer to 12.1 give Reciprocal1; the book's Matrix 12.3 and its prose are Reciprocal2.
+   Keep Reciprocal1 and change the text, or default to Reciprocal2 against the dialog?
