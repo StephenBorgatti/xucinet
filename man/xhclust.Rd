@@ -33,7 +33,9 @@ is printed regardless.}
 An \code{xucinet_output} of subclass \code{xhclust}. \verb{$nodes} is the
 partition indicator matrix as a data frame, one column per distinct merge
 level, named as UCINET names them (\verb{1(8)206} is level 1, eight clusters,
-merge distance 206), plus \code{Cluster} when \code{k} is given. \verb{$summary} holds
+merge distance 206), plus \code{Cluster} when \code{k} is given. As in UCINET, which
+saves this matrix but does not print it, it is not part of the printed
+report. \verb{$summary} holds
 the cophenetic correlation and the number of levels. \verb{$matrices} holds
 \verb{Measures of cluster adequacy} (\code{Corr}, \code{Modularity}, \code{Silhouette} by
 level) and \verb{Cluster sizes} (proportion of items in each cluster, by

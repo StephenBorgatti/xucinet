@@ -13,7 +13,7 @@ xcentralization(
 \arguments{
 \item{net}{A network (any accepted form).}
 
-\item{measure}{\code{"degree"} (the default) or \code{"betweenness"}.}
+\item{measure}{\code{"degree"} (the default), \code{"betweenness"} or \code{"eigenvector"}.}
 
 \item{...}{Passed to the centrality routine, so its own options - \code{normalize}
 and the rest - still work.}
@@ -29,18 +29,20 @@ is from a star, where one node has everything.
 \details{
 This is deliberately not a computation. It calls the centrality routine and
 hands back the centralization that routine reports, so that the two can
-never disagree with each other (design question 10.5).
+never disagree with each other (design question 10.5). Degree
+centralization is a proportion; betweenness and eigenvector centralization
+are percentages, as UCINET reports each.
 
-\code{"closeness"} and \code{"eigenvector"} are not available yet. UCINET reports a
-centralization for both, but \code{\link[=xcloseness]{xcloseness()}} and \code{\link[=xeigenvector]{xeigenvector()}} do not, and
-the chapter 9 goldens hold neither figure, so there is nothing to check an
-implementation against. Both are open on the issue list.
+\code{"closeness"} is not available: the Closeness dialog that \code{\link[=xcloseness]{xcloseness()}}
+follows reports no centralization. Only UCINET's legacy closeness routine
+did.
 }
 \examples{
 xcentralization(campnet)
 xcentralization(campnet, measure = "betweenness")
+xcentralization(campnet, measure = "eigenvector")
 }
 \seealso{
-\code{\link[=xdegree]{xdegree()}} and \code{\link[=xbetweenness]{xbetweenness()}}, which report the same figures as
-part of their fuller output.
+\code{\link[=xdegree]{xdegree()}}, \code{\link[=xbetweenness]{xbetweenness()}} and \code{\link[=xeigenvector]{xeigenvector()}}, which report
+the same figures as part of their fuller output.
 }

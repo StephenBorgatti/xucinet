@@ -66,16 +66,17 @@ test_that("Yule's Q is the two-by-two of tie against sameness", {
   expect_equal(xhomophily(hetero4(), pair())$summary[["Yules Q"]], -1)
 })
 
-test_that("weighted changes only the mixing matrix, as calcwhomophily does", {
-  # `wt := net.cell[i,j]` is unconditional for the internal and external
-  # totals; treatvalued branches only when filling mrs.
-  a <- xhomophily(camp92, gender(), weighted = TRUE)
+test_that("weighted = FALSE dichotomizes before every measure (UCINET issue 21)", {
+  # UCINET's calcwhomophily applies binary treatment to the mixing matrix
+  # only; xucinet applies it everywhere, as the dialog says.
+  expect_differs_from_ucinet(21)
   b <- xhomophily(camp92, gender(), weighted = FALSE)
-  for (k in c("H", "h-star", "Corr", "Yules Q", "E-I Index")) {
-    expect_equal(a$summary[[k]], b$summary[[k]], info = k)
+  d <- xhomophily((as.matrix(camp92) > 0) * 1, gender())
+  for (k in names(d$summary)) {
+    expect_equal(b$summary[[k]], d$summary[[k]], info = k)
   }
-  # but the mixing matrix, and so assortativity, do change
-  expect_false(isTRUE(all.equal(a$matrices$Mixing, b$matrices$Mixing)))
+  a <- xhomophily(camp92, gender(), weighted = TRUE)
+  expect_false(isTRUE(all.equal(a$summary[["Corr"]], b$summary[["Corr"]])))
 })
 
 test_that("the mixing matrix totals the ties", {

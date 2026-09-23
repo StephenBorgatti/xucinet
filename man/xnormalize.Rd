@@ -7,7 +7,8 @@
 xnormalize(
   net,
   by = c("cols", "rows", "matrix", "both"),
-  method = c("sum", "mean", "sd", "zscore", "euclidean", "max", "sqrtsum"),
+  method = c("sum", "mean", "sd", "zscore", "euclidean", "max", "sqrtsum",
+    "correspondence"),
   constant = 0,
   diagonal = TRUE,
   tolerance = 0.001,
@@ -20,38 +21,44 @@ xnormalize(
 \item{by}{\code{"cols"} (UCINET's default), \code{"rows"}, \code{"matrix"} or \code{"both"}.}
 
 \item{method}{The criterion: \code{"sum"} (the default, UCINET's Marginal:
-divide by the total), \code{"mean"}, \code{"sd"}, \code{"zscore"} (subtract the mean,
-then divide by the standard deviation), \code{"euclidean"}, \code{"max"} or
-\code{"sqrtsum"} (divide by the square root of the total). Standard deviations
-are the population form, as UCINET's estimator reports them.}
+divide by the total), \code{"mean"} (subtract the mean), \code{"sd"} (divide by the
+standard deviation), \code{"zscore"} (subtract the mean, then divide by the
+standard deviation), \code{"euclidean"} (divide by the root of the sum of
+squares), \code{"max"}, \code{"sqrtsum"} (UCINET's SQRT-Marginal: divide by the
+square root of the total), or \code{"correspondence"} (divide each cell by the
+square root of its row total times its column total, the same whatever
+\code{by} says). Standard deviations are the population form, as UCINET's
+estimator reports them.}
 
-\item{constant}{Added to every cell before normalising, as the dialog's
-"constant" field does. \code{0} by default.}
+\item{constant}{Replaces every zero cell before normalising, as the dialog's
+"Constant to replace zeros with" does. \code{0}, the default, changes nothing.}
 
-\item{diagonal}{Include the diagonal in the statistic, and rescale it? Yes
-by default, as in the dialog. When \code{FALSE} the diagonal is set missing
-before normalising and put back afterwards. Forced on for 2-mode data.}
+\item{diagonal}{Include the diagonal? Yes by default, as in the dialog. When
+\code{FALSE} the diagonal is set missing, as UCINET does, and stays missing in
+the result. Forced on for 2-mode data.}
 
 \item{tolerance, maxit}{Convergence controls for \code{by = "both"}; UCINET's
 defaults are 0.001 and 100.}
 }
 \value{
 An \code{xucinet} object titled \verb{<name>-nrm}, with a \code{history} attribute;
-for \code{by = "both"} it records how many passes it took.
+for \code{by = "both"} it records how many rounds it took.
 }
 \description{
 UCINET: Transform | Normalize. Rescales the matrix so that every row, every
 column, or the matrix as a whole meets a chosen criterion.
 }
 \details{
-\code{by = "both"} alternates row and column passes until nothing moves by more
-than \code{tolerance} or \code{maxit} passes have been made, and warns if it stops at
-the limit. Alternating passes only have a fixed point when every non-zero
-cell lies on some perfect matching of rows to columns; when they do not,
-the iteration drifts rather than settling.
+\code{by = "both"} alternates row and column passes until every row and every
+column is within \code{tolerance} of its target or \code{maxit} rounds have been made,
+and warns if it stops at the limit. Alternating passes only have a fixed
+point when every non-zero cell lies on some perfect matching of rows to
+columns; when they do not, the iteration drifts rather than settling. For
+\code{method = "sum"} on non-square data the column target is \code{nrow/ncol} rather
+than 1, since both margins cannot otherwise sum to the same total.
 
-A row (or column, or matrix) whose divisor works out to zero is left alone
-rather than turned into \code{NaN}; \code{rowstoch} does the same.
+A row (or column, or matrix) whose divisor is not positive comes back
+missing, as in UCINET: its cells have no defined normalized value.
 }
 \examples{
 m <- matrix(c(0,3,1, 2,0,0, 5,1,0), 3, 3, byrow = TRUE,

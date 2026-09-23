@@ -130,6 +130,8 @@ dich_op_tag <- c(">" = "_GT_", ">=" = "_GE_", "==" = "_EQ_",
 #' @param otherwise Value written where it does not. `0` by default; `NA` is
 #'   allowed. UCINET calls this the "else" value, which cannot be an argument
 #'   name in R because `else` is reserved.
+#' @param elsevalue The same as `otherwise`, under a name closer to the
+#'   dialog's. Give one or the other, not both.
 #' @param density Target density, used when `method = "density"`. The cutoff
 #'   chosen is the most selective one, among the values present, whose density
 #'   is still at least this.
@@ -157,8 +159,17 @@ xdichotomize <- function(net, cutoff = 0,
                          op = c(">", ">=", "==", "<=", "<", "!="),
                          then = 1, otherwise = 0, density = NULL,
                          method = c("cutoff", "density", "maxcor"),
-                         diagonal = c("else", "zero", "missing", "then", "rule")) {
+                         diagonal = c("else", "zero", "missing", "then", "rule"),
+                         elsevalue = NULL) {
   net <- xnet(net, substitute(net))
+  # Two names for the dialog's "else value" (Steve, 23 Sep 2026).
+  if (!is.null(elsevalue)) {
+    if (!missing(otherwise)) {
+      stop("give otherwise = or elsevalue =, not both; they are the same ",
+           "argument.", call. = FALSE)
+    }
+    otherwise <- elsevalue
+  }
   op <- match.arg(op)
   diagonal <- match.arg(diagonal)
   # Giving density = is enough to mean it, without naming the method too.
@@ -449,44 +460,74 @@ symmetrize_note <- function(m, y) {
 
 # ---- xnormalize -------------------------------------------------------------
 #
-# Xstdize.pas with dialog Normdlg.pas/.dfm, and G2Tools/uNormalize.pas. The
-# dialog's dimension list is Matrix, Rows, Columns, Both with Columns the
-# default; the criterion list is Marginal (default), Mean, Std-Dev, Z-Score,
-# Euclidean, Maximum, SQRT-Marginal, Correspondence; a constant is added to
-# every cell first (default 0); "Both" iterates to a tolerance of 0.001 or
-# 100 iterations and warns if it does not settle; "Diagonal valid?" defaults
-# to Yes, and is forced on for non-square data.
+# Xstdize.pas (runnormalize, runrowcols with rcalc/ccalc/adjust, runmatrix),
+# with the dialog Normdlg.pas/.dfm; repository StephenBorgatti/ucinet at commit
+# c7b4956. Not G2Tools/uNormalize.pas, which an earlier version of this comment
+# named: that unit serves other routines, and its conventions differ.
+#
+# What the menu routine does, read from the source:
+#   - Dimension Matrix, Rows, Columns or Both; Columns is the default.
+#   - Criteria, each as "rescale so the statistic reaches its target":
+#       Marginal       sum -> 1          Euclidean  norm -> 1
+#       Mean           mean -> 0         Maximum    max -> 1
+#                      (x - mean: a shift, not a division)
+#       Std-Dev        sd -> 1           SQRT-Marginal  x / sqrt(sum)
+#       Z-Score        mean -> 0 and sd -> 1
+#       Correspondence x / sqrt(R_i * C_j), R and C the row and column totals
+#   - A row or column whose divisor is not positive gets missing cells
+#     (`if a.cell[k] > 0 then ... else x := bna`); the Matrix dimension
+#     tests `<> 0` for the sum and the maximum and `> 0` for the rest.
+#   - "Diagonal valid? No" sets the diagonal missing first, and it stays
+#     missing in the output. Forced to Yes for non-square data.
+#   - The constant *replaces* cells whose absolute value is below single
+#     precision ("Constant to replace zeros with"), before anything else.
+#   - Both: one column pass, then alternately test the rows (stop if every row
+#     statistic is within the tolerance of its target), adjust the rows, test
+#     the columns, adjust the columns; at most maxit rounds. For Marginal the
+#     column target is nr/nc rather than 1, which is what lets a non-square
+#     matrix have both margins met.
+#
+# Two places where UCINET's Matrix dimension skips a criterion - Correspondence
+# (UCINET issue 23) and SQRT-Marginal, which runmatrix has no branch for either
+# - xucinet does the arithmetic instead of returning the input unchanged. For
+# Correspondence the result is the same for every `by`, as runrowcols makes it.
 
 #' Normalize a network's rows, columns or cells
 #'
 #' UCINET: Transform | Normalize. Rescales the matrix so that every row, every
 #' column, or the matrix as a whole meets a chosen criterion.
 #'
-#' `by = "both"` alternates row and column passes until nothing moves by more
-#' than `tolerance` or `maxit` passes have been made, and warns if it stops at
-#' the limit. Alternating passes only have a fixed point when every non-zero
-#' cell lies on some perfect matching of rows to columns; when they do not,
-#' the iteration drifts rather than settling.
+#' `by = "both"` alternates row and column passes until every row and every
+#' column is within `tolerance` of its target or `maxit` rounds have been made,
+#' and warns if it stops at the limit. Alternating passes only have a fixed
+#' point when every non-zero cell lies on some perfect matching of rows to
+#' columns; when they do not, the iteration drifts rather than settling. For
+#' `method = "sum"` on non-square data the column target is `nrow/ncol` rather
+#' than 1, since both margins cannot otherwise sum to the same total.
 #'
-#' A row (or column, or matrix) whose divisor works out to zero is left alone
-#' rather than turned into `NaN`; `rowstoch` does the same.
+#' A row (or column, or matrix) whose divisor is not positive comes back
+#' missing, as in UCINET: its cells have no defined normalized value.
 #'
 #' @param net A network (any accepted form).
 #' @param by `"cols"` (UCINET's default), `"rows"`, `"matrix"` or `"both"`.
 #' @param method The criterion: `"sum"` (the default, UCINET's Marginal:
-#'   divide by the total), `"mean"`, `"sd"`, `"zscore"` (subtract the mean,
-#'   then divide by the standard deviation), `"euclidean"`, `"max"` or
-#'   `"sqrtsum"` (divide by the square root of the total). Standard deviations
-#'   are the population form, as UCINET's estimator reports them.
-#' @param constant Added to every cell before normalising, as the dialog's
-#'   "constant" field does. `0` by default.
-#' @param diagonal Include the diagonal in the statistic, and rescale it? Yes
-#'   by default, as in the dialog. When `FALSE` the diagonal is set missing
-#'   before normalising and put back afterwards. Forced on for 2-mode data.
+#'   divide by the total), `"mean"` (subtract the mean), `"sd"` (divide by the
+#'   standard deviation), `"zscore"` (subtract the mean, then divide by the
+#'   standard deviation), `"euclidean"` (divide by the root of the sum of
+#'   squares), `"max"`, `"sqrtsum"` (UCINET's SQRT-Marginal: divide by the
+#'   square root of the total), or `"correspondence"` (divide each cell by the
+#'   square root of its row total times its column total, the same whatever
+#'   `by` says). Standard deviations are the population form, as UCINET's
+#'   estimator reports them.
+#' @param constant Replaces every zero cell before normalising, as the dialog's
+#'   "Constant to replace zeros with" does. `0`, the default, changes nothing.
+#' @param diagonal Include the diagonal? Yes by default, as in the dialog. When
+#'   `FALSE` the diagonal is set missing, as UCINET does, and stays missing in
+#'   the result. Forced on for 2-mode data.
 #' @param tolerance,maxit Convergence controls for `by = "both"`; UCINET's
 #'   defaults are 0.001 and 100.
 #' @return An `xucinet` object titled `<name>-nrm`, with a `history` attribute;
-#'   for `by = "both"` it records how many passes it took.
+#'   for `by = "both"` it records how many rounds it took.
 #' @seealso [xdichotomize()], [xsymmetrize()].
 #' @examples
 #' m <- matrix(c(0,3,1, 2,0,0, 5,1,0), 3, 3, byrow = TRUE,
@@ -496,98 +537,143 @@ symmetrize_note <- function(m, y) {
 #' @export
 xnormalize <- function(net, by = c("cols", "rows", "matrix", "both"),
                        method = c("sum", "mean", "sd", "zscore",
-                                  "euclidean", "max", "sqrtsum"),
+                                  "euclidean", "max", "sqrtsum",
+                                  "correspondence"),
                        constant = 0, diagonal = TRUE,
                        tolerance = 0.001, maxit = 100) {
   net <- xnet(net, substitute(net))
   by <- match.arg(by)
   method <- match.arg(method)
-  # rowstoch: `if x.Is2mode then diagok := true`.
-  if (identical(net$mode, "2-mode")) diagonal <- TRUE
 
   passes <- integer(0)
   out <- map_relations(net, function(m) {
-    res <- normalize_matrix(m + constant, by, method, diagonal, tolerance, maxit)
+    # `if m.nr <> m.nc then diagok := true`
+    diag_ok <- diagonal || nrow(m) != ncol(m)
+    if (!diag_ok) diag(m) <- NA_real_
+    if (constant != 0) {
+      near0 <- !is.na(m) & abs(m) < 1e-7
+      m[near0] <- constant
+    }
+    res <- normalize_matrix(m, by, method, diag_ok, tolerance, maxit)
     passes <<- c(passes, res$passes)
     res$m
   })
   entry <- paste0("normalized (", by, ", ", method, ")")
-  if (identical(by, "both")) {
+  if (identical(by, "both") && method != "correspondence") {
     entry <- paste0(entry, ", ", paste(passes, collapse = ", "), " passes")
   }
   transformed(out, "-nrm", entry)
 }
 
-# One pass of the criterion over a vector. A zero divisor leaves it alone.
-normalize_vector <- function(v, method) {
+# rcalc/ccalc: the statistic of one row or column, over its valid cells, as
+# tunivariate reports it (population sd; nrm is the root of the sum of
+# squares). Missing when the vector has no valid cells.
+normalize_stat <- function(v, method) {
   obs <- v[!is.na(v)]
-  if (!length(obs)) return(v)
+  if (!length(obs)) return(c(NA_real_, NA_real_))
   mu <- mean(obs)
   sdev <- sqrt(mean((obs - mu)^2))
-  div <- switch(method,
-                sum       = sum(obs),
-                mean      = mu,
-                sd        = sdev,
-                zscore    = sdev,
-                euclidean = sqrt(sum(obs^2)),
-                max       = max(obs),
-                sqrtsum   = sqrt(sum(obs)))
-  if (is.na(div) || isTRUE(all.equal(div, 0))) return(v)
-  if (identical(method, "zscore")) (v - mu) / div else v / div
+  switch(method,
+         sum = , correspondence = c(sum(obs), NA),
+         mean = c(mu, NA),
+         sd = c(sdev, NA),
+         zscore = c(mu, sdev),
+         euclidean = c(sqrt(sum(obs^2)), NA),
+         max = c(max(obs), NA),
+         sqrtsum = c(sqrt(sum(obs)), NA))
 }
 
-normalize_matrix <- function(m, by, method, diagonal, tolerance, maxit) {
-  square <- nrow(m) == ncol(m)
-  # "Diagonal valid? No" sets the diagonal missing before normalising; it is
-  # held back and restored so the original values survive.
-  held <- if (!diagonal && square) diag(m) else NULL
-
-  apply_rows <- function(x) {
-    if (!is.null(held)) diag(x) <- NA_real_
-    for (i in seq_len(nrow(x))) x[i, ] <- normalize_vector(x[i, ], method)
-    if (!is.null(held)) diag(x) <- held
-    x
+# adjust: move one vector's statistic to its target. Missing cells stay
+# missing; a divisor that is not positive makes the vector missing.
+normalize_adjust <- function(v, method, target) {
+  a <- normalize_stat(v, method)
+  ok <- !is.na(v)
+  if (method == "mean") {
+    v[ok] <- v[ok] + target - a[1]
+  } else if (method == "zscore") {
+    v[ok] <- if (!is.na(a[2]) && a[2] > 0) (v[ok] - a[1]) / a[2] else NA_real_
+  } else {
+    v[ok] <- if (!is.na(a[1]) && a[1] > 0) v[ok] * target / a[1] else NA_real_
   }
-  apply_cols <- function(x) {
-    if (!is.null(held)) diag(x) <- NA_real_
-    for (j in seq_len(ncol(x))) x[, j] <- normalize_vector(x[, j], method)
-    if (!is.null(held)) diag(x) <- held
-    x
-  }
+  v
+}
 
+normalize_matrix <- function(m, by, method, diag_ok, tolerance, maxit) {
+  nr <- nrow(m); nc <- ncol(m)
+  # Cells the routine may touch: everything, or everything off the diagonal.
+  # With the diagonal excluded it is already missing, so this only matters to
+  # keep the statistic's denominators right.
   passes <- NA_integer_
+
+  if (method == "correspondence") {
+    rt <- apply(m, 1, function(v) sum(v, na.rm = TRUE))
+    ct <- apply(m, 2, function(v) sum(v, na.rm = TRUE))
+    for (i in which(rt > 0)) for (j in which(ct > 0)) {
+      m[i, j] <- m[i, j] / sqrt(rt[i] * ct[j])
+    }
+    return(list(m = m, passes = passes))
+  }
+
+  row_target <- if (method == "mean" || method == "zscore") 0 else 1
+  col_target <- if (method == "sum" && by == "both") nr / nc else row_target
+
+  adjust_rows <- function(x) {
+    for (i in seq_len(nr)) x[i, ] <- normalize_adjust(x[i, ], method, row_target)
+    x
+  }
+  adjust_cols <- function(x) {
+    for (j in seq_len(nc)) x[, j] <- normalize_adjust(x[, j], method, col_target)
+    x
+  }
+  # rowsok / colsok: every statistic within the tolerance of its target. For
+  # the z-score both the mean (target 0) and the sd (target 1) are tested.
+  within <- function(x, margin, target) {
+    stats <- apply(x, margin, normalize_stat, method = method)
+    want <- if (method == "zscore") c(0, 1) else c(target, NA)
+    d1 <- abs(stats[1, ] - want[1])
+    d2 <- if (method == "zscore") abs(stats[2, ] - want[2]) else 0
+    all(c(d1, d2)[!is.na(c(d1, d2))] <= tolerance)
+  }
+
   out <- switch(
     by,
-    rows   = apply_rows(m),
-    cols   = apply_cols(m),
+    rows = adjust_rows(m),
+    cols = adjust_cols(m),
     matrix = {
       x <- m
-      if (!is.null(held)) diag(x) <- NA_real_
-      x[] <- normalize_vector(as.vector(x), method)
-      if (!is.null(held)) diag(x) <- held
+      ok <- !is.na(x)
+      obs <- x[ok]
+      if (length(obs)) {
+        mu <- mean(obs)
+        sdev <- sqrt(mean((obs - mu)^2))
+        tot <- sum(obs)
+        # runmatrix: the sum and the maximum test `<> 0`, the others `> 0`.
+        x[ok] <- switch(method,
+          sum = if (tot != 0) obs / tot else NA_real_,
+          mean = obs - mu,
+          sd = if (sdev > 0) obs / sdev else NA_real_,
+          zscore = if (sdev > 0) (obs - mu) / sdev else NA_real_,
+          euclidean = if (sqrt(sum(obs^2)) > 0) obs / sqrt(sum(obs^2)) else NA_real_,
+          max = if (max(obs) != 0) obs / max(obs) else NA_real_,
+          sqrtsum = if (tot > 0) obs / sqrt(tot) else NA_real_)
+      }
       x
     },
     both = {
-      x <- m
-      passes <- 0L
+      x <- adjust_cols(m)
       settled <- FALSE
-      off <- NA_real_
+      passes <- 0L
       for (it in seq_len(maxit)) {
-        x <- apply_cols(apply_rows(x))
         passes <- it
-        # UCINET iterates "until every margin is within the tolerance", not
-        # until the matrix stops moving. A margin is at its target exactly
-        # when normalising that dimension again would change nothing, so the
-        # test is how far one more pass of each would move it.
-        off <- max(max(abs(apply_rows(x) - x), na.rm = TRUE),
-                   max(abs(apply_cols(x) - x), na.rm = TRUE))
-        if (is.finite(off) && off < tolerance) { settled <- TRUE; break }
+        if (within(x, 1, row_target)) { settled <- TRUE; break }
+        x <- adjust_rows(x)
+        if (within(x, 2, col_target)) { settled <- TRUE; break }
+        x <- adjust_cols(x)
       }
       if (!settled) {
         warning("xnormalize(by = \"both\") stopped at the iteration limit (",
-                maxit, ") with a margin still ", format(off),
-                " away from its target, above tolerance = ",
-                format(tolerance), ".\n",
+                maxit, ") with a margin still more than tolerance = ",
+                format(tolerance), " away from its target.\n",
                 "  Rows and columns cannot both be normalized for this ",
                 "matrix, or not to this tolerance.\n",
                 "  Raise maxit =, loosen tolerance =, or normalize one ",

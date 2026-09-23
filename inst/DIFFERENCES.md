@@ -483,3 +483,36 @@ ego's neighbourhood, which falls with degree almost mechanically and is
 undefined below two neighbours, so a column of it invites a ranking that
 mostly reflects degree. For binary data the same number is ego-network density
 with ego removed, which is available from the ego-network routines.
+
+## 23. Normalize: Correspondence and SQRT-Marginal under Dimension = Matrix
+
+**Status:** UCINET fix pending. `dev/UCINET-ISSUES.md` issue 23, raised
+23 September 2026.
+
+`xnormalize(method = "correspondence")` divides each cell by the square root of
+its row total times its column total, and gives the same result whatever `by`
+says, which is what UCINET's `runrowcols` does for Rows, Columns and Both. Under
+Dimension = Matrix UCINET's `runmatrix` has no branch for it and returns the
+input unchanged. The same is true of SQRT-Marginal: `xnormalize(by = "matrix",
+method = "sqrtsum")` divides by the square root of the matrix total, and UCINET
+changes nothing.
+
+## 24. Homophily: binary treatment applies to every measure
+
+**Status:** UCINET fix pending. `dev/UCINET-ISSUES.md` issue 21 (Steve,
+23 September 2026).
+
+`xhomophily(weighted = FALSE)` dichotomizes at > 0 before computing anything.
+UCINET's Whole Networks | Homophily | Categorical applies its *Treat data as
+binary* choice to the mixing matrix only, so there `H`, `h-star`, `Corr`,
+`Yules Q` and the `E-I Index` are the same whichever treatment is chosen. With
+the default, valued treatment, the two agree.
+
+## 25. Mixing tables skip missing cells
+
+**Status:** UCINET fix pending. `dev/UCINET-ISSUES.md` issue 25, raised
+23 September 2026.
+
+`xmixing()` leaves missing cells out of every table. UCINET's Mixing Tables
+tests `val <> na` where a missing cell is stored as a larger number, so each
+missing cell is added in as 1e38. On complete data the two agree.

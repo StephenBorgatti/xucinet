@@ -118,6 +118,14 @@ test_that("the text cluster diagram is UCINET's, line for line", {
   expect_true(any(grepl("^Type of Data: +Dissimilarities", out)))
 })
 
+test_that("the partition matrix is kept but not printed, as in UCINET", {
+  res <- xhclust(cities, type = "d", method = "single", plot = FALSE)
+  out <- capture.output(print(res))
+  expect_false(any(grepl("Partition indicator matrix", out)))
+  expect_true(any(grepl("Measures of cluster adequacy", out)))
+  expect_equal(nrow(res$nodes), 9L)
+})
+
 test_that("levels below 1 print with four decimals, as getdd() decides", {
   m <- as.matrix(campnet); m <- (m + t(m)) / 2
   res <- xhclust(m, type = "s", plot = FALSE)

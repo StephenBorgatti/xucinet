@@ -36,12 +36,11 @@
 #' @param directed `NULL` (detect), `TRUE`, or `FALSE` to ignore the direction
 #'   of ties, which is the dialog's checkbox.
 #' @param weighted Treat the data as valued? `TRUE`, as the dialog does
-#'   (`TypeOfData.ItemIndex = 1`). This affects **only** the mixing matrix,
-#'   and through it `Assort`: `calcwhomophily` takes the raw cell value for
-#'   the internal and external totals whatever this says, and branches on it
-#'   only when filling the mixing matrix. So `H`, `h-star`, `Corr`,
-#'   `Yules Q` and `E-I Index` are the same either way. That is UCINET's
-#'   behaviour, not a simplification here.
+#'   (`TypeOfData.ItemIndex = 1`). `FALSE` dichotomizes at > 0 before every
+#'   measure. UCINET's `calcwhomophily` applies the choice to the mixing
+#'   matrix only, leaving `H`, `h-star`, `Corr`, `Yules Q` and `E-I Index`
+#'   on the raw values either way; that is UCINET issue 21, fix pending, and
+#'   xucinet does what the dialog says.
 #' @param diagonal Allow reflexive ties? `FALSE` by default.
 #' @param data A data frame to look `attribute` up in.
 #' @return An object of class `c("xhomophily", "xucinet_output")`, with the
@@ -75,7 +74,12 @@ xhomophily <- function(net, attribute, directed = NULL, weighted = TRUE,
     assumptions <- c(assumptions, "Direction of ties ignored.")
   }
   if (!diagonal) assumptions <- c(assumptions, "Reflexive ties not counted.")
-  if (!weighted) assumptions <- c(assumptions, "Data treated as binary.")
+  if (!weighted) {
+    # UCINET issue 21: binary treatment applies to every measure, not only to
+    # the mixing matrix as in calcwhomophily.
+    m <- ifelse(is.na(m), NA_real_, (m > 0) * 1)
+    assumptions <- c(assumptions, "Data treated as binary.")
+  }
 
   undirected <- isFALSE(directed) || isTRUE(isSymmetric(unname(m)))
   hom <- homophily_measures(m, groups, weighted, diagonal, undirected)

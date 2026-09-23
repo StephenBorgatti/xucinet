@@ -606,10 +606,8 @@ filling the mixing matrix `mrs`. So `H`, `h-star`, `Corr`, `Yules Q` and the
 `E-I Index` are identical for binary and valued treatment; only the mixing
 matrix changes. The dialog reads as though the choice applies to everything.
 
-**What xucinet does:** at present it reproduces UCINET (`xhomophily(weighted =)`
-affects the mixing matrix only). Under the lifecycle it is to implement the
-correct behaviour, with `weighted = FALSE` dichotomizing before every measure,
-and a ledger entry marked *UCINET fix pending*.
+**What xucinet does:** since 23 September 2026 (issue #16), `xhomophily(weighted
+= FALSE)` dichotomizes before every measure. Ledger entry 24.
 
 **Fix:** use the dichotomized value in the internal and external totals when
 the data are treated as binary.
@@ -652,10 +650,16 @@ handles Dimension = Matrix, has no branch for method 8, so every cell passes
 through unchanged and the output equals the input without a warning.
 
 **What xucinet does:** `xnormalize(method = "correspondence")` gives the same
-result for every `by`. Ledger entry to be written with the code.
+result for every `by`. Ledger entry 23.
+
+**The same gap for SQRT-Marginal** (method 7), found 23 September 2026 by
+Claude Code porting the fix: `runmatrix` has branches for methods 1 to 6 only,
+so SQRT-Marginal under Dimension = Matrix also returns the input unchanged.
+`xnormalize(by = "matrix", method = "sqrtsum")` divides by the square root of
+the matrix total, as the Rows and Columns dimensions do for their margins.
 
 **Fix:** route method 8 to `runrowcols` for every dimension, or refuse
-Dimension = Matrix for it.
+Dimension = Matrix for it; add a method 7 branch to `runmatrix`.
 
 ---
 
@@ -668,6 +672,29 @@ Menu routines (the `uc_*.pas` forms) can only be run through their dialogs, so
 golden fixtures for them are made by hand. SPEC section 5, item 0 describes the
 console target (`ucinetcl`) that would run them from a script. Until it exists,
 each goldens batch is a manual Windows session.
+
+---
+
+## 25. Mixing Tables sums missing cells as 1e38
+
+**bug** · **open — fix pending** · found 23 September 2026 (Claude Code, issue #16)
+
+Every loop in `G2Tools/unetmixingmodels.pas` guards a cell with
+
+```pascal
+val := AdjMatrix.cell[i,j];
+if val <> ucommon.na then ...
+```
+
+but a missing cell is stored as `bna = 1e38`, and `na = 1e37` is the threshold
+(`tsmat.isna` is `cell >= na`). The test is never false for a missing cell, so
+each one is added into the observed table and the expected-value totals as
+1e38. A network with a single missing cell gives a Mixing Tables report of
+astronomically large numbers.
+
+**What xucinet does:** `xmixing()` skips missing cells. Ledger entry 25.
+
+**Fix:** `if val < ucommon.na`, or `if not AdjMatrix.isna(i,j)`.
 
 ---
 

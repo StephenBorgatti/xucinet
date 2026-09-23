@@ -59,7 +59,9 @@
 #' @return An `xucinet_output` of subclass `xhclust`. `$nodes` is the
 #'   partition indicator matrix as a data frame, one column per distinct merge
 #'   level, named as UCINET names them (`1(8)206` is level 1, eight clusters,
-#'   merge distance 206), plus `Cluster` when `k` is given. `$summary` holds
+#'   merge distance 206), plus `Cluster` when `k` is given. As in UCINET, which
+#'   saves this matrix but does not print it, it is not part of the printed
+#'   report. `$summary` holds
 #'   the cophenetic correlation and the number of levels. `$matrices` holds
 #'   `Measures of cluster adequacy` (`Corr`, `Modularity`, `Silhouette` by
 #'   level) and `Cluster sizes` (proportion of items in each cluster, by
@@ -163,6 +165,8 @@ xhclust <- function(x, type, method = c("average", "single", "complete"),
     fields = c("Method:" = method_label, "Type of Data:" = type_label(type)),
     preamble = diagram,
     nodes_title = "Partition indicator matrix",
+    # UCINET saves the partition matrix and does not print it (Steve, 23 Sep).
+    print_nodes = FALSE,
     stats_block = FALSE,
     subclass = "xhclust", call = match.call())
   out$hclust <- hc

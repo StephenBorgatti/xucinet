@@ -196,6 +196,10 @@ format_number <- function(v, digits = 3) format_values(v, digits)
 #' @param preamble Optional character vector of preformatted lines printed after
 #'   the header block and before any table, for output that is not a matrix,
 #'   such as the text cluster diagram of Johnson's clustering.
+#' @param print_nodes Print the node table? `TRUE` by default. `FALSE` keeps it
+#'   in the object without printing it, for a routine whose UCINET log does not
+#'   show a table it saves, such as the partition matrix of Johnson's
+#'   clustering.
 #' @return An object of class `xucinet_output`.
 #' @keywords internal
 #' @export
@@ -204,12 +208,13 @@ new_xucinet_output <- function(routine, net, nodes = NULL, summary = NULL,
                                subclass = NULL, call = sys.call(-1),
                                nodes_title = NULL, summary_title = NULL,
                                stats_block = FALSE, fields = NULL,
-                               preamble = NULL) {
+                               preamble = NULL, print_nodes = TRUE) {
   structure(
     list(routine = routine, dataset = net$title, nodes = nodes, summary = summary,
          matrices = matrices, assumptions = assumptions, call = call,
          nodes_title = nodes_title, summary_title = summary_title,
-         stats_block = stats_block, fields = fields, preamble = preamble),
+         stats_block = stats_block, fields = fields, preamble = preamble,
+         print_nodes = print_nodes),
     class = c(subclass, "xucinet_output")
   )
 }
@@ -281,9 +286,13 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = NULL, ...) 
     cat("\n")
   }
 
-  if (is.null(x$nodes)) summary_block()
+  # A node table the routine keeps but UCINET does not print behaves, for
+  # printing, as if there were none.
+  show_nodes <- !is.null(x$nodes) && !isFALSE(x$print_nodes)
 
-  if (!is.null(x$nodes)) {
+  if (!show_nodes) summary_block()
+
+  if (show_nodes) {
     nodes <- x$nodes
     # The statistics describe the measure, not the view of it, so they are taken
     # from the full table before any sorting or subsetting (SPEC ch 9 decision 2).

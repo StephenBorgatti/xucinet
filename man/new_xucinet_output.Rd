@@ -17,7 +17,8 @@ new_xucinet_output(
   summary_title = NULL,
   stats_block = FALSE,
   fields = NULL,
-  preamble = NULL
+  preamble = NULL,
+  print_nodes = TRUE
 )
 }
 \arguments{
@@ -56,6 +57,11 @@ the same way as \verb{Input dataset:}.}
 \item{preamble}{Optional character vector of preformatted lines printed after
 the header block and before any table, for output that is not a matrix,
 such as the text cluster diagram of Johnson's clustering.}
+
+\item{print_nodes}{Print the node table? \code{TRUE} by default. \code{FALSE} keeps it
+in the object without printing it, for a routine whose UCINET log does not
+show a table it saves, such as the partition matrix of Johnson's
+clustering.}
 }
 \value{
 An object of class \code{xucinet_output}.

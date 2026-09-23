@@ -14,7 +14,9 @@ position. Defaults to the first.}
 }
 \value{
 An \code{xucinet_output}. \verb{$nodes} has one \code{Eigenvector} column;
-\verb{$summary} carries the principal eigenvalue, or the component count when
+\verb{$summary} carries the eigenvector centralization as a percentage, as
+UCINET's dialog reports it, and the principal eigenvalue, or the component
+count when
 the lambda-squared method was used instead.
 }
 \description{

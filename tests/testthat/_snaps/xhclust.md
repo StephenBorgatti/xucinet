@@ -33,30 +33,6 @@
        1059   . XXXXXXXXXXXXXXX
        1075   XXXXXXXXXXXXXXXXX
       
-      Partition indicator matrix
-      
-                     1 2 3 4 5 6 7 8 
-                     1 2 3 4 5 6 7 8 
-                     ( ( ( ( ( ( ( ( 
-                     8 7 6 5 4 3 2 1 
-                     ) ) ) ) ) ) ) ) 
-                     2 2 3 6 8 9 1 1 
-                     0 3 7 7 0 9 0 0 
-                     6 3 9 1 8 6 5 7 
-                                 9 5 
-                     - - - - - - - - 
-           1  BOSTON 1 1 1 1 1 1 1 1 
-           2      NY 1 1 1 1 1 1 1 1 
-           3      DC 2 1 1 1 1 1 1 1 
-           4   MIAMI 3 2 2 2 2 2 2 1 
-           5 CHICAGO 4 3 3 1 1 1 1 1 
-           6 SEATTLE 5 4 4 3 3 3 1 1 
-           7      SF 6 5 5 4 3 3 1 1 
-           8      LA 7 6 5 4 3 3 1 1 
-           9  DENVER 8 7 6 5 4 1 1 1 
-      
-      9 rows, 8 columns, 1 levels.
-      
                         1     2 
                     Cophe Level 
                     netic     s 

@@ -122,3 +122,14 @@ at commit 207958a (`Tools/G1Tools`, `Tools/G2Tools`).
 | `uc_structuralholes.pas` + `.dfm` | `Ucinet/Source` | Structural Holes: dialog defaults, `runegonetworksingle`, `runwholenetwork` |
 | `uEgonetStructuralHoles.pas`, `uEgonet.pas` | `Tools/G1Tools`, `Tools/G2Tools` | the ego-network model's arithmetic; `whichegometh` |
 | `ucentralitymeasures.pas`, `ubetween.pas`, `ugeodist.pas` | `Tools/G1Tools` | ego betweenness (`brandesbetweenness`, `calculatebrandesbetweenness`) and `bFloyd` |
+
+## Steve's 23 September answers (issue #16)
+
+Added 23 September 2026, from the same commits (ucinet c7b4956, tools 207958a).
+
+| file | taken from | what the port uses it for |
+|---|---|---|
+| `Xstdize.pas` | `Ucinet/Source` | Transform \| Normalize as the menu runs it: `runrowcols` (rcalc, ccalc, adjust, the targets and the Both iteration), `runmatrix`, the constant and diagonal handling in `runnormalize`. `xnormalize()` follows this unit, not `uNormalize.pas` |
+| `uc_MixingTables.pas` + `.dfm` | `Ucinet/Source` | Network \| Mixing Tables: the form, its defaults, the directed rule, the ratio |
+| `unetmixingmodels.pas` | `Tools/G2Tools` | the observed mixing matrix and the three expected-value models (UCINET issue 25 is in its `val <> na` tests) |
+| `uc_EigenvectorCentrality.pas` + `.dfm` | `Ucinet/Source` | `getcentralization`, the eigenvector centralization percentage |

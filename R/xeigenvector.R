@@ -23,7 +23,9 @@
 #' @param relation Which relation of a multi-relation dataset, by name or
 #'   position. Defaults to the first.
 #' @return An `xucinet_output`. `$nodes` has one `Eigenvector` column;
-#'   `$summary` carries the principal eigenvalue, or the component count when
+#'   `$summary` carries the eigenvector centralization as a percentage, as
+#'   UCINET's dialog reports it, and the principal eigenvalue, or the component
+#'   count when
 #'   the lambda-squared method was used instead.
 #' @examples
 #' xeigenvector(campnet)
@@ -69,6 +71,17 @@ xeigenvector <- function(net, relation = NULL) {
     v <- e$vector
     summary <- list(`Principal eigenvalue` = e$value)
   }
+
+  # Eigenvector centralization, as the Eigenvector Centrality dialog reports it
+  # (uc_EigenvectorCentrality.pas, getcentralization; ucinet c7b4956): the sum
+  # of differences from the largest score, as a percentage of the most a
+  # unit-length vector can have, which is a star's. Computed on the positive
+  # vector before any output normalization, and the dialog's default
+  # normalization is unit length anyway.
+  n <- length(v)
+  summary[["Eigenvector centralization (%)"]] <- if (n > 2) {
+    100 * sum(max(v) - v) / ((n - 1) * (sqrt(0.5) - sqrt(1 / (2 * (n - 1)))))
+  } else NA_real_
 
   nodes <- data.frame(Eigenvector = v, row.names = rownames(m),
                       check.names = FALSE)

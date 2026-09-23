@@ -101,6 +101,13 @@ test_that("the else value is what lands off the rule, not necessarily zero", {
   expect_equal(out[2, 3], -1)     # 0 is not
 })
 
+test_that("elsevalue is otherwise under the dialog's name", {
+  v <- valued()
+  expect_equal(xdichotomize(v, cutoff = 1, then = 9, elsevalue = -1),
+               xdichotomize(v, cutoff = 1, then = 9, otherwise = -1))
+  expect_error(xdichotomize(v, otherwise = 0, elsevalue = 0), "not both")
+})
+
 test_that("then and otherwise may be missing, as the dialog allows", {
   v <- valued()
   out <- as.matrix(xdichotomize(v, cutoff = 1, otherwise = NA, diagonal = "rule"))
@@ -307,12 +314,13 @@ test_that("columns are the default dimension, as the dialog has it", {
   expect_equal(sum(as.matrix(xnormalize(v, by = "matrix"))), 1)
 })
 
-test_that("each criterion divides by the right statistic", {
+test_that("each criterion moves the right statistic to its target", {
   v <- valued()
   col1 <- v[, 1]
   mu <- mean(col1); sdev <- sqrt(mean((col1 - mu)^2))
   expect_equal(as.matrix(xnormalize(v, method = "max"))[, 1], col1 / max(col1))
-  expect_equal(as.matrix(xnormalize(v, method = "mean"))[, 1], col1 / mu)
+  # Mean's target is 0 and adjust adds `t - a`: a shift, not a division.
+  expect_equal(as.matrix(xnormalize(v, method = "mean"))[, 1], col1 - mu)
   expect_equal(as.matrix(xnormalize(v, method = "sd"))[, 1], col1 / sdev)
   expect_equal(as.matrix(xnormalize(v, method = "zscore"))[, 1], (col1 - mu) / sdev)
   expect_equal(as.matrix(xnormalize(v, method = "euclidean"))[, 1],
@@ -321,24 +329,54 @@ test_that("each criterion divides by the right statistic", {
                col1 / sqrt(sum(col1)))
 })
 
-test_that("a zero divisor leaves the vector alone rather than making NaN", {
-  z <- matrix(0, 2, 2, dimnames = list(c("a", "b"), c("a", "b")))
-  expect_equal(as.matrix(xnormalize(z)), z)
-})
-
-test_that("the constant is added before normalising", {
+test_that("a divisor that is not positive makes the vector missing, as adjust does", {
   v <- valued()
-  expect_equal(as.matrix(xnormalize(v, constant = 1))[, 1],
-               (v[, 1] + 1) / sum(v[, 1] + 1))
+  v[, 2] <- 0
+  out <- as.matrix(xnormalize(v))
+  expect_true(all(is.na(out[, 2])))
+  expect_equal(unname(colSums(out[, -2])), c(1, 1))
 })
 
-test_that("diagonal = FALSE holds the diagonal out and puts it back", {
+test_that("the constant replaces zeros; it is not added", {
+  v <- valued()
+  expected <- v[, 1]
+  expected[expected == 0] <- 0.5
+  expect_equal(as.matrix(xnormalize(v, constant = 0.5))[, 1],
+               expected / sum(expected))
+})
+
+test_that("diagonal = FALSE leaves the diagonal missing, as UCINET does", {
   v <- valued()
   diag(v) <- 4
   out <- as.matrix(xnormalize(v, diagonal = FALSE))
-  expect_equal(diag(out), c(a = 4, b = 4, c = 4))
-  # the off-diagonal cells of column 1 now sum to 1 on their own
+  expect_true(all(is.na(diag(out))))
+  # the off-diagonal cells of column 1 sum to 1 on their own
   expect_equal(sum(out[-1, 1]), 1)
+})
+
+test_that("correspondence divides by the root of row total times column total", {
+  v <- valued()
+  rt <- rowSums(v); ct <- colSums(v)
+  want <- v / sqrt(outer(rt, ct))
+  for (b in c("cols", "rows", "both", "matrix")) {
+    expect_equal(as.matrix(xnormalize(v, by = b, method = "correspondence")),
+                 want, info = b)
+  }
+})
+
+test_that("correspondence under by = matrix is not UCINET's no-op (issue 23)", {
+  expect_differs_from_ucinet(23)
+  v <- valued()
+  expect_false(isTRUE(all.equal(
+    as.matrix(xnormalize(v, by = "matrix", method = "correspondence")), v)))
+})
+
+test_that("by = both with sum targets nr/nc for the columns on 2-mode data", {
+  m <- matrix(c(1, 2, 3, 4, 5, 6), 2, 3,
+              dimnames = list(c("r1", "r2"), c("c1", "c2", "c3")))
+  out <- as.matrix(xnormalize(m, by = "both"))
+  expect_equal(unname(rowSums(out)), c(1, 1), tolerance = 1e-3)
+  expect_equal(unname(colSums(out)), rep(2 / 3, 3), tolerance = 1e-3)
 })
 
 test_that("by = both settles when it can and warns when it cannot", {

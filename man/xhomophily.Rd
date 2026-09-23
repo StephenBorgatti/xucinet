@@ -23,12 +23,11 @@ first in \code{net}'s attribute table and then in \code{data} (G3).}
 of ties, which is the dialog's checkbox.}
 
 \item{weighted}{Treat the data as valued? \code{TRUE}, as the dialog does
-(\code{TypeOfData.ItemIndex = 1}). This affects \strong{only} the mixing matrix,
-and through it \code{Assort}: \code{calcwhomophily} takes the raw cell value for
-the internal and external totals whatever this says, and branches on it
-only when filling the mixing matrix. So \code{H}, \code{h-star}, \code{Corr},
-\verb{Yules Q} and \verb{E-I Index} are the same either way. That is UCINET's
-behaviour, not a simplification here.}
+(\code{TypeOfData.ItemIndex = 1}). \code{FALSE} dichotomizes at > 0 before every
+measure. UCINET's \code{calcwhomophily} applies the choice to the mixing
+matrix only, leaving \code{H}, \code{h-star}, \code{Corr}, \verb{Yules Q} and \verb{E-I Index}
+on the raw values either way; that is UCINET issue 21, fix pending, and
+xucinet does what the dialog says.}
 
 \item{diagonal}{Allow reflexive ties? \code{FALSE} by default.}
 

@@ -8,7 +8,7 @@ against the xucinet 2.0 function that serves it.
 | status | meaning | count |
 |---|---|---|
 | done | written, tested, and checked against UCINET goldens | 14 |
-| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 39 |
+| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 40 |
 | not started | no function yet | 31 |
 | dropped | will not be written; the reason is given below | 1 |
 
@@ -44,9 +44,9 @@ against the xucinet 2.0 function that serves it.
 
 | section | topic | UCINET | 2.0 function | status |
 |---|---|---|---|---|
-| 6.2 | Multidimensional scaling (MDS, classical and non-metric) | Tools\|Scaling/Decomposition\|Non-metric MDS (and Classic MDS) | `xmds()` | coded, goldens pending |
+| 6.2 | Multidimensional scaling (classical, non-metric) | Tools\|Scaling/Decomposition\|Metric MDS / Non-metric MDS | `xmds()` | coded, goldens pending |
 | 6.3 | Correspondence analysis | Tools\|Scaling/Decomposition\|Correspondence Analysis | `xcorrespondence()` | coded, goldens pending |
-| 6.4 | Johnson's hierarchical clustering (dendrogram, cophenetic correlation) | Tools\|Cluster Analysis\|Johnson's Hierarchical | `xhclust()` | coded, goldens pending |
+| 6.4 | Johnson's hierarchical clustering | Tools\|Cluster Analysis\|Johnson's Hierarchical | `xhclust()` | coded, goldens pending |
 
 ## Chapter 7
 
@@ -96,6 +96,7 @@ against the xucinet 2.0 function that serves it.
 | 10.4 | Centralization (for any centrality measure) | Network\|Whole Networks\|Centralization | `xcentralization()` | coded, goldens pending |
 | 10.4 | Core-peripheriness (continuous CP correlation as a whole-network measure) | Network\|Core/Periphery\|Continuous | `xcoreperiphery()` | not started |
 | 10.5 | Density by groups; homophily (E-I index etc.) | Network\|Mixing/Density Tables; Network\|Whole Networks\|Homophily\|Categorical | `xdensitybygroups()` | coded, goldens pending |
+| 10.5 | Mixing tables: observed, expected, density and observed/expected matrices by group | Network\|Mixing Tables | `xmixing()` | coded, goldens pending |
 
 ## Chapter 11
 

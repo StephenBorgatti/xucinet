@@ -146,15 +146,27 @@ test_that("degree centralization agrees with the cohesion block", {
                tolerance = 1e-6)
 })
 
-test_that("closeness and eigenvector say why they are not available", {
-  # UCINET reports both, xcloseness() and xeigenvector() do not carry them,
-  # and the chapter 9 goldens hold neither figure.
-  for (meas in c("closeness", "eigenvector")) {
-    expect_error(xcentralization(campnet, measure = meas),
-                 "not available yet", info = meas)
-    expect_error(xcentralization(campnet, measure = meas),
-                 "goldens", info = meas)
-  }
+test_that("closeness says why it is not available", {
+  # The Closeness dialog reports no centralization; only the legacy routine did.
+  expect_error(xcentralization(campnet, measure = "closeness"), "legacy")
+})
+
+test_that("eigenvector centralization comes from xeigenvector", {
+  expect_equal(
+    xcentralization(campnet, measure = "eigenvector")$summary[[1]],
+    xeigenvector(campnet)$summary[["Eigenvector centralization (%)"]])
+})
+
+test_that("eigenvector centralization is 100 for a star and 0 for a ring", {
+  # getcentralization's denominator is the star's total, so a star scores 100
+  # and a vertex-transitive graph, where every score is equal, scores 0.
+  star <- matrix(0, 5, 5, dimnames = list(letters[1:5], letters[1:5]))
+  star[1, -1] <- star[-1, 1] <- 1
+  expect_equal(xeigenvector(star)$summary[["Eigenvector centralization (%)"]], 100)
+  ring <- matrix(0, 5, 5, dimnames = list(letters[1:5], letters[1:5]))
+  for (i in 1:5) ring[i, i %% 5 + 1] <- ring[i %% 5 + 1, i] <- 1
+  expect_equal(xeigenvector(ring)$summary[["Eigenvector centralization (%)"]], 0,
+               tolerance = 1e-8)
 })
 
 test_that("arguments reach the centrality routine", {

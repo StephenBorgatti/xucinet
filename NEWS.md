@@ -1,5 +1,27 @@
 # xucinet 2.0.0.9000 (development)
 
+## Steve's answers of 23 September 2026
+
+* `xmixing()`, new: Network | Mixing Tables, with its three expected-value
+  models (Density, Configuration, Fixed outdegree). `xdensitybygroups()` is
+  unchanged.
+* `xeigenvector()` reports the eigenvector centralization, as a percentage,
+  and `xcentralization(measure = "eigenvector")` returns it. Closeness has none
+  to return: UCINET's Closeness dialog reports no centralization.
+* `xnormalize()` now follows `Xstdize.pas`, the unit the Normalize menu runs,
+  rather than `uNormalize.pas`: `"mean"` subtracts the mean instead of dividing
+  by it; `constant` replaces zeros instead of being added to every cell; a row
+  or column whose divisor is not positive comes back missing; `diagonal =
+  FALSE` leaves the diagonal missing; `by = "both"` starts with the columns,
+  stops when every margin is within tolerance of its target, and targets
+  `nrow/ncol` for the column sums. New `method = "correspondence"`.
+* `xhomophily(weighted = FALSE)` dichotomizes before every measure, not just
+  the mixing matrix (UCINET issue 21).
+* `xdichotomize()` accepts `elsevalue =` for `otherwise =`.
+* `xhclust()` no longer prints the partition matrix, which UCINET saves but
+  does not print; it is still in `$nodes`.
+* Ledger entries 23-25; UCINET issue 25.
+
 ## Chapter 8: ego networks (23 September 2026)
 
 * `xegonet()`: the sixteen columns of Egonet Basic Measures - size, ties,

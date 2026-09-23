@@ -12,7 +12,8 @@ xdichotomize(
   otherwise = 0,
   density = NULL,
   method = c("cutoff", "density", "maxcor"),
-  diagonal = c("else", "zero", "missing", "then", "rule")
+  diagonal = c("else", "zero", "missing", "then", "rule"),
+  elsevalue = NULL
 )
 }
 \arguments{
@@ -41,6 +42,9 @@ is still at least this.}
 \code{"else"} (the dialog's default), \code{"zero"}, \code{"missing"}, \code{"then"}, or
 \code{"rule"} to dichotomize it like any other cell. Ignored for 2-mode data,
 where the diagonal is an ordinary cell.}
+
+\item{elsevalue}{The same as \code{otherwise}, under a name closer to the
+dialog's. Give one or the other, not both.}
 }
 \value{
 An \code{xucinet} object titled as UCINET names it (\code{camp92_GT_1}; a dot
