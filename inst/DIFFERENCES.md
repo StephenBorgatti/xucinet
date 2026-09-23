@@ -27,8 +27,8 @@ that produced it. The test suite fails if the two disagree.
 
 ## 1. A truncated DL file
 
-**Status:** deliberate difference — **UCINET fix pending**. We refuse; UCINET
-accepts.
+**Status:** deliberate difference — **UCINET fix pending** (scheduled for
+UCINET 6.850). We refuse; UCINET accepts.
 **Checked:** 6 September 2026, confirmed independently 7 September 2026.
 
 `krebs.txt`, in UCINET's own `Datafiles`, declares `N=56, NM=5` — 280 rows of 56
@@ -463,3 +463,23 @@ xucinet node-level routine does: they use the relation named by `relation`,
 the first by default, and say in the report which one it was. Use
 `relation =` to pick another. `xtiecomposition()` is the exception, since
 comparing the relations is its purpose: it uses them all, as UCINET does.
+
+---
+
+## 22. No node-level clustering coefficient
+
+**Status:** deliberate, 22 September 2026 (design question 10.2); UCINET is to
+follow (`dev/UCINET-ISSUES.md` issue 16).
+
+UCINET's Clustering Coefficient routine, under Network | Whole Networks,
+reports an overall coefficient, a weighted overall coefficient and a
+coefficient for every node. `xtransitivity()` reports the overall
+coefficient (the mean of the node values) in its `$summary` and has no node table, and there is no
+`xclustering()` export.
+
+Two reasons. A whole-network routine does not return a node table (SPEC
+addendum, 23 September 2026). And the node-level coefficient is the density of
+ego's neighbourhood, which falls with degree almost mechanically and is
+undefined below two neighbours, so a column of it invites a ranking that
+mostly reflects degree. For binary data the same number is ego-network density
+with ego removed, which is available from the ego-network routines.

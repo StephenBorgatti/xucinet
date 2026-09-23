@@ -180,9 +180,13 @@ whole table is worth exposing (`xdichotomize(net, method = "maxcor", table = TRU
 it, or a separate small function); recommendation: no, the three `history` numbers suffice.
 (ii) The diagonal. The menu default writes the else-value (0) on the
 diagonal; the Phase 0 goldens made with the CLI showed the rule applied to the diagonal
-(ledger entry 1, "UCINET 6.849 no longer zeroes it"). Claude Code compares the CLI unit with
+(a ledger entry since removed, "UCINET 6.849 no longer zeroes it"). Claude Code compares the CLI unit with
 the form and reports; recommendation: R follows the menu form (`diagonal = c("else","zero",
-"missing","then","rule")`, default `"else"`), and entry 1 is corrected. Signature:
+"missing","then","rule")`, default `"else"`), and entry 1 is corrected.
+*Correction, 23 Sep 2026:* "entry 1" referred to the dichotomize-diagonal entry, which was
+removed when UCINET 6.849 stopped zeroing the diagonal (see `dev/UCINET-ISSUES.md`, "Fixed
+since this list started"). The numbering then moved, and entry 1 is now the truncated DL
+file. The point is recorded as ledger entry 13. Signature:
 `xdichotomize(net, cutoff = 0, op = ">", then = 1, else = 0, density = NULL, diagonal =
 "else")`, op as the six strings `">"`, `">="`, `"=="`, `"<="`, `"<"`, `"!="`; multi-relation
 input handled per relation; 2-mode allowed (no diagonal question).
@@ -402,7 +406,12 @@ Crosswalk: `method = c("dyad","arc")`. Recommendation: compute both always and p
 `$summary`, with `method` choosing which is printed first; valued data dichotomised with
 UCINET's notice.
 
-**10.2. xtransitivity and clustering.** UCINET's Transitivity routine reports the proportion of
+**10.2. xtransitivity and clustering.** *Corrected 23 Sep 2026 from the source:* Transform |
+Transitivity offers Triads / Triplets (Triplets the default) plus a separate Adjacency /
+Strengths / Costs group for the data; it has no adjacency / weak / strong choice. The
+function is `xtransitivity(net, method = c("triplets","triads"))`. Steve's answer (fold the
+overall clustering coefficient into the transitivity report, no node-level coefficient) is
+implemented. The original text follows. UCINET's Transitivity routine reports the proportion of
 transitive triples under a chosen definition (adjacency, weak, strong, Euclidean, ...); UCINET's
 Clustering Coefficient routine is separate (overall, weighted overall, per-node). The 3e text
 in 10.2.3 discusses transitivity and the clustering coefficient together. Recommendation:
@@ -429,7 +438,9 @@ covers the four the text names plus average distance, diameter and the rest. k-r
 proportions are left out of the text unless the block contains them (Claude Code will report
 what the block holds).
 
-**10.5. xcentralization.** Crosswalk: `xcentralization(net, measure = c("degree","closeness",
+**10.5. xcentralization.** *Update 23 Sep 2026:* all four measures are to be covered;
+`xcloseness()` and `xeigenvector()` gain the centralization UCINET reports, and
+`xcentralization()` reads it from them (SPEC addendum, 23 Sep 2026). Crosswalk: `xcentralization(net, measure = c("degree","closeness",
 "betweenness","eigenvector"))`. The centrality routines already put centralization in
 `$summary`. Recommendation: xcentralization is a thin function that calls the centrality
 routine and returns its centralization as a one-row `$summary`, so the two cannot disagree;

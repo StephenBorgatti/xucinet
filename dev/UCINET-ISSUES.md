@@ -63,7 +63,7 @@ answer, **inconsistency** means two routes to the same measure disagree,
 
 ## 1. A truncated DL file imports silently, padded with missing values
 
-**bug** · **open — fix pending** · found 6 September 2026, `krebs.txt`
+**bug** · **open — fix pending** · found 6 September 2026, `krebs.txt` · **scheduled for UCINET 6.850** (Steve, 23 September 2026)
 
 xucinet already does the correct thing: it refuses the file and names both
 counts. Ledger entry: *UCINET fix pending*.
@@ -593,6 +593,81 @@ reproduce; all nine columns always.
 
 **Fix:** call `qualifies` in `runfilteredstats`, parse the second box into
 `lowsd`, and use `setdim(meas.nr, meas.nc - 1, ...)`.
+
+---
+
+## 21. Whole-Network Homophily: "Treat data as" changes only the mixing matrix
+
+**bug** · **open — fix pending** (Steve, 23 September 2026: add to the bug list)
+
+`calcwhomophily` takes the raw cell value for the internal and external totals
+whatever the *Treat data as* radio group says, and branches on it only when
+filling the mixing matrix `mrs`. So `H`, `h-star`, `Corr`, `Yules Q` and the
+`E-I Index` are identical for binary and valued treatment; only the mixing
+matrix changes. The dialog reads as though the choice applies to everything.
+
+**What xucinet does:** at present it reproduces UCINET (`xhomophily(weighted =)`
+affects the mixing matrix only). Under the lifecycle it is to implement the
+correct behaviour, with `weighted = FALSE` dichotomizing before every measure,
+and a ledger entry marked *UCINET fix pending*.
+
+**Fix:** use the dichotomized value in the internal and external totals when
+the data are treated as binary.
+
+---
+
+## 22. Mixing Tables: an attribute taken from a row of the attribute file is not read
+
+**bug** · **open — no xucinet impact** · found 23 September 2026 (Cowork)
+
+In `TMixingTables.getattr` (`uc_MixingTables.pas`), the branch for
+`dimension.itemindex = 1` loops over `j` but assigns `attr.cell[i]`:
+
+```pascal
+1: begin
+     if not attr.allocsize(m.nc) then goto cleanup;
+     for j:= 1 to m.nc do
+       attr.cell[i]:= round(m.cell[k,j]);
+     end;
+```
+
+`i` is not set in that branch, so the partition vector is not filled. Choosing
+a column of the attribute file (the default) is unaffected.
+
+**What xucinet does:** `xmixing()` takes the attribute as a vector or a named
+column, so it has no row/column choice to get wrong.
+
+**Fix:** `attr.cell[j]:= round(m.cell[k,j]);`
+
+---
+
+## 23. Normalize: Correspondence with Dimension = Matrix does nothing
+
+**bug** · **open — fix pending** · found 23 September 2026 (Cowork)
+
+In `Xstdize.pas`, method 8 (Correspondence) is handled in `runrowcols`, which
+computes x(i,j)/sqrt(R_i·C_j) from the row and column totals whatever the
+dimension (Rows, Columns or Both give the same result). `runmatrix`, which
+handles Dimension = Matrix, has no branch for method 8, so every cell passes
+through unchanged and the output equals the input without a warning.
+
+**What xucinet does:** `xnormalize(method = "correspondence")` gives the same
+result for every `by`. Ledger entry to be written with the code.
+
+**Fix:** route method 8 to `runrowcols` for every dimension, or refuse
+Dimension = Matrix for it.
+
+---
+
+## 24. A headless batch driver for menu routines
+
+**request** · **open — no xucinet impact** · **scheduled for UCINET 6.850**
+(Steve, 23 September 2026)
+
+Menu routines (the `uc_*.pas` forms) can only be run through their dialogs, so
+golden fixtures for them are made by hand. SPEC section 5, item 0 describes the
+console target (`ucinetcl`) that would run them from a script. Until it exists,
+each goldens batch is a manual Windows session.
 
 ---
 

@@ -11,7 +11,7 @@
 #
 #   source("data-raw/make-crosswalk.R")
 
-crosswalk <- "C:/Users/sborg2/GitHub/asnr2e/crosswalk/ASNR2e_routine_crosswalk_v1.xlsx"
+crosswalk <- "C:/Dev/asnr2e/crosswalk/ASNR2e_routine_crosswalk_v1.xlsx"
 sheet <- readxl::read_excel(crosswalk, sheet = "Routines", .name_repair = "minimal")
 
 pick <- function(x) {

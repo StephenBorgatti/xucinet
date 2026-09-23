@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 23 Sep 2026 (Claude Code session; Cowork should correct anything here it knows
+Updated 23 Sep 2026 (Claude Code session, then Cowork; Cowork should correct anything here it knows
 better). Overwrite the first three sections each session; append to the last two.
 
 **Order of work changed 20 Sep 2026: code every remaining routine first, one UCINET goldens
@@ -47,18 +47,11 @@ batch at the end.** Design questions for all remaining chapters are batched in
   an explanation rather than the generic "not written yet". Goldens not generated:
   `inst/goldens/transform/` names the eighteen fixtures the tests expect and carries the
   batch; the golden tests skip until the sweep.
-- Chapter 8 (ego networks) **complete 23 Sep, issue #14**: `xegonet`,
-  `xstructuralholes`, `xtiecomposition`, `xvaluedtiecomposition`, `xaltercomposition`,
-  `xegoaltersimilarity`, with shared internals in `R/ego-internals.R` (the `direction`
-  vocabulary, the G3 attribute-type rule, UCINET's tie test). Goldens not generated:
-  `inst/goldens/ego/` names seventeen fixtures and carries the batch (three CLI
-  commands, the rest menu runs). The 1e Cat/Con aliases set `type=` through a new
-  fixed-argument table in `data-raw/make-aliases.R`.
-- Chapters 7, 11, 12, 13, 14 routines not started. About 31 exported functions
+- Chapters 7, 8, 11, 12, 13, 14 routines not started. About 37 exported functions
   remain against the crosswalk (see `dev/COVERAGE.md`, regenerated 23 Sep: 14 done,
-  39 coded with goldens pending, 31 not started, 1 dropped). The merged book text already
+  33 coded with goldens pending, 37 not started, 1 dropped). The merged book text already
   names them; the list of what the text asserts is in `asnr2e/docs/plan.md` ("Decoupling
-  decision", requirements list). Remaining coding order: 11, 12, 13, 14, 7.
+  decision", requirements list). Remaining coding order: 8, 11, 12, 13, 14, 7.
 - Machine: repo cloned to `C:\Dev\xucinet` on the new computer 16 Sep. R toolchain
   working 20 Sep: R 4.6.1, Rtools45 (`C:\rtools45`), devtools 2.5.2 / roxygen2 8.1.0 /
   testthat 3.3.2 / rcmdcheck 1.4.0 in `%LOCALAPPDATA%\R\win-library\4.6`, Pandoc 3.11
@@ -69,36 +62,39 @@ batch at the end.** Design questions for all remaining chapters are batched in
   without them it fails on `\textfont 0 is undefined` in the DESCRIPTION URL.
   And `devtools::check()` passes `--no-manual` itself, so the PDF manual is only
   exercised by a plain `R CMD check --as-cran`.
-  R is not on the Git Bash PATH: prefix `export PATH="/c/Program Files/R/R-4.6.1/bin:$PATH"`,
-  and put any `Rscript -e` code containing `|` in a file, because the shell hands it to
-  cmd.exe. There is no Python on this machine.
 - UCINET source for porting: `C:\Dev\ucinet\Source` (repo StephenBorgatti/ucinet) and
   `C:\Dev\tools\G2Tools` (repo StephenBorgatti/tools), both on Delphi 13 since 14 Sep. The
   Dropbox copies are stale. See `asnr2e/docs/plan.md`, "UCINET, Tools and NetDraw repositories".
 
-## Done this session (23 Sep 2026, Claude Code, second session)
+## Done this session (23 Sep 2026, Cowork, after the Claude Code session)
 
-- **Chapter 8 complete (issue #14).** Six exports, read out of the Ego Networks forms in
-  `C:\Dev\ucinet\Source` (c7b4956) and their G1Tools/G2Tools units (207958a), all
-  vendored in `inst/reference/delphi/` with a README section mapping menu item to unit.
-  Egonet Basic Measures turned out to be the old `Xegonet.pas`, not a `uc_` form; its
-  sixteen columns and formulas are listed in #14.
-- Found in the source rather than assumed: the categorical alter composition weights
-  its counts by tie strength; "Both incoming and outgoing" in the composition dialogs is
-  a max-symmetrize, while "Both in and out" in the tie-composition dialogs counts a
-  reciprocated tie twice; the continuous ego-alter similarity default measure is
-  `-AbsDiff` (the only box `FormCreate` ticks); Structural Holes defaults to the
-  ego-network model, not Burt's whole-network form.
-- Four UCINET bugs: `dev/UCINET-ISSUES.md` 17-20, ledger entries 18-20. Ledger 17 sets
-  the constraint formulas beside igraph's; ledger 21 records the first-relation
-  convention.
-- `xstructuralholes(method = "whole")` is asserted equal to `igraph::constraint()` on
-  symmetric campnet, and the default ego model asserted *not* equal; both skip locally
-  (no igraph) and run on CI.
-- Issue #15 (label `steve`, created this session because the label did not exist yet):
-  crosswalk signatures, the `direction` name, UCINET bugs 17-20.
+- Steve answered the twelve open questions below; the answers are carried into the files
+  listed here. Code changes are listed under "Next" for Claude Code, since this session could
+  not run `devtools::check()`.
+- **Level-of-analysis rule** (Steve, 23 Sep): SPEC addendum 23 Sep 2026; pointer in
+  `dev/CLAUDE.md`. A function is named and placed by the level of its main result; it may
+  include short higher-level summaries of that result (centralization, distance
+  distribution); it never includes a lower-level table; its slot structure never depends on
+  arguments.
+- `dev/UCINET-ISSUES.md`: issue 1 scheduled for 6.850; new issues 21 (homophily "Treat data
+  as"), 22 (Mixing Tables `getattr`, row dimension), 23 (Normalize, Correspondence under
+  Matrix does nothing), 24 (headless batch driver, scheduled for 6.850).
+- `inst/DIFFERENCES.md`: entry 1 notes 6.850; new entry 22 (no node-level clustering
+  coefficient).
+- `dev/design/remaining-chapters-questions.md`: 5.1(ii) reference to "entry 1" explained;
+  10.2 corrected from the source; 10.5 updated.
+- `asnr2e/crosswalk/crosswalk.py`: the six chapter 5 signatures, `xnormalize` gains
+  `"correspondence"`, `xtransitivity` signature and decision, `xcentralization` decision,
+  `xkeyplayer` row removed, `xmixing` row added. `ASNR2e_routine_crosswalk_v1.xlsx` rebuilt
+  with `build_xlsx.py` (it had not been rebuilt since the 8 Sep chapter 6 edits; the rebuild
+  changes nothing else). `data-raw/make-crosswalk.R` now reads it from `C:/Dev/asnr2e`.
+- Question 6 answered from the source: Correspondence is method 8 in `Xstdize.pas` (the unit
+  the Normalize menu runs), not in `uNormalize.pas`. It is x(i,j)/sqrt(R_i*C_j) with R and C
+  the row and column totals of the input, which is `handlemarginals` in `Xcorresp.pas` with
+  `keepfirst` (the grand total cancels). Not the same as SQRT-Marginal, so it is to be added.
+  Reading the same unit showed two faults in `xnormalize()`; see "Next", item 0(c).
 
-(23 Sep 2026, Claude Code, first session:)
+## Done earlier on 23 Sep 2026 (Claude Code)
 
 - **Chapter 10 complete (issue #13).** `xcohesion`, `xreciprocity`, `xtransitivity`,
   `xcyclicality`, `xcomponents`, `xcentralization`, `xhomophily`, `xdensitybygroups`.
@@ -156,13 +152,57 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-1. Claude Code runs the remaining chapter prompts in order: ch11, ch12, ch13, ch14,
-   ch07 (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after
+0. **Claude Code, before the next chapter: carry out Steve's 23 Sep answers.** Run
+   `devtools::check()` after these, as usual.
+   (a) `xhclust()`: stop printing the Partition indicator matrix; keep it in the object
+       (question 1). Update the snapshot.
+   (b) `xdichotomize()`: accept `elsevalue =` as a synonym for `otherwise =`; stop if both
+       are given (question 4).
+   (c) `xnormalize()` (question 6; `Xstdize.pas`, `runrowcols` and `runnormalize`):
+       - add `method = "correspondence"`: x(i,j)/sqrt(R_i*C_j), R and C the row and column
+         totals over valid cells (diagonal included only if `diagonal = TRUE`), computed once
+         from the input; cells whose R_i or C_j is not positive are left alone; same result
+         for every `by`. UCINET returns the input unchanged under Dimension = Matrix
+         (UCINET-ISSUES 23): ledger entry, "UCINET fix pending".
+       - `constant` **replaces** cells with |x| below single precision; it does not add to
+         every cell. The dialog label is "Constant to replace zeros with".
+       - `by = "both"` with `method = "sum"`: the column target is nr/nc, not 1
+         (`ct.cell[i]:= dm*m.nr/m.nc` when `dim = 4`), which is what lets 2-mode data
+         converge. Check the other methods' targets against `runrowcols` at the same time.
+       - the unit comment at the top of the xnormalize block names `uNormalize.pas`; the
+         menu routine is `Xstdize.pas`.
+   (d) `xcloseness()` and `xeigenvector()` gain the centralization UCINET reports
+       (`xcloseness.pas`, "Network Centralization = "; `uc_EigenvectorCentrality.pas`,
+       `getcentralization`, as percentages), and `xcentralization()` covers all four
+       measures (question 9). Goldens join the sweep.
+   (e) `xmixing()`, new (question 10): UCINET's Network | Mixing Tables
+       (`uc_MixingTables.pas`, engine `unetmixingmodels`). Observed, expected, density and
+       observed/expected matrices, one set per relation; expected-value model Density
+       (default), Configuration, Fixed outdegree; "For undirected networks, treat ties as"
+       Directed (default) or the alternative in the .dfm. Ratio missing where expected is 0.
+       A group-level routine under the 23 Sep rule. `xdensitybygroups()` is left as it is.
+       The fixtures `g10_mix_campnet_exp_config` and `g10_mix_campnet_exp_fixedout` already
+       in `inst/goldens/cohesion/make_goldens.txt` cover it; add the density model.
+   (f) `xhomophily(weighted = FALSE)`: dichotomize before every measure, not only the mixing
+       matrix (question 12, UCINET-ISSUES 21); ledger entry "UCINET fix pending"; the test
+       is marked as expected to differ from UCINET.
+   (g) Install `igraph`, `sna`, `network` and `tidygraph` on the Windows machine
+       (question 8) and run the cross-check tests locally.
+   (h) Rerun `data-raw/make-crosswalk.R` to regenerate `inst/extdata/crosswalk-routines.csv`
+       from the rebuilt crosswalk; add a signature note for `elsevalue`.
+   (i) Audit the exports against the 23 Sep level-of-analysis rule and list any function
+       that returns a lower-level table or whose slots depend on arguments.
+   (j) "Where things stand" says chapter 8 is not started, but ledger entries 17-21 and
+       UCINET-ISSUES 17-20 record chapter 8 routines (issue #14). Bring the section and
+       `dev/COVERAGE.md` up to date.
+   (k) Book text: `xsimilarities(by =)` is now `mode =` (question 3).
+1. Claude Code runs the remaining chapter prompts in order: ch08, ch11, ch12,
+   ch13, ch14, ch07 (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after
    `prompt-conventions.md`). Each is one session; each ends with `dev/COVERAGE.md`
-   regenerated. Chapters 5 (#12), 10 (#13) and 8 (#14) are done. Chapter 11 needs
-   G1 (igraph to Imports), which the answers table leaves blank, i.e. as recommended.
-2. Chapter 6, 5, 10 and 8 golden tests stay skipped; the fixtures named in
-   `inst/goldens/{multivariate,transform,cohesion,ego}/README.md` join the sweep.
+   regenerated. Chapters 5 (#12) and 10 (#13) are done.
+2. Chapter 6 and chapter 5 golden tests stay skipped; the fixtures named in
+   `inst/goldens/multivariate/README.md` and `inst/goldens/transform/README.md` join
+   the sweep.
 3. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`, prompts A and B) when Steve has
    a free hour with UCINET; `Config/ucinet/reference` bumps then.
 4. Then the asnr2e side: generators and practices per chapter (ch09 first, then 6, 5, 10,
@@ -186,24 +226,25 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   golden tests; one UCINET batch at the end turns the golden tests on. Design questions
   batched into one document. `dev/COVERAGE.md` (crosswalk row → status) is regenerated
   each chapter as the progress page for coauthors.
-- 23 Sep 2026 (Claude Code, chapter 8, answers G3 and 8.1-8.4 taken as recommended):
-  one `direction` argument for the whole chapter, values `undirected`/`both`/`out`/
-  `in`/`reciprocated`/`equal`, each function offering its dialog's subset and default;
-  `xegonet` follows the dialog, so no `include_ego` and no `directed`; node-level ego
-  routines report the first relation with a note, as every node-level routine does
-  (ledger 21), except `xtiecomposition`, which uses all of them; text attributes appear
-  in a node table by category number, because `$nodes` stays numeric; the continuous
-  alter-composition SD filters are not offered, since UCINET's do nothing.
+
+- 23 Sep 2026: level-of-analysis rule (SPEC addendum 23 Sep). Answers to the twelve
+  questions below, carried into Next 0.
 
 ## Open questions for Steve
+Steve's answers prefixed with ***
 
 1. The printed `Partition indicator matrix` in `xhclust()` wraps its column labels
    (`1(8)206`) into one-character chunks because the values are single digits; that is
    UCINET's display rule, but UCINET itself does not print this matrix (it saves it). Keep
    printing it, or follow UCINET and leave it in `$nodes` only?
+*** follow ucinet and don't print
+   → Next 0(a).
 2. UCINET items found during Phase 0 (in `dev/UCINET-ISSUES.md`): 2-mode average degree
    divides by ncols; importfullmatrix pads a short file silently; headless batch driver for
    menu routines. Which of these are being fixed in UCINET, and in which version?
+*** all to be fixed in 6.850
+   → Issue 1 marked scheduled for 6.850; the batch driver added as issue 24. The 2-mode
+   average degree was already fixed in 6.849 (UCINET-ISSUES, "Fixed since this list started").
 3. **`asnr2e/crosswalk/crosswalk.py` needs six signature edits** (chapter 5, 22 Sep).
    `xdichotomize` gains `then`/`otherwise`/`diagonal` and its `method` values are
    cutoff/density/maxcor; `xsymmetrize` goes from six methods to sixteen plus `missing`;
@@ -212,23 +253,36 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
    `xrecode` gains `diagonal`/`rows`/`cols`/`relations`; and **`xsimilarities` renames
    `by=` to `mode=`** and goes from four measures to nineteen. The last one touches the
    book text. The package's copy in `inst/extdata/` is already updated.
+*** ok
+   → Done in `asnr2e/crosswalk/crosswalk.py` 23 Sep (Cowork); xlsx rebuilt. Book text: Next 0(k).
 4. **`else` cannot be an R argument name**, so UCINET's "else value" in
    `xdichotomize()` is `otherwise =`. Happy with that, or would `elsevalue =` read
    better to a UCINET user?
+*** can we accept both? if not, go with otherwise
+   → Both can be accepted: Next 0(b).
 5. **`xcombinenodes()` refuses 2-mode data.** UCINET's Block dialog takes a separate
    partition for rows and columns; question 5.6 gives one `attribute` argument, so rather
    than invent a second the function stops and says why. Is 2-mode aggregation wanted?
+*** no
+   → No change; the refusal stays.
 6. **Question 5.3's "full criterion list" for `xnormalize`.** Seven of the dialog's eight
    are implemented; SQRT-Marginal is there as `"sqrtsum"`, but **Correspondence** is not,
    because its formula is not in `uNormalize.pas` and guessing it would be guessing
    numbers. Where does it live, or should it be dropped?
+*** i think correspondence may be the same as sqrt-marginal. check the code in ucinet/source/xcorresp.pas, particularly the routine called handlemarginals. if the same as sqrt-marginal then drop correspondence option. If not, add the method in handlemarginals
+   → Not the same (see "Done this session"). Next 0(c).
 7. **The design file asks for ledger entry 1 to be corrected** (5.1(ii)). It cannot be:
    entry 1 is the truncated DL file, and the entry describing the dichotomize diagonal was
    retired when UCINET 6.849 stopped zeroing it, as the lifecycle in `dev/CLAUDE.md`
    requires. Entry **13** is written in its place.
+*** need to give me more context
+   → Explained to Steve 23 Sep (Cowork): the design file's "entry 1" was the dichotomize-
+   diagonal entry removed when 6.849 fixed it; entry 13 is correct. Design file annotated.
 8. **`igraph`, `sna`, `network` and `tidygraph` are not installed on the Windows
    machine**, so the cross-check layer the conventions require skips locally (8 tests).
    They are written and run on CI. Worth installing here?
+*** please install
+   → Next 0(g). (Cowork has no shell on the machine.)
 9. **`xcentralization()` covers degree and betweenness only.** UCINET reports a
    closeness centralization (`xcloseness.pas`, "Network Centralization = ") and an
    eigenvector one (`uc_EigenvectorCentrality.pas`, `getcentralization`), but
@@ -236,11 +290,15 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
    degree figure only. Question 10.5 says this function must not compute anything of
    its own, so the two wait on a UCINET run that records them. That is a chapter 9
    gap rather than a chapter 10 one.
+** xcentralization should cover closeness and betweenness as well
+   → Steve confirmed 23 Sep: closeness and eigenvector. Next 0(d).
 10. **`xdensitybygroups(model=)` offers the Density model only.** UCINET's Mixing
    Tables has three - Density (its default), Configuration, Fixed outdegree. The
    other two are refused rather than guessed; `inst/goldens/cohesion/make_goldens.txt`
    asks for `g10_mix_campnet_exp_config` and `g10_mix_campnet_exp_fixedout`, which
    would let them be written.
+*** leave xdensitybygroups alone. Add xmixing to imitate ucinet's mixing tables routine
+   → Next 0(e); crosswalk row added.
 11. **Question 10.2 described an argument the dialog does not have.** It proposed
    `xtransitivity(type = c("adjacency","weak","strong"))`; Transform | Transitivity
    actually offers Triads / Triplets (Triplets the default) plus a separate
@@ -248,6 +306,8 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
    `method = c("triplets","triads")`. Worth correcting in the design file, which was
    written from memory for chapter 10 - sections 5.1 to 5.7 were rewritten from the
    source on 21 Sep but chapter 10 was not.
+*** ok, will correct it
+   → Corrected in the design file 23 Sep (Cowork).
 12. **`xhomophily(weighted=)` affects only the mixing matrix.** `calcwhomophily`
    takes the raw cell value for the internal and external totals whatever the
    "Treat data as" radio says, and branches on it only when filling `mrs`. So `H`,
@@ -255,16 +315,5 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
    reproduced, and documented, but it looks like an oversight in UCINET rather than
    a design: the dialog reads as though it should affect everything. Worth a view on
    whether it belongs on the bug list.
-13. **Chapter 8 crosswalk signatures (issue #15).** `asnr2e/crosswalk/crosswalk.py`
-   needs the six chapter 8 signatures now in `inst/extdata/crosswalk-routines.csv`.
-   The one that matters is `xegonet`: the crosswalk's `directed = NULL,
-   include_ego = FALSE` match nothing in the Egonet Basic Measures dialog, whose only
-   control is the neighbourhood combo, so it is `direction =` instead. The book names
-   the functions only, so no chapter text changes.
-14. **Is `direction` the right name (issue #15)?** One argument for "which ties define
-   the ego network" across chapter 8, since D4's `directed` is TRUE/FALSE and cannot
-   hold six choices.
-15. **UCINET bugs 17-20 (issue #15)**, found reading the chapter 8 source: isolates get
-   zeros in Egonet Basic Measures; Tie Composition ignores *Include ties to self*;
-   Valued Tie Composition "Both" adds the wrong cell; the continuous alter-composition
-   SD filters never filter. Which will be fixed, and in which build?
+*** add to ucinet bug list
+   → UCINET-ISSUES 21; xucinet to implement the correct behaviour, Next 0(f).

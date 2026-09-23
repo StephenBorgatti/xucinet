@@ -495,3 +495,39 @@ of that file), before the routines were written the same day.
 
 7. **`save =` deferred.** D4 lists it, no routine has it yet; it lands for every
    routine at once rather than starting with chapter 6.
+
+---
+
+## Addendum, 23 September 2026 — level of analysis
+
+Steve's decision, 23 September 2026. It binds every exported analysis function.
+
+1. **A function is named and placed by the level of its main result**: whole network,
+   group, node (including ego network), or dyad. The pkgdown reference groups and
+   `xhelp()` follow the same levels.
+2. **A function may include short summaries of its main result at a higher level.**
+   Examples: centralization in the `$summary` of a centrality routine (chapter 9
+   addendum, item 3); the frequency distribution of distances beside the geodesic
+   distance matrix; the descriptive-statistics block under a node table. These are
+   computed from the function's own result, and they are short.
+3. **A function never includes a table at a lower level.** A whole-network routine does
+   not return a node table; a quantity at a lower level gets its own function at that
+   level, or a column in an existing function at that level when it is the same number.
+   This is why there is no node-level clustering coefficient in `xtransitivity()`
+   (question 10.2; `dev/UCINET-ISSUES.md` issue 16).
+4. **The slot structure never depends on arguments.** Which slots an object has, and
+   the columns of each table, are fixed for a given function and type of input
+   (1-mode or 2-mode, directed or not). No argument of the `type = "global"/"local"`
+   kind that changes the shape of the result.
+
+Consequences:
+
+- A function that summarizes the output of another (for example `xcentralization()`)
+  reads the summary from that function rather than computing it again, so the two
+  cannot disagree (question 10.5). `xcentralization()` therefore covers a measure only
+  when the centrality routine for that measure reports its centralization; `xcloseness()`
+  and `xeigenvector()` are to gain theirs (Steve, 23 September 2026).
+- Where a UCINET routine returns results at a lower level than its menu position (the
+  Clustering Coefficient routine's node column is the known case), xucinet does not
+  reproduce it, and `inst/DIFFERENCES.md` records the difference.
+- Each help page cross-references the functions for the same concept at other levels.

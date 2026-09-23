@@ -2,7 +2,9 @@
 
 Read `dev/SPEC.md` (design) and `dev/PLAN.md` (phases) before changing anything. The addendum at the
 end of `dev/SPEC.md` records the naming decisions, and the chapter 9 addendum (6 Sep 2026) the
-output conventions for node-level routines; the routine-by-routine list of
+output conventions for node-level routines, and the 23 Sep 2026 addendum the
+level-of-analysis rule (a function returns one level; short higher-level summaries allowed,
+lower-level tables never; slots never depend on arguments); the routine-by-routine list of
 names and signatures is the crosswalk spreadsheet in the book repo (`asnr2e/crosswalk/`).
 
 ## Non-negotiable conventions
