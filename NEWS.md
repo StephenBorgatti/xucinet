@@ -1,5 +1,18 @@
 # xucinet 2.0.0.9000 (development)
 
+## Chapter 12: equivalence, blockmodels, core/periphery (issue #23)
+
+* `xstructuralequivalence()`: UCINET's Profile similarity, every relation
+  stacked into one profile, rows and columns, the five diagonal treatments
+  (reciprocal swapping by default), seven measures, and UCINET's
+  weighted-average clustering (size-weighted, which is `xhclust()`'s
+  `"average"`).
+* `xblockmodel()`: a given partition as a blockmodel: the blocked matrix,
+  block values, an image matrix and UCINET's autocorrelation fit (ledger 34).
+* `xcoreperiphery()`: the categorical and continuous models in one function,
+  ported from UCINET's current code; reproducible under `seed` (ledger 35,
+  UCINET issue 29). 2-mode waits on a decision.
+
 ## Level of analysis and closeness centralization (23 September 2026, issue #20)
 
 * A function returns the same fields whatever its arguments; arguments choose

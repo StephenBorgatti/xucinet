@@ -794,6 +794,39 @@ over relations; drop `maxval*` from the normalization.
 
 ---
 
+## 29. Categorical core/periphery: off-diagonal blocks lose cells when their density is set
+
+**bug** · **open — fix pending** · found 23 September 2026 (chapter 12, issue #23)
+
+`G2Tools/utcpcat.pas`, `tcatcp.evaluate`, local procedure `addcases`
+(Network | Core/Periphery | Categorical | Borgatti & Everett).
+
+```pascal
+for i:= 0 to list1.count-1 do
+  for j:= 0 to list2.count-1 do if (i <> j) or diagok
+    then corr.addcase(x,mat.cell[list1[i],list2[j]]);
+```
+
+`i` and `j` are positions in the core and periphery lists, not node numbers.
+For the core-core and periphery-periphery blocks that is harmless (the same
+list, so equal positions are the same node). For the off-diagonal blocks,
+used only when *Desired density for core to periphery ties* or *periphery to
+core* is set, it drops the cell pairing the k-th core node with the k-th
+peripheral node, for every k, although those are different nodes. The fit is
+then computed on an arbitrary subset of each off-diagonal block. With the
+default (both densities NA) the code is not reached.
+
+Also: the local `diag` is computed and never used; the test reads `diagok`
+directly, so with the diagonal allowed the off-diagonal blocks are whole.
+
+**What xucinet does:** `xcoreperiphery()` counts the off-diagonal blocks whole
+and says so in its notes when `c2p` or `p2c` is given. Ledger entry 35.
+
+**Fix:** test `(list1[i] <> list2[j]) or diagok`, or skip the test when
+`list1 <> list2`.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps

@@ -53,7 +53,10 @@ overrides <- c(
   xNegativeWeightedCentrality = "xpncentrality",
   # Withdrawn (see `withdrawn`); the crosswalk says "dropped", which is not a
   # function. The map names the routine its message points to.
-  xNegativeDegreeCentrality = "xdegree"
+  xNegativeDegreeCentrality = "xdegree",
+  # 2-mode profile similarity: xstructuralequivalence() takes 1-mode data, and
+  # the rows or columns of a 2-mode matrix are compared by xsimilarities().
+  xDualStructuralEquivalence = "xsimilarities"
 )
 
 # Aliases whose wrapper is more than a rename: the generated wrapper calls a
@@ -125,6 +128,9 @@ withdrawn <- c(
 
 # A few aliases need a sentence the generic message cannot give.
 notes <- c(
+  xDualCorePeriphery = "2-mode core/periphery waits on a decision about UCINET's genetic algorithm versus the dual projection the book describes (dev/STATUS.md, open questions); xcoreperiphery() takes 1-mode data.",
+  xDualDiscreteCorePeriphery = "2-mode core/periphery waits on a decision about UCINET's genetic algorithm versus the dual projection the book describes (dev/STATUS.md, open questions); xcoreperiphery() takes 1-mode data.",
+  xDualStructuralEquivalence = "For 2-mode data, compare rows or columns with xsimilarities(net, mode = \"rows\") or mode = \"cols\".",
   xBiCliques = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
   xBiComembership = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
   xDualLouvainMethod = "On 2-mode data xlouvain() waits on a decision between UCINET's bipartite modularity and the dual projection the book describes (GitHub issue #18).",
@@ -140,7 +146,10 @@ args <- list(
   xAlterCompositionCat   = list(type = "categorical"),
   xAlterCompositionCon   = list(type = "continuous"),
   xEgoAlterSimilarityCat = list(type = "categorical"),
-  xEgoAlterSimilarityCon = list(type = "continuous")
+  xEgoAlterSimilarityCon = list(type = "continuous"),
+  xContinuousCorePeriphery = list(type = "continuous"),
+  xConcentration         = list(type = "continuous"),
+  xDiscreteCorePeriphery = list(type = "categorical")
 )
 
 map <- unlist(pairs)

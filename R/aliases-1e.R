@@ -78,7 +78,7 @@ xucinet_1e_map <- c(
   xDualCorePeriphery = "xcoreperiphery",
   xDualDiscreteCorePeriphery = "xcoreperiphery",
   xDualLouvainMethod = "xlouvain",
-  xDualStructuralEquivalence = "xstructuralequivalence",
+  xDualStructuralEquivalence = "xsimilarities",
   xEgoAlterSimilarityCat = "xegoaltersimilarity",
   xEgoAlterSimilarityCon = "xegoaltersimilarity",
   xEgonetStructure = "xegonet",
@@ -139,6 +139,9 @@ xucinet_1e_map <- c(
 
 # Extra guidance for aliases whose replacement is not a simple rename.
 xucinet_1e_notes <- c(
+  xDualCorePeriphery = "2-mode core/periphery waits on a decision about UCINET's genetic algorithm versus the dual projection the book describes (dev/STATUS.md, open questions); xcoreperiphery() takes 1-mode data.",
+  xDualDiscreteCorePeriphery = "2-mode core/periphery waits on a decision about UCINET's genetic algorithm versus the dual projection the book describes (dev/STATUS.md, open questions); xcoreperiphery() takes 1-mode data.",
+  xDualStructuralEquivalence = "For 2-mode data, compare rows or columns with xsimilarities(net, mode = \"rows\") or mode = \"cols\".",
   xBiCliques = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
   xBiComembership = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
   xDualLouvainMethod = "On 2-mode data xlouvain() waits on a decision between UCINET's bipartite modularity and the dual projection the book describes (GitHub issue #18).",
@@ -153,7 +156,10 @@ xucinet_1e_args <- list(
   xAlterCompositionCat = list(type = "categorical"),
   xAlterCompositionCon = list(type = "continuous"),
   xEgoAlterSimilarityCat = list(type = "categorical"),
-  xEgoAlterSimilarityCon = list(type = "continuous")
+  xEgoAlterSimilarityCon = list(type = "continuous"),
+  xContinuousCorePeriphery = list(type = "continuous"),
+  xConcentration = list(type = "continuous"),
+  xDiscreteCorePeriphery = list(type = "categorical")
 )
 
 # Aliases whose 2.0 target is not coming. These stop with the explanation
@@ -354,7 +360,7 @@ xDualDiscreteCorePeriphery <- function(...) alias_1e("xDualDiscreteCorePeriphery
 xDualLouvainMethod <- function(...) alias_1e("xDualLouvainMethod", "xlouvain", ...)
 #' @rdname xucinet-1e
 #' @export
-xDualStructuralEquivalence <- function(...) alias_1e("xDualStructuralEquivalence", "xstructuralequivalence", ...)
+xDualStructuralEquivalence <- function(...) alias_1e("xDualStructuralEquivalence", "xsimilarities", ...)
 #' @rdname xucinet-1e
 #' @export
 xEgoAlterSimilarityCat <- function(...) alias_1e("xEgoAlterSimilarityCat", "xegoaltersimilarity", ...)

@@ -1,0 +1,53 @@
+// ===========================================================================
+// xucinet golden fixtures - Chapter 12, equivalence, blockmodels, core/periphery
+//
+// For xstructuralequivalence, xblockmodel and xcoreperiphery (xrege and
+// xblockoptimize are added when they are written). Part of the single goldens
+// sweep at the end of the coding run (decision of 20 Sep 2026).
+//
+// All of these are menu runs: the dialogs save the datasets named below.
+//
+// HOW TO RUN
+//   1. Open UCINET and do the menu runs below.
+//   2. Commit everything written here, plus log_menu.txt, and set the build
+//      number in UCINET-VERSION.
+//
+// Last run: not yet.
+// ===========================================================================
+
+// --- Network | Roles & Positions | Structural Equivalence | Profile ----------
+// Measure: Euclidean Distance (the default); Method of handling diagonal
+// values: Reciprocal1 (single count), the default; Include transpose: Yes (the
+// default); Convert to geodesics: No.
+//   campnet                         -> (Output) SE matrix  g12_se_campnet_euc
+//   campnet, Measure: Correlation   -> g12_se_campnet_cor
+//   sampson, relations Esteem and Disesteem only (Data | Unpack them and Join,
+//     or extract the two)           -> g12_se_sampson
+//   hightech, Advice only           -> g12_se_hightech
+// Please also run sampson (Esteem + Disesteem) once with the diagonal set to
+// Reciprocal2 (double count) and keep the log: the book's Matrix 12.3 matches
+// Reciprocal2, not the current default (text-changes T13).
+
+// --- Transform | Aggregate | Block - Aggregate by Partitions -------------------
+// Row and column partition: campnet's Gender attribute (camp92_attr, or the
+// Gender column of the campnet attribute file); Method: Average (the
+// default); Utilize diagonal: unchecked (the default).
+//   campnet by gender -> Output matrix  g12_block_campnet
+// Keep the log: the blocked matrix display and the autocorrelation are what
+// the printed report is checked against.
+
+// --- Network | Core/Periphery | Continuous -------------------------------------
+// Max # of iterations: 100; Diagonal values valid: unchecked; Prevent negative
+// coreness: checked (all defaults).
+//   campnet -> Output Coreness Dataset  g12_contcp_campnet
+//   zachary -> g12_contcp_zachary
+// Keep the log: fit, Gini, heterogeneity and the concentration table.
+
+// --- Network | Core/Periphery | Categorical | Borgatti & Everett --------------
+// Exclude ties to self: checked; Number of random starts: as the dialog sets
+// it (20 for these sizes); Max number of iterations: 500; both densities NA.
+//   campnet -> Output partition  g12_catcp_campnet
+//   zachary -> g12_catcp_zachary
+//   baker_journals dichotomized (> 0) -> g12_catcp_baker
+// UCINET randomizes its starts, so run each twice and note whether the
+// partition and the fit in the log change.

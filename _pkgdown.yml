@@ -137,8 +137,8 @@ reference:
   desc: >
     Chapter 11. Cliques, and partitions into cohesive groups. Every partition
     routine reports `Cluster` for each node and a `Modularity` computed the
-    same way, so the methods can be compared; `xcommunities()` runs any of
-    them.
+    same way, so the methods can be compared; `xcommunities()` runs all
+    five and puts their partitions side by side.
   contents:
   - xcliques
   - xfactions
@@ -152,7 +152,7 @@ reference:
   desc: >
     Chapter 8. Each node's own neighbourhood: its size and density, how its
     ties and alters are composed, whether alters resemble ego, and Burt's
-    structural holes. One `direction` argument says which ties define the
+    structural holes. One `ties` argument says which ties define the
     ego network, with each dialog's own default.
   contents:
   - xegonet
@@ -162,6 +162,22 @@ reference:
   - xvaluedtiecomposition
   - xaltercomposition
   - xegoaltersimilarity
+
+- title: Network | Roles & Positions
+  desc: >
+    Chapter 12. Structural equivalence by profile similarity, and the
+    blockmodel of a partition: the blocked matrix, block densities, image
+    and fit.
+  contents:
+  - xstructuralequivalence
+  - xblockmodel
+
+- title: Network | Core/Periphery
+  desc: >
+    Chapter 12.8. The categorical and continuous core/periphery models in one
+    function; `type` chooses which is printed.
+  contents:
+  - xcoreperiphery
 
 - title: Tools | Scaling/Decomposition
   desc: >

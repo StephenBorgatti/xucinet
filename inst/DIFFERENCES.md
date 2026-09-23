@@ -660,3 +660,35 @@ Where that moves output away from the UCINET dialog that prints it:
 
 On binary, single-relation data with an empty diagonal the numbers are
 UCINET's.
+
+## 34. Blockmodel: an image matrix UCINET does not print
+
+**Status:** deliberate addition, 23 September 2026 (design question 12.2).
+
+`xblockmodel()` is Transform | Aggregate | Block - Aggregate by Partitions
+(`uc_blockmatrix.pas`) as a report: the blocked matrix, the aggregated matrix
+and the autocorrelation, all UCINET's. It adds an image matrix, each block set
+to 1 when its value reaches a cutoff, by default the relation's density (the
+alpha criterion), because the book's Figure 12.5 shows one and UCINET's dialog
+prints none.
+
+## 35. Core/periphery: reproducible random starts, whole off-diagonal blocks, and MINRES versus the eigenvector
+
+**Status:** UCINET fix pending for the second point (UCINET issue 29);
+deliberate for the others. 23 September 2026.
+
+- UCINET's categorical routine calls `randomize`, so two runs of UCINET can
+  give different partitions where fits are close. `xcoreperiphery()` draws its
+  random starts from the Delphi generator under `seed`, so a run can be
+  repeated, but no seed reproduces a UCINET run: only the fit is comparable.
+- With `c2p` or `p2c` set, UCINET computes the fit on an arbitrary subset of
+  the off-diagonal blocks (UCINET issue 29). xucinet uses the whole blocks.
+- The continuous model is UCINET's MINRES: unless the diagonal is valid, it is
+  replaced by the squared loadings and re-estimated, so the scores are not the
+  principal eigenvector, which is what the model gives with the diagonal
+  valid. The book (12.8) notes the relation; the test suite checks both.
+- `$matrices` also holds the densities of the categorical blocks, which the
+  book's Figure 12.10 reports and UCINET's log does not print.
+- The 2-mode routine is held: UCINET's is a genetic algorithm on the
+  row-by-column correlation, while section 13.6 describes dual projection
+  (STATUS open question).

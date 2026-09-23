@@ -1,0 +1,6 @@
+UCINET: n/a
+Generated: not yet
+Notes: Chapter 12 goldens (profile similarity, blockmodels, core-periphery,
+    REGE). The batch has not been run. Until it is, every test that calls
+    skip_if_no_golden(<name>, "equivalence") skips, and this family is exempt
+    from the reference-build check.

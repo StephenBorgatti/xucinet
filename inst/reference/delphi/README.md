@@ -148,3 +148,17 @@ Added 23 September 2026, from ucinet c7b4956 and tools 207958a.
 | `uc_Louvain.pas` + `.dfm`, `utlouvain.pas`, `utpartition.pas` | `Ucinet/Source`, `Tools/G2Tools` | Louvain: the deterministic local moving and aggregation (UCINET issue 26 is in `getbestmove`/`movenodes`); `renumber` sorts cluster ids |
 | `uc_2modelouvain.pas`, `u2modelouvain.pas` | `Ucinet/Source`, `Tools/G2Tools` | 2-mode Louvain, Barber's bipartite modularity (issue #18) |
 | `uc_FastGreedy.pas` + `.dfm` | `Ucinet/Source` | UCINET's FastGreedy, for the ledger entry on how igraph's differs |
+
+## Chapter 12: equivalence, blockmodels, core/periphery (issue #23)
+
+ucinet commit c7b4956, tools commit 207958a.
+
+| file | taken from | what the port uses it for |
+|---|---|---|
+| `Xse.pas`, `ProfDlg.pas` | `Ucinet/Source` | Profile structural equivalence: the defaults (`diag = 4`, Reciprocal1; transpose Yes), the log, the clustering call; `setdiagonaloptions` is not wired to any event |
+| `ug2sim.pas` | `Tools/G2Tools` | `sesim2` and its five profile builders; the measures (euclid rescaled for missing cells, the correlation's constant-profile rule, overlaps, coverage) |
+| `ujohnsonhiclus.pas` | `Tools/G1Tools` | `wtdavgcomp` is size-weighted, i.e. UPGMA, which is why no WPGMA was added to `xhclust()` |
+| `uc_blockmatrix.pas` + `.dfm`, `uAggregate.pas`, `ug2display.pas` | `Ucinet/Source`, `Tools/G2Tools` | Block - Aggregate by Partitions: `aggbygroups`, the autocorrelation, and `blockdisplay`, the blocked-matrix layout |
+| `uc_categoricalcoreperiphery.pas` + `.dfm`, `utcpcat.pas` | `Ucinet/Source`, `Tools/G2Tools` | Categorical core/periphery: dialog defaults, the starting partitions, hill climbing, random starts (UCINET issue 29 is in `evaluate`) |
+| `uc_ContinuousCoreness.pas` + `.dfm`, `utminres.pas`, `utconcentration.pas`, `utbivariate.pas` | `Ucinet/Source`, `Tools/G2Tools`, `Tools/G1Tools` | Continuous core/periphery: MINRES, the concentration table, Gini, heterogeneity, the identity coefficient |
+| `x2mcatcp.pas` | `Ucinet/Source` | 2-mode categorical core/periphery (a genetic algorithm), held for Steve's decision |
