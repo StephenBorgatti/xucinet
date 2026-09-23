@@ -86,3 +86,7 @@ read from, as the Delphi units vendored in `inst/reference/delphi/` do.
 The book chapters (Word files in Dropbox, not in git) reference these functions by name.
 The book repo's `tools/lint_docx.py` checks every `x...(` in the chapters against this
 package's export list, so renaming an exported function is a book edit as well as a code edit.
+The lint catches names only. Any change to an argument, default, argument value, return value
+or printed output that affects what the chapters say gets an entry in
+`C:\Dev\asnr2e\docs\text-changes.md` (rules at the top of that file), committed in the asnr2e
+repo alongside the package commit.

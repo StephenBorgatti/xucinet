@@ -446,7 +446,9 @@ what the block holds).
 routine and returns its centralization as a one-row `$summary`, so the two cannot disagree;
 no separate computation.
 
-**10.6. xdensitybygroups, xhomophily, xkeyplayer.** (a) xdensitybygroups (Density by groups):
+**10.6. xdensitybygroups, xhomophily, xkeyplayer.** *Revised 23 Sep 2026 (Steve):*
+`xdensitybygroups()` returns the density table only; the observed, expected (all three
+models) and ratio tables are `xmixing()`. The original text follows. (a) xdensitybygroups (Density by groups):
 the group-by-group density matrix plus the count matrix; `test = TRUE` (the ch05 and ch14
 text) runs a permutation test. Question: which UCINET test is meant, "ANOVA density models"
 (constant homophily, variable homophily, structural blockmodel) or the relational contingency
