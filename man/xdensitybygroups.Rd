@@ -2,16 +2,9 @@
 % Please edit documentation in R/xdensitybygroups.R
 \name{xdensitybygroups}
 \alias{xdensitybygroups}
-\title{Density and mixing by groups}
+\title{Density by groups}
 \usage{
-xdensitybygroups(
-  net,
-  attribute,
-  directed = NULL,
-  model = c("density", "configuration", "fixedout"),
-  test = FALSE,
-  data = NULL
-)
+xdensitybygroups(net, attribute, directed = NULL, test = FALSE, data = NULL)
 }
 \arguments{
 \item{net}{A network (any accepted form). 1-mode only.}
@@ -19,12 +12,8 @@ xdensitybygroups(
 \item{attribute}{The grouping: a vector, or the name of a column looked up
 first in \code{net}'s attribute table and then in \code{data} (G3).}
 
-\item{directed}{\code{NULL} (detect), \code{TRUE} or \code{FALSE}. Undirected data count
-each edge once.}
-
-\item{model}{The expected-value model. \code{"density"} (the dialog's default)
-spreads the observed density over the group sizes. \code{"configuration"} and
-\code{"fixedout"} are UCINET's other two and are not ported yet.}
+\item{directed}{\code{NULL} (use the data as they are), \code{TRUE}, or \code{FALSE} to
+symmetrize by the maximum first.}
 
 \item{test}{Run the permutation test? Not yet: it arrives with chapter 14,
 which brings the permutation engine.}
@@ -33,24 +22,29 @@ which brings the permutation engine.}
 }
 \value{
 An object of class \code{c("xdensitybygroups", "xucinet_output")} whose
-\verb{$matrices} holds \code{Density}, \code{Observed}, \code{Expected} and \code{Ratio}.
+\verb{$matrices} holds \code{Density}.
 }
 \description{
-UCINET: Network | Mixing Tables w/ Expected Values. How densely each group
-ties to each other group, and how that compares with chance.
+How densely each group ties to each other group: the mean tie value in each
+block of the network, blocks being defined by a partition of the nodes. The
+same table \code{\link[=xcombinenodes]{xcombinenodes()}} gives, and the one UCINET's Mixing Tables
+prints as its density table.
 }
 \details{
-Four tables come back. \code{Density} is the mean tie strength in each block, the
-same figure \code{\link[=xcombinenodes]{xcombinenodes()}} gives. \code{Observed} sums the ties in each block.
-\code{Expected} is what a model predicts for those group sizes, and \code{Ratio} is
-observed over expected, so 1 is exactly as expected and 2 is twice as much.
+The observed mixing table, and what baseline models expect of it, are
+\code{\link[=xmixing]{xmixing()}}'s.
 }
+\section{UCINET equivalent}{
+
+Network | Mixing Tables, the density table.
+}
+
 \examples{
 gender <- camp92_attr$Gender
 names(gender) <- rownames(camp92_attr)
 xdensitybygroups(campnet, gender)
 }
 \seealso{
-\code{\link[=xcombinenodes]{xcombinenodes()}} for the density table on its own, and
-\code{\link[=xhomophily]{xhomophily()}} for the summary measures built on the same mixing.
+\code{\link[=xmixing]{xmixing()}} for observed and expected mixing, \code{\link[=xcombinenodes]{xcombinenodes()}},
+and \code{\link[=xhomophily]{xhomophily()}}.
 }

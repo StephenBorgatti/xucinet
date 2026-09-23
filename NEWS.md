@@ -2,9 +2,12 @@
 
 ## Steve's answers of 23 September 2026
 
-* `xmixing()`, new: Network | Mixing Tables, with its three expected-value
-  models (Density, Configuration, Fixed outdegree). `xdensitybygroups()` is
-  unchanged.
+* `xmixing()`, new: Network | Mixing Tables. The observed mixing table, and
+  the expected table and observed/expected ratio under all three of UCINET's
+  models (Density, Configuration, Fixed outdegree) in one call.
+* `xdensitybygroups()` now returns the density table only: its `model`
+  argument and its Observed, Expected and Ratio tables have moved to
+  `xmixing()`. `test =` stays for chapter 14. Ledger entry 26.
 * `xeigenvector()` reports the eigenvector centralization, as a percentage,
   and `xcentralization(measure = "eigenvector")` returns it. Closeness has none
   to return: UCINET's Closeness dialog reports no centralization.
@@ -20,7 +23,7 @@
 * `xdichotomize()` accepts `elsevalue =` for `otherwise =`.
 * `xhclust()` no longer prints the partition matrix, which UCINET saves but
   does not print; it is still in `$nodes`.
-* Ledger entries 23-25; UCINET issue 25.
+* Ledger entries 23-26; UCINET issue 25.
 
 ## Chapter 8: ego networks (23 September 2026)
 

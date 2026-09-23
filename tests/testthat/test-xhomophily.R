@@ -106,9 +106,9 @@ test_that("the report prints", {
 
 # ---- xdensitybygroups --------------------------------------------------------
 
-test_that("four tables come back", {
+test_that("one table comes back: the density table (Steve, 23 Sep)", {
   d <- xdensitybygroups(campnet, gender())
-  expect_equal(names(d$matrices), c("Density", "Observed", "Expected", "Ratio"))
+  expect_equal(names(d$matrices), "Density")
 })
 
 test_that("the density table is the one xcombinenodes gives", {
@@ -119,50 +119,24 @@ test_that("the density table is the one xcombinenodes gives", {
                tolerance = tol)
 })
 
-test_that("the observed table totals the ties, for directed data", {
-  obs <- xdensitybygroups(campnet, gender())$matrices$Observed
-  expect_equal(sum(obs), sum(as.matrix(campnet)))
+test_that("homophily shows up as dense diagonal blocks", {
+  d <- xdensitybygroups(campnet, gender())$matrices$Density
+  expect_true(all(diag(d) > d[upper.tri(d)]))
 })
 
-test_that("the density model preserves the total, for directed data", {
-  # E[r,s] sums to d * n(n-1), which is the number of ties.
-  d <- xdensitybygroups(campnet, gender())
-  expect_equal(sum(d$matrices$Expected), sum(d$matrices$Observed),
-               tolerance = 1e-6)
-})
-
-test_that("the ratio is observed over expected", {
-  d <- xdensitybygroups(campnet, gender())
-  expect_equal(d$matrices$Ratio, d$matrices$Observed / d$matrices$Expected,
-               tolerance = tol)
-})
-
-test_that("homophily shows up as a within-group ratio above one", {
-  d <- xdensitybygroups(campnet, gender())
-  expect_true(all(diag(d$matrices$Ratio) > 1))
-  expect_true(all(d$matrices$Ratio[upper.tri(d$matrices$Ratio)] < 1))
-})
-
-test_that("undirected counts each edge once and mirrors the blocks", {
+test_that("directed = FALSE symmetrizes first", {
   d <- xdensitybygroups(campnet, gender(), directed = FALSE)
-  obs <- d$matrices$Observed
-  expect_equal(obs, t(obs))
-  m <- pmax(as.matrix(campnet), t(as.matrix(campnet)))
-  # the within-group blocks hold the within-group edges
-  expect_equal(sum(diag(obs)), sum(m[upper.tri(m)] *
-    outer(gender(), gender(), "==")[upper.tri(m)]))
+  expect_equal(d$matrices$Density, t(d$matrices$Density))
   expect_true(any(grepl("Symmetrized", d$assumptions)))
+})
+
+test_that("there is no model argument any more; xmixing reports every model", {
+  expect_error(xdensitybygroups(campnet, gender(), model = "density"),
+               "unused argument")
 })
 
 test_that("test = TRUE says where the permutation engine is", {
   expect_error(xdensitybygroups(campnet, gender(), test = TRUE), "chapter 14")
-})
-
-test_that("the two unported expected models say so", {
-  for (mod in c("configuration", "fixedout")) {
-    expect_error(xdensitybygroups(campnet, gender(), model = mod),
-                 "not ported yet", info = mod)
-  }
 })
 
 test_that("an attribute can be named as a column", {

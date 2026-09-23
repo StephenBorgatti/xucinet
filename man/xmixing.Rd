@@ -4,14 +4,7 @@
 \alias{xmixing}
 \title{Mixing tables}
 \usage{
-xmixing(
-  net,
-  attribute,
-  relation = NULL,
-  model = c("density", "configuration", "fixedout"),
-  directed = TRUE,
-  data = NULL
-)
+xmixing(net, attribute, relation = NULL, directed = TRUE, data = NULL)
 }
 \arguments{
 \item{net}{A network (any accepted form). 1-mode.}
@@ -23,8 +16,6 @@ to whole numbers, as UCINET does.}
 \item{relation}{Which relation of a multi-relation dataset, by name or
 position. Defaults to the first.}
 
-\item{model}{\code{"density"} (the default), \code{"configuration"} or \code{"fixedout"}.}
-
 \item{directed}{Treat symmetric data as directed? \code{TRUE}, as the dialog
 does. Has no effect on asymmetric data.}
 
@@ -32,34 +23,37 @@ does. Has no effect on asymmetric data.}
 }
 \value{
 An object of class \code{c("xmixing", "xucinet_output")} whose
-\verb{$matrices} holds \code{Observed}, \code{Expected}, \code{Density} and \code{Ratio}.
+\verb{$matrices} holds the seven tables above, in that order.
 }
 \description{
 UCINET: Network | Mixing Tables. How the ties of a network fall within and
-between the groups of a partition, and how that compares with what a
-baseline model expects.
+between the groups of a partition, and how that compares with what three
+baseline models expect.
 }
 \details{
-Four group-by-group tables come back, in UCINET's order:
+Seven group-by-group tables come back, always the same seven:
 \itemize{
 \item \code{Observed}: the total tie value from each group to each other group.
-\item \code{Expected}: what the chosen model predicts for the same cells.
-\item \code{Density}: the mean tie value in each block, the same figure
-\code{\link[=xcombinenodes]{xcombinenodes()}} gives.
-\item \code{Ratio}: observed over expected, missing where the expectation is 0.
+\item \code{Expected (density)}, \code{Expected (configuration)} and
+\verb{Expected (fixed outdegree)}: what each model predicts for the same cells.
+\item \code{Ratio (density)}, \code{Ratio (configuration)} and \verb{Ratio (fixed outdegree)}:
+observed over expected, missing where the expectation is 0.
 }
 
-The three models for the expected values:
+The three models:
 \itemize{
-\item \code{"density"} (the default): the network's overall density spread over the
-group sizes, so a block's expectation is density times the number of
-pairs in it.
-\item \code{"configuration"}: groups keep their total outgoing and incoming tie
-value (their total strength, for undirected data) and send it in
-proportion to the other groups' totals.
-\item \code{"fixedout"}: groups keep their total outgoing tie value and send it to
-other nodes in proportion to group size.
+\item \strong{density}: the network's overall density spread over the group sizes,
+so a block's expectation is density times the number of pairs in it.
+\item \strong{configuration}: groups keep their total outgoing and incoming tie value
+(their total strength, for undirected data) and send it in proportion to
+the other groups' totals.
+\item \strong{fixed outdegree}: groups keep their total outgoing tie value and send
+it to other nodes in proportion to group size.
 }
+
+UCINET computes one model per run, chosen in the dialog, and prints the
+density table as well. Here all three models come back together, and the
+density table is \code{\link[=xdensitybygroups]{xdensitybygroups()}}'s.
 
 Symmetric data are treated as directed unless \code{directed = FALSE}, as in the
 dialog; asymmetric data are always directed. Undirected data count each
@@ -67,15 +61,14 @@ edge once.
 }
 \section{UCINET equivalent}{
 
-Network | Mixing Tables. \emph{Model for expected values} is \code{model}; \emph{For
-undirected networks, treat ties as} is \code{directed}.
+Network | Mixing Tables, run once for each \emph{Model for expected values}.
+\emph{For undirected networks, treat ties as} is \code{directed}.
 }
 
 \examples{
 xmixing(campnet, camp92_attr$Gender)
-xmixing(campnet, camp92_attr$Gender, model = "configuration")
 }
 \seealso{
-\code{\link[=xdensitybygroups]{xdensitybygroups()}}, \code{\link[=xhomophily]{xhomophily()}} for summary measures of the
-same mixing, and \code{\link[=xcombinenodes]{xcombinenodes()}}.
+\code{\link[=xdensitybygroups]{xdensitybygroups()}} for the density table, \code{\link[=xhomophily]{xhomophily()}} for
+summary measures of the same mixing, and \code{\link[=xcombinenodes]{xcombinenodes()}}.
 }

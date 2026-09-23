@@ -1,9 +1,9 @@
 // ===========================================================================
 // xucinet golden fixtures - Chapter 10, whole-network measures
 //
-// For xreciprocity, xtransitivity, xcyclicality, xcomponents, xhomophily and
-// xdensitybygroups. Part of the single goldens sweep at the end of the coding
-// run (decision of 20 Sep 2026).
+// For xreciprocity, xtransitivity, xcyclicality, xcomponents, xhomophily,
+// xdensitybygroups and xmixing. Part of the single goldens sweep at the end of
+// the coding run (decision of 20 Sep 2026).
 //
 // xcohesion needs nothing here. The Phase 0 density run already saved its
 // whole block for three datasets - ../density/G_CAMPNET_COH, G_BAKER_COH and
@@ -90,16 +90,20 @@ g10_comp_iso_weak       = comp(g9_iso weak)
 // matrix printed above the scores is what $matrices$Mixing is checked
 // against, and it is not saved anywhere else.
 
-// --- Network | Mixing Tables w/ Expected Values ----------------------------
+// --- Network | Mixing Tables ------------------------------------------------
+// For xmixing() (observed, expected and ratio under all three models) and
+// xdensitybygroups() (the density table). UCINET runs one model per call, so
+// this is three runs of the dialog.
 // Input network:    campnet
 // Input attribute:  camp92_attr column Gender
-// Model for expected values: Density (ExpectedModel.ItemIndex = 0, default)
+// For undirected networks, treat ties as: Directed (the default)
+//
+// Run 1, Model for expected values: Density (ExpectedModel.ItemIndex = 0, default)
 //   -> observed mixing matrix        g10_mix_campnet_obs
 //   -> expected mixing matrix        g10_mix_campnet_exp
 //   -> density matrix                g10_mix_campnet_den
 //   -> observed/expected ratio       g10_mix_campnet_ratio
-//
-// If it is quick, run it twice more with Configuration and Fixed outdegree
-// and save as g10_mix_campnet_exp_config and g10_mix_campnet_exp_fixedout.
-// Those two models are refused in R at the moment rather than guessed, and
-// these two fixtures are what would let them be written.
+// Run 2, Configuration: save the expected mixing matrix as
+//   g10_mix_campnet_exp_config
+// Run 3, Fixed outdegree: save the expected mixing matrix as
+//   g10_mix_campnet_exp_fixedout

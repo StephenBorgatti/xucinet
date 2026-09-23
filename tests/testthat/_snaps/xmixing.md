@@ -8,7 +8,6 @@
       
       Input Attribute:                        Gender
       (for undirected data) Treat ties as:    Directed
-      Model for expected values:              Density
       Input dataset:                          campnet
       
       
@@ -23,7 +22,7 @@
       
       2 rows, 2 columns, 1 levels.
       
-      Expected
+      Expected (density)
       
                     1      2 
                     1      2 
@@ -33,17 +32,47 @@
       
       2 rows, 2 columns, 1 levels.
       
-      Density
+      Expected (configuration)
+      
+                    1      2 
+                    1      2 
+               ------ ------ 
+           1 1 11.111 12.889 
+           2 2 13.889 16.111 
+      
+      2 rows, 2 columns, 1 levels.
+      
+      Expected (fixed outdegree)
+      
+                    1      2 
+                    1      2 
+               ------ ------ 
+           1 1  9.882 14.118 
+           2 2 14.118 15.882 
+      
+      2 rows, 2 columns, 1 levels.
+      
+      Ratio (density)
       
                    1     2 
                    1     2 
                ----- ----- 
-           1 1 0.357 0.050 
-           2 2 0.062 0.278 
+           1 1 2.024 0.283 
+           2 2 0.354 1.574 
       
       2 rows, 2 columns, 1 levels.
       
-      Ratio
+      Ratio (configuration)
+      
+                   1     2 
+                   1     2 
+               ----- ----- 
+           1 1 1.800 0.310 
+           2 2 0.360 1.552 
+      
+      2 rows, 2 columns, 1 levels.
+      
+      Ratio (fixed outdegree)
       
                    1     2 
                    1     2 

@@ -516,3 +516,25 @@ the default, valued treatment, the two agree.
 `xmixing()` leaves missing cells out of every table. UCINET's Mixing Tables
 tests `val <> na` where a missing cell is stored as a larger number, so each
 missing cell is added in as 1e38. On complete data the two agree.
+
+## 26. Mixing Tables is two functions: every model at once, density apart
+
+**Status:** deliberate. Steve, 23 September 2026 (`dev/STATUS.md`, Next
+0(e)).
+
+UCINET's Network | Mixing Tables prints four tables per run: the observed
+mixing table, the expected table under the one model chosen in the dialog
+(Density by default), the density table, and observed over expected. xucinet
+divides that report differently, in two ways:
+
+- **`xmixing()` reports all three expected-value models in one call**, with no
+  `model` argument: `Observed`, then `Expected (density)`,
+  `Expected (configuration)` and `Expected (fixed outdegree)`, then the three
+  matching `Ratio` tables. UCINET needs three runs for the same numbers. The
+  shape of the result then never depends on an argument (SPEC addendum,
+  23 September 2026, rule 4).
+- **The density table is not in `xmixing()`.** It is `xdensitybygroups()`'s
+  only table, as that function's name says, and the same table
+  `xcombinenodes()` gives.
+
+Every number is UCINET's; only the grouping into reports differs.

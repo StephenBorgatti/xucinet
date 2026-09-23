@@ -33,10 +33,12 @@ columns, and its tests run rather than skip.
 | `g10_comp_disc_weak` | `xcomponents` | several components |
 | `g10_comp_iso_weak` | `xcomponents` | an isolate, which must come back as a component of size 1 |
 | `g10_hom_campnet_gender` | `xhomophily` | the seven measures, by Gender |
-| `g10_mix_campnet_obs` | `xdensitybygroups` | observed mixing |
-| `g10_mix_campnet_exp` | `xdensitybygroups` | expected, Density model |
+| `g10_mix_campnet_obs` | `xmixing` | observed mixing |
+| `g10_mix_campnet_exp` | `xmixing` | expected, Density model |
+| `g10_mix_campnet_exp_config` | `xmixing` | expected, Configuration model |
+| `g10_mix_campnet_exp_fixedout` | `xmixing` | expected, Fixed outdegree model |
 | `g10_mix_campnet_den` | `xdensitybygroups` | density table |
-| `g10_mix_campnet_ratio` | `xdensitybygroups` | observed over expected |
+| `g10_mix_campnet_ratio` | `xmixing` | observed over expected, Density model |
 
 ## Two things only the log records
 
@@ -48,14 +50,12 @@ its scores, which is what `$matrices$Mixing` is checked against.
 
 Please save UCINET's own log rather than pasting from the window.
 
-## Would unblock work
 
-`g10_mix_campnet_exp_config` and `g10_mix_campnet_exp_fixedout`, if the two
-other expected-value models are run, are what would let those models be
-ported. They are refused at the moment rather than guessed.
 
-The same applies to the closeness and eigenvector centralizations:
-`xcentralization()` covers degree and betweenness only, because UCINET reports
-a figure for all four but the chapter 9 goldens hold none of the other two.
-Those belong with the chapter 9 family rather than here, but they are the
-other thing a UCINET session would unblock.
+## Also wanted from this session
+
+The eigenvector centralization percentage that Network | Centrality |
+Eigenvector prints (`Eigenvector centralization percentages`), for campnet and
+g9_disc: `xeigenvector()` reports it since 23 September 2026 and
+`xcentralization(measure = "eigenvector")` returns it, but no golden holds the
+figure yet. It belongs with the chapter 9 family.
