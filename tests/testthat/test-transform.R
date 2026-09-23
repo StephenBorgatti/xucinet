@@ -284,14 +284,16 @@ test_that("xsymmetrize applies to every relation and keeps the stack", {
 })
 
 test_that("cross-check: max symmetrize is the undirected graph igraph builds", {
-  # as.undirected(mode = "collapse") keeps an edge when either direction has
+  # as_undirected(mode = "collapse") keeps an edge when either direction has
   # one, which is the maximum rule on a binary matrix.
   skip_if_not_installed("igraph")
   m <- as.matrix(campnet)
   ours <- as.matrix(xsymmetrize(m))
   g <- igraph::graph_from_adjacency_matrix(m, mode = "directed")
+  # as_undirected() since igraph 2.1.0; the old as.undirected() spelling is
+  # deprecated and warns.
   theirs <- as.matrix(igraph::as_adjacency_matrix(
-    igraph::as.undirected(g, mode = "collapse")))
+    igraph::as_undirected(g, mode = "collapse")))
   expect_equal(unname(ours), unname(theirs), tolerance = tol)
 })
 
