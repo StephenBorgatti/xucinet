@@ -8,8 +8,8 @@ against the xucinet 2.0 function that serves it.
 | status | meaning | count |
 |---|---|---|
 | done | written, tested, and checked against UCINET goldens | 15 |
-| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 63 |
-| not started | no function yet | 7 |
+| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 64 |
+| not started | no function yet | 6 |
 | dropped | will not be written; the reason is given below | 3 |
 
 ## Chapter 5
@@ -143,7 +143,7 @@ against the xucinet 2.0 function that serves it.
 |---|---|---|---|---|
 | 14.3 | Group-level tests (regression across groups: classic and permutation) | Tools\|Testing Hypotheses\|Node-level\|Regression | `xregression()` | coded, goldens pending |
 | 14.4 | Node-level permutation correlation / regression | Tools\|Testing Hypotheses\|Node-level\|Regression | `xcorrelation()` | coded, goldens pending |
-| 14.4 | Network autoregressive model | Tools\|Testing Hypotheses\|Node-level\|Autoregressive Model | `xautoregression()` | not started |
+| 14.4 | Network autoregressive model | Tools\|Testing Hypotheses\|Node-level\|Autoregressive Model | `xautoregression()` | coded, goldens pending |
 | 14.5.1 | QAP correlation | Tools\|Testing Hypotheses\|Dyadic (QAP)\|QAP Correlation | `xqap()` | coded, goldens pending |
 | 14.5.2 | QAP (MR-QAP) regression, Double Dekker semi-partialling | Tools\|Testing Hypotheses\|Dyadic (QAP)\|MR-QAP Linear Regression\|Double Dekker | `xmrqap()` | coded, goldens pending |
 | 14.5.2 | QAP logistic regression | Tools\|Testing Hypotheses\|Dyadic (QAP)\|LR-QAP Logistic Regression | `xlrqap()` | coded, goldens pending |

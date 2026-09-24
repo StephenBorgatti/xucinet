@@ -28,6 +28,7 @@ Suggests:
     cluster,
     network,
     sna,
+    numDeriv,
     tidygraph,
     jsonlite,
     readxl,

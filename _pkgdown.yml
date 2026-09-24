@@ -202,6 +202,7 @@ reference:
   - xqap
   - xmrqap
   - xlrqap
+  - xautoregression
 
 - title: Tools | Scaling/Decomposition
   desc: >

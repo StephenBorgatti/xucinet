@@ -13,8 +13,9 @@
 * `xdensitybygroups(test = TRUE)`: the ANOVA density models (constant
   homophily, variable homophily, structural blockmodel), always fitted, with
   permutation p-values on request. UCINET issue 33, ledger 42.
-* `xautoregression()` waits on a decision (issue #28): UCINET has no routine
-  to port.
+* `xautoregression()`: network effects (lag) and disturbances (error) models
+  by maximum likelihood, wrapping `sna::lnam()`, since UCINET has no routine
+  (issue #28, ledger 43). Needs `sna` and `numDeriv`.
 
 ## Chapter 13: two-mode networks (issue #26)
 

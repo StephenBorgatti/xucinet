@@ -791,3 +791,16 @@ blockmodel), and `test = TRUE` adds their permutation p-values, from the
 Y-permutation MRQAP engine. The adjusted R-square is the standard one and
 missing cells are dropped. UCINET's two core/periphery variants of the dialog
 are not offered; `xcoreperiphery()` is the core/periphery routine.
+
+## 43. Network autoregression has no UCINET routine
+
+**Status:** deliberate (Steve, 24 September 2026; issue #28).
+
+`xautoregression()` fits the network effects (lag) and network disturbances
+(error) models by maximum likelihood with `sna::lnam()`, which it wraps. UCINET
+has no such routine: the Autoregressive Model item the first edition named is
+not in the current source. There is therefore no golden; the test suite checks
+`lnam`'s estimates against an independent fit by the concentrated
+log-likelihood. W is row-normalized by default and its diagonal cleared; nodes
+with missing values are refused rather than dropped, since dropping one changes
+the network. Significance is from the normal distribution, as `lnam` reports.
