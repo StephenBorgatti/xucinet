@@ -1,16 +1,18 @@
-# For the UCINET development machine
+# For the UCINET side
 
-A page to point Claude Code at when it is running on the Delphi XE7 machine,
-which has the UCINET source but knows nothing about xucinet.
+A page for Claude Code when it works on the UCINET source rather than on xucinet.
 
-Give it this and nothing else:
+Updated 24 September 2026. UCINET and xucinet are now on the same machine (user `sborg2`,
+Delphi 13). The UCINET source is a git repository, `C:\Dev\ucinet`
+(github.com/StephenBorgatti/ucinet, private), and the shared Delphi units are
+`C:\Dev\tools` (github.com/StephenBorgatti/tools). The Dropbox copies of Ucinet and Tools
+are stale and read-only. The current UCINET work is planned in
+`C:\Dev\ucinet\Planning\6.850-plan.md`, and its progress is in `C:\Dev\ucinet\STATUS.md`.
 
-> The R package xucinet is UCINET's twin and is measured against this build.
-> Read https://raw.githubusercontent.com/stephenborgatti/xucinet/main/dev/UCINET-SIDE.md
-> and follow it.
+A session started elsewhere can still read this page, and every file named below, from the
+public repository:
 
-The repository is public, so that URL needs no authentication, no clone and no
-`gh` login. Everything below is readable the same way by swapping the filename.
+> https://raw.githubusercontent.com/stephenborgatti/xucinet/main/dev/UCINET-SIDE.md
 
 ---
 
@@ -110,16 +112,16 @@ UCINET 6.850
 
 ## What not to do from that machine
 
-Do not edit the xucinet repository. The two sides are deliberately kept apart:
+Do not edit the xucinet repository, except to add a new entry to `dev/UCINET-ISSUES.md`
+when UCINET work finds a defect that is not listed. The two sides are deliberately kept apart:
 UCINET changes land in the Delphi tree, and the R side follows them in its own
 commit, after regenerating fixtures against the new build. A change that arrives
 in both at once cannot be checked, because there is no moment where old fixtures
 meet new behaviour and the test suite has a chance to complain.
 
-Note also that the UCINET source is **not under version control** — it is a
-Dropbox folder, and it already contains files with "conflicted copy" in their
-names from two machines writing at once. Be careful about editing the same file
-from two places, and prefer telling Steve to making a change you cannot revert.
+The UCINET source is under git (above), so a change can be reverted. Work on a branch
+(`v6850` for the current round) and commit one issue at a time, so that each change to output
+can be traced to one commit.
 
 ---
 
