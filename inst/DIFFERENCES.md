@@ -718,8 +718,6 @@ values and of non-square data.
   only as one combined routine (Network | 2-Mode Networks | 2-Mode Centrality,
   `xcentrality()` here). The book (13.4) says the chapter 9 functions
   "recognize two-mode data".
-- `xaffiliations()` leaves out the dialog's Backbone (SDSM) method, a
-  statistical model rather than a similarity.
 
 ## 38. Affiliations: covariance divided by n
 
@@ -728,3 +726,18 @@ values and of non-square data.
 UCINET's Affiliations reports the sum of cross-products of deviations as the
 "Covariance", `n` times the covariance. `xaffiliations(method = "covariance")`
 divides by `n`, as UCINET's own Tools | Similarities does.
+
+## 39. SDSM backbone: exact tail probabilities, as UCINET, unlike backbone 3.x
+
+**Status:** matches UCINET; recorded 24 September 2026 (Steve asked for the
+method; issue #26).
+
+`xaffiliations(method = "sdsm")` ports UCINET's `usdsm.pas`: the logistic null
+model by default (UCINET's default, and what the R package backbone used before
+version 3), BiCM as the alternative, and the **exact** Poisson-binomial upper
+tail. The R package backbone 3.x fits only BiCM and computes the tail by a
+refined normal approximation, which runs high near the tail: on a 60 by 40 test
+network with the same BiCM probabilities (they agree to 1e-9), a pair whose
+exact p is 0.046 (confirmed by simulation) gets 0.058 there, and backbone keeps
+17 edges where the exact test keeps 34. The exact test is the right one and is
+UCINET's.

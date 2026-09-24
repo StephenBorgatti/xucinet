@@ -278,3 +278,93 @@ test_that("the biclique co-membership of both modes is clustered", {
   expect_equal(co[1:18, 1:18], r$matrices[["Row co-membership"]], ignore_attr = TRUE)
   expect_s3_class(r$clustering, "xhclust")
 })
+
+# ---- SDSM backbone ----------------------------------------------------------------
+
+blocks <- function() {
+  set.seed(11)
+  nr <- 60; nc <- 40
+  g <- rep(1:3, length.out = nr); h <- rep(1:3, length.out = nc)
+  p <- outer(g, h, function(a, b) ifelse(a == b, 0.45, 0.08)) *
+    outer(runif(nr, .5, 1.5), runif(nc, .5, 1.5))
+  matrix(rbinom(nr * nc, 1, pmin(p, 1)), nr, nc,
+         dimnames = list(paste0("r", 1:nr), paste0("c", 1:nc)))
+}
+
+test_that("the backbone is binary, symmetric, with an empty diagonal", {
+  b <- as.matrix(xaffiliations(blocks(), method = "sdsm"))
+  expect_true(all(b %in% c(0, 1)))
+  expect_true(isSymmetric(unname(b)))
+  expect_true(all(diag(b) == 0))
+  expect_gt(sum(b), 0)
+  h <- attr(xaffiliations(blocks(), method = "sdsm"), "history")
+  expect_true(any(grepl("significant edges retained", h)))
+})
+
+test_that("the logistic null model is the glm fit of ties on the degrees", {
+  m <- blocks()
+  R <- rowSums(m); C <- colSums(m)
+  fit <- sdsm_logit(m, R, C)
+  df <- data.frame(y = as.vector(m), r = rep(R, times = ncol(m)),
+                   c = rep(C, each = nrow(m)))
+  g <- stats::glm(y ~ r + c, family = stats::binomial, data = df)
+  expect_equal(unname(fit$b), unname(stats::coef(g)), tolerance = 1e-6)
+  expect_true(fit$converged)
+})
+
+test_that("the BiCM probabilities reproduce the degrees in expectation", {
+  m <- blocks()
+  f <- sdsm_bicm(rowSums(m), colSums(m))
+  P <- outer(f$x, f$y); P <- P / (1 + P)
+  expect_equal(rowSums(P), rowSums(m), ignore_attr = TRUE, tolerance = 1e-6)
+  expect_equal(colSums(P), colSums(m), ignore_attr = TRUE, tolerance = 1e-6)
+})
+
+test_that("the BiCM probabilities are backbone's", {
+  skip_if_not_installed("backbone")
+  m <- blocks()
+  f <- sdsm_bicm(rowSums(m), colSums(m))
+  P <- outer(f$x, f$y); P <- P / (1 + P)
+  theirs <- get("bicm", asNamespace("backbone"))(m)
+  expect_equal(P, theirs, ignore_attr = TRUE, tolerance = 1e-7)
+})
+
+test_that("the tail probability is exact Poisson-binomial", {
+  # enumerate all 2^6 outcomes
+  q <- c(0.1, 0.5, 0.3, 0.8, 0.05, 0.6)
+  out <- as.matrix(expand.grid(rep(list(0:1), 6)))
+  pr <- apply(out, 1, function(o) prod(ifelse(o == 1, q, 1 - q)))
+  s <- rowSums(out)
+  for (k in 0:7) {
+    expect_equal(poisson_binomial_upper(k, matrix(q, 1)),
+                 if (k <= 0) 1 else sum(pr[s >= k]), tolerance = 1e-12,
+                 info = paste("k =", k))
+  }
+})
+
+test_that("rows and columns are both projected", {
+  m <- blocks()
+  a <- as.matrix(xaffiliations(m, method = "sdsm", mode = "cols"))
+  expect_equal(dim(a), c(40L, 40L))
+  expect_equal(xaffiliations(m, method = "sdsm", mode = "cols")$title, "mColumns")
+})
+
+test_that("alpha must lie between 0 and 1", {
+  expect_error(xaffiliations(davis, method = "sdsm", alpha = 1.5), "alpha")
+})
+
+test_that("missing cells are read as 0, as UCINET's unit does", {
+  m <- blocks(); m[1, 1] <- NA
+  n <- blocks(); n[1, 1] <- 0
+  expect_equal(as.matrix(xaffiliations(m, method = "sdsm")),
+               as.matrix(xaffiliations(n, method = "sdsm")))
+})
+
+test_that("davis SDSM backbones match UCINET", {
+  skip_if_no_golden("g13_sdsm_davis_cols", "twomode")
+  skip_if_no_golden("g13_sdsm_davis_rows_bicm", "twomode")
+  expect_equal(unname(as.matrix(xaffiliations(davis, method = "sdsm", mode = "cols"))),
+               unname(golden_matrix("g13_sdsm_davis_cols", "twomode")))
+  expect_equal(unname(as.matrix(xaffiliations(davis, method = "sdsm", nullmodel = "bicm"))),
+               unname(golden_matrix("g13_sdsm_davis_rows_bicm", "twomode")))
+})

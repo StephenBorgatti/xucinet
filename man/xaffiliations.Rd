@@ -8,9 +8,11 @@ xaffiliations(
   net,
   mode = c("rows", "cols"),
   method = c("crossproduct", "min", "covariance", "correlation", "matches", "jaccard",
-    "identity", "bonacich", "maxmin", "crossproductmin", "ssd", "cosine"),
+    "identity", "bonacich", "maxmin", "crossproductmin", "ssd", "cosine", "sdsm"),
   normalize = FALSE,
-  recode = TRUE
+  recode = TRUE,
+  nullmodel = c("logistic", "bicm"),
+  alpha = 0.05
 )
 }
 \arguments{
@@ -22,17 +24,25 @@ projected the same way, row by row.}
 \item{method}{How a pair is compared: \code{"crossproduct"} (the default, the
 number of shared ties for binary data), \code{"min"}, \code{"covariance"},
 \code{"correlation"}, \code{"matches"}, \code{"jaccard"}, \code{"identity"}, \code{"bonacich"},
-\code{"maxmin"}, \code{"crossproductmin"}, \code{"ssd"} or \code{"cosine"}.}
+\code{"maxmin"}, \code{"crossproductmin"}, \code{"ssd"}, \code{"cosine"} or \code{"sdsm"} (the
+backbone; see Details).}
 
 \item{normalize}{Weight the opposite mode inversely by its totals first?
 \code{FALSE} by default.}
 
 \item{recode}{Recode missing values to 0 first? \code{TRUE} by default, as in
 the dialog.}
+
+\item{nullmodel}{For \code{method = "sdsm"}: \code{"logistic"} (the default) or
+\code{"bicm"}.}
+
+\item{alpha}{For \code{method = "sdsm"}: the one-tailed significance level, 0.05
+by default.}
 }
 \value{
 An \code{xucinet} object: a 1-mode, undirected, valued network, titled
-as UCINET names it (\code{davisRows}), with a \code{history} attribute.
+as UCINET names it (\code{davisRows}), with a \code{history} attribute. The SDSM
+backbone is binary.
 }
 \description{
 UCINET: Data | Affiliations (2-mode to 1-mode). Turns a 2-mode network,
@@ -45,12 +55,23 @@ attended, and a woman's diagonal cell is the number she attended.
 
 Data | Affiliations (2-mode to 1-mode). \emph{Mode} is \code{mode}, \emph{Method} is
 \code{method}, \emph{Opposite mode normalization} is \code{normalize}, \emph{Recode missing
-values to zeros} is \code{recode}. The Backbone (SDSM) method is not offered.
+values to zeros} is \code{recode}, \emph{SDSM null model} is \code{nullmodel}, \emph{Alpha} is
+\code{alpha}.
+
+\code{method = "sdsm"} extracts the backbone of the projection by Neal's (2014)
+stochastic degree sequence model: two rows are tied (1) when they share more
+columns than a null model that keeps the degrees would produce, at
+significance \code{alpha} (one-tailed, exact Poisson-binomial test). The null
+model is a logistic regression on the row and column degrees (the default,
+as in the R package backbone) or the bipartite configuration model. The data
+are read as binary, and \code{normalize} does not apply. The fit is recorded in the
+result's \code{history}.
 }
 
 \examples{
 xaffiliations(davis)
 xaffiliations(davis, mode = "cols")
+xaffiliations(davis, method = "sdsm")
 }
 \seealso{
 \code{\link[=xbipartite]{xbipartite()}}, \code{\link[=xsimilarities]{xsimilarities()}}.

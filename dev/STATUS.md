@@ -80,6 +80,11 @@ batch at the end.** Design questions for all remaining chapters are batched in
   Centrality's scores with `mode = "both"/"rows"/"cols"`. `ximpute()` refuses 2-mode data,
   as UCINET's imputation does (the prompt expected otherwise). Book: T14 (2-mode
   core/periphery), crosswalk rows for chapter 13 (asnr2e 198d443).
+- **SDSM backbone in `xaffiliations()`** (Steve, 24 Sep): `method = "sdsm"`,
+  `nullmodel = "logistic"` (UCINET's default) or `"bicm"`, `alpha = 0.05`, ported from
+  `usdsm.pas` with its exact Poisson-binomial tail. Checked against `glm()`, the
+  `backbone` package's BiCM (to 1e-9) and brute-force enumeration; backbone 3.x itself
+  keeps fewer edges because it approximates the tail (ledger 39).
 
 ## Done on 23 Sep 2026 (Claude Code)
 
@@ -301,6 +306,9 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   data by returning UCINET's 2-Mode Centrality scores (`mode` default `"both"`, SPEC D4);
   `xcentrality()` keeps its `"rows"` default, one margin as UCINET's dialog.
   `xbipartite()` is titled `<input>-bi` rather than UCINET's fixed `bi`.
+
+- 24 Sep 2026 (Steve): `xaffiliations()` includes the SDSM backbone, as a 1-mode
+  projection like the other methods.
 
 
 ## Open questions for Steve

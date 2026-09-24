@@ -2,8 +2,8 @@
 
 ## Chapter 13: two-mode networks (issue #26)
 
-* `xaffiliations()`: Data | Affiliations, twelve of the dialog's thirteen
-  measures (not the SDSM backbone), rows or columns, opposite-mode
+* `xaffiliations()`: Data | Affiliations, all thirteen of the dialog's
+  methods, including the SDSM backbone (Neal 2014), rows or columns, opposite-mode
   normalization; covariance divided by n (UCINET issue 30, ledger 38).
 * `xbipartite()`: Transform | Bipartite, with each node's mode in
   `$attributes`.

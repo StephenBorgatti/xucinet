@@ -30,3 +30,9 @@ g13_biclique_davis = biclique(davis 3 3)
 // --- Transform | Graph Theoretic | Bipartite -------------------------------------
 // Only if the CLI line above fails: davis, fill 0, symmetric Yes, no prefixes,
 // saved as g13_bipartite_davis.
+
+// --- Data | Affiliations, Method: Backbone (SDSM) --------------------------------
+// SDSM null model: Logistic (the default); Alpha: 0.05 (the default).
+//   davis, Mode: Columns          -> g13_sdsm_davis_cols
+//   davis, Mode: Rows, null model BiCM -> g13_sdsm_davis_rows_bicm
+// Keep the log: the logit coefficients and the count of retained edges.

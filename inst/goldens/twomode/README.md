@@ -9,6 +9,8 @@ fixture below skips.
 | `g13_affil_davis_rows` | `xaffiliations` | women by women, cross-products |
 | `g13_affil_davis_rowsmin` | `xaffiliations` | women by women, cross-minimums |
 | `g13_affil_davis_cols` | `xaffiliations` | events by events |
+| `g13_sdsm_davis_cols` | `xaffiliations` | SDSM backbone of the events, logistic |
+| `g13_sdsm_davis_rows_bicm` | `xaffiliations` | SDSM backbone of the women, BiCM |
 | `g13_bipartite_davis` | `xbipartite` | the 32 by 32 bipartite matrix |
 | `g13_biclique_davis` | `xbicliques` | nodes (women then events) by biclique, 3 by 3, in UCINET's order |
 
