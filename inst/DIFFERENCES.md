@@ -741,3 +741,53 @@ network with the same BiCM probabilities (they agree to 1e-9), a pair whose
 exact p is 0.046 (confirmed by simulation) gets 0.058 there, and backbone keeps
 17 edges where the exact test keeps 34. The exact test is the right one and is
 UCINET's.
+
+## 40. Permutation tests: one p-value convention, R's generator
+
+**Status:** deliberate, 24 September 2026 (design answer 14.2; issue #27).
+
+UCINET's permutation routines count four ways: QAP Correlation as
+(1 + count)/(1 + nperm); node-level regression, Double Dekker MRQAP and LR-QAP
+with the observed value as one of nperm draws; Y-permutation MRQAP and the
+ANOVA density models over the permutations only. They differ by at most
+1/nperm. Every xucinet routine uses the first: `nperm` random permutations and
+p = (1 + count)/(1 + nperm), which never gives 0. All report UCINET's three
+proportions (as large, as small, as extreme); the significance is as extreme
+for two tails and, for one tail, the proportion in the direction of the
+observed statistic. Where UCINET's report is one-tailed by the sign (the
+Y-permutation MRQAP and the ANOVA density models have no tails option),
+xucinet's default is two-tailed, and `tails = 1` gives UCINET's figure.
+
+The permutations come from R's generator under `seed`, so p-values agree with
+UCINET's in distribution, not digit for digit (SPEC D12). Two of UCINET's
+dialogs never read their seed box (UCINET issue 33).
+
+`nperm` defaults are each dialog's: 10000 for node-level regression (and
+`xcorrelation()`, which is that routine with one predictor), 5000 for QAP
+correlation and the ANOVA density models, 2000 for MRQAP, 1000 for LR-QAP.
+
+## 41. MRQAP: t on every path, Y's symmetry checked
+
+**Status:** UCINET fix pending (UCINET issues 31 and 32). 24 September 2026.
+
+- Double Dekker: UCINET's fast path (no missing data) permutes b / SE² rather
+  than t; xucinet permutes t = b / SE, as UCINET's own path for missing data
+  does. With missing cells, each permutation keeps the cells present after
+  permuting, where UCINET's column falls out of step.
+- Y permutation: UCINET decides whether to use one triangle from the X's
+  alone; xucinet requires Y and every X to be symmetric.
+- Both methods return the same table (robust SE and t, the proportions, the
+  permuted coefficients' mean and sd, the collinearity diagnostics); `method`
+  changes only how the p-values are obtained.
+
+## 42. ANOVA density models: all three models, standard adjusted R-square
+
+**Status:** UCINET fix pending for the adjusted R-square and missing cells
+(UCINET issue 33); deliberate otherwise. 24 September 2026.
+
+`xdensitybygroups()` always fits the constant homophily, variable homophily
+and structural blockmodel models (the dialog fits one; its default is the
+blockmodel), and `test = TRUE` adds their permutation p-values, from the
+Y-permutation MRQAP engine. The adjusted R-square is the standard one and
+missing cells are dropped. UCINET's two core/periphery variants of the dialog
+are not offered; `xcoreperiphery()` is the core/periphery routine.

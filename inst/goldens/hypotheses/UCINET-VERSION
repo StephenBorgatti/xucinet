@@ -1,0 +1,6 @@
+UCINET: n/a
+Generated: not yet
+Notes: Chapter 14 goldens (node-level regression, QAP, MRQAP, LR-QAP, ANOVA
+    density). The batch has not been run. Until it is, every test that calls
+    skip_if_no_golden(<name>, "hypotheses") skips, and this family is exempt
+    from the reference-build check.

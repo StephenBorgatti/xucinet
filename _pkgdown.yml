@@ -191,6 +191,18 @@ reference:
   - xbipartite
   - xbicliques
 
+- title: Tools | Testing Hypotheses
+  desc: >
+    Chapter 14. Permutation tests at the node level (regression,
+    correlation) and the dyad level (QAP correlation, MRQAP, LR-QAP). One
+    permutation engine, so every p-value is counted the same way.
+  contents:
+  - xcorrelation
+  - xregression
+  - xqap
+  - xmrqap
+  - xlrqap
+
 - title: Tools | Scaling/Decomposition
   desc: >
     Chapter 6. Multidimensional scaling and correspondence analysis of a

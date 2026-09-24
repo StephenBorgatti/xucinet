@@ -1,0 +1,44 @@
+// ===========================================================================
+// xucinet golden fixtures - Chapter 14, testing hypotheses
+//
+// Observed statistics are compared exactly; p-values only to within sampling
+// error (see README.md), since UCINET's random permutations cannot be
+// reproduced in R. Record every dialog option, and the seed the dialog shows.
+//
+// HOW TO RUN: the menu runs below; commit what is written here and the logs;
+// set the build number in UCINET-VERSION.
+//
+// Last run: not yet.
+// ===========================================================================
+
+// --- Tools | Testing Hypotheses | Dyadic (QAP) | QAP Correlation --------------
+// Data matrices: padgett's Marriage, then Business (Data | Unpack padgett
+// first); # of permutations 5000; Type: Detailed (missing values ok);
+// Tails: 2-tailed.
+//   -> QAP Correlation Results  g14_qap_padgett
+// Keep the log: all seven measures and their proportions.
+
+// --- MR-QAP Linear Regression | Double Dekker Semi-Partialling MRQAP -----------
+// Dependent: hightech Advice; Independent: Friendship, ReportTo (unpacked);
+// # of permutations 2000; Statistics to track: T-Statistics; P-values:
+// 2-tailed.
+//   -> Coefficients dataset  g14_mrqap_hightech
+// UCINET issue 31 is expected to change its p-values, not its coefficients.
+
+// --- MR-QAP Linear Regression | Original (Y permutation) method ----------------
+// Same variables, 2000 permutations.  -> g14_mrqap_hightech_yperm (log only)
+
+// --- LR-QAP Logistic Regression --------------------------------------------------
+// Same variables; 1000 permutations; T-Statistics; 2-tailed; Data are:
+// Non-symmetric.  -> Coefficients dataset  g14_lrqap_hightech
+
+// --- Node-level | Regression ------------------------------------------------------
+// Dependent: campnet's outdegree is constant, so use camp92 attributes:
+// build a dataset with Gender and Role (or any two numeric attributes) and
+// regress the first on the second; Method Y-perm; 10000 permutations;
+// 2-tailed.  -> g14_nodereg_camp92_coef
+
+// --- Mixed Dyadic/Nodal | Categorical attributes | Anova Density models --------
+// campnet by Gender; run each model: Constant Homophily, Variable Homophily,
+// Structural Blockmodel; 5000 permutations. Keep the log (UCINET issue 33:
+// its adjusted R-square is expected to differ).

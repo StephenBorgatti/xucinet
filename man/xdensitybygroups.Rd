@@ -4,7 +4,16 @@
 \alias{xdensitybygroups}
 \title{Density by groups}
 \usage{
-xdensitybygroups(net, attribute, directed = NULL, test = FALSE, data = NULL)
+xdensitybygroups(
+  net,
+  attribute,
+  directed = NULL,
+  test = FALSE,
+  data = NULL,
+  nperm = 5000,
+  seed = NULL,
+  tails = 2
+)
 }
 \arguments{
 \item{net}{A network (any accepted form). 1-mode only.}
@@ -15,14 +24,23 @@ first in \code{net}'s attribute table and then in \code{data} (G3).}
 \item{directed}{\code{NULL} (use the data as they are), \code{TRUE}, or \code{FALSE} to
 symmetrize by the maximum first.}
 
-\item{test}{Run the permutation test? Not yet: it arrives with chapter 14,
-which brings the permutation engine.}
+\item{test}{Test the ANOVA density models by permutation? \code{FALSE} by
+default: the models are fitted either way, and \code{test = TRUE} adds their
+p-values.}
 
 \item{data}{A data frame to look \code{attribute} up in.}
+
+\item{nperm}{Number of random permutations for the test. UCINET's default
+is 5000.}
+
+\item{seed}{Random seed for the permutations.}
+
+\item{tails}{2 (the default) or 1.}
 }
 \value{
 An object of class \code{c("xdensitybygroups", "xucinet_output")} whose
-\verb{$matrices} holds \code{Density}.
+\verb{$matrices} holds \code{Density} and the coefficients of the three ANOVA density
+models, and whose \verb{$summary} holds each model's fit (one row per model).
 }
 \description{
 How densely each group ties to each other group: the mean tie value in each

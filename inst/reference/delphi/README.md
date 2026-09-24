@@ -173,3 +173,16 @@ ucinet commit c7b4956, tools commit 207958a.
 | `uc_AffiliationsDlg.pas` + `.dfm`, `ug2simdis.pas`, `usdsm.pas` | `Ucinet/Source`, `Tools/G2Tools` | Data | Affiliations: the dialog, `normcols`/`normrows`, the twelve measures (UCINET issue 30 is in `Covariance`), and the SDSM backbone |\| Affiliations: the dialog, `normcols`/`normrows`, the twelve measures (UCINET issue 30 is in `Covariance`) |
 | `Xbipart.pas` | `Ucinet/Source` | Transform \| Bipartite |
 | `ug2clique.pas`, `ubronkb.pas` | `Tools/G2Tools` | `getncliques` and the G2 `BronKerbosch`, the same algorithm as `uclique.pas`; `runbiclique` itself is in `Xdpmat.pas` (not vendored: 7,000 lines, the procedure is described in `R/xbicliques.R`'s header) |
+
+## Chapter 14: testing hypotheses (issue #27)
+
+ucinet commit c7b4956, tools commit 207958a.
+
+| file | taken from | what the port uses it for |
+|---|---|---|
+| `uc_NodeLevelRegression.pas` + `.dfm`, `uMtxvecRegression.pas` | `Ucinet/Source`, `Tools/G2Tools` | node-level regression: defaults, the table, `getypermsig` (the seed box is never read) |
+| `uc_qapcorrdlg.pas` + `.dfm`, `utqapsim.pas`, `utsim.pas` | `Ucinet/Source`, `Tools/G1Tools` | QAP correlation: Fast and Detailed, the seven measures, the proportions |
+| `uc_QaPDekkerRegression.pas` + `.dfm`, `umrqapdekker.pas`, `urestrictedqap.pas` | `Ucinet/Source`, `Tools/G1Tools` | Double Dekker MRQAP (UCINET issue 31 is in `regressresidual`); R-square's QAP test |
+| `xmrqapna.pas` | `Ucinet/Source` | Y-permutation MRQAP (UCINET issue 32 is in `readdata`) |
+| `uc_lrqap.pas` + `.dfm`, `ulrqap.pas` | `Ucinet/Source`, `Tools/G1Tools` | LR-QAP |
+| `XCatC2.pas` | `Ucinet/Source` | ANOVA density models (UCINET issue 33) |

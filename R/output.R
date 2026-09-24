@@ -298,6 +298,7 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = NULL, ...) 
     if (!is.null(x$show_summary)) {
       s <- if (is.data.frame(s)) s[, x$show_summary, drop = FALSE] else s[x$show_summary]
     }
+    if (!length(s)) return(invisible(NULL))
     if (is.list(s) && !is.data.frame(s)) {
       m <- matrix(vapply(s, function(v) as.numeric(v)[1], numeric(1)), nrow = 1,
                   dimnames = list(x$dataset, names(s)))

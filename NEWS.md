@@ -1,5 +1,21 @@
 # xucinet 2.0.0.9000 (development)
 
+## Chapter 14: testing hypotheses (issue #27)
+
+* One permutation engine (`R/permute-internals.R`): every test reports
+  UCINET's three proportions and counts p = (1 + count)/(1 + nperm)
+  (ledger 40).
+* `xregression()` and `xcorrelation()`: Node-level Regression, Y permutation
+  of t; `nperm = 0` for the classical test.
+* `xqap()`: QAP Correlation, all seven of the detailed analysis's measures.
+* `xmrqap()`: Double Dekker semi-partialling (default) or Y permutation;
+  `xlrqap()`: LR-QAP. UCINET issues 31 and 32, ledger 41.
+* `xdensitybygroups(test = TRUE)`: the ANOVA density models (constant
+  homophily, variable homophily, structural blockmodel), always fitted, with
+  permutation p-values on request. UCINET issue 33, ledger 42.
+* `xautoregression()` waits on a decision (issue #28): UCINET has no routine
+  to port.
+
 ## Chapter 13: two-mode networks (issue #26)
 
 * `xaffiliations()`: Data | Affiliations, all thirteen of the dialog's

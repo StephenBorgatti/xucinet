@@ -59,6 +59,13 @@ Severity is a judgement, not a promise: **bug** means a wrong or misleading
 answer, **inconsistency** means two routes to the same measure disagree,
 **request** means it works and could be better.
 
+**Scheduled for UCINET 6.850 (Steve, 24 September 2026): every open entry**, including the
+cosmetic ones and those with no xucinet impact, and any entry opened before 6.850 is built.
+One version bump for the batch. Claude Code does the work in `C:\Dev\ucinet` and
+`C:\Dev\tools` on branch `v6850`; the plan and Steve's decisions are in
+`C:\Dev\ucinet\Planning\6.850-plan.md`. The per-entry "scheduled for 6.850" notes below
+predate this and are kept.
+
 ---
 
 ## 1. A truncated DL file imports silently, padded with missing values
@@ -488,6 +495,14 @@ by inverse degree.
 **Fix in UCINET:** drop the per-node column from the Clustering Coefficient
 routine's output, or move it behind an option that is off by default.
 
+**Decided, 24 September 2026 (Steve):** drop the per-node column from the whole-network
+routine, and add a node-level routine, Network | Ego networks | Clustering Coefficient.
+Steve's reason for offering both: users do not realize that the weighted overall
+coefficient equals transitivity, or that the node-level coefficient is the density of
+ego's network. For 6.850 only, the whole-network routine's log says where the node-level
+coefficient went. The same rule applies to Reciprocity's node table and the E-I Index's
+node scores (plan, decisions 5-8).
+
 ---
 
 ## 17. Egonet Basic Measures reports zeros for an ego with no alters
@@ -847,6 +862,81 @@ events. `utsimilarity.pas`, which Tools | Similarities uses, divides by n.
 number of cells both vectors have. Ledger entry 38.
 
 **Fix:** `z:= sxy/nxy`.
+
+---
+
+## 31. Double Dekker MRQAP: the fast path permutes b / SE² rather than t
+
+**bug** · **open — fix pending** · found 24 September 2026 (chapter 14, issue #27)
+
+`G1Tools/umrqapdekker.pas`, `tmrqapdekker.regressresidual`. With no missing
+data (the optimized path) the observed and permuted statistics are
+
+```pascal
+se_sq := mse_val * inv_kk;          // the variance of b[k]
+ot := ob.cell[k] / se_sq;           // and likewise ts := bk / se_sq
+```
+
+that is b divided by its variance, not by its standard error. Since the
+variance changes from one permutation to the next, b / SE² does not rank the
+permutations as t does, and the p-values differ from those the same data give
+on the fallback path (any missing cell), which divides by `se_fb`, the
+standard error. The dialog's "Statistics to track: T-Statistics" is therefore
+not what the fast path tracks.
+
+Also on the fallback path: the design matrix is built over the cells that are
+not missing, but the permuted column is written with its own counter, skipping
+cells whose *permuted* source is missing, so the column's rows fall out of
+step with the other columns whenever a missing cell is permuted into place.
+
+**What xucinet does:** `xmrqap()` uses t = b / SE on every path, and each
+permutation keeps the cells present in Y, the other X's and the permuted
+residual. Ledger entry 41.
+
+**Fix:** `ts := bk / sqrt(se_sq)` and `ot := ob.cell[k] / sqrt(se_sq)`; in the
+fallback path, rebuild the design matrix per permutation over the cells valid
+after permuting.
+
+---
+
+## 32. MRQAP (Y permutation): symmetry is decided without looking at Y
+
+**bug** · **open — fix pending** · found 24 September 2026 (chapter 14, issue #27)
+
+`xmrqapna.pas`, `readdata`: `tmp.checksymmetry(temp); symmetric:= temp;` runs
+on `tmp` before anything has been loaded into it, and Y itself is never
+checked; `symmetric` then depends on the X matrices only. With symmetric X's
+and an asymmetric Y, only the lower triangle is used and half of the dyads are
+dropped.
+
+**What xucinet does:** one triangle only when Y and every X are symmetric.
+Ledger entry 41.
+
+**Fix:** `ymat.checksymmetry(temp)` in place of `tmp.checksymmetry(temp)`.
+
+---
+
+## 33. ANOVA density models: adjusted R-square off by one, seed ignored, missing cells read as values
+
+**bug** · **open — fix pending** · found 24 September 2026 (chapter 14, issue #27)
+
+`XCatC2.pas`, `autocorranova`:
+
+1. `adjrsqr:= rsqr - (1.0-rsqr)*(nx-1.0)/(nobs-nx)`, with `nx` the number of
+   predictors, is R² − (1 − R²)(k − 1)/(n − k); the adjusted R-square is
+   R² − (1 − R²)k/(n − k − 1).
+2. `randseed:= seed` reads a unit-level `seed`, not `seedvalue`, the number
+   the dialog shows and the user can type, so the seed box has no effect.
+3. The matrix is used as loaded: a missing cell enters the regression as the
+   missing-value code (1E37).
+
+(Node-level regression has the same seed problem: `getypermsig` is passed
+Delphi's global `randseed`, and the dialog's seed box is never read.)
+
+**What xucinet does:** the standard adjusted R-square, R's generator under
+`seed`, missing cells dropped. Ledger entry 42.
+
+**Fix:** the standard formula; `randseed:= seedvalue`; skip cells `>= na`.
 
 ---
 
