@@ -48,13 +48,17 @@ batch at the end.** Design questions for all remaining chapters are batched in
   `xblockoptimize` (issue #24, open question 6), 2-mode core/periphery (issue #25, open
   question 7), the profile-similarity diagonal default (open question 8, T13). Goldens
   named in `inst/goldens/equivalence/`.
-- Chapters 7, 13, 14 not started. `dev/COVERAGE.md` (23 Sep): 15 done, 55 coded with
-  goldens pending, 15 not started, 3 dropped. Remaining coding order: 13, 14, 7.
+- Chapter 13 (two-mode) done 24 Sep, issue #26: `xaffiliations`, `xbipartite`,
+  `xbicliques`, and 2-mode data in `xdegree`/`xcloseness`/`xbetweenness`/`xeigenvector`
+  (`mode =`). 2-mode Louvain and core/periphery still wait on open questions 4 and 7.
+  Goldens named in `inst/goldens/twomode/`. The 2-mode audit is a comment on issue #26.
+- Chapters 7 and 14 not started. `dev/COVERAGE.md` (24 Sep): 15 done, 58 coded with
+  goldens pending, 12 not started, 3 dropped. Remaining coding order: 14, 7.
 - `inst/extdata/crosswalk-routines.csv` was regenerated from the rebuilt crosswalk on
-  23 Sep; its chapter 8, 11 and 12 rows are edited by hand to the package's signatures.
-  `crosswalk.py` now has the chapter 8 and 12 signatures too (asnr2e, 23 Sep) but still
-  the old chapter 11 ones (open question 5), and the xlsx has not been rebuilt since, so
-  re-running `data-raw/make-crosswalk.R` now would revert rows.
+  23 Sep; its chapter 8, 11, 12 and 13 rows are edited by hand to the package's
+  signatures. `crosswalk.py` has the chapter 8, 12 and 13 signatures too but still the
+  old chapter 11 ones (open question 5), so re-running `data-raw/make-crosswalk.R` now
+  would revert rows.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
@@ -64,7 +68,20 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - UCINET source for porting: `C:\Dev\ucinet\Source` and `C:\Dev\tools` (Delphi 13). The
   Dropbox copies are stale.
 
-## Done this session (23 Sep 2026, Claude Code)
+## Done this session (24 Sep 2026, Claude Code)
+
+- **Chapter 13 (issue #26; 319e535).** `xaffiliations()` (Data | Affiliations, twelve of
+  its thirteen methods; UCINET issue 30, covariance not divided by n, ledger 38);
+  `xbipartite()` (Transform | Bipartite, `$attributes$mode`); `xbicliques()` (the CLI
+  `biclique()`, which is 2-cliques of the bipartite graph through the same Bron-Kerbosch
+  as `xcliques`, so UCINET's order; brute-force checked; the book's Figure 13.4
+  clustering added, ledger 37). The audit found that the chapter 9 centrality routines
+  refused 2-mode data although 13.4 says they take it; they now report 2-Mode
+  Centrality's scores with `mode = "both"/"rows"/"cols"`. `ximpute()` refuses 2-mode data,
+  as UCINET's imputation does (the prompt expected otherwise). Book: T14 (2-mode
+  core/periphery), crosswalk rows for chapter 13 (asnr2e 198d443).
+
+## Done on 23 Sep 2026 (Claude Code)
 
 - **Chapter 12 (issue #23; 144c4fe, 6a77f25).** `xstructuralequivalence()` (Xse.pas,
   ug2sim `sesim2`): every relation stacked, five diagonal treatments, seven measures,
@@ -166,18 +183,19 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. **Cowork:** rebuild the crosswalk xlsx (`build_xlsx.py`): `crosswalk.py` has new
-   signatures for `xcommunities` and the chapter 12 routines that the xlsx does not.
+0. **Cowork:** rebuild the crosswalk xlsx (`build_xlsx.py`) and commit it (an uncommitted
+   rebuild was sitting in asnr2e on 24 Sep): `crosswalk.py` has new
+   signatures for `xcommunities` and the chapter 12 and 13 routines.
 1. **Chapter 12 leftovers, once Steve answers:** `xblockoptimize` (open question 6,
    issue #24), 2-mode core/periphery (open question 7, issue #25), the profile-similarity
    diagonal default (open question 8, T13).
-2. Claude Code runs the remaining chapter prompts in order: ch13, ch14, ch07
+2. Claude Code runs the remaining chapter prompts in order: ch14, ch07
    (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after `prompt-conventions.md`).
    Each is one session and ends with `dev/COVERAGE.md` regenerated. **2-mode:** Louvain
-   (open question 4, #18) and core/periphery (open question 7, #25) both wait for Steve and
-   may land with chapter 13.
-3. Golden tests for chapters 5, 6, 8, 10, 11 and 12 stay skipped; the fixtures named in
-   `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence}/README.md` join the
+   (open question 4, #18) and core/periphery (open question 7, #25) both wait for Steve;
+   each is a small follow-up once decided (T9, T14).
+3. Golden tests for chapters 5, 6, 8, 10, 11, 12 and 13 stay skipped; the fixtures named in
+   `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence,twomode}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
 4. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`) when Steve has a free hour with
    UCINET; `Config/ucinet/reference` bumps then.
@@ -278,6 +296,11 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   use the Delphi generator under `seed`, though UCINET itself calls `randomize`.
 - 23 Sep 2026 (Claude Code, issue #21): `xcommunities()` has no `method` argument: it
   always runs all five, as Steve's note describes a node-by-method matrix.
+
+- 24 Sep 2026 (Claude Code, issue #26): the single-measure centrality routines take 2-mode
+  data by returning UCINET's 2-Mode Centrality scores (`mode` default `"both"`, SPEC D4);
+  `xcentrality()` keeps its `"rows"` default, one margin as UCINET's dialog.
+  `xbipartite()` is titled `<input>-bi` rather than UCINET's fixed `bi`.
 
 
 ## Open questions for Steve
