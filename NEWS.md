@@ -1,5 +1,17 @@
 # xucinet 2.0.0.9000 (development)
 
+## Chapter 7: visualization (issue #30)
+
+* `xplot()`: network drawings in base graphics. Node colour, size, shape and
+  label size from attributes, names or node-level results; tie width and
+  darkness from values; several relations by colour and line style; tie
+  cut-off, node filtering, ego networks, isolates left out in place;
+  `file =` writes png, jpg, tiff, pdf or svg. No underscores in argument
+  names (Steve, design 7.2). Ledger 44.
+* `xlayout()`: spring (Fruchterman-Reingold), Kamada-Kawai, classical and
+  non-metric MDS of geodesic distances, circle, random, grouped by an
+  attribute, bipartite; the result is reused by label in `xplot(layout =)`.
+
 ## Chapter 14: testing hypotheses (issue #27)
 
 * One permutation engine (`R/permute-internals.R`): every test reports

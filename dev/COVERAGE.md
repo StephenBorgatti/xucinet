@@ -8,8 +8,8 @@ against the xucinet 2.0 function that serves it.
 | status | meaning | count |
 |---|---|---|
 | done | written, tested, and checked against UCINET goldens | 15 |
-| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 64 |
-| not started | no function yet | 6 |
+| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 67 |
+| not started | no function yet | 3 |
 | dropped | will not be written; the reason is given below | 3 |
 
 ## Chapter 5
@@ -52,9 +52,9 @@ against the xucinet 2.0 function that serves it.
 
 | section | topic | UCINET | 2.0 function | status |
 |---|---|---|---|---|
-| 7.2–7.5 | Draw a network (layouts, node/tie attributes, filtering) | NetDraw (all of ch 7) | `xplot()` | not started |
-| 7.6 | Visualizing network change (new in 3e) | NetDraw; Tools\|Correlation | `xplot()` | not started |
-| 7.7 | Exporting visualizations (new in 3e) | File\|Save Diagram As; File\|Print | `ggsave()` | not started |
+| 7.2–7.5 | Draw a network (layouts, node/tie attributes, filtering) | NetDraw (all of ch 7) | `xplot()` | coded, goldens pending |
+| 7.6 | Visualizing network change (new in 3e) | NetDraw; Tools\|Correlation | `xlayout()` | coded, goldens pending |
+| 7.7 | Exporting visualizations (new in 3e) | File\|Save Diagram As; File\|Print | `xplot()` | coded, goldens pending |
 
 ## Chapter 8
 

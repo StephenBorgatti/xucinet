@@ -219,6 +219,15 @@ reference:
   contents:
   - xhclust
 
+- title: Visualize
+  desc: >
+    Chapter 7. Network drawings in base graphics, and the layouts they use,
+    reusable across drawings. Stands in for NetDraw; the drawings are not
+    NetDraw's.
+  contents:
+  - xplot
+  - xlayout
+
 - title: Datasets
   desc: >
     The datasets the book uses, under their lowercase names. Node attributes are

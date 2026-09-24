@@ -804,3 +804,15 @@ not in the current source. There is therefore no golden; the test suite checks
 log-likelihood. W is row-normalized by default and its diagonal cleared; nodes
 with missing values are refused rather than dropped, since dropping one changes
 the network. Significance is from the normal distribution, as `lnam` reports.
+
+## 44. xplot is not NetDraw
+
+**Status:** deliberate (design 7.1-7.3, Steve 24 September 2026; issue #30).
+
+`xplot()` draws in base graphics with igraph's layouts; NetDraw's own layout
+(an MDS start polished by an energy function with three terms) is not
+reproduced, and the default `"spring"` is Fruchterman-Reingold. NetDraw moves
+isolates to the side by default; `xplot()` draws them in place and leaves them
+out with `isolates = FALSE`, keeping the other nodes where they were. The
+drawing arguments carry no underscore (`nodecolor`, `edgewidth`, ...). There
+are no golden tests: nothing about a drawing is a number UCINET prints.
