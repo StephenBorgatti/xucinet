@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 24 Sep 2026 (Claude Code, chapter 14; Cowork should
+Updated 24 Sep 2026 (Claude Code, chapters 14 and 7; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -52,15 +52,19 @@ batch at the end.** Design questions for all remaining chapters are batched in
   `xbicliques`, and 2-mode data in `xdegree`/`xcloseness`/`xbetweenness`/`xeigenvector`
   (`mode =`). 2-mode Louvain and core/periphery still wait on open questions 4 and 7.
   Goldens named in `inst/goldens/twomode/`. The 2-mode audit is a comment on issue #26.
-- Chapter 14 (testing hypotheses) done 24 Sep, issue #27: `xcorrelation`, `xregression`,
-  `xqap`, `xmrqap`, `xlrqap`, and `xdensitybygroups(test = TRUE)` with the three ANOVA
-  density models. One permutation engine for all (`R/permute-internals.R`). Held:
-  `xautoregression` (#28, no UCINET routine). Goldens named in `inst/goldens/hypotheses/`.
-- Chapter 7 not started; it is the last. `dev/COVERAGE.md` (24 Sep): 15 done, 63 coded
-  with goldens pending, 7 not started, 3 dropped.
+- Chapter 14 (testing hypotheses) done 24 Sep, issues #27 and #28: `xcorrelation`,
+  `xregression`, `xqap`, `xmrqap`, `xlrqap`, `xdensitybygroups(test = TRUE)` with the three
+  ANOVA density models, and `xautoregression` (wrapping `sna::lnam`, Steve). One permutation
+  engine for all (`R/permute-internals.R`). Goldens named in `inst/goldens/hypotheses/`.
+- Chapter 7 (visualization) done 24 Sep, issue #30: `xplot` and `xlayout`, base graphics
+  on igraph layouts, argument names without underscores. No goldens (NetDraw is not the
+  oracle).
+- **Every chapter is now coded.** `dev/COVERAGE.md` (24 Sep): 15 done, 67 coded with
+  goldens pending, 3 not started (the chapter 12 and 2-mode items waiting on Steve), 3
+  dropped. What is left is the open questions below and the goldens sweep.
 - `inst/extdata/crosswalk-routines.csv` was regenerated from the rebuilt crosswalk on
-  23 Sep; its chapter 8, 11, 12, 13 and 14 rows are edited by hand to the package's
-  signatures. `crosswalk.py` has the chapter 8, 12, 13 and 14 signatures too but still the
+  23 Sep; its chapter 7, 8, 11, 12, 13 and 14 rows are edited by hand to the package's
+  signatures. `crosswalk.py` has the chapter 7, 8, 12, 13 and 14 signatures too but still the
   old chapter 11 ones (open question 5), so re-running `data-raw/make-crosswalk.R` now
   would revert rows.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
@@ -74,6 +78,26 @@ batch at the end.** Design questions for all remaining chapters are batched in
 
 ## Done this session (24 Sep 2026, Claude Code)
 
+- **`xautoregression` (issue #28, fb9a231).** Steve chose to wrap `sna::lnam`: lag and
+  error models, W row-normalized by default, net first as everywhere. `numDeriv` joins
+  Suggests (lnam needs it). Checked against an independent concentrated-likelihood fit.
+  Ledger 43; T17 done (the text already says what the package does).
+- **Newcomb data (#29).** Steve assigned it to Cowork, but the data already ship as
+  `newfrat` (17 nodes, PreferenceT00-T15, week 9 missing). Commented on #29 and corrected
+  T16: what is left is naming `newfrat` in the text and the Table 14.4 specification.
+- **Chapter 7 (issue #30, ea68649).** `xlayout()`: spring (Fruchterman-Reingold), kk,
+  mds and nmds of geodesics (unreachable max + 1), circle, random, groups (by attribute,
+  Figure 7.6), bipartite; seeded by default so a call always gives the same picture.
+  `xplot()`: attributes by name, vector or node-level result to colour (categories get a
+  palette and legend, numbers grey shades), size, shape and label size; valued ties to
+  width and darkness; several relations by colour and style with multiplex ties thicker
+  (Figure 7.20); `cutoff`, `keep`, `ego`, `isolates = FALSE` (keeps coordinates);
+  coordinates matched by label, so a layout serves subsets and later networks; attribute
+  columns as a layout draw axes (Figure 7.5); `file =` writes png/jpg/tiff/pdf/svg.
+  Tests on coordinates, filtering, mapping and files; every drawing run on a null device.
+  Ledger 44. pkgdown group Visualize. Book (asnr2e 3af07b0): crosswalk rows; T18 lists
+  what the ch07 merge needs (7.2.3, 7.4.2, 7.5.1, 7.7, and Figure 7.27 is
+  `xcorrespondence()`).
 - **Chapter 14 (issue #27; 4500f3c).** Node level: `xcorrelation()` and `xregression()`
   (Tools | Testing Hypotheses | Node-level | Regression), permuting y, classical and
   permutation p-values side by side. Dyadic: `xqap()` reports all seven utqapsim measures,
@@ -81,12 +105,8 @@ batch at the end.** Design questions for all remaining chapters are batched in
   by Double Dekker semi-partialling (default) or Y permutation, with the robust SE UCINET
   prints (hightech, Table 14.3, reproduced); `xlrqap()`. Mixed: `xdensitybygroups()`
   always fits UCINET's three ANOVA density models (XCatC2.pas); `test = TRUE` adds their
-  p-values, `test = FALSE` prints only the density table. UCINET issues 31 (Double Dekker's
-  fast path permutes b / SE² rather than t), 32 (Y-permutation MRQAP decides symmetry
-  without looking at Y), 33 (ANOVA density: adjusted R-square off by one, seed ignored,
-  missing cells read as values); ledger 40 (one p-value convention, (1 + count)/(1 + nperm), R's
-  generator), 41, 42. Units vendored. Book (asnr2e 7e83cd3): crosswalk rows, T15 (`xqap`
-  has no measure option), T16 (no Newcomb data, issue #29), T17 (`xautoregression`, #28).
+  p-values. UCINET issues 31-33; ledger 40-42. Book (asnr2e 7e83cd3): crosswalk rows,
+  T15 (`xqap` has no measure option), T16, T17.
 - UCINET-SIDE.md: Cowork's edit of 24 Sep committed (94c4b42).
 
 ## Done earlier on 24 Sep 2026 (Claude Code)
@@ -215,20 +235,18 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 1. **Chapter 12 leftovers, once Steve answers:** `xblockoptimize` (open question 6,
    issue #24), 2-mode core/periphery (open question 7, issue #25), the profile-similarity
    diagonal default (open question 8, T13).
-2. Claude Code runs the last chapter prompt, ch07
-   (`asnr2e/docs/prompts/ch07-claude-code-prompts.md`, after `prompt-conventions.md`),
-   ending with `dev/COVERAGE.md` regenerated. Chapter 14 leftovers once Steve answers:
-   `xautoregression` (open question 9, #28) and the Newcomb dataset (open question 10,
-   #29). **2-mode:** Louvain
-   (open question 4, #18) and core/periphery (open question 7, #25) both wait for Steve;
-   each is a small follow-up once decided (T9, T14).
-3. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped; the fixtures named in
+2. **2-mode:** Louvain (open question 4, #18) and core/periphery (open question 7, #25) both
+   wait for Steve; each is a small follow-up once decided (T9, T14).
+   **Table 14.4 (#29):** once its week-1 dichotomization and predictors are known, a test
+   that reproduces it with `xlrqap(newfrat, ...)`.
+3. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
    `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence,twomode,hypotheses}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
 4. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`) when Steve has a free hour with
    UCINET; `Config/ucinet/reference` bumps then.
 5. Then the asnr2e side: generators and practices per chapter, and the ch07 merge
-   completion once xplot exists.
+   completion (`tools/merge-edits/edits07.py`, a separate asnr2e prompt; T18 has the facts),
+   now that xplot exists.
 
 ## Decisions
 
@@ -342,9 +360,23 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   has no t-test or ANOVA example, so there is no `xttest` / `xanova`.
 
 
+- 24 Sep 2026 (Steve, issue #28): `xautoregression()` wraps `sna::lnam`, since UCINET has no
+  routine; ledger 43.
+
+- 24 Sep 2026 (Steve, design 7.2): no underscores in argument names, so `nodecolor`,
+  `nodesize`, `nodeshape`, `edgewidth`, `edgecolor` and so on.
+
+- 24 Sep 2026 (Claude Code, issue #30): `xplot()` draws the first relation by default, and
+  several with `relation = c(...)`; the layout of a named method is computed on what is
+  shown after `cutoff`, `keep` and `ego` but before isolates are dropped, so
+  `isolates = FALSE` keeps the others' coordinates (7.5.1). 2-mode data are drawn with the
+  spring layout by default rather than the bipartite one the prompt proposed, since two
+  lines of nodes hide the structure the chapters discuss; `layout = "bipartite"` is there.
+  Numbers with at most six distinct whole values count as categories for colour and shape.
+
 ## Open questions for Steve
 
-(Questions 1, 2 and 6 were answered on 23 Sep and are under "Decisions"; the remaining
+(Questions 1, 2 and 6 were answered on 23 Sep, and 9 and 10 on 24 Sep; the answers are under "Decisions". The remaining
 ones keep their numbers because other notes refer to them.)
 
 3. **Chapter 8 items (issue #15):** the six chapter 8 signatures in `crosswalk.py`
@@ -391,10 +423,3 @@ ones keep their numbers because other notes refer to them.)
 8. **Profile similarity's diagonal default (design 12.1; T13).** UCINET's dialog and the
    answer to 12.1 give Reciprocal1; the book's Matrix 12.3 and its prose are Reciprocal2.
    Keep Reciprocal1 and change the text, or default to Reciprocal2 against the dialog?
-9. **`xautoregression` (design 14.4, issue #28).** UCINET has no network autoregression
-   routine to port or test against. Options: (a) native ML lag and error models,
-   cross-checked against `sna::lnam`; (b) wrap `sna::lnam`; (c) drop it and change 14.4
-   (T17). Recommendation (a).
-10. **Newcomb data for the LR-QAP example (14.5.2, Table 14.4; issue #29, T16).** Ship
-   `newcomb` (and say which week-1 dichotomization and predictors Table 14.4 used), or
-   move the example to a shipped dataset? Recommendation: ship it.
