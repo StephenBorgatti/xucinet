@@ -143,7 +143,13 @@ xcentrality <- function(net, relation = NULL, directed = NULL,
 #               each mode scaled to unit length separately rather than the
 #               vector as a whole. UCINET returns it negative; we flip it
 #               positive, as its own 1-mode routines do (UCINET issue 2).
-twomode_centrality <- function(net, m, mode, call) {
+#
+# twomode_scores() computes them for one margin, with the raw degree and raw
+# betweenness beside the normalized ones; xcentrality() reports the five, and
+# xdegree(), xcloseness(), xbetweenness() and xeigenvector() report their own
+# measure for 2-mode data (chapter 13: "the centrality functions of Chapter 9
+# recognize two-mode data and give the appropriately normalized scores").
+twomode_scores <- function(m, mode) {
   nr <- nrow(m); nc <- ncol(m)
   own   <- if (mode == "rows") nr else nc
   other <- if (mode == "rows") nc else nr
@@ -151,10 +157,9 @@ twomode_centrality <- function(net, m, mode, call) {
 
   bin <- bipartite((m > 0) * 1)
   val <- bipartite(replace(m, is.na(m), 0))
-  n <- nrow(bin)
 
-  deg <- (if (mode == "rows") rowSums(m, na.rm = TRUE)
-          else colSums(m, na.rm = TRUE)) / other
+  rawdeg <- if (mode == "rows") rowSums(m, na.rm = TRUE) else colSums(m, na.rm = TRUE)
+  deg <- rawdeg / other
 
   ndeg <- c(rowSums(m, na.rm = TRUE) / nc, colSums(m, na.rm = TRUE) / nr)
   two_local <- as.vector(bin %*% ndeg)[idx] / other
@@ -162,7 +167,8 @@ twomode_centrality <- function(net, m, mode, call) {
   d <- geodesics(bin)
   closeness <- (other + 2 * (own - 1)) / rowSums(d)[idx]
 
-  betweenness <- brandes(bin)[idx] / bipartite_max_betweenness(own, other)
+  rawbet <- brandes(bin)[idx]
+  betweenness <- rawbet / bipartite_max_betweenness(own, other)
 
   e <- principal_eigen(val)$vector
   half <- e[idx]
@@ -171,10 +177,18 @@ twomode_centrality <- function(net, m, mode, call) {
   if (sum(eigenvector) < 0) eigenvector <- -eigenvector
 
   labels <- if (mode == "rows") rownames(m) else colnames(m)
-  nodes <- data.frame(Degree = deg, `2-Local` = two_local,
-                      Closeness = closeness, Betweenness = betweenness,
-                      Eigenvector = eigenvector,
-                      row.names = labels, check.names = FALSE)
+  data.frame(Degree = deg, `2-Local` = two_local,
+             Closeness = closeness, Betweenness = betweenness,
+             Eigenvector = eigenvector, RawDegree = unname(rawdeg),
+             RawBetweenness = rawbet,
+             row.names = labels, check.names = FALSE)
+}
+
+twomode_centrality <- function(net, m, mode, call) {
+  nr <- nrow(m); nc <- ncol(m)
+  other <- if (mode == "rows") nc else nr
+  nodes <- twomode_scores(m, mode)[, c("Degree", "2-Local", "Closeness",
+                                       "Betweenness", "Eigenvector")]
 
   out <- new_xucinet_output(
     "2-mode centrality", net,
@@ -195,4 +209,35 @@ twomode_centrality <- function(net, m, mode, call) {
     subclass = c("x2modecentrality", "xcentrality"), call = call)
   out$primary <- "Degree"
   out
+}
+
+# One measure of 2-Mode Centrality, for the single-measure routines. `cols`
+# maps the report's column names to twomode_scores() columns; mode "both"
+# stacks the rows then the columns and adds a Mode column.
+twomode_single <- function(net, m, mode, cols, routine, subclass, call) {
+  margins <- if (mode == "both") c("rows", "cols") else mode
+  parts <- lapply(margins, function(md) {
+    s <- twomode_scores(m, md)[, unname(cols), drop = FALSE]
+    names(s) <- names(cols)
+    if (mode == "both") s$Mode <- if (md == "rows") "row" else "col"
+    s
+  })
+  nodes <- do.call(rbind, parts)
+  out <- new_xucinet_output(
+    routine, net, nodes = nodes,
+    assumptions = c(
+      sprintf("Data treated as 2-mode: %d rows by %d columns.", nrow(m), ncol(m)),
+      "Computed on the bipartite graph; normalized by the size of the opposite mode (Borgatti and Everett 1997), as UCINET's 2-Mode Centrality."),
+    nodes_title = sprintf("2-Mode %s for %s of %s", routine,
+                          switch(mode, both = "ROWS and COLS", toupper(mode)),
+                          net$title),
+    stats_block = FALSE, subclass = subclass, call = call)
+  out$primary <- names(cols)[if (length(cols) > 1) 2 else 1]
+  out
+}
+
+# The 2-mode test the single-measure routines share: rectangular, or declared
+# 2-mode.
+is_twomode <- function(net, m) {
+  nrow(m) != ncol(m) || identical(net$mode, "2-mode")
 }

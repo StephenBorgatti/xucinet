@@ -1,5 +1,18 @@
 # xucinet 2.0.0.9000 (development)
 
+## Chapter 13: two-mode networks (issue #26)
+
+* `xaffiliations()`: Data | Affiliations, twelve of the dialog's thirteen
+  measures (not the SDSM backbone), rows or columns, opposite-mode
+  normalization; covariance divided by n (UCINET issue 30, ledger 38).
+* `xbipartite()`: Transform | Bipartite, with each node's mode in
+  `$attributes`.
+* `xbicliques()`: UCINET's `biclique()`, in its order, with participation and
+  co-membership per mode and the clustering of the book's Figure 13.4.
+* `xdegree()`, `xcloseness()`, `xbetweenness()` and `xeigenvector()` take
+  2-mode data, with `mode = "both"`, `"rows"` or `"cols"`, and report UCINET's
+  2-Mode Centrality scores (ledger 37).
+
 ## Chapter 12: equivalence, blockmodels, core/periphery (issue #23)
 
 * `xstructuralequivalence()`: UCINET's Profile similarity, every relation

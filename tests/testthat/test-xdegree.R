@@ -135,6 +135,6 @@ test_that("sort is a printing choice and does not move the statistics", {
   expect_error(print(res, sort = "nosuchcolumn"), "must name a column")
 })
 
-test_that("a rectangular matrix is refused, and says what to use instead", {
-  expect_error(xdegree(davis), "square")
+test_that("a rectangular matrix gets 2-mode degree (chapter 13)", {
+  expect_true(all(c("Degree", "nDegree", "Mode") %in% names(xdegree(davis)$nodes)))
 })

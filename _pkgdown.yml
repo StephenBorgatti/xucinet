@@ -181,6 +181,16 @@ reference:
   contents:
   - xcoreperiphery
 
+- title: Network | 2-Mode Networks
+  desc: >
+    Chapter 13. From 2-mode to 1-mode (Data | Affiliations), the bipartite
+    representation, and bicliques. The chapter 9 centrality functions take
+    2-mode data too, with `mode =`.
+  contents:
+  - xaffiliations
+  - xbipartite
+  - xbicliques
+
 - title: Tools | Scaling/Decomposition
   desc: >
     Chapter 6. Multidimensional scaling and correspondence analysis of a

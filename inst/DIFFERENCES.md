@@ -702,3 +702,29 @@ missing cell enters its sums as the missing-value code, 1E37, a tie far
 stronger than any real one. `xrege()` sets missing cells to 0 and says so in
 its notes. Everything else is UCINET's, including the refusal of negative
 values and of non-square data.
+
+## 37. Two-mode: what is added to UCINET's output
+
+**Status:** deliberate, 24 September 2026 (chapter 13, issue #26).
+
+- `xbicliques()` clusters the co-membership of all the nodes, rows and columns
+  together, by average link, as the book's Figure 13.4 shows. UCINET's
+  `biclique()` command only saves the bicliques.
+- `xbipartite()` titles its result after the input (`davis-bi`), where UCINET's
+  dialog saves it under a fixed default name, `bi`; and it records each node's
+  mode in `$attributes`.
+- `xdegree()`, `xcloseness()`, `xbetweenness()` and `xeigenvector()` take 2-mode
+  data and report the scores of UCINET's 2-Mode Centrality, which UCINET offers
+  only as one combined routine (Network | 2-Mode Networks | 2-Mode Centrality,
+  `xcentrality()` here). The book (13.4) says the chapter 9 functions
+  "recognize two-mode data".
+- `xaffiliations()` leaves out the dialog's Backbone (SDSM) method, a
+  statistical model rather than a similarity.
+
+## 38. Affiliations: covariance divided by n
+
+**Status:** UCINET fix pending (UCINET issue 30). 24 September 2026.
+
+UCINET's Affiliations reports the sum of cross-products of deviations as the
+"Covariance", `n` times the covariance. `xaffiliations(method = "covariance")`
+divides by `n`, as UCINET's own Tools | Similarities does.

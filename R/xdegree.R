@@ -22,6 +22,11 @@
 #'   the primary value by [summary()] and by `sort =`.
 #' @param diagonal Include the diagonal? UCINET's *Exclude diagonal* defaults to
 #'   on, so this defaults to `FALSE`.
+#' @param mode For 2-mode data: `"both"` (the default; the rows, then the
+#'   columns, with a `Mode` column), `"rows"` or `"cols"`. The scores are
+#'   UCINET's 2-Mode Centrality, computed on the bipartite graph and normalized
+#'   by the size of the opposite mode (Borgatti and Everett 1997); see
+#'   [xcentrality()]. Ignored for 1-mode data.
 #' @return An `xucinet_output`. `$nodes` holds the degree columns in original
 #'   node order; `$summary` holds graph centralization, as a proportion rather
 #'   than a percentage, which is what UCINET reports.
@@ -32,13 +37,14 @@
 #' print(xdegree(campnet), sort = "Indeg")
 #' @export
 xdegree <- function(net, relation = NULL, directed = NULL, weighted = NULL,
-                    normalize = FALSE, diagonal = FALSE) {
+                    normalize = FALSE, diagonal = FALSE,
+                    mode = c("both", "rows", "cols")) {
+  mode <- match.arg(mode)
   net <- xnet(net, substitute(net), directed = directed)
   m <- as.matrix(net, relation = relation)
-  if (nrow(m) != ncol(m)) {
-    stop("Degree centrality needs a square matrix; this one is ", nrow(m), " x ",
-         ncol(m), ".\n  For 2-mode data use xdegree(net, mode = ) once 2-mode ",
-         "centrality lands.", call. = FALSE)
+  if (is_twomode(net, m)) {
+    return(twomode_single(net, m, mode, c(Degree = "RawDegree", nDegree = "Degree"),
+                          "Degree", "xdegree", match.call()))
   }
   assumptions <- character()
   if (xnrelations(net) > 1) {

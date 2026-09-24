@@ -10,7 +10,8 @@ xdegree(
   directed = NULL,
   weighted = NULL,
   normalize = FALSE,
-  diagonal = FALSE
+  diagonal = FALSE,
+  mode = c("both", "rows", "cols")
 )
 }
 \arguments{
@@ -31,6 +32,12 @@ the primary value by \code{\link[=summary]{summary()}} and by \verb{sort =}.}
 
 \item{diagonal}{Include the diagonal? UCINET's \emph{Exclude diagonal} defaults to
 on, so this defaults to \code{FALSE}.}
+
+\item{mode}{For 2-mode data: \code{"both"} (the default; the rows, then the
+columns, with a \code{Mode} column), \code{"rows"} or \code{"cols"}. The scores are
+UCINET's 2-Mode Centrality, computed on the bipartite graph and normalized
+by the size of the opposite mode (Borgatti and Everett 1997); see
+\code{\link[=xcentrality]{xcentrality()}}. Ignored for 1-mode data.}
 }
 \value{
 An \code{xucinet_output}. \verb{$nodes} holds the degree columns in original

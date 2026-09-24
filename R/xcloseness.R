@@ -34,6 +34,11 @@
 #' @param directed `NULL` (detect from symmetry), `TRUE` or `FALSE`.
 #' @param undefined What to do with unreachable pairs: `"max1"` (default),
 #'   `"n"`, `"zero"` or `"avg"`.
+#' @param mode For 2-mode data: `"both"` (the default; the rows, then the
+#'   columns, with a `Mode` column), `"rows"` or `"cols"`. The scores are
+#'   UCINET's 2-Mode Centrality, computed on the bipartite graph and normalized
+#'   by the size of the opposite mode (Borgatti and Everett 1997); see
+#'   [xcentrality()]. Ignored for 1-mode data.
 #' @return An `xucinet_output` whose `$nodes` holds the three measures, or six
 #'   for directed data, and whose `$summary` holds the closeness centralization
 #'   as a percentage (in- and out- for directed data). UCINET's current Closeness
@@ -44,13 +49,15 @@
 #' xcloseness(campnet)
 #' @export
 xcloseness <- function(net, relation = NULL, directed = NULL,
-                       undefined = c("max1", "n", "zero", "avg")) {
+                       undefined = c("max1", "n", "zero", "avg"),
+                       mode = c("both", "rows", "cols")) {
   undefined <- match.arg(undefined)
+  mode <- match.arg(mode)
   net <- xnet(net, substitute(net), directed = directed)
   m <- as.matrix(net, relation = relation)
-  if (nrow(m) != ncol(m)) {
-    stop("Closeness needs a square matrix; this one is ", nrow(m), " x ",
-         ncol(m), ".", call. = FALSE)
+  if (is_twomode(net, m)) {
+    return(twomode_single(net, m, mode, c(Closeness = "Closeness"),
+                          "Closeness", "xcloseness", match.call()))
   }
   assumptions <- character()
   if (xnrelations(net) > 1) {

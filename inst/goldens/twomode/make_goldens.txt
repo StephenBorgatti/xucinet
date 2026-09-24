@@ -1,0 +1,32 @@
+// ===========================================================================
+// xucinet golden fixtures - Chapter 13, two-mode networks
+//
+// For xaffiliations, xbipartite and xbicliques. Part of the single goldens
+// sweep. The 2-mode Louvain and 2-mode core/periphery fixtures wait on Steve's
+// decisions (issues #18 and #25).
+//
+// HOW TO RUN
+//   1. Paste the CLI lines into the command window, from this folder, then do
+//      the menu runs.
+//   2. Commit everything written here, plus the logs, and set the build number
+//      in UCINET-VERSION.
+//
+// Last run: not yet.
+// ===========================================================================
+
+// --- CLI -------------------------------------------------------------------
+g13_bipartite_davis = bipartite(davis)
+g13_biclique_davis = biclique(davis 3 3)
+
+// --- Data | Affiliations (2-mode to 1-mode) ------------------------------------
+// Mode: Rows; Method: Sums of cross-products (defaults); Opposite mode
+// normalization: None; Recode missing values: checked.
+//   davis                         -> Output dataset  g13_affil_davis_rows
+//   davis, Method: Sums of cross-minimums -> g13_affil_davis_rowsmin
+//   davis, Mode: Columns          -> g13_affil_davis_cols
+// Please also run davis, Mode: Rows, Method: Covariance, and keep the log: it
+// shows UCINET issue 30 (the sum of cross-products of deviations).
+
+// --- Transform | Graph Theoretic | Bipartite -------------------------------------
+// Only if the CLI line above fails: davis, fill 0, symmetric Yes, no prefixes,
+// saved as g13_bipartite_davis.

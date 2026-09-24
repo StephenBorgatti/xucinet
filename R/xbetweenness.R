@@ -21,6 +21,11 @@
 #' @param directed `NULL` (detect from symmetry), `TRUE` or `FALSE`.
 #' @param normalize Selects which column [summary()] reports as the headline.
 #'   Both are always in `$nodes`.
+#' @param mode For 2-mode data: `"both"` (the default; the rows, then the
+#'   columns, with a `Mode` column), `"rows"` or `"cols"`. The scores are
+#'   UCINET's 2-Mode Centrality, computed on the bipartite graph and normalized
+#'   by the size of the opposite mode (Borgatti and Everett 1997); see
+#'   [xcentrality()]. Ignored for 1-mode data.
 #' @return An `xucinet_output`. `$nodes` has `Betweenness` and `nBetweenness`;
 #'   `$summary` has the un-normalized centralization and the network
 #'   centralization index, as UCINET prints both.
@@ -28,12 +33,14 @@
 #' xbetweenness(campnet)
 #' @export
 xbetweenness <- function(net, relation = NULL, directed = NULL,
-                         normalize = FALSE) {
+                         normalize = FALSE, mode = c("both", "rows", "cols")) {
+  mode <- match.arg(mode)
   net <- xnet(net, substitute(net), directed = directed)
   m <- as.matrix(net, relation = relation)
-  if (nrow(m) != ncol(m)) {
-    stop("Betweenness needs a square matrix; this one is ", nrow(m), " x ",
-         ncol(m), ".", call. = FALSE)
+  if (is_twomode(net, m)) {
+    return(twomode_single(net, m, mode,
+                          c(Betweenness = "RawBetweenness", nBetweenness = "Betweenness"),
+                          "Betweenness", "xbetweenness", match.call()))
   }
   assumptions <- character()
   if (xnrelations(net) > 1) {

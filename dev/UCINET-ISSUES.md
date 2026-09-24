@@ -827,6 +827,29 @@ and says so in its notes when `c2p` or `p2c` is given. Ledger entry 35.
 
 ---
 
+## 30. Affiliations: "Covariance" is the sum of cross-products of deviations
+
+**bug** · **open — fix pending** · found 24 September 2026 (chapter 13, issue #26)
+
+`G2Tools/ug2simdis.pas`, procedure `Covariance` (used by Data | Affiliations,
+Method "Covariance"):
+
+```pascal
+if nxy < 1 then z:= bna else z:= sxy;
+```
+
+`sxy` is the running sum of `(x - mean x)(y - mean y)`; it is never divided by
+`nxy`. So the value reported as a covariance is `n` times the covariance (the
+population form), and a projection by covariance scales with the number of
+events. `utsimilarity.pas`, which Tools | Similarities uses, divides by n.
+
+**What xucinet does:** `xaffiliations(method = "covariance")` divides by the
+number of cells both vectors have. Ledger entry 38.
+
+**Fix:** `z:= sxy/nxy`.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps

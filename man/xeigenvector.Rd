@@ -4,13 +4,19 @@
 \alias{xeigenvector}
 \title{Eigenvector centrality}
 \usage{
-xeigenvector(net, relation = NULL)
+xeigenvector(net, relation = NULL, mode = c("both", "rows", "cols"))
 }
 \arguments{
 \item{net}{A network (any accepted form).}
 
 \item{relation}{Which relation of a multi-relation dataset, by name or
 position. Defaults to the first.}
+
+\item{mode}{For 2-mode data: \code{"both"} (the default; the rows, then the
+columns, with a \code{Mode} column), \code{"rows"} or \code{"cols"}. The scores are
+UCINET's 2-Mode Centrality, computed on the bipartite graph and normalized
+by the size of the opposite mode (Borgatti and Everett 1997); see
+\code{\link[=xcentrality]{xcentrality()}}. Ignored for 1-mode data.}
 }
 \value{
 An \code{xucinet_output}. \verb{$nodes} has one \code{Eigenvector} column;

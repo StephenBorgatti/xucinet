@@ -131,8 +131,6 @@ notes <- c(
   xDualCorePeriphery = "2-mode core/periphery waits on a decision about UCINET's genetic algorithm versus the dual projection the book describes (dev/STATUS.md, open questions); xcoreperiphery() takes 1-mode data.",
   xDualDiscreteCorePeriphery = "2-mode core/periphery waits on a decision about UCINET's genetic algorithm versus the dual projection the book describes (dev/STATUS.md, open questions); xcoreperiphery() takes 1-mode data.",
   xDualStructuralEquivalence = "For 2-mode data, compare rows or columns with xsimilarities(net, mode = \"rows\") or mode = \"cols\".",
-  xBiCliques = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
-  xBiComembership = "Two-mode cliques (bicliques) belong to chapter 13 and are written with it; xcliques() takes 1-mode data.",
   xDualLouvainMethod = "On 2-mode data xlouvain() waits on a decision between UCINET's bipartite modularity and the dual projection the book describes (GitHub issue #18).",
   xMDS = "type =\"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xmds.",
   xHierarchicalClustering = "type = \"similarities\" or \"dissimilarities\" is now required; the 1e default is gone because a 0/1 matrix cannot tell the two apart. See ?xhclust.",

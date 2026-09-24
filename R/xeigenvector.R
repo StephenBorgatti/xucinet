@@ -22,6 +22,11 @@
 #' @param net A network (any accepted form).
 #' @param relation Which relation of a multi-relation dataset, by name or
 #'   position. Defaults to the first.
+#' @param mode For 2-mode data: `"both"` (the default; the rows, then the
+#'   columns, with a `Mode` column), `"rows"` or `"cols"`. The scores are
+#'   UCINET's 2-Mode Centrality, computed on the bipartite graph and normalized
+#'   by the size of the opposite mode (Borgatti and Everett 1997); see
+#'   [xcentrality()]. Ignored for 1-mode data.
 #' @return An `xucinet_output`. `$nodes` has one `Eigenvector` column;
 #'   `$summary` carries the eigenvector centralization as a percentage, as
 #'   UCINET's dialog reports it, and the principal eigenvalue, or the component
@@ -30,12 +35,13 @@
 #' @examples
 #' xeigenvector(campnet)
 #' @export
-xeigenvector <- function(net, relation = NULL) {
+xeigenvector <- function(net, relation = NULL, mode = c("both", "rows", "cols")) {
+  mode <- match.arg(mode)
   net <- xnet(net, substitute(net))
   m <- as.matrix(net, relation = relation)
-  if (nrow(m) != ncol(m)) {
-    stop("Eigenvector centrality needs a square matrix; this one is ", nrow(m),
-         " x ", ncol(m), ".", call. = FALSE)
+  if (is_twomode(net, m)) {
+    return(twomode_single(net, m, mode, c(Eigenvector = "Eigenvector"),
+                          "Eigenvector", "xeigenvector", match.call()))
   }
   assumptions <- character()
   if (xnrelations(net) > 1) {
