@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 24 Sep 2026 (Claude Code, chapter 13; Cowork should
+Updated 24 Sep 2026 (Claude Code, chapter 14; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -52,11 +52,15 @@ batch at the end.** Design questions for all remaining chapters are batched in
   `xbicliques`, and 2-mode data in `xdegree`/`xcloseness`/`xbetweenness`/`xeigenvector`
   (`mode =`). 2-mode Louvain and core/periphery still wait on open questions 4 and 7.
   Goldens named in `inst/goldens/twomode/`. The 2-mode audit is a comment on issue #26.
-- Chapters 7 and 14 not started. `dev/COVERAGE.md` (24 Sep): 15 done, 58 coded with
-  goldens pending, 12 not started, 3 dropped. Remaining coding order: 14, 7.
+- Chapter 14 (testing hypotheses) done 24 Sep, issue #27: `xcorrelation`, `xregression`,
+  `xqap`, `xmrqap`, `xlrqap`, and `xdensitybygroups(test = TRUE)` with the three ANOVA
+  density models. One permutation engine for all (`R/permute-internals.R`). Held:
+  `xautoregression` (#28, no UCINET routine). Goldens named in `inst/goldens/hypotheses/`.
+- Chapter 7 not started; it is the last. `dev/COVERAGE.md` (24 Sep): 15 done, 63 coded
+  with goldens pending, 7 not started, 3 dropped.
 - `inst/extdata/crosswalk-routines.csv` was regenerated from the rebuilt crosswalk on
-  23 Sep; its chapter 8, 11, 12 and 13 rows are edited by hand to the package's
-  signatures. `crosswalk.py` has the chapter 8, 12 and 13 signatures too but still the
+  23 Sep; its chapter 8, 11, 12, 13 and 14 rows are edited by hand to the package's
+  signatures. `crosswalk.py` has the chapter 8, 12, 13 and 14 signatures too but still the
   old chapter 11 ones (open question 5), so re-running `data-raw/make-crosswalk.R` now
   would revert rows.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
@@ -69,6 +73,23 @@ batch at the end.** Design questions for all remaining chapters are batched in
   Dropbox copies are stale.
 
 ## Done this session (24 Sep 2026, Claude Code)
+
+- **Chapter 14 (issue #27; 4500f3c).** Node level: `xcorrelation()` and `xregression()`
+  (Tools | Testing Hypotheses | Node-level | Regression), permuting y, classical and
+  permutation p-values side by side. Dyadic: `xqap()` reports all seven utqapsim measures,
+  each with its own test (the book's Padgett numbers, Table 14.2, reproduced); `xmrqap()`
+  by Double Dekker semi-partialling (default) or Y permutation, with the robust SE UCINET
+  prints (hightech, Table 14.3, reproduced); `xlrqap()`. Mixed: `xdensitybygroups()`
+  always fits UCINET's three ANOVA density models (XCatC2.pas); `test = TRUE` adds their
+  p-values, `test = FALSE` prints only the density table. UCINET issues 31 (Double Dekker's
+  fast path permutes b / SE² rather than t), 32 (Y-permutation MRQAP decides symmetry
+  without looking at Y), 33 (ANOVA density: adjusted R-square off by one, seed ignored,
+  missing cells read as values); ledger 40 (one p-value convention, (1 + count)/(1 + nperm), R's
+  generator), 41, 42. Units vendored. Book (asnr2e 7e83cd3): crosswalk rows, T15 (`xqap`
+  has no measure option), T16 (no Newcomb data, issue #29), T17 (`xautoregression`, #28).
+- UCINET-SIDE.md: Cowork's edit of 24 Sep committed (94c4b42).
+
+## Done earlier on 24 Sep 2026 (Claude Code)
 
 - **Chapter 13 (issue #26; 319e535).** `xaffiliations()` (Data | Affiliations, twelve of
   its thirteen methods; UCINET issue 30, covariance not divided by n, ledger 38);
@@ -194,13 +215,15 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 1. **Chapter 12 leftovers, once Steve answers:** `xblockoptimize` (open question 6,
    issue #24), 2-mode core/periphery (open question 7, issue #25), the profile-similarity
    diagonal default (open question 8, T13).
-2. Claude Code runs the remaining chapter prompts in order: ch14, ch07
-   (`asnr2e/docs/prompts/chNN-claude-code-prompts.md`, after `prompt-conventions.md`).
-   Each is one session and ends with `dev/COVERAGE.md` regenerated. **2-mode:** Louvain
+2. Claude Code runs the last chapter prompt, ch07
+   (`asnr2e/docs/prompts/ch07-claude-code-prompts.md`, after `prompt-conventions.md`),
+   ending with `dev/COVERAGE.md` regenerated. Chapter 14 leftovers once Steve answers:
+   `xautoregression` (open question 9, #28) and the Newcomb dataset (open question 10,
+   #29). **2-mode:** Louvain
    (open question 4, #18) and core/periphery (open question 7, #25) both wait for Steve;
    each is a small follow-up once decided (T9, T14).
-3. Golden tests for chapters 5, 6, 8, 10, 11, 12 and 13 stay skipped; the fixtures named in
-   `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence,twomode}/README.md` join the
+3. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped; the fixtures named in
+   `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence,twomode,hypotheses}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
 4. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`) when Steve has a free hour with
    UCINET; `Config/ucinet/reference` bumps then.
@@ -310,6 +333,14 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 - 24 Sep 2026 (Steve): `xaffiliations()` includes the SDSM backbone, as a 1-mode
   projection like the other methods.
 
+- 24 Sep 2026 (Claude Code, issue #27): every permutation routine uses one convention:
+  p = (1 + count)/(1 + nperm), the observed value counted, R's generator under `seed`,
+  `tails = 2` testing As Extreme and `tails = 1` the direction of the observed sign;
+  UCINET's routines differ among themselves (ledger 40). `xqap()` has no measure argument,
+  since UCINET computes and prints all seven. `xdensitybygroups()` always fits the three
+  ANOVA density models (level-of-analysis rule); `test` only adds the p-values. The book
+  has no t-test or ANOVA example, so there is no `xttest` / `xanova`.
+
 
 ## Open questions for Steve
 
@@ -360,3 +391,10 @@ ones keep their numbers because other notes refer to them.)
 8. **Profile similarity's diagonal default (design 12.1; T13).** UCINET's dialog and the
    answer to 12.1 give Reciprocal1; the book's Matrix 12.3 and its prose are Reciprocal2.
    Keep Reciprocal1 and change the text, or default to Reciprocal2 against the dialog?
+9. **`xautoregression` (design 14.4, issue #28).** UCINET has no network autoregression
+   routine to port or test against. Options: (a) native ML lag and error models,
+   cross-checked against `sna::lnam`; (b) wrap `sna::lnam`; (c) drop it and change 14.4
+   (T17). Recommendation (a).
+10. **Newcomb data for the LR-QAP example (14.5.2, Table 14.4; issue #29, T16).** Ship
+   `newcomb` (and say which week-1 dichotomization and predictors Table 14.4 used), or
+   move the example to a shipped dataset? Recommendation: ship it.
