@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 23 Sep 2026 (Claude Code, after the Cowork session of the same day; Cowork should
+Updated 24 Sep 2026 (Claude Code, chapter 13; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
