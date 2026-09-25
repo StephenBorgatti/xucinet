@@ -67,7 +67,9 @@ batch at the end.** Design questions for all remaining chapters are batched in
   `elsevalue=` and the full 10.5 row; Walktrap and QuickClus are marked dropped in both.
   The xlsx was rebuilt from it on 25 Sep (asnr2e 7fcc115), so xlsx, `crosswalk.py` and the
   CSV all agree; `data-raw/make-crosswalk.R` can regenerate the CSV without reverting
-  anything. Rebuild with `python build_xlsx.py` in `asnr2e/crosswalk`.
+  anything. Rebuild with `python build_xlsx.py` in `asnr2e/crosswalk`, then copy the xlsx
+  over the one in the book's Dropbox folder (`ASN R 2e - Fall 2026/`), which is there only
+  for the coauthors and was last refreshed 25 Sep.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
