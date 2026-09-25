@@ -65,9 +65,9 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - `inst/extdata/crosswalk-routines.csv` and `crosswalk.py` agree (25 Sep): every signature
   in the CSV appears verbatim in `crosswalk.py`, which now has the chapter 11 signatures,
   `elsevalue=` and the full 10.5 row; Walktrap and QuickClus are marked dropped in both.
-  The xlsx was rebuilt and committed through chapter 14 (asnr2e 174a3bf, built 24 Sep
-  18:34), so it predates the chapter 7 rows and this morning's sync; once it is rebuilt
-  again, `data-raw/make-crosswalk.R` can regenerate the CSV without reverting anything.
+  The xlsx was rebuilt from it on 25 Sep (asnr2e 7fcc115), so xlsx, `crosswalk.py` and the
+  CSV all agree; `data-raw/make-crosswalk.R` can regenerate the CSV without reverting
+  anything. Rebuild with `python build_xlsx.py` in `asnr2e/crosswalk`.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
@@ -89,6 +89,8 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - asnr2e 174a3bf, at Steve's request: the crosswalk xlsx rebuild through chapter 14 that
   had been sitting uncommitted, and `build_xlsx.py`, which now carries Steve's answers to
   D-1 to D-10 (a new column on the Decisions sheet) so that rebuilds keep them.
+- Python 3.13 installed (with openpyxl, lxml), and the xlsx rebuilt from the current
+  `crosswalk.py` (asnr2e 7fcc115): chapter 7 rows and the 25 Sep signature sync now in it.
 
 ## Done on 24 Sep 2026 (Claude Code)
 
@@ -243,23 +245,19 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. **Cowork:** rebuild the crosswalk xlsx once more (`build_xlsx.py`) and commit it. The
-   committed workbook (asnr2e 174a3bf) runs through chapter 14 but was built before the
-   chapter 7 rows and the 25 Sep sync of `crosswalk.py` (chapter 11, 5.5.1, chapter 8,
-   10.5). Claude Code can run it now that Python is installed (25 Sep).
-1. **Chapter 12 leftovers, once Steve answers:** `xblockoptimize` (open question 6,
+0. **Chapter 12 leftovers, once Steve answers:** `xblockoptimize` (open question 6,
    issue #24), 2-mode core/periphery (open question 7, issue #25), the profile-similarity
    diagonal default (open question 8, T13).
-2. **2-mode:** Louvain (open question 4, #18) and core/periphery (open question 7, #25) both
+1. **2-mode:** Louvain (open question 4, #18) and core/periphery (open question 7, #25) both
    wait for Steve; each is a small follow-up once decided (T9, T14).
    **Table 14.4 (#29):** once its week-1 dichotomization and predictors are known, a test
    that reproduces it with `xlrqap(newfrat, ...)`.
-3. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
+2. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
    `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence,twomode,hypotheses}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
-4. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`) when Steve has a free hour with
+3. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`) when Steve has a free hour with
    UCINET; `Config/ucinet/reference` bumps then.
-5. Then the asnr2e side: generators and practices per chapter, and the ch07 merge
+4. Then the asnr2e side: generators and practices per chapter, and the ch07 merge
    completion (`tools/merge-edits/edits07.py`, a separate asnr2e prompt; T18 has the facts),
    now that xplot exists.
 
