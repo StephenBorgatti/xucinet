@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 24 Sep 2026 (Claude Code, chapters 14 and 7; Cowork should
+Updated 25 Sep 2026 (Claude Code; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -62,11 +62,11 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - **Every chapter is now coded.** `dev/COVERAGE.md` (24 Sep): 15 done, 67 coded with
   goldens pending, 3 not started (the chapter 12 and 2-mode items waiting on Steve), 3
   dropped. What is left is the open questions below and the goldens sweep.
-- `inst/extdata/crosswalk-routines.csv` was regenerated from the rebuilt crosswalk on
-  23 Sep; its chapter 7, 8, 11, 12, 13 and 14 rows are edited by hand to the package's
-  signatures. `crosswalk.py` has the chapter 7, 8, 12, 13 and 14 signatures too but still the
-  old chapter 11 ones (open question 5), so re-running `data-raw/make-crosswalk.R` now
-  would revert rows.
+- `inst/extdata/crosswalk-routines.csv` and `crosswalk.py` agree (25 Sep): every signature
+  in the CSV appears verbatim in `crosswalk.py`, which now has the chapter 11 signatures,
+  `elsevalue=` and the full 10.5 row; Walktrap and QuickClus are marked dropped in both.
+  Once Cowork rebuilds the xlsx, `data-raw/make-crosswalk.R` can regenerate the CSV
+  without reverting anything.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
@@ -76,7 +76,16 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - UCINET source for porting: `C:\Dev\ucinet\Source` and `C:\Dev\tools` (Delphi 13). The
   Dropbox copies are stale.
 
-## Done this session (24 Sep 2026, Claude Code)
+## Done this session (25 Sep 2026, Claude Code)
+
+- Housekeeping Steve asked for: issue #15 closed (answered 23 Sep); T8 in
+  `asnr2e/docs/text-changes.md` turned from `open: decision` into a plain text edit (no
+  WPGMA; UCINET's weighted average is `xhclust(method = "average")`); open question 5
+  done: the chapter 11 signatures copied into `crosswalk.py`, and the other rows where the
+  two copies differed (5.5.1, 8.2, 8.4, 8.5, 8.6.1, 10.5) brought into line with the
+  functions' actual arguments.
+
+## Done on 24 Sep 2026 (Claude Code)
 
 - **`xautoregression` (issue #28, fb9a231).** Steve chose to wrap `sna::lnam`: lag and
   error models, W row-normalized by default, net first as everywhere. `numDeriv` joins
@@ -376,20 +385,9 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Open questions for Steve
 
-(Questions 1, 2 and 6 were answered on 23 Sep, and 9 and 10 on 24 Sep; the answers are under "Decisions". The remaining
+(Questions 1 and 2 were answered on 23 Sep, 9 and 10 on 24 Sep, and 3 and 5 are closed; the answers are under "Decisions". The remaining
 ones keep their numbers because other notes refer to them.)
 
-3. **Chapter 8 items (issue #15):** the six chapter 8 signatures in `crosswalk.py`
-   (`xegonet` has neither `directed` nor `include_ego`); whether `direction` is the right
-   argument name; which of UCINET bugs 17-20 will be fixed. (The `xmixing` signature
-   without `model =` has been in `crosswalk.py` and the xlsx since the Cowork commit of
-   23 Sep; only the chapter 8 rows remain.)
-   → Partly answered 23 Sep (Steve, via Cowork). The argument is renamed `ties`, with
-   `"undirected"` becoming `"any"` (Next 2; SPEC addendum). The chapter 8 rows of
-   `crosswalk.py` now carry the package's signatures with `ties`. Still open: whether
-   UCINET issues 17-20 go on the 6.850 list.
-   → Answered 23 Sep (Steve): yes, all four are scheduled for 6.850 (UCINET-ISSUES 17-20
-   updated). Question 3 is closed.
 4. **2-mode Louvain (design question 11.4).** UCINET's 2-mode Louvain
    (`uc_2modelouvain.pas`, engine `G2Tools/u2modelouvain.pas`) maximizes Barber's
    bipartite modularity Q_b: one level of local moving, no aggregation, nodes visited in
@@ -400,16 +398,6 @@ ones keep their numbers because other notes refer to them.)
    (b) it does dual projection, as the text says, with a ledger entry; (c) both, chosen by
    an argument (the slot structure is the same either way). Recorded as
    `asnr2e/docs/text-changes.md` T9.
-5. **Chapter 11 signatures for `crosswalk.py`** (issue #17). The package's copy has
-   them; the master needs them: `xcliques(net, min = 3, type = c("weak","strong"),
-   relation = NULL)`, `xfactions(net, k = 2, method = c("hamming","phi","modularity",
-   "entailment"), restarts = 3, maxit = 20, penalty = 15, seed = NULL, relation = NULL)`,
-   `xgirvannewman(net, k = 10, relation = NULL)`, `xlouvain(net, symmetrize =
-   c("max","min","average","sum","none"), maxlevels = NULL, relation = NULL)` (no
-   `resolution`: UCINET's Louvain has none), `xfastgreedy(net, relation = NULL)`,
-   `xlabelpropagation(net, seed = NULL, relation = NULL)`; and the Walktrap row marked
-   dropped. Book text: T10 (factions measures) and T11 (Louvain is deterministic) in
-   `asnr2e/docs/text-changes.md`.
 6. **`xblockoptimize` (design 12.3, issue #24).** Steve asked whether it differs from
    `xblockmodel` (yes: it searches for the partition, `xblockmodel` summarizes a given
    one), how to implement it, and whether a package exists. Options: (a) a native port of
