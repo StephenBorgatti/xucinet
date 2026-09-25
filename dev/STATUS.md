@@ -73,7 +73,8 @@ batch at the end.** Design questions for all remaining chapters are batched in
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
   tests run locally. R is not on the Git Bash PATH: prefix
   `export PATH="/c/Program Files/R/R-4.6.1/bin:$PATH"`, and put `Rscript -e` code
-  containing `|` in a file, because the shell hands it to cmd.exe. No Python.
+  containing `|` in a file, because the shell hands it to cmd.exe. Python 3.13 (25 Sep, per user, with openpyxl and lxml):
+  `$LOCALAPPDATA/Programs/Python/Python313/python.exe`, on the user PATH for new shells.
 - UCINET source for porting: `C:\Dev\ucinet\Source` and `C:\Dev\tools` (Delphi 13). The
   Dropbox copies are stale.
 
@@ -245,7 +246,7 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 0. **Cowork:** rebuild the crosswalk xlsx once more (`build_xlsx.py`) and commit it. The
    committed workbook (asnr2e 174a3bf) runs through chapter 14 but was built before the
    chapter 7 rows and the 25 Sep sync of `crosswalk.py` (chapter 11, 5.5.1, chapter 8,
-   10.5). Claude Code cannot run it: no Python on this machine.
+   10.5). Claude Code can run it now that Python is installed (25 Sep).
 1. **Chapter 12 leftovers, once Steve answers:** `xblockoptimize` (open question 6,
    issue #24), 2-mode core/periphery (open question 7, issue #25), the profile-similarity
    diagonal default (open question 8, T13).
