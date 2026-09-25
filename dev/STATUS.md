@@ -65,8 +65,9 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - `inst/extdata/crosswalk-routines.csv` and `crosswalk.py` agree (25 Sep): every signature
   in the CSV appears verbatim in `crosswalk.py`, which now has the chapter 11 signatures,
   `elsevalue=` and the full 10.5 row; Walktrap and QuickClus are marked dropped in both.
-  Once Cowork rebuilds the xlsx, `data-raw/make-crosswalk.R` can regenerate the CSV
-  without reverting anything.
+  The xlsx was rebuilt and committed through chapter 14 (asnr2e 174a3bf, built 24 Sep
+  18:34), so it predates the chapter 7 rows and this morning's sync; once it is rebuilt
+  again, `data-raw/make-crosswalk.R` can regenerate the CSV without reverting anything.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
@@ -84,6 +85,9 @@ batch at the end.** Design questions for all remaining chapters are batched in
   done: the chapter 11 signatures copied into `crosswalk.py`, and the other rows where the
   two copies differed (5.5.1, 8.2, 8.4, 8.5, 8.6.1, 10.5) brought into line with the
   functions' actual arguments.
+- asnr2e 174a3bf, at Steve's request: the crosswalk xlsx rebuild through chapter 14 that
+  had been sitting uncommitted, and `build_xlsx.py`, which now carries Steve's answers to
+  D-1 to D-10 (a new column on the Decisions sheet) so that rebuilds keep them.
 
 ## Done on 24 Sep 2026 (Claude Code)
 
@@ -238,9 +242,10 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. **Cowork:** rebuild the crosswalk xlsx (`build_xlsx.py`) and commit it (an uncommitted
-   rebuild was sitting in asnr2e on 24 Sep): `crosswalk.py` has new
-   signatures for `xcommunities` and the chapter 12 and 13 routines.
+0. **Cowork:** rebuild the crosswalk xlsx once more (`build_xlsx.py`) and commit it. The
+   committed workbook (asnr2e 174a3bf) runs through chapter 14 but was built before the
+   chapter 7 rows and the 25 Sep sync of `crosswalk.py` (chapter 11, 5.5.1, chapter 8,
+   10.5). Claude Code cannot run it: no Python on this machine.
 1. **Chapter 12 leftovers, once Steve answers:** `xblockoptimize` (open question 6,
    issue #24), 2-mode core/periphery (open question 7, issue #25), the profile-similarity
    diagonal default (open question 8, T13).
