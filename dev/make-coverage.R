@@ -47,10 +47,22 @@ dropped <- c(
   xcreateproject   = "design question 5.11: xucinet 2.0 has no project object",
   xaddtoproject    = "design question 5.11: xucinet 2.0 has no project object",
   xremovefromproject = "design question 5.11: xucinet 2.0 has no project object",
-  xreachbetweenness = "no UCINET equivalent; withdrawn 7 Sep 2026",
-  xwalktrap        = "design question 11.5 (after D-7): the third edition does not use Walktrap; the 1e aliases name xcommunities()",
-  drop             = "QuickClus: the crosswalk marks it for dropping; chapter 11 does not use it"
+  xreachbetweenness = "no UCINET equivalent; withdrawn 7 Sep 2026"
 )
+
+# Rows dropped as a whole, matched on the topic, because their 2.0 column holds
+# no function name to key on: "(dropped)" for the two chapter 11 methods, and
+# "(statnet)" for chapter 15, which uses other packages directly.
+dropped_rows <- c(
+  "QuickClus"  = "QuickClus: the crosswalk marks it for dropping; chapter 11 does not use it",
+  "Walktrap"   = "Walktrap: design question 11.5 (after D-7); the third edition does not use it, and the 1e aliases name xcommunities()",
+  "ERGMs"      = "ERGMs: decision D-9; chapter 15 uses statnet's ergm and RSiena directly, with as_network() as the bridge, so there are no xucinet wrappers"
+)
+row_dropped <- function(topic) {
+  hit <- names(dropped_rows)[vapply(names(dropped_rows), grepl, logical(1),
+                                    x = topic, fixed = TRUE)]
+  if (length(hit)) hit[1] else NA_character_
+}
 
 # The first bare lowercase name in the 2.0 column, the way xhelp() reads it.
 first_name <- function(x) {
@@ -73,9 +85,12 @@ status_of <- function(fn, chapter) {
 }
 
 tbl$fn <- vapply(tbl$name_2, first_name, character(1))
-tbl$status <- vapply(seq_len(nrow(tbl)),
-                     function(i) status_of(tbl$fn[i], tbl$chapter[i]),
-                     character(1))
+tbl$drop_key <- vapply(tbl$topic, row_dropped, character(1))
+tbl$fn[!is.na(tbl$drop_key)] <- NA_character_
+tbl$status <- vapply(seq_len(nrow(tbl)), function(i) {
+  if (!is.na(tbl$drop_key[i])) return("dropped")
+  status_of(tbl$fn[i], tbl$chapter[i])
+}, character(1))
 
 # ---- write it out -----------------------------------------------------------
 
@@ -122,9 +137,10 @@ for (ch in chapters) {
            "")
 }
 
-if (length(dropped)) {
+if (length(dropped) || length(dropped_rows)) {
   out <- c(out, "## Dropped", "",
-           sprintf("- `%s()` - %s", names(dropped), unname(dropped)), "")
+           sprintf("- `%s()` - %s", names(dropped), unname(dropped)),
+           sprintf("- %s", unname(dropped_rows)), "")
 }
 
 writeLines(out, "dev/COVERAGE.md")
