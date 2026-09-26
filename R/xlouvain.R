@@ -48,7 +48,10 @@
 #' Each level of that process is a partition; `$matrices$Levels` has them all,
 #' headed with the number of clusters and the modularity as UCINET heads them,
 #' and `Cluster` in the node table is the last. For 1-mode data the search is
-#' deterministic, as UCINET's is, so `seed` plays no part.
+#' deterministic by default, as UCINET's is: nodes are visited in their order.
+#' `order = "random"` visits them in a random order instead, drawn afresh on
+#' every pass, so that runs with different seeds show how robust a partition
+#' is (book, 11.4.2). UCINET has no such option.
 #'
 #' **2-mode data** are UCINET's 2-Mode Bipartite Communities (Louvain): one
 #' partition of the row and column nodes together that maximizes Barber's
@@ -76,18 +79,24 @@
 #'   nothing merges.
 #' @param relation Which relation of a multi-relation dataset, by name or
 #'   position. Defaults to the first.
-#' @param seed For 2-mode data: the random seed, a whole number. `NULL` picks
-#'   one between 1 and 1000 and reports it, so the run can be repeated.
+#' @param order 1-mode data: `"fixed"` (the default, UCINET's) visits nodes in
+#'   their order; `"random"` in a random order under `seed`.
+#' @param seed For 2-mode data, and for `order = "random"`: the random seed, a
+#'   whole number. `NULL` picks one between 1 and 1000 and reports it, so the
+#'   run can be repeated.
 #' @return An object of class `c("xlouvain", "xucinet_output")`.
 #' @seealso [xcommunities()], [xgirvannewman()].
 #' @examples
 #' xlouvain(campnet)
+#' xlouvain(zachary, order = "random", seed = 2)
 #' xlouvain(davis, seed = 1)
 #' @export
 xlouvain <- function(net, symmetrize = c("max", "min", "average", "sum", "none"),
-                     maxlevels = NULL, relation = NULL, seed = NULL) {
+                     maxlevels = NULL, relation = NULL, seed = NULL,
+                     order = c("fixed", "random")) {
   net <- xnet(net, substitute(net))
   symmetrize <- match.arg(symmetrize)
+  order <- match.arg(order)
   if (identical(net$mode, "2-mode")) {
     return(xlouvain_2mode(net, relation, seed, match.call()))
   }
@@ -111,7 +120,16 @@ xlouvain <- function(net, symmetrize = c("max", "min", "average", "sum", "none")
     assumptions <- c(assumptions, paste0("Data symmetrized by ", symmetrize, "."))
   }
 
-  res <- louvain_levels(w, if (is.null(maxlevels)) nrow(w) else maxlevels)
+  if (order == "random") {
+    if (is.null(seed)) seed <- sample.int(1000, 1)
+    seed <- as.integer(seed)
+    res <- with_seed(seed, louvain_levels(w, if (is.null(maxlevels)) nrow(w) else maxlevels,
+                                          random = TRUE))
+    assumptions <- c(assumptions, sprintf(
+      "Nodes visited in a random order (seed %d); UCINET's order is fixed.", seed))
+  } else {
+    res <- louvain_levels(w, if (is.null(maxlevels)) nrow(w) else maxlevels)
+  }
   levels <- res$hier
   rownames(levels) <- labels
   part <- levels[, ncol(levels)]
@@ -144,7 +162,7 @@ xlouvain <- function(net, symmetrize = c("max", "min", "average", "sum", "none")
 # the arithmetic is shorter. A move is made only if it raises Q by more than
 # 1e-12, so that two routes to the same Q are a tie (first candidate wins, as
 # in UCINET) rather than a coin toss decided by rounding.
-louvain_levels <- function(w, maxpart) {
+louvain_levels <- function(w, maxpart, random = FALSE) {
   noriginal <- nrow(w)
   net <- w
   sumofties <- sum(net)
@@ -177,7 +195,8 @@ louvain_levels <- function(w, maxpart) {
     anymoved <- TRUE
     while (anymoved) {
       anymoved <- FALSE
-      for (ego in seq_len(n)) {
+      # order = "random" (Steve, 26 Sep 2026, T11): a fresh order each pass.
+      for (ego in if (random) sample.int(n) else seq_len(n)) {
         cands <- unique(part[neighbors[[ego]]])
         a <- part[ego]
         cands <- cands[cands != a]

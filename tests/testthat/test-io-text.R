@@ -70,6 +70,27 @@ test_that("DL nodelist1 reads ego then alters", {
   expect_equal(unname(as.matrix(net)), full3)
 })
 
+test_that("a valued nodelist1 reads alter:value, and . as missing", {
+  # Book 5.3.3: "Chandler Joey:2 Monica:3 Phoebe:1" (asnr2e T5; Steve, 26 Sep).
+  net <- xreaddl(dlfile("DL N=4", "FORMAT=NODELIST1", "LABELS EMBEDDED", "DATA:",
+                        "Chandler Joey:2 Monica:3 Phoebe:1", "Joey Chandler:1",
+                        "Monica Chandler:3 Phoebe:.", "Phoebe"))
+  m <- as.matrix(net)
+  expect_equal(rownames(m), c("Chandler", "Joey", "Monica", "Phoebe"))
+  expect_equal(unname(m["Chandler", c("Joey", "Monica", "Phoebe")]), c(2, 3, 1))
+  expect_equal(m["Joey", "Chandler"], 1)
+  expect_true(is.na(m["Monica", "Phoebe"]))
+  expect_equal(sum(m["Phoebe", ], na.rm = TRUE), 0)
+  # Plain alters are still ties of 1, in the same row as valued ones.
+  mixed <- as.matrix(xreaddl(dlfile("DL N=3", "FORMAT=NODELIST1", "LABELS EMBEDDED",
+                                    "DATA:", "a b:4 c", "b", "c")))
+  expect_equal(unname(mixed["a", c("b", "c")]), c(4, 1))
+  # A colon that is not followed by a number belongs to the label.
+  lab <- as.matrix(xreaddl(dlfile("DL N=2", "FORMAT=NODELIST1", "LABELS EMBEDDED",
+                                  "DATA:", "x:y z", "z")))
+  expect_equal(rownames(lab), c("x:y", "z"))
+})
+
 test_that("the 2-mode variants index two different node sets", {
   el <- xreaddl(dlfile("DL NR=2, NC=3", "FORMAT=EDGELIST2", "ROW LABELS:", "r1,r2",
                        "COLUMN LABELS:", "c1,c2,c3", "DATA:", "1 1 1", "2 3 1"))

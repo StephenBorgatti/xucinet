@@ -1013,6 +1013,23 @@ only when valid; missing cells left out. Ledger entry 46.
 
 ---
 
+## 36. DL import: valued nodelists (alter:value)
+
+**request** · **open** · 26 September 2026 (Steve; book 5.3.3, asnr2e T5)
+
+The book describes a valued nodelist, each alter followed by a colon and the tie
+value (`Chandler Joey:2 Monica:3 Phoebe:1`), with a value that can mark a missing
+tie. UCINET's DL readers do not take it: the nodelist formats carry no values, and
+`udlm.pas` lists `:` among the delimiters, so `Joey:2` would read as two alters.
+
+**What xucinet does:** `xread()` / `xreaddl()` read `alter:value` in NODELIST1 and
+NODELIST2 data, `alter:.` as missing; a colon not followed by a number is part of the
+label. Ledger entry 47.
+
+**Request:** the same in UCINET's DL importer, so the two read the same files.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps

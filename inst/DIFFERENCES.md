@@ -846,3 +846,19 @@ governs every count; missing cells are left out. Because the first changes the
 start, partitions can differ from UCINET's for the same seed; the golden tests
 compare the fit. Valued or binary is chosen from the data unless `weighted` says;
 UCINET has two menu items.
+
+## 47. DL files: valued nodelists
+
+**Status:** deliberate, until UCINET follows (UCINET issue 36). Steve, 26 September 2026.
+
+`xreaddl()` reads `alter:value` in a DL nodelist (book 5.3.3) and `alter:.` as a
+missing tie. UCINET's DL importer does not yet read the form.
+
+## 48. Louvain: an optional random visiting order
+
+**Status:** deliberate (Steve, 26 September 2026; asnr2e T11).
+
+`xlouvain(order = "random", seed = )` visits the nodes of 1-mode data in a random
+order drawn afresh each pass, so that different seeds test a partition's
+robustness (book 11.4.2). UCINET's Louvain has only the fixed order, which stays
+the default.

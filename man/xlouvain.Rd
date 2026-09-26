@@ -9,7 +9,8 @@ xlouvain(
   symmetrize = c("max", "min", "average", "sum", "none"),
   maxlevels = NULL,
   relation = NULL,
-  seed = NULL
+  seed = NULL,
+  order = c("fixed", "random")
 )
 }
 \arguments{
@@ -24,8 +25,12 @@ nothing merges.}
 \item{relation}{Which relation of a multi-relation dataset, by name or
 position. Defaults to the first.}
 
-\item{seed}{For 2-mode data: the random seed, a whole number. \code{NULL} picks
-one between 1 and 1000 and reports it, so the run can be repeated.}
+\item{seed}{For 2-mode data, and for \code{order = "random"}: the random seed, a
+whole number. \code{NULL} picks one between 1 and 1000 and reports it, so the
+run can be repeated.}
+
+\item{order}{1-mode data: \code{"fixed"} (the default, UCINET's) visits nodes in
+their order; \code{"random"} in a random order under \code{seed}.}
 }
 \value{
 An object of class \code{c("xlouvain", "xucinet_output")}.
@@ -40,7 +45,10 @@ on the smaller network until nothing more merges.
 Each level of that process is a partition; \verb{$matrices$Levels} has them all,
 headed with the number of clusters and the modularity as UCINET heads them,
 and \code{Cluster} in the node table is the last. For 1-mode data the search is
-deterministic, as UCINET's is, so \code{seed} plays no part.
+deterministic by default, as UCINET's is: nodes are visited in their order.
+\code{order = "random"} visits them in a random order instead, drawn afresh on
+every pass, so that runs with different seeds show how robust a partition
+is (book, 11.4.2). UCINET has no such option.
 
 \strong{2-mode data} are UCINET's 2-Mode Bipartite Communities (Louvain): one
 partition of the row and column nodes together that maximizes Barber's
@@ -65,6 +73,7 @@ Network | Subgroups | Louvain Method. \emph{Max partitions} is \code{maxlevels};
 
 \examples{
 xlouvain(campnet)
+xlouvain(zachary, order = "random", seed = 2)
 xlouvain(davis, seed = 1)
 }
 \seealso{

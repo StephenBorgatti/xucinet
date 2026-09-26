@@ -17,6 +17,11 @@
   search, with Delphi's generator so a seed gives UCINET's search. Five
   defects in UCINET's code are corrected (UCINET issue 35, ledger 46; issue
   #24).
+* DL files: a nodelist may carry tie values, `alter:value`, with `alter:.` for
+  a missing tie (book 5.3.3; UCINET issue 36, ledger 47).
+* `xlouvain(order = "random", seed = )` visits nodes in a random order, for
+  checking a partition's robustness; the default stays UCINET's fixed order
+  (ledger 48).
 
 ## Chapter 7: visualization (issue #30)
 

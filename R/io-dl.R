@@ -273,16 +273,26 @@ dl_edgelist <- function(lines, data_at, nr, nc, nm, rowlab, collab, twomode) {
 }
 
 # Rows of "ego alter alter ...".
+# A valued nodelist writes each alter as alter:value ("Chandler Joey:2
+# Monica:3", book 5.3.3), and "." as the value marks a missing tie. Only a
+# number or "." after the last colon counts as a value, so a label that
+# contains a colon is still a label. UCINET's DL readers do not take this form
+# yet (Steve, 26 Sep 2026: xucinet reads it, and UCINET's importer is to
+# follow; dev/UCINET-ISSUES.md).
 dl_nodelist <- function(lines, data_at, nr, nc, rowlab, collab, twomode) {
   rows <- lapply(lines[(data_at + 1L):length(lines)], dl_split)
   rows <- rows[lengths(rows) >= 1L]
   egos <- vapply(rows, `[`, character(1), 1)
   alters <- unlist(lapply(rows, function(r) r[-1]))
+  valued <- grepl(":(\\.|[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?)$", alters)
+  vals <- rep(1, length(alters))
+  vals[valued] <- suppressWarnings(as.numeric(sub("^.*:", "", alters[valued])))
+  alters[valued] <- sub(":[^:]*$", "", alters[valued])
   reps <- vapply(rows, function(r) length(r) - 1L, integer(1))
   ax <- dl_axes(rep(egos, reps), alters, rowlab, collab, nr, nc, twomode,
                 all_rows = egos)
   m <- matrix(0, length(ax$rlab), length(ax$clab), dimnames = list(ax$rlab, ax$clab))
-  if (length(alters)) m[cbind(ax$ridx, ax$cidx)] <- 1
+  if (length(alters)) m[cbind(ax$ridx, ax$cidx)] <- vals
   list(m)
 }
 

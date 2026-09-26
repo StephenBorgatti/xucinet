@@ -525,3 +525,16 @@ test_that("the factions start from igraph's distances is the Floyd port's", {
     }
   }
 })
+
+test_that("order = \"random\" varies the visiting order under a seed (T11)", {
+  fixed <- xlouvain(zachary)
+  expect_identical(xlouvain(zachary, order = "fixed", seed = 5)$nodes, fixed$nodes)
+  a <- xlouvain(zachary, order = "random", seed = 5)
+  expect_identical(a$nodes, xlouvain(zachary, order = "random", seed = 5)$nodes)
+  expect_true(any(grepl("random order (seed 5)", a$assumptions, fixed = TRUE)))
+  qs <- vapply(1:8, function(s) xlouvain(zachary, order = "random", seed = s)$summary$Modularity,
+               numeric(1))
+  expect_gt(length(unique(round(qs, 6))), 1)
+  expect_true(all(qs <= fixed$summary$Modularity + 1e-9))
+  expect_equal(a$summary$Modularity, community_modularity(as.matrix(zachary), a$nodes$Cluster))
+})
