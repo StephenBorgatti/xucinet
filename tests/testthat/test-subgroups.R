@@ -260,8 +260,85 @@ test_that("Louvain reaches igraph's modularity on zachary, or near it", {
   expect_true(abs(ours - igraph::modularity(igraph::cluster_louvain(g))) < 0.03)
 })
 
-test_that("2-mode data wait on issue #18", {
-  expect_error(xlouvain(davis), "#18")
+# ---- xlouvain, 2-mode (uc_2modelouvain.pas; Steve, 26 Sep 2026, issue #18) ------
+
+# Barber's Q_b written out from its definition, independently of the package.
+qb <- function(a, rp, cp) {
+  m <- sum(a); r <- rowSums(a); k <- colSums(a); q <- 0
+  for (i in seq_len(nrow(a))) for (j in seq_len(ncol(a))) {
+    if (rp[i] == cp[j]) q <- q + a[i, j] - r[i] * k[j] / m
+  }
+  unname(q / m)
+}
+
+test_that("2-mode: one partition of rows and columns, rows first, with Mode", {
+  r <- xlouvain(davis, seed = 1)
+  a <- as.matrix(davis)
+  expect_equal(nrow(r$nodes), nrow(a) + ncol(a))
+  expect_equal(rownames(r$nodes), c(rownames(a), colnames(a)))
+  expect_equal(r$nodes$Mode, rep(c("row", "col"), c(nrow(a), ncol(a))))
+  expect_equal(sort(unique(r$nodes$Cluster)), seq_len(r$summary$Clusters))
+})
+
+test_that("2-mode: the reported modularity is Barber's Q_b of the partition", {
+  a <- as.matrix(davis)
+  for (s in 1:3) {
+    r <- xlouvain(davis, seed = s)
+    p <- r$nodes$Cluster
+    expect_equal(r$summary$Modularity,
+                 qb(a, p[seq_len(nrow(a))], p[nrow(a) + seq_len(ncol(a))]))
+  }
+})
+
+test_that("2-mode: no single node can raise Q_b by joining a neighbour's community", {
+  # What the local moving converges to. Candidates are the communities of a
+  # node's neighbours, as in TwoModeLouvain.
+  a <- as.matrix(davis); nr <- nrow(a); nc <- ncol(a)
+  r <- xlouvain(davis, seed = 1)
+  p <- r$nodes$Cluster
+  q0 <- qb(a, p[1:nr], p[nr + 1:nc])
+  for (u in seq_len(nr + nc)) {
+    nb <- if (u <= nr) nr + which(a[u, ] != 0) else which(a[, u - nr] != 0)
+    for (cc in setdiff(unique(p[nb]), p[u])) {
+      p2 <- p; p2[u] <- cc
+      expect_lte(qb(a, p2[1:nr], p2[nr + 1:nc]), q0 + 1e-9)
+    }
+  }
+})
+
+test_that("2-mode: the seed reproduces the run, and a missing seed is reported", {
+  expect_identical(xlouvain(davis, seed = 7)$nodes, xlouvain(davis, seed = 7)$nodes)
+  r <- xlouvain(davis)
+  expect_match(r$fields[["Seed:"]], "^[0-9]+$")
+  again <- xlouvain(davis, seed = as.integer(r$fields[["Seed:"]]))
+  expect_identical(again$nodes, r$nodes)
+  expect_error(xlouvain(davis, seed = 0), "other than 0")
+})
+
+test_that("2-mode: two disconnected bicliques are two communities", {
+  a <- matrix(0, 4, 4, dimnames = list(paste0("r", 1:4), paste0("c", 1:4)))
+  a[1:2, 1:2] <- 1; a[3:4, 3:4] <- 1
+  r <- xlouvain(as_xucinet(a, mode = "2-mode"), seed = 3)
+  p <- r$nodes$Cluster
+  expect_equal(r$summary$Clusters, 2L)
+  expect_equal(p[c(1, 2, 5, 6)], rep(p[1], 4))
+  expect_equal(p[c(3, 4, 7, 8)], rep(p[3], 4))
+  expect_equal(r$summary$Modularity, 0.5)
+})
+
+test_that("2-mode Louvain matches UCINET for the same seed", {
+  skip_if_no_golden("g13_louvain2_davis_rows", "twomode")
+  skip_if_no_golden("g13_louvain2_davis_cols", "twomode")
+  r <- xlouvain(davis, seed = 1)
+  a <- as.matrix(davis)
+  expect_equal(r$nodes$Cluster[seq_len(nrow(a))],
+               as.vector(golden_matrix("g13_louvain2_davis_rows", "twomode")))
+  expect_equal(r$nodes$Cluster[nrow(a) + seq_len(ncol(a))],
+               as.vector(golden_matrix("g13_louvain2_davis_cols", "twomode")))
+})
+
+test_that("the 2-mode report prints", {
+  expect_snapshot(xlouvain(davis, seed = 1))
 })
 
 test_that("directed data are symmetrized by maximum unless told not to", {

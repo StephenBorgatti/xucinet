@@ -1,5 +1,13 @@
 # xucinet 2.0.0.9000 (development)
 
+## Steve's decisions of 26 September 2026
+
+* `xlouvain()` takes 2-mode data: UCINET's 2-Mode Bipartite Communities
+  (Louvain), maximizing Barber's bipartite modularity, with communities that
+  hold row and column nodes together. Random visiting order under `seed`
+  (the same seed gives UCINET's run); the report ends with the blocked matrix.
+  No dual projection (issue #18).
+
 ## Chapter 7: visualization (issue #30)
 
 * `xplot()`: network drawings in base graphics. Node colour, size, shape and

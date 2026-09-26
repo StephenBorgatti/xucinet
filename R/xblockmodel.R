@@ -168,12 +168,16 @@ blockmodel_autocorrelation <- function(m, agg, block, diagonal) {
 # blockdisplay (the tstreamwriter version in ug2display.pas) with the arguments
 # uc_blockmatrix passes: width and decimals chosen from the data, zeros shown
 # blank. Rows and columns are sorted by block; within a block, original order.
-format_blocked_matrix <- function(m, block) {
-  n <- nrow(m)
-  ord <- order(block, seq_len(n))
-  bl <- block[ord]
-  labs <- rownames(m); if (is.null(labs)) labs <- as.character(seq_len(n))
-  vals <- m[ord, ord, drop = FALSE]
+# `cblock` partitions the columns; it defaults to `block`, the square case. A
+# 2-mode matrix passes its column partition, as uc_2modelouvain does.
+format_blocked_matrix <- function(m, block, cblock = block) {
+  nr <- nrow(m); nc <- ncol(m)
+  rord <- order(block, seq_len(nr))
+  cord <- order(cblock, seq_len(nc))
+  rbl <- block[rord]; cbl <- cblock[cord]
+  rlabs <- rownames(m); if (is.null(rlabs)) rlabs <- as.character(seq_len(nr))
+  clabs <- colnames(m); if (is.null(clabs)) clabs <- as.character(seq_len(nc))
+  vals <- m[rord, cord, drop = FALSE]
   ok <- vals[!is.na(vals)]
   whole <- all(ok == round(ok))
   d <- if (whole) 0L else 3L
@@ -184,26 +188,27 @@ format_blocked_matrix <- function(m, block) {
     min(20L, k + 1L)
   }
   w <- if (length(ok)) max(minw1(max(ok)), minw1(min(ok))) else 2L
-  lw <- max(nchar(labs)) + 2L
+  lw <- max(nchar(rlabs)) + 2L
   left2 <- 4L + lw + 1L
-  brk <- c(bl[-1] != bl[-n], TRUE)      # a block ends after this column/row
+  rbrk <- c(rbl[-1] != rbl[-nr], TRUE)  # a block ends after this row
+  cbrk <- c(cbl[-1] != cbl[-nc], TRUE)  # ... after this column
 
   cell <- function(x) {
     if (is.na(x)) return(formatC(".", width = w))
     if (abs(x) < 1e-7) return(strrep(" ", w))
     formatC(x, width = w, format = "f", digits = d)
   }
-  sep <- function(j, end, mid) if (j == n) end else if (brk[j]) mid else ""
+  sep <- function(j, end, mid) if (j == nc) end else if (cbrk[j]) mid else ""
 
   out <- character()
   # Column numbers: written downwards, one digit per line, when they do not
   # fit the cell width (FancyColHead), otherwise on one line.
-  idx <- as.character(ord)
-  if (w < minw1(n) || w < max(nchar(idx))) {
+  idx <- as.character(cord)
+  if (w < minw1(nc) || w < max(nchar(idx))) {
     nd <- max(nchar(idx))
     for (i in seq_len(nd)) {
       line <- strrep(" ", left2)
-      for (j in seq_len(n)) {
+      for (j in seq_len(nc)) {
         s <- idx[j]
         pos <- nchar(s) - (nd - i)
         ch <- if (pos >= 1) substr(s, pos, pos) else " "
@@ -213,29 +218,29 @@ format_blocked_matrix <- function(m, block) {
     }
   } else {
     line <- strrep(" ", left2)
-    for (j in seq_len(n)) line <- paste0(line, formatC(idx[j], width = w), sep(j, "  ", "  "))
+    for (j in seq_len(nc)) line <- paste0(line, formatC(idx[j], width = w), sep(j, "  ", "  "))
     out <- c(out, line)
   }
   line <- strrep(" ", left2)
-  for (j in seq_len(n)) {
-    line <- paste0(line, formatC(substr(labs[ord[j]], 1, w - 1), width = w),
+  for (j in seq_len(nc)) {
+    line <- paste0(line, formatC(substr(clabs[cord[j]], 1, w - 1), width = w),
                    sep(j, "  ", "  "))
   }
   out <- c(out, line)
   rule <- function(lead) {
     line <- lead
-    for (j in seq_len(n)) line <- paste0(line, strrep("-", w), sep(j, "--", "--"))
+    for (j in seq_len(nc)) line <- paste0(line, strrep("-", w), sep(j, "--", "--"))
     line
   }
   out <- c(out, sub("--$", "- ", rule(strrep(" ", left2))))
-  for (i in seq_len(n)) {
-    line <- paste0(formatC(as.character(ord[i]), width = 4),
-                   formatC(paste0(labs[ord[i]], " |"), width = lw + 1))
-    for (j in seq_len(n)) line <- paste0(line, cell(vals[i, j]), sep(j, " |", " |"))
+  for (i in seq_len(nr)) {
+    line <- paste0(formatC(as.character(rord[i]), width = 4),
+                   formatC(paste0(rlabs[rord[i]], " |"), width = lw + 1))
+    for (j in seq_len(nc)) line <- paste0(line, cell(vals[i, j]), sep(j, " |", " |"))
     out <- c(out, line)
-    if (i == n) {
+    if (i == nr) {
       out <- c(out, rule(strrep(" ", 3L + lw + 1L)))
-    } else if (brk[i]) {
+    } else if (rbrk[i]) {
       out <- c(out, rule(paste0(strrep(" ", 4L + lw), "-")))
     }
   }

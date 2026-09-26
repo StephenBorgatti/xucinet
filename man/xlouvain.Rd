@@ -8,12 +8,12 @@ xlouvain(
   net,
   symmetrize = c("max", "min", "average", "sum", "none"),
   maxlevels = NULL,
-  relation = NULL
+  relation = NULL,
+  seed = NULL
 )
 }
 \arguments{
-\item{net}{A network (any accepted form). 1-mode; 2-mode data wait on a
-decision (issue #18).}
+\item{net}{A network (any accepted form), 1-mode or 2-mode.}
 
 \item{symmetrize}{What to do with directed data: \code{"max"} (the default),
 \code{"min"}, \code{"average"}, \code{"sum"}, or \code{"none"}.}
@@ -23,6 +23,9 @@ nothing merges.}
 
 \item{relation}{Which relation of a multi-relation dataset, by name or
 position. Defaults to the first.}
+
+\item{seed}{For 2-mode data: the random seed, a whole number. \code{NULL} picks
+one between 1 and 1000 and reports it, so the run can be repeated.}
 }
 \value{
 An object of class \code{c("xlouvain", "xucinet_output")}.
@@ -36,8 +39,20 @@ on the smaller network until nothing more merges.
 \details{
 Each level of that process is a partition; \verb{$matrices$Levels} has them all,
 headed with the number of clusters and the modularity as UCINET heads them,
-and \code{Cluster} in the node table is the last. The search is deterministic, as
-UCINET's is, so there is no seed.
+and \code{Cluster} in the node table is the last. For 1-mode data the search is
+deterministic, as UCINET's is, so \code{seed} plays no part.
+
+\strong{2-mode data} are UCINET's 2-Mode Bipartite Communities (Louvain): one
+partition of the row and column nodes together that maximizes Barber's
+bipartite modularity
+\deqn{Q_b = \frac{1}{m}\sum_{i,j} \left(a_{ij} - \frac{r_i c_j}{m}\right)
+\delta(g_i, g_j),}
+the sum over row node \eqn{i} and column node \eqn{j}, with \eqn{r_i} and
+\eqn{c_j} their weighted degrees and \eqn{m} the total weight. A community
+may hold women and events together. Nodes are visited in a random order, so
+the result depends on \code{seed}; the same seed gives UCINET's result. The node
+table lists the rows, then the columns, with a \code{Mode} column, and the report
+ends with the blocked matrix. \code{symmetrize} and \code{maxlevels} do not apply.
 
 Tie values are used as weights. Directed data are symmetrized by maximum
 first unless \code{symmetrize} says otherwise; negative values are dropped.
@@ -50,6 +65,7 @@ Network | Subgroups | Louvain Method. \emph{Max partitions} is \code{maxlevels};
 
 \examples{
 xlouvain(campnet)
+xlouvain(davis, seed = 1)
 }
 \seealso{
 \code{\link[=xcommunities]{xcommunities()}}, \code{\link[=xgirvannewman]{xgirvannewman()}}.

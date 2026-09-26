@@ -1,9 +1,8 @@
 // ===========================================================================
 // xucinet golden fixtures - Chapter 13, two-mode networks
 //
-// For xaffiliations, xbipartite and xbicliques. Part of the single goldens
-// sweep. The 2-mode Louvain and 2-mode core/periphery fixtures wait on Steve's
-// decisions (issues #18 and #25).
+// For xaffiliations, xbipartite, xbicliques and 2-mode xlouvain. Part of the single goldens
+// sweep. The 2-mode core/periphery fixture is added with that port (issue #25).
 //
 // HOW TO RUN
 //   1. Paste the CLI lines into the command window, from this folder, then do
@@ -36,3 +35,9 @@ g13_biclique_davis = biclique(davis 3 3)
 //   davis, Mode: Columns          -> g13_sdsm_davis_cols
 //   davis, Mode: Rows, null model BiCM -> g13_sdsm_davis_rows_bicm
 // Keep the log: the logit coefficients and the count of retained edges.
+
+// --- Network | Subgroups | 2-Mode Bipartite Communities (Louvain) -----------------
+// davis, Random seed: 1 (not the default 0, which is random), outputs:
+//   Output row community assignment    -> g13_louvain2_davis_rows
+//   Output column community assignment -> g13_louvain2_davis_cols
+// Keep the log: communities, Q_b, sweeps and accepted moves.

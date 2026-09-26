@@ -146,7 +146,7 @@ Added 23 September 2026, from ucinet c7b4956 and tools 207958a.
 | `ukm1.pas`, `ufloyd.pas` | `Tools/G2Tools` | the factions starting partition |
 | `uc_GirvanNewman.pas` + `.dfm`, `uGirvanNewman.pas` | `Ucinet/Source`, `Tools/G1Tools` | Girvan-Newman: every tied top edge removed at once, partitions recorded per new component count |
 | `uc_Louvain.pas` + `.dfm`, `utlouvain.pas`, `utpartition.pas` | `Ucinet/Source`, `Tools/G2Tools` | Louvain: the deterministic local moving and aggregation (UCINET issue 26 is in `getbestmove`/`movenodes`); `renumber` sorts cluster ids |
-| `uc_2modelouvain.pas`, `u2modelouvain.pas` | `Ucinet/Source`, `Tools/G2Tools` | 2-mode Louvain, Barber's bipartite modularity (issue #18) |
+| `uc_2modelouvain.pas`, `u2modelouvain.pas` | `Ucinet/Source`, `Tools/G2Tools` | 2-mode Louvain, Barber's bipartite modularity: `TwoModeLouvain` ported as `louvain_2mode()` in `R/xlouvain.R`, with its shuffled visiting order under Delphi's `Random` (issue #18) |
 | `uc_FastGreedy.pas` + `.dfm` | `Ucinet/Source` | UCINET's FastGreedy, for the ledger entry on how igraph's differs |
 
 ## Chapter 12: equivalence, blockmodels, core/periphery (issue #23)
@@ -170,7 +170,7 @@ ucinet commit c7b4956, tools commit 207958a.
 
 | file | taken from | what the port uses it for |
 |---|---|---|
-| `uc_AffiliationsDlg.pas` + `.dfm`, `ug2simdis.pas`, `usdsm.pas` | `Ucinet/Source`, `Tools/G2Tools` | Data | Affiliations: the dialog, `normcols`/`normrows`, the twelve measures (UCINET issue 30 is in `Covariance`), and the SDSM backbone |\| Affiliations: the dialog, `normcols`/`normrows`, the twelve measures (UCINET issue 30 is in `Covariance`) |
+| `uc_AffiliationsDlg.pas` + `.dfm`, `ug2simdis.pas`, `usdsm.pas` | `Ucinet/Source`, `Tools/G2Tools` | Data \| Affiliations: the dialog, `normcols`/`normrows`, the twelve measures (UCINET issue 30 is in `Covariance`), and the SDSM backbone |
 | `Xbipart.pas` | `Ucinet/Source` | Transform \| Bipartite |
 | `ug2clique.pas`, `ubronkb.pas` | `Tools/G2Tools` | `getncliques` and the G2 `BronKerbosch`, the same algorithm as `uclique.pas`; `runbiclique` itself is in `Xdpmat.pas` (not vendored: 7,000 lines, the procedure is described in `R/xbicliques.R`'s header) |
 

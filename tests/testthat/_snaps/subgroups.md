@@ -177,6 +177,58 @@
       1 rows, 7 columns, 1 levels.
       
 
+# the 2-mode report prints
+
+    Code
+      xlouvain(davis, seed = 1)
+    Output
+      2-MODE BIPARTITE COMMUNITIES (LOUVAIN)
+      --------------------------------------------------------------------------------
+      
+      Seed:                                   1
+      Input dataset:                          davis
+      
+      
+      
+                       1     2     3     4     5     6 
+                   Clust Row c Col c Modul Sweep Moves 
+                     ers luste luste arity     s       
+                            rs    rs                   
+                   ----- ----- ----- ----- ----- ----- 
+           1 davis     4     4     4 0.346     4    42 
+      
+      1 rows, 6 columns, 1 levels.
+      
+      Blocked adjacency matrix:
+      
+                                             1   1 1 1 1  
+                       1 2 3 4 5 6   7 8   9 1   0 2 3 4  
+                       E E E E E E   E E   E E   E E E E  
+                      ----------------------------------- 
+         1    EVELYN | 1 1 1 1 1 1 |   1 | 1   |         |
+         2     LAURA | 1 1 1   1 1 | 1 1 |     |         |
+         3   THERESA |   1 1 1 1 1 | 1 1 | 1   |         |
+         4    BRENDA | 1   1 1 1 1 | 1 1 |     |         |
+         5 CHARLOTTE |     1 1 1   | 1   |     |         |
+         6   FRANCES |     1   1 1 |   1 |     |         |
+                     -------------------------------------
+         7   ELEANOR |         1 1 | 1 1 |     |         |
+         9      RUTH |         1   | 1 1 | 1   |         |
+        10     VERNE |             | 1 1 | 1   |   1     |
+                     -------------------------------------
+         8     PEARL |           1 |   1 | 1   |         |
+        16   DOROTHY |             |   1 | 1   |         |
+        17    OLIVIA |             |     | 1 1 |         |
+        18     FLORA |             |     | 1 1 |         |
+                     -------------------------------------
+        11     MYRNA |             |   1 | 1   | 1 1     |
+        12 KATHERINE |             |   1 | 1   | 1 1 1 1 |
+        13    SYLVIA |             | 1 1 | 1   | 1 1 1 1 |
+        14      NORA |           1 | 1   | 1 1 | 1 1 1 1 |
+        15     HELEN |             | 1 1 |   1 | 1 1     |
+                     ------------------------------------
+      
+
 # the Louvain report prints
 
     Code
