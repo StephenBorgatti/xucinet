@@ -7,6 +7,11 @@
   hold row and column nodes together. Random visiting order under `seed`
   (the same seed gives UCINET's run); the report ends with the blocked matrix.
   No dual projection (issue #18).
+* `xcoreperiphery()` takes 2-mode data: UCINET's 2-Mode Categorical
+  Core/Periphery, a row core and a column core found by a genetic algorithm
+  and single flips; new arguments `popsize`, `stopafter`, `auxit`. Five defects
+  in UCINET's code are not copied (UCINET issue 34, ledger 45). No dual
+  projection (issue #25).
 
 ## Chapter 7: visualization (issue #30)
 

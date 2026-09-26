@@ -940,6 +940,44 @@ Delphi's global `randseed`, and the dialog's seed box is never read.)
 
 ---
 
+## 34. 2-mode categorical core/periphery: five defects in the search and the density table
+
+**bug** · **open — fix pending** · found 26 September 2026 (chapter 13, issue #25)
+
+`x2mcatcp.pas` (`run2modecategoricalcp`, `initialpartition`, `corrfit`), with
+`genetic2` in `G1Tools/Ugenetic.pas` and `blockdensity` in `G1Tools/uag.pas`
+(ucinet c7b4956, tools 207958a):
+
+1. `initialpartition` sums the rows and columns with `if (i<>j) or diagok`, a
+   1-mode rule: on 2-mode data it leaves out the cells whose row and column
+   numbers happen to be equal (on davis, 14 cells). Only the start is affected.
+2. `genetic2` never updates `prevfit`, so `samevalue(prevfit, bestfit)` is true
+   only while the best fit is 0, and *Stop after ___ generations with no
+   improvement* has no effect: the search runs to *Max generations*.
+3. `genetic2` fills population member 1 with the starting partition but scores
+   only members 2 onwards, and resets `bestfit` to `minfloat`. The start has
+   fitness 0, so it is never selected and can never be the answer; the
+   starting partition is computed for nothing.
+4. `blockdensity(d, den, rp, cp, 2, 2, diagok)` with `diagok = false` drops the
+   same equal-numbered cells from the density table. (`blockrsq`, beside it in
+   `uag.pas`, sets `diagok` for non-square matrices; `blockdensity` does not.)
+5. `corrfit` returns `(b.corr + 1) / 2`; when the scored cells are all equal
+   the correlation is `bna`, the missing-value code, and the fitness becomes
+   about 5e37, the best there is, so a degenerate partition wins.
+
+(The routine also calls `randomize`, so runs cannot be repeated. That is a
+design choice, not a defect; xucinet takes a seed, as for 1-mode core/periphery.)
+
+**What xucinet does:** every cell counts in the start and the density table;
+the start is scored and competes; the search stops after `stopafter` generations
+in a row without improvement; an undefined correlation scores 0. Ledger entry 45.
+
+**Fix:** `diagok := true` for non-square data in both places; score member 1
+and keep the incoming `bestfit`; `prevfit := bestfit` after each generation (and
+reset the count on improvement); treat `corr >= na` as fitness 0.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps

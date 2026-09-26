@@ -1,8 +1,8 @@
 // ===========================================================================
 // xucinet golden fixtures - Chapter 13, two-mode networks
 //
-// For xaffiliations, xbipartite, xbicliques and 2-mode xlouvain. Part of the single goldens
-// sweep. The 2-mode core/periphery fixture is added with that port (issue #25).
+// For xaffiliations, xbipartite, xbicliques, 2-mode xlouvain and 2-mode
+// xcoreperiphery. Part of the single goldens sweep.
 //
 // HOW TO RUN
 //   1. Paste the CLI lines into the command window, from this folder, then do
@@ -41,3 +41,11 @@ g13_biclique_davis = biclique(davis 3 3)
 //   Output row community assignment    -> g13_louvain2_davis_rows
 //   Output column community assignment -> g13_louvain2_davis_cols
 // Keep the log: communities, Q_b, sweeps and accepted moves.
+
+// --- Network | Core/Periphery | 2-Mode Categorical ------------------------------
+// davis, defaults (max generations 1000, population 250, stop after 2,
+// auxiliary 6). UCINET randomizes, so only the fit is compared. Outputs:
+//   (Output) Row Partition -> g13_cp2_davis_rows
+//   (Output) Col Partition -> g13_cp2_davis_cols
+// Keep the log: starting and final fitness, generations, density matrix (its
+// cells show UCINET issue 34, item 4).

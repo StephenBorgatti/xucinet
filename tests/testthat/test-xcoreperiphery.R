@@ -129,8 +129,89 @@ test_that("missing cells are left out of the categorical fit", {
   expect_equal(xcoreperiphery(m, seed = 1)$summary[["Categorical fit"]], 1)
 })
 
-test_that("2-mode data are refused for now", {
-  expect_error(xcoreperiphery(davis), "1-mode")
+# ---- 2-mode (x2mcatcp.pas; Steve, 26 Sep 2026, issue #25) -----------------------
+
+# The model's fit written out: correlation of the data with 1 in the row-core
+# by column-core cells and 0 in the row-periphery by column-periphery cells.
+cp2_corr <- function(a, rp, cp) {
+  core <- outer(rp == 1, cp == 1, `&`); peri <- outer(rp == 2, cp == 2, `&`)
+  stats::cor(c(rep(1, sum(core)), rep(0, sum(peri))), c(a[core], a[peri]))
+}
+
+test_that("2-mode: rows then columns, a class each, and cores of 3 to n - 3", {
+  r <- xcoreperiphery(davis, seed = 1)
+  a <- as.matrix(davis)
+  expect_equal(rownames(r$nodes), c(rownames(a), colnames(a)))
+  expect_equal(r$nodes$Mode, rep(c("row", "col"), c(18, 14)))
+  expect_true(all(r$nodes$Class %in% 1:2))
+  expect_true(r$summary[["Row core"]] >= 3 && r$summary[["Row core"]] <= 15)
+  expect_true(r$summary[["Col core"]] >= 3 && r$summary[["Col core"]] <= 11)
+})
+
+test_that("2-mode: the fit is the correlation with the ideal, and no flip improves it", {
+  a <- as.matrix(davis)
+  r <- xcoreperiphery(davis, seed = 1)
+  p <- r$nodes$Class
+  rp <- p[1:18]; cp <- p[18 + 1:14]
+  expect_equal(r$summary[["Categorical fit"]], cp2_corr(a, rp, cp))
+  expect_lt(r$summary[["Auxiliary passes"]], 6)    # stopped because nothing moved
+  for (u in seq_along(p)) {
+    q <- p; q[u] <- 3L - q[u]
+    qr <- q[1:18]; qc <- q[18 + 1:14]
+    if (sum(qr == 1) < 3 || sum(qr == 1) > 15 || sum(qc == 1) < 3 || sum(qc == 1) > 11) next
+    expect_lte(cp2_corr(a, qr, qc), r$summary[["Categorical fit"]] + 1e-12)
+  }
+})
+
+test_that("2-mode: a planted core is found exactly", {
+  a <- matrix(0, 10, 8, dimnames = list(paste0("r", 1:10), paste0("c", 1:8)))
+  a[1:4, 1:3] <- 1          # the core block
+  a[9, 2] <- 1              # a mixed-block tie, which the model ignores
+  r <- xcoreperiphery(as_xucinet(a, mode = "2-mode"), seed = 2)
+  # Any three or more of the four core rows fit perfectly, so the test is the
+  # fit and that both cores come from the planted block.
+  expect_equal(r$summary[["Categorical fit"]], 1)
+  expect_true(all(which(r$nodes$Class[1:10] == 1) %in% 1:4))
+  expect_true(all(which(r$nodes$Class[10 + 1:8] == 1) %in% 1:3))
+})
+
+test_that("2-mode: the density table counts every cell", {
+  # UCINET's blockdensity leaves out cells whose row and column numbers are
+  # equal, a 1-mode rule (UCINET issue 34, item 4).
+  a <- as.matrix(davis)
+  r <- xcoreperiphery(davis, seed = 1)
+  p <- r$nodes$Class; rp <- p[1:18]; cp <- p[18 + 1:14]
+  expect_equal(r$matrices[["Density matrix"]]["Core", "Core"], mean(a[rp == 1, cp == 1]))
+  expect_equal(r$matrices[["Density matrix"]]["Periphery", "Core"], mean(a[rp == 2, cp == 1]))
+})
+
+test_that("2-mode: the seed reproduces the run; the continuous model is refused", {
+  expect_identical(xcoreperiphery(davis, seed = 4)$nodes,
+                   xcoreperiphery(davis, seed = 4)$nodes)
+  expect_error(xcoreperiphery(davis, type = "continuous"), "only the categorical")
+  small <- as_xucinet(matrix(1, 5, 7), mode = "2-mode")
+  expect_error(xcoreperiphery(small), "at least six rows and six columns")
+})
+
+test_that("2-mode: the start scores 0 when the data are constant in the scored cells", {
+  # UCINET scores an undefined correlation as its missing-value code, the
+  # largest fitness there is (UCINET issue 34, item 5).
+  a <- matrix(1, 8, 8)
+  expect_equal(catcp2_fitness(a, c(rep(1, 4), rep(2, 4), rep(1, 4), rep(2, 4)), 8, 8), 0)
+})
+
+test_that("2-mode core/periphery reaches UCINET's fit", {
+  # UCINET randomizes, so its partition is compared by fit, not cell by cell.
+  skip_if_no_golden("g13_cp2_davis_rows", "twomode")
+  skip_if_no_golden("g13_cp2_davis_cols", "twomode")
+  a <- as.matrix(davis)
+  ucinet <- cp2_corr(a, golden_matrix("g13_cp2_davis_rows", "twomode")[, 1],
+                     golden_matrix("g13_cp2_davis_cols", "twomode")[, 1])
+  expect_gte(xcoreperiphery(davis, seed = 1)$summary[["Categorical fit"]], ucinet - 1e-9)
+})
+
+test_that("the 2-mode report prints", {
+  expect_snapshot(xcoreperiphery(davis, seed = 1))
 })
 
 test_that("a 200-node network runs in reasonable time", {

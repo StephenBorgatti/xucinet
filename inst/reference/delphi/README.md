@@ -161,7 +161,7 @@ ucinet commit c7b4956, tools commit 207958a.
 | `uc_blockmatrix.pas` + `.dfm`, `uAggregate.pas`, `ug2display.pas` | `Ucinet/Source`, `Tools/G2Tools` | Block - Aggregate by Partitions: `aggbygroups`, the autocorrelation, and `blockdisplay`, the blocked-matrix layout |
 | `uc_categoricalcoreperiphery.pas` + `.dfm`, `utcpcat.pas` | `Ucinet/Source`, `Tools/G2Tools` | Categorical core/periphery: dialog defaults, the starting partitions, hill climbing, random starts (UCINET issue 29 is in `evaluate`) |
 | `uc_ContinuousCoreness.pas` + `.dfm`, `utminres.pas`, `utconcentration.pas`, `utbivariate.pas` | `Ucinet/Source`, `Tools/G2Tools`, `Tools/G1Tools` | Continuous core/periphery: MINRES, the concentration table, Gini, heterogeneity, the identity coefficient |
-| `x2mcatcp.pas` | `Ucinet/Source` | 2-mode categorical core/periphery (a genetic algorithm), held for Steve's decision |
+| `x2mcatcp.pas`, `uc_2modecatcp.pas` + `.dfm`, `Ugenetic.pas` | `Ucinet/Source`, `Tools/G1Tools` | 2-mode categorical core/periphery: the start, `corrfit`, `genetic2` and `greedy`, the dialog defaults (UCINET issue 34); ported as `catcp2_run()` in `R/xcoreperiphery.R` (issue #25) |
 | `Xrege.pas`, `Urege.pas` | `Ucinet/Source`, `Tools/G1Tools` | REGE: the dialog, the 64-bit refusal, `sStdrege` |
 
 ## Chapter 13: two-mode networks (issue #26)

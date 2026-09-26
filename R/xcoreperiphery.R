@@ -39,9 +39,19 @@
 # normalized to unit length, absolute values unless negatives are allowed.
 # The concentration table and the recommended core are getcorenessconcentration.
 #
-# 2-mode: UCINET's 2-Mode Categorical Core/Periphery (x2mcatcp.pas) is a
-# genetic algorithm on the row-by-column correlation, not the dual-projection
-# method section 13.6 describes, so it waits for Steve (STATUS open question).
+# 2-mode: UCINET's 2-Mode Categorical Core/Periphery (x2mcatcp.pas,
+# run2modecategoricalcp, with genetic2 and greedy in G1Tools/Ugenetic.pas;
+# ucinet c7b4956, tools 207958a), ported in catcp2_run() below. Steve, 26 Sep
+# 2026 (issue #25): port UCINET's model only, no dual projection. Rows and
+# columns are each split into core and periphery; the fit is the correlation
+# between the data and an ideal with the row-core by column-core block 1 and the
+# row-periphery by column-periphery block 0, the other two blocks ignored, and
+# each core must have at least 3 members and leave at least 3 outside. Search:
+# a start from the row and column sums (the top third of each), a genetic
+# algorithm (population 250, crossover 0.6 on each mode separately, mutation
+# 0.025, roulette selection), then single flips (greedy). UCINET issue 34: five
+# defects in that code are not copied (see dev/UCINET-ISSUES.md; ledger 45).
+# UCINET calls `randomize`; here R's generator runs under `seed`.
 
 #' Core/periphery structure
 #'
@@ -59,6 +69,17 @@
 #' degree-based start and then from `starts - 1` random partitions. `Class` in
 #' `$nodes` is 1 for the core and 2 for the periphery.
 #'
+#' **2-mode data** (UCINET's 2-Mode Categorical Core/Periphery): the rows and
+#' the columns are each divided into core and periphery, so that the row core
+#' is densely tied to the column core and the row periphery hardly tied to the
+#' column periphery. The fit is the correlation between the data and that ideal,
+#' the two mixed blocks ignored; each core has at least three members and
+#' leaves at least three outside, so each mode needs six nodes. The search is
+#' UCINET's genetic algorithm (`maxit` generations, 1000 by default for 2-mode
+#' data; `popsize`, `stopafter`) followed by single-node flips (`auxit`
+#' passes). Only the categorical model exists for 2-mode data. `$nodes` lists
+#' the rows, then the columns, with `Class` and `Mode`.
+#'
 #' **Continuous**: a coreness score for every node, such that the product of
 #' two nodes' scores approximates the tie between them, estimated by MINRES
 #' (UCINET's algorithm). `Coreness` holds the scores, normalized to unit
@@ -74,7 +95,7 @@
 #' Network | Core/Periphery | Continuous: *Diagonal values valid* is
 #' `diagonal`, *Prevent negative coreness* is `positive`.
 #'
-#' @param net A network (any accepted form). 1-mode.
+#' @param net A network (any accepted form), 1-mode or 2-mode.
 #' @param type Which model to print: `"categorical"` (the default) or
 #'   `"continuous"`.
 #' @param relation Which relation of a multi-relation dataset, by name or
@@ -85,11 +106,17 @@
 #'   the degree-based partition. `NULL` follows UCINET: 20 below 50 nodes, 10
 #'   below 150, else 3.
 #' @param maxit Maximum hill-climbing steps per start. UCINET's default is 500.
+#'   For 2-mode data, the maximum number of generations; UCINET's default, 1000,
+#'   is used when `maxit` is not given.
 #' @param c2p,p2c Ideal density of the core-to-periphery and
 #'   periphery-to-core blocks, or `NULL` (the default) to ignore them.
 #' @param seed Seed for the random starts. `NULL` draws one; it is reported.
 #' @param positive Continuous model: report absolute coreness, UCINET's
 #'   *Prevent negative coreness* (on by default).
+#' @param popsize,stopafter,auxit 2-mode data only: the genetic algorithm's
+#'   population size (250), the number of generations in a row without
+#'   improvement after which it stops (2), and the most passes of single-node
+#'   flips afterwards (6). UCINET's defaults.
 #' @return An object of class `c("xcoreperiphery", "xucinet_output")`.
 #'   `$nodes`: `Coreness`, `InCore` and `Class`. `$summary`: the categorical
 #'   and continuous fits, Gini coefficient, heterogeneity, recommended core
@@ -100,12 +127,22 @@
 #' @examples
 #' xcoreperiphery(campnet, seed = 1)
 #' xcoreperiphery(campnet, type = "continuous")
+#' xcoreperiphery(davis, seed = 1)
 #' @export
 xcoreperiphery <- function(net, type = c("categorical", "continuous"),
                            relation = NULL, diagonal = FALSE, starts = NULL,
                            maxit = 500, c2p = NULL, p2c = NULL, seed = NULL,
-                           positive = TRUE) {
+                           positive = TRUE, popsize = 250, stopafter = 2,
+                           auxit = 6) {
   net <- xnet(net, substitute(net))
+  if (identical(net$mode, "2-mode")) {
+    if (!missing(type) && match.arg(type) == "continuous") {
+      stop("xcoreperiphery(): 2-mode data have only the categorical model; ",
+           "UCINET has no 2-mode continuous core/periphery.", call. = FALSE)
+    }
+    return(xcoreperiphery_2mode(net, relation, if (missing(maxit)) 1000L else maxit,
+                                popsize, stopafter, auxit, seed, match.call()))
+  }
   type <- match.arg(type)
   require_1mode(net, "xcoreperiphery()")
   m <- as.matrix(net, relation = relation)
@@ -430,3 +467,146 @@ concentration_table <- function(net, cent) {
   }
   list(table = tab, gini = gini, hetero = hetero, order = dsl)
 }
+# ---- 2-mode: x2mcatcp.pas ---------------------------------------------------------
+
+xcoreperiphery_2mode <- function(net, relation, maxit, popsize, stopafter, auxit,
+                                 seed, call) {
+  m <- as.matrix(net, relation = relation)
+  nr <- nrow(m); nc <- ncol(m)
+  if (nr < 6 || nc < 6) {
+    stop("xcoreperiphery(): 2-mode data need at least six rows and six columns, ",
+         "since each core has at least three members and leaves three outside.",
+         call. = FALSE)
+  }
+  if (is.null(seed)) seed <- sample.int(10000, 1)
+  a <- unname(m); a[is.na(a)] <- 0       # x2mcatcp: cells >= na set to 0
+  fit <- with_seed(seed, catcp2_run(a, as.integer(maxit), as.integer(popsize),
+                                    as.integer(stopafter), as.integer(auxit)))
+  rp <- fit$part[seq_len(nr)]; cp <- fit$part[nr + seq_len(nc)]
+  rlabs <- rownames(m); if (is.null(rlabs)) rlabs <- paste0("r", seq_len(nr))
+  clabs <- colnames(m); if (is.null(clabs)) clabs <- paste0("c", seq_len(nc))
+  labels <- c(rlabs, clabs)
+  if (anyDuplicated(labels)) labels <- make.unique(labels)
+  core_first <- c("Core", "Periphery")
+  dens <- matrix(NA_real_, 2, 2, dimnames = list(core_first, core_first))
+  for (i in 1:2) for (j in 1:2) {
+    cells <- m[rp == i, cp == j]
+    if (length(cells) && any(!is.na(cells))) dens[i, j] <- mean(cells, na.rm = TRUE)
+  }
+  dimnames(m) <- list(rlabs, clabs)
+  mm <- m; mm[is.na(mm)] <- 0
+  new_xucinet_output(
+    "2-Mode Categorical Core/Periphery Model", net,
+    nodes = data.frame(Class = fit$part, Mode = rep(c("row", "col"), c(nr, nc)),
+                       row.names = labels, check.names = FALSE),
+    summary = list(`Starting fit` = fit$start, `Categorical fit` = fit$fit,
+                   Generations = fit$generations, `Auxiliary passes` = fit$aux,
+                   `Row core` = sum(rp == 1), `Col core` = sum(cp == 1)),
+    matrices = list(`Density matrix` = dens),
+    assumptions = c(if (anyNA(m)) "Missing cells treated as 0, as UCINET does.",
+                    sprintf("Random number seed: %d.", as.integer(seed))),
+    fields = c("Max generations:" = format(maxit), "Population size:" = format(popsize),
+               "Stop after generations with no improvement:" = format(stopafter),
+               "Max auxiliary iterations:" = format(auxit)),
+    preamble = c(sprintf("Starting fitness: %s", formatC(fit$start, format = "f", digits = 3)),
+                 sprintf("Number of generations: %d", fit$generations),
+                 sprintf("Final fitness: %s", formatC(fit$fit, format = "f", digits = 3)),
+                 sprintf("Number of auxiliary iterations: %d", fit$aux), "",
+                 "Blocked Adjacency Matrix -- Final", "",
+                 format_blocked_matrix(mm, rp, cp), ""),
+    show_summary = character(0),
+    print_nodes = FALSE,
+    subclass = "xcoreperiphery", call = call)
+}
+
+# corrfit: the correlation between the data and the ideal over the core-core
+# (1) and periphery-periphery (0) cells, rescaled to (r + 1) / 2 so the genetic
+# algorithm's roulette never sees a negative fitness; 0 when a core is smaller
+# than 3 or leaves fewer than 3 outside. An undefined correlation (the scored
+# cells all equal) scores 0 here; UCINET's scores the missing-value code, the
+# largest fitness there is (UCINET issue 34, item 5).
+catcp2_fitness <- function(a, p, nr, nc) {
+  rc <- p[seq_len(nr)] == 1; cc <- p[nr + seq_len(nc)] == 1
+  r1 <- sum(rc); c1 <- sum(cc)
+  if (r1 < 3 || r1 > nr - 3 || c1 < 3 || c1 > nc - 3) return(0)
+  core <- outer(rc, cc, `&`); peri <- outer(!rc, !cc, `&`)
+  y <- c(a[core], a[peri])
+  if (stats::var(y) == 0) return(0)
+  (stats::cor(c(rep(1, sum(core)), rep(0, sum(peri))), y) + 1) / 2
+}
+
+# x2mcatcp.pas: the starting partition, genetic2, greedy.
+catcp2_run <- function(a, maxgen, popsize, stopafter, auxit, pcross = 0.6,
+                       pmut = 0.025) {
+  nr <- nrow(a); nc <- ncol(a); len <- nr + nc
+  fitf <- function(p) catcp2_fitness(a, p, nr, nc)
+
+  # initialpartition: the top third of the rows by row sum, and of the columns
+  # by column sum, are core. Every cell counts; UCINET leaves out the cells
+  # whose row and column numbers are equal, a 1-mode rule (issue 34, item 1).
+  start <- rep(2L, len)
+  start[order(-rowSums(a), seq_len(nr))[seq_len(nr %/% 3)]] <- 1L
+  start[nr + order(-colSums(a), seq_len(nc))[seq_len(nc %/% 3)]] <- 1L
+  start_fit <- fitf(start)
+
+  # genetic2. Member 1 is the starting partition and is scored like the others
+  # (UCINET never scores it, item 3); the run stops after `stopafter`
+  # generations in a row without improvement (UCINET's counter never moves,
+  # item 2).
+  if (popsize %% 2L == 1L) popsize <- popsize + 1L
+  pop <- matrix(sample.int(2L, popsize * len, replace = TRUE), popsize, len)
+  pop[1, ] <- start
+  fit <- apply(pop, 1, fitf)
+  best <- pop[which.max(fit), ]; bestfit <- max(fit)
+  mutate <- function(g) {
+    hit <- stats::runif(length(g)) <= pmut
+    g[hit] <- sample.int(2L, sum(hit), replace = TRUE)
+    g
+  }
+  select <- function(cum, total) {
+    j <- which(cum >= stats::runif(1) * total)[1]
+    if (is.na(j)) popsize else j
+  }
+  gen <- 0L; unchanged <- 0L
+  if (bestfit < 1) repeat {
+    gen <- gen + 1L
+    cum <- cumsum(fit); total <- sum(fit)
+    newpop <- pop
+    for (i in seq(1L, popsize, by = 2L)) {
+      p1 <- pop[select(cum, total), ]; p2 <- pop[select(cum, total), ]
+      c1 <- p1; c2 <- p2
+      # rows, then columns, each with its own crossover point (RandomRange(a, b)
+      # is a <= k < b)
+      jr <- if (stats::runif(1) <= pcross) sample.int(nr - 2L, 1) else nr
+      if (jr < nr) { s <- (jr + 1):nr; c1[s] <- p2[s]; c2[s] <- p1[s] }
+      jc <- if (stats::runif(1) <= pcross) nr + sample.int(nc - 2L, 1) else len
+      if (jc < len) { s <- (jc + 1):len; c1[s] <- p2[s]; c2[s] <- p1[s] }
+      newpop[i, ] <- mutate(c1); newpop[i + 1L, ] <- mutate(c2)
+    }
+    pop <- newpop
+    fit <- apply(pop, 1, fitf)
+    if (max(fit) > bestfit) {
+      bestfit <- max(fit); best <- pop[which.max(fit), ]; unchanged <- 0L
+    } else {
+      unchanged <- unchanged + 1L
+    }
+    if (gen >= maxgen || bestfit >= 1 || unchanged >= stopafter) break
+  }
+
+  # greedy: flip each node in turn, keep a flip that raises the fit.
+  aux <- 0L
+  repeat {
+    aux <- aux + 1L
+    changed <- FALSE
+    for (u in seq_len(len)) {
+      old <- best[u]
+      best[u] <- if (old == 1L) 2L else 1L
+      f <- fitf(best)
+      if (f > bestfit) { bestfit <- f; changed <- TRUE } else best[u] <- old
+    }
+    if (aux >= auxit || bestfit >= 1 || !changed) break
+  }
+  list(part = as.integer(best), fit = 2 * bestfit - 1, start = 2 * start_fit - 1,
+       generations = gen, aux = aux)
+}
+

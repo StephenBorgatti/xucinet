@@ -816,3 +816,18 @@ isolates to the side by default; `xplot()` draws them in place and leaves them
 out with `isolates = FALSE`, keeping the other nodes where they were. The
 drawing arguments carry no underscore (`nodecolor`, `edgewidth`, ...). There
 are no golden tests: nothing about a drawing is a number UCINET prints.
+
+## 45. 2-mode core/periphery: the search as UCINET intends it
+
+**Status:** UCINET fix pending (UCINET issue 34). Steve, 26 September 2026 (issue #25).
+
+`xcoreperiphery()` on 2-mode data is UCINET's 2-Mode Categorical
+Core/Periphery (`x2mcatcp.pas`), with five defects corrected: the starting
+partition and the density table count every cell (UCINET leaves out the cells
+whose row and column numbers are equal); the starting partition is scored and
+can win; the genetic algorithm stops after `stopafter` generations in a row
+without improvement, as the dialog says (UCINET's counter never moves, so it
+runs every generation); and a partition whose scored cells are all equal
+scores 0 rather than the largest fitness there is. Randomness is R's generator
+under `seed`; UCINET calls `randomize`, so only the fit can be compared.
+The dual projection section 13.6 describes is not offered (T14).

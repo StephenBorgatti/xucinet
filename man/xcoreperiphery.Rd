@@ -14,11 +14,14 @@ xcoreperiphery(
   c2p = NULL,
   p2c = NULL,
   seed = NULL,
-  positive = TRUE
+  positive = TRUE,
+  popsize = 250,
+  stopafter = 2,
+  auxit = 6
 )
 }
 \arguments{
-\item{net}{A network (any accepted form). 1-mode.}
+\item{net}{A network (any accepted form), 1-mode or 2-mode.}
 
 \item{type}{Which model to print: \code{"categorical"} (the default) or
 \code{"continuous"}.}
@@ -33,7 +36,9 @@ both dialogs.}
 the degree-based partition. \code{NULL} follows UCINET: 20 below 50 nodes, 10
 below 150, else 3.}
 
-\item{maxit}{Maximum hill-climbing steps per start. UCINET's default is 500.}
+\item{maxit}{Maximum hill-climbing steps per start. UCINET's default is 500.
+For 2-mode data, the maximum number of generations; UCINET's default, 1000,
+is used when \code{maxit} is not given.}
 
 \item{c2p, p2c}{Ideal density of the core-to-periphery and
 periphery-to-core blocks, or \code{NULL} (the default) to ignore them.}
@@ -42,6 +47,11 @@ periphery-to-core blocks, or \code{NULL} (the default) to ignore them.}
 
 \item{positive}{Continuous model: report absolute coreness, UCINET's
 \emph{Prevent negative coreness} (on by default).}
+
+\item{popsize, stopafter, auxit}{2-mode data only: the genetic algorithm's
+population size (250), the number of generations in a row without
+improvement after which it stops (2), and the most passes of single-node
+flips afterwards (6). UCINET's defaults.}
 }
 \value{
 An object of class \code{c("xcoreperiphery", "xucinet_output")}.
@@ -67,6 +77,17 @@ core-to-periphery and periphery-to-core blocks are ignored unless \code{c2p} and
 degree-based start and then from \code{starts - 1} random partitions. \code{Class} in
 \verb{$nodes} is 1 for the core and 2 for the periphery.
 
+\strong{2-mode data} (UCINET's 2-Mode Categorical Core/Periphery): the rows and
+the columns are each divided into core and periphery, so that the row core
+is densely tied to the column core and the row periphery hardly tied to the
+column periphery. The fit is the correlation between the data and that ideal,
+the two mixed blocks ignored; each core has at least three members and
+leaves at least three outside, so each mode needs six nodes. The search is
+UCINET's genetic algorithm (\code{maxit} generations, 1000 by default for 2-mode
+data; \code{popsize}, \code{stopafter}) followed by single-node flips (\code{auxit}
+passes). Only the categorical model exists for 2-mode data. \verb{$nodes} lists
+the rows, then the columns, with \code{Class} and \code{Mode}.
+
 \strong{Continuous}: a coreness score for every node, such that the product of
 two nodes' scores approximates the tie between them, estimated by MINRES
 (UCINET's algorithm). \code{Coreness} holds the scores, normalized to unit
@@ -87,6 +108,7 @@ Network | Core/Periphery | Continuous: \emph{Diagonal values valid} is
 \examples{
 xcoreperiphery(campnet, seed = 1)
 xcoreperiphery(campnet, type = "continuous")
+xcoreperiphery(davis, seed = 1)
 }
 \seealso{
 \code{\link[=xblockmodel]{xblockmodel()}}, \code{\link[=xeigenvector]{xeigenvector()}}.

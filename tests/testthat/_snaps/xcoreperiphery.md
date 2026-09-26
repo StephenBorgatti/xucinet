@@ -1,3 +1,65 @@
+# the 2-mode report prints
+
+    Code
+      xcoreperiphery(davis, seed = 1)
+    Output
+      2-MODE CATEGORICAL CORE/PERIPHERY MODEL
+      --------------------------------------------------------------------------------
+      
+      Max generations:                        1000
+      Population size:                        250
+      Stop after generations with no improvement:2
+      Max auxiliary iterations:               6
+      Input dataset:                          davis
+      Note:                                   Random number seed: 1.
+      
+      
+      
+      Starting fitness: 0.516
+      Number of generations: 2
+      Final fitness: 0.664
+      Number of auxiliary iterations: 3
+      
+      Blocked Adjacency Matrix -- Final
+      
+                                           1 1 1 1 1  
+                       7 8 9   1 2 3 4 5 6 0 1 2 3 4  
+                       E E E   E E E E E E E E E E E  
+                      ------------------------------- 
+         1    EVELYN |   1 1 | 1 1 1 1 1 1           |
+         2     LAURA | 1 1   | 1 1 1   1 1           |
+         3   THERESA | 1 1 1 |   1 1 1 1 1           |
+         4    BRENDA | 1 1   | 1   1 1 1 1           |
+         5 CHARLOTTE | 1     |     1 1 1             |
+         6   FRANCES |   1   |     1   1 1           |
+         7   ELEANOR | 1 1   |         1 1           |
+         9      RUTH | 1 1 1 |         1             |
+        10     VERNE | 1 1 1 |                 1     |
+        11     MYRNA |   1 1 |             1   1     |
+        12 KATHERINE |   1 1 |             1   1 1 1 |
+        13    SYLVIA | 1 1 1 |             1   1 1 1 |
+        14      NORA | 1   1 |           1 1 1 1 1 1 |
+        15     HELEN | 1 1   |             1 1 1     |
+                     ---------------------------------
+         8     PEARL |   1 1 |           1           |
+        16   DOROTHY |   1 1 |                       |
+        17    OLIVIA |     1 |               1       |
+        18     FLORA |     1 |               1       |
+                     --------------------------------
+      
+      
+      Density matrix
+      
+                           1     2 
+                        Core Perip 
+                              hery 
+                       ----- ----- 
+           1      Core 0.714 0.325 
+           2 Periphery 0.500 0.068 
+      
+      2 rows, 2 columns, 1 levels.
+      
+
 # the reports print
 
     Code
