@@ -83,6 +83,12 @@ batch at the end.** Design questions for all remaining chapters are batched in
 ## Done this session (26 Sep 2026, Claude Code)
 
 
+- **Steve's answers on T5, T11, T12, T19** (asnr2e `docs/text-changes.md`), carried out:
+  DL nodelists read `alter:value` and `alter:.` (T5; UCINET issue 36 asks UCINET's
+  importer for the same; ledger 47); `xlouvain(order = "random", seed = )` (T11; ledger
+  48); T12 is a text edit only; Table 14.4 regenerated with `xlrqap()`, 5000
+  permutations, seed 1 (T19: p 0.017 and 0.100 where the text has 0.012 and 0.064).
+
 - **Steve's decisions on open questions 4, 6, 7, 8**, recorded in both STATUS files; T9,
   T13, T14 turned into plain text edits. Then:
 - **2-mode Louvain (#18, closed).** `xlouvain()` on 2-mode data ports
@@ -281,8 +287,8 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. Nothing is waiting on Steve in the package. The book side has T5, T11, T12 and T19
-   (`asnr2e/docs/text-changes.md`).
+0. Nothing is waiting on Steve, in the package or in `asnr2e/docs/text-changes.md`
+   (26 Sep).
 1. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
    `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence,twomode,hypotheses}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
@@ -427,6 +433,11 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   a text edit; issue #25).
   (8) Profile similarity keeps the Reciprocal1 default; the text says Matrix 12.3 was
   computed with Reciprocal2 and the practice passes `diagonal = "reciprocal2"` (T13).
+
+- 26 Sep 2026 (Steve; asnr2e T5, T11, T12, T19): valued nodelists are a DL format that
+  xucinet reads (and UCINET is to read, issue 36); `xlouvain()` keeps the fixed order and
+  offers `order = "random"`; the closeness-centralization exercise leaves Pucci out;
+  Table 14.4 keeps the 2-path count and is regenerated with `xlrqap()`.
 
 ## Open questions for Steve
 
