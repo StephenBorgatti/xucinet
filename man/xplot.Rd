@@ -19,6 +19,7 @@ xplot(
   arrows = NULL,
   arrowsize = NULL,
   cutoff = NULL,
+  op = ">",
   keep = NULL,
   ego = NULL,
   isolates = TRUE,
@@ -67,7 +68,10 @@ not symmetric.}
 an n by n matrix, or \code{TRUE} to make them follow the tie values
 (Figure 7.19).}
 
-\item{cutoff}{Draw only ties whose value is greater than this (7.4.1).}
+\item{cutoff, op}{Draw only the ties whose value satisfies \verb{value op cutoff}
+(7.4.1). \code{op} is one of \code{">"} (the default), \code{">="}, \code{"=="}, \code{"<="},
+\code{"<"}, \code{"!="}. A zero is never a tie, whatever the rule, so \verb{cutoff = 4, op = "<"} keeps the top three of a ranking where 1 is the first choice
+(Figure 7.18).}
 
 \item{keep}{The nodes to draw: a logical vector, a vector of labels, or
 \code{NULL} for all (7.5.2).}
@@ -149,6 +153,9 @@ xplot(padgett, relation = c("Marriage", "Business"),
       edgecolor = c("darkgreen", "blue", "black"))
 xy <- xplot(zachary, relation = "Strength", nodecolor = "Club", data = zachary_attr)
 xplot(zachary, relation = "Strength", layout = xy, cutoff = 3, isolates = FALSE)
+# Newcomb's fraternity, top three choices in week 1, bigger heads for first choices
+xplot(newfrat, relation = "PreferenceT01", cutoff = 4, op = "<",
+      arrowsize = 4 - as.matrix(newfrat, relation = "PreferenceT01"))
 }
 \seealso{
 \code{\link[=xlayout]{xlayout()}}.

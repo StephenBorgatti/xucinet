@@ -5,7 +5,8 @@
 * `xplot()`: network drawings in base graphics. Node colour, size, shape and
   label size from attributes, names or node-level results; tie width and
   darkness from values; several relations by colour and line style; tie
-  cut-off, node filtering, ego networks, isolates left out in place;
+  cut-off with a rule (`op =`, so a ranking's top three can be drawn), node
+  filtering, ego networks, isolates left out in place;
   `file =` writes png, jpg, tiff, pdf or svg. No underscores in argument
   names (Steve, design 7.2). Ledger 44.
 * `xlayout()`: spring (Fruchterman-Reingold), Kamada-Kawai, classical and

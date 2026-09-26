@@ -174,3 +174,23 @@ test_that("xhelp finds the drawing functions by the words people use", {
     expect_true("xplot" %in% res$name_2, info = w)
   }
 })
+
+test_that("op sets the cutoff rule, and a zero is never a tie", {
+  m <- matrix(0, 5, 5, dimnames = list(letters[1:5], letters[1:5]))
+  m["a", "b"] <- m["b", "a"] <- 1
+  m["b", "c"] <- m["c", "b"] <- 5
+  m["d", "a"] <- m["a", "d"] <- 9
+  xy <- draw(m, layout = "circle", cutoff = 4, op = "<", isolates = FALSE)
+  expect_equal(rownames(xy), c("a", "b"))
+  xy <- draw(m, layout = "circle", cutoff = 4, op = ">=", isolates = FALSE)
+  expect_equal(rownames(xy), c("a", "b", "c", "d"))
+  expect_error(draw(m, cutoff = 4, op = "=>"), "op must be one of")
+})
+
+test_that("Newcomb's top three: every man keeps his three choices", {
+  p <- as.matrix(newfrat, relation = "PreferenceT01")
+  xy <- draw(newfrat, relation = "PreferenceT01", cutoff = 4, op = "<",
+             isolates = FALSE, arrowsize = 4 - p)
+  expect_equal(nrow(xy), 17L)
+  expect_true(all(rowSums(p > 0 & p < 4) == 3))
+})

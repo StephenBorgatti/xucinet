@@ -299,7 +299,11 @@ is_colour <- function(x) {
 #' @param arrowsize Size of the arrowheads: a number (1 is the default size),
 #'   an n by n matrix, or `TRUE` to make them follow the tie values
 #'   (Figure 7.19).
-#' @param cutoff Draw only ties whose value is greater than this (7.4.1).
+#' @param cutoff,op Draw only the ties whose value satisfies `value op cutoff`
+#'   (7.4.1). `op` is one of `">"` (the default), `">="`, `"=="`, `"<="`,
+#'   `"<"`, `"!="`. A zero is never a tie, whatever the rule, so `cutoff = 4,
+#'   op = "<"` keeps the top three of a ranking where 1 is the first choice
+#'   (Figure 7.18).
 #' @param keep The nodes to draw: a logical vector, a vector of labels, or
 #'   `NULL` for all (7.5.2).
 #' @param ego Draw only the ego network of this node: it, the nodes it is tied
@@ -328,12 +332,15 @@ is_colour <- function(x) {
 #'       edgecolor = c("darkgreen", "blue", "black"))
 #' xy <- xplot(zachary, relation = "Strength", nodecolor = "Club", data = zachary_attr)
 #' xplot(zachary, relation = "Strength", layout = xy, cutoff = 3, isolates = FALSE)
+#' # Newcomb's fraternity, top three choices in week 1, bigger heads for first choices
+#' xplot(newfrat, relation = "PreferenceT01", cutoff = 4, op = "<",
+#'       arrowsize = 4 - as.matrix(newfrat, relation = "PreferenceT01"))
 #' @export
 xplot <- function(net, layout = "spring", relation = NULL, nodecolor = NULL,
                   nodesize = NULL, nodeshape = NULL, label = TRUE,
                   labelsize = NULL, edgewidth = NULL, edgecolor = NULL,
                   edgestyle = NULL, arrows = NULL, arrowsize = NULL,
-                  cutoff = NULL, keep = NULL, ego = NULL, isolates = TRUE,
+                  cutoff = NULL, op = ">", keep = NULL, ego = NULL, isolates = TRUE,
                   legend = TRUE, data = NULL, seed = 1, main = NULL,
                   file = NULL, width = 7, height = 7, dpi = 300, ...) {
   net <- xnet(net, substitute(net))
@@ -342,10 +349,11 @@ xplot <- function(net, layout = "spring", relation = NULL, nodecolor = NULL,
   n <- length(labels)
   nrel <- length(g$mats)
 
-  # Ties drawn: present, and above the cutoff.
+  # Ties drawn: present, and passing the cutoff rule.
+  op <- match_op(op, "xplot()")
   tie <- lapply(g$mats, function(m) {
     t <- !is.na(m) & m != 0
-    if (!is.null(cutoff)) t <- t & !is.na(m) & m > cutoff
+    if (!is.null(cutoff)) t <- t & is_tie_matrix(m, op, cutoff)
     t
   })
   drawn <- Reduce(`|`, tie)
