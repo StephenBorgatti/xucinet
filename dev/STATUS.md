@@ -41,16 +41,16 @@ batch at the end.** Design questions for all remaining chapters are batched in
   shared internals in `R/community-internals.R` (UCINET's modularity, a port of Delphi's
   `Random`, the common Cluster/Modularity output). igraph is in Imports (G1). Cliques,
   factions, Girvan-Newman and Louvain are native ports; fast greedy and label propagation
-  run on igraph. `xlouvain()` fixes UCINET issue 26 as Steve decided, and refuses 2-mode
-  input until open question 4 (issue #18). Goldens named in `inst/goldens/subgroups/`.
-- Chapter 12 (equivalence) mostly done 23 Sep, issue #23: `xstructuralequivalence`,
-  `xblockmodel`, `xcoreperiphery` (categorical and continuous), `xrege`. Waiting on Steve:
-  `xblockoptimize` (issue #24, open question 6), 2-mode core/periphery (issue #25, open
-  question 7), the profile-similarity diagonal default (open question 8, T13). Goldens
-  named in `inst/goldens/equivalence/`.
+  run on igraph. `xlouvain()` fixes UCINET issue 26 as Steve decided; on 2-mode data it is
+  UCINET's bipartite-modularity Louvain (26 Sep, #18). Goldens named in
+  `inst/goldens/subgroups/`.
+- Chapter 12 (equivalence) done: `xstructuralequivalence`, `xblockmodel`, `xcoreperiphery`
+  (categorical and continuous, and 2-mode categorical), `xrege` (23 Sep, #23), and
+  `xblockoptimize` (26 Sep, #24; UCINET issue 35). Goldens named in
+  `inst/goldens/equivalence/`.
 - Chapter 13 (two-mode) done 24 Sep, issue #26: `xaffiliations`, `xbipartite`,
   `xbicliques`, and 2-mode data in `xdegree`/`xcloseness`/`xbetweenness`/`xeigenvector`
-  (`mode =`). 2-mode Louvain and core/periphery still wait on open questions 4 and 7.
+  (`mode =`); 2-mode Louvain (#18) and core/periphery (#25; UCINET issue 34) added 26 Sep.
   Goldens named in `inst/goldens/twomode/`. The 2-mode audit is a comment on issue #26.
 - Chapter 14 (testing hypotheses) done 24 Sep, issues #27 and #28: `xcorrelation`,
   `xregression`, `xqap`, `xmrqap`, `xlrqap`, `xdensitybygroups(test = TRUE)` with the three
@@ -59,11 +59,9 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - Chapter 7 (visualization) done 24 Sep, issue #30: `xplot` and `xlayout`, base graphics
   on igraph layouts, argument names without underscores. No goldens (NetDraw is not the
   oracle).
-- **Every chapter is now coded.** `dev/COVERAGE.md` (26 Sep): 15 done, 67 coded with
-  goldens pending, 2 not started (`xblockoptimize`, waiting on Steve), 4 dropped (project
-  bundle, QuickClus, Walktrap, ERGM wrappers per D-9). The 2-mode items are flags inside
-  existing functions, not rows. What is left is the open questions below and the goldens
-  sweep.
+- **Every routine is coded.** `dev/COVERAGE.md` (26 Sep): 15 done, 69 coded with goldens
+  pending, 0 not started, 4 dropped (project bundle, QuickClus, Walktrap, ERGM wrappers per
+  D-9). No open questions. What is left is the goldens sweep and the asnr2e side.
 - `inst/extdata/crosswalk-routines.csv` and `crosswalk.py` agree (25 Sep): every signature
   in the CSV appears verbatim in `crosswalk.py`, which now has the chapter 11 signatures,
   `elsevalue=` and the full 10.5 row; Walktrap and QuickClus are marked dropped in both.
@@ -84,6 +82,26 @@ batch at the end.** Design questions for all remaining chapters are batched in
 
 ## Done this session (26 Sep 2026, Claude Code)
 
+
+- **Steve's decisions on open questions 4, 6, 7, 8**, recorded in both STATUS files; T9,
+  T13, T14 turned into plain text edits. Then:
+- **2-mode Louvain (#18, closed).** `xlouvain()` on 2-mode data ports
+  `u2modelouvain.pas`: Barber's Q_b, one level of local moving in an order shuffled by
+  Delphi's `Random` under `seed`, the blocked matrix (`format_blocked_matrix()` now takes a
+  column partition). Tests: Q_b written out, local optimality, two bicliques.
+- **2-mode core/periphery (#25, closed).** `xcoreperiphery()` on 2-mode data ports
+  `x2mcatcp.pas` and `Ugenetic.pas` (`genetic2`, `greedy`), R's generator under `seed`.
+  UCINET issue 34: five defects (a 1-mode diagonal rule in the start and the density
+  table, the stopping counter that never moves, the start never scored, an undefined
+  correlation scored as the best). Ledger 45. New arguments `popsize`, `stopafter`, `auxit`.
+- **`xblockoptimize` (#24, closed).** Structural (binary, valued) and regular optimization,
+  ported from `xsbmb.pas`, `xsbmv.pas`, `xrbm.pas` with the G1 `tabus` and `km1`, Delphi's
+  generator. UCINET issue 35: five defects (the start's distance, the valued routine never
+  using its random starts, the regular moves never reaching the last block, the diagonal
+  option not reaching the costs, missing cells read as values). Ledger 46. The regular
+  cost is matrix products: lazega at k = 3 takes 13 s.
+- Crosswalk signatures for all three in both copies; xlsx rebuilt and the Dropbox copy
+  refreshed (asnr2e 19f3d66). COVERAGE: 0 not started.
 - **Table 14.4 (#29, closed; 830fa83).** Steve found the model in the 1e practice:
   week 1 top three on week 0's top three, its transpose, and the 2-path count, fitted with
   `sna::netlogit` (semi-partialling). `xlrqap()` reproduces the coefficients (-2.642,
@@ -263,17 +281,14 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. **Chapter 12 leftovers, once Steve answers:** `xblockoptimize` (open question 6,
-   issue #24), 2-mode core/periphery (open question 7, issue #25), the profile-similarity
-   diagonal default (open question 8, T13).
-1. **2-mode:** Louvain (open question 4, #18) and core/periphery (open question 7, #25) both
-   wait for Steve; each is a small follow-up once decided (T9, T14).
-2. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
+0. Nothing is waiting on Steve in the package. The book side has T5, T11, T12 and T19
+   (`asnr2e/docs/text-changes.md`).
+1. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
    `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence,twomode,hypotheses}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
-3. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`) when Steve has a free hour with
+2. Goldens sweep (`asnr2e/docs/prompts/goldens-sweep.md`) when Steve has a free hour with
    UCINET; `Config/ucinet/reference` bumps then.
-4. Then the asnr2e side: generators and practices per chapter, and the ch07 merge
+3. Then the asnr2e side: generators and practices per chapter, and the ch07 merge
    completion (`tools/merge-edits/edits07.py`, a separate asnr2e prompt; T18 has the facts),
    now that xplot exists.
 
