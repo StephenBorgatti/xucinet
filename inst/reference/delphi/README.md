@@ -163,6 +163,7 @@ ucinet commit c7b4956, tools commit 207958a.
 | `uc_ContinuousCoreness.pas` + `.dfm`, `utminres.pas`, `utconcentration.pas`, `utbivariate.pas` | `Ucinet/Source`, `Tools/G2Tools`, `Tools/G1Tools` | Continuous core/periphery: MINRES, the concentration table, Gini, heterogeneity, the identity coefficient |
 | `x2mcatcp.pas`, `uc_2modecatcp.pas` + `.dfm`, `Ugenetic.pas` | `Ucinet/Source`, `Tools/G1Tools` | 2-mode categorical core/periphery: the start, `corrfit`, `genetic2` and `greedy`, the dialog defaults (UCINET issue 34); ported as `catcp2_run()` in `R/xcoreperiphery.R` (issue #25) |
 | `Xrege.pas`, `Urege.pas` | `Ucinet/Source`, `Tools/G1Tools` | REGE: the dialog, the 64-bit refusal, `sStdrege` |
+| `xsbmb.pas`, `xsbmv.pas`, `xrbm.pas`, `uc_sbmbdlg.pas` + `.dfm`, `uc_sbmvdlg.pas` + `.dfm`, `Tabu2Dlg.pas`, `utabu.pas`, `Uclus.pas`, `uag.pas` | `Ucinet/Source`, `Tools/G1Tools` | Blockmodel optimization, structural (binary, valued) and regular: the costs, the starts (`km1`, REGE), the G1 `tabus`, the simple moves, the defaults (UCINET issue 35); ported in `R/xblockoptimize.R` (issue #24) |
 
 ## Chapter 13: two-mode networks (issue #26)
 

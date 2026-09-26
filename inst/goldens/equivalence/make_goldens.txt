@@ -59,3 +59,16 @@
 //   campnet -> (Output) REGE similarities  g12_rege_campnet
 //   wiring (all six relations, as the dialog uses them) -> g12_rege_wiring
 // Keep the log: the similarities are printed times 100.
+
+// --- Network | Roles & Positions | Structural Equivalence | Optimization | Binary
+// campnet, Number of blocks: 3, Random seed: 1 (type it over the one shown),
+// other options at their defaults (diagonal not valid, 50 iterations, penalty
+// 25, 5 random starts).
+//   (Output) Partition -> g12_sbm_campnet
+// Keep the log: errors per start, the final errors and R-square.
+
+// --- Network | Roles & Positions | Maximal Regular Equivalence | Optimization -----
+// campnet, Number of blocks: 2, Random seed: 1, other options at their
+// defaults (30 iterations, penalty 25, 30 random starts).
+//   (Output) Partition -> g12_rbm_campnet
+// Keep the log: errors per start and the final errors.

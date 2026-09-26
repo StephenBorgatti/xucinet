@@ -12,6 +12,11 @@
   and single flips; new arguments `popsize`, `stopafter`, `auxit`. Five defects
   in UCINET's code are not copied (UCINET issue 34, ledger 45). No dual
   projection (issue #25).
+* `xblockoptimize()`, new: UCINET's blockmodel optimization, structural
+  (binary or valued) and regular, a start and random starts improved by tabu
+  search, with Delphi's generator so a seed gives UCINET's search. Five
+  defects in UCINET's code are corrected (UCINET issue 35, ledger 46; issue
+  #24).
 
 ## Chapter 7: visualization (issue #30)
 

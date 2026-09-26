@@ -167,12 +167,13 @@ reference:
   desc: >
     Chapter 12. Structural equivalence by profile similarity, regular
     equivalence by REGE, and the
-    blockmodel of a partition: the blocked matrix, block densities, image
-    and fit.
+    blockmodel of a partition (the blocked matrix, block densities, image
+    and fit), and the search for the best partition.
   contents:
   - xstructuralequivalence
   - xblockmodel
   - xrege
+  - xblockoptimize
 
 - title: Network | Core/Periphery
   desc: >

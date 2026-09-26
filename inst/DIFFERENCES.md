@@ -831,3 +831,18 @@ runs every generation); and a partition whose scored cells are all equal
 scores 0 rather than the largest fitness there is. Randomness is R's generator
 under `seed`; UCINET calls `randomize`, so only the fit can be compared.
 The dual projection section 13.6 describes is not offered (T14).
+
+## 46. Blockmodel optimization: UCINET's search without its defects
+
+**Status:** UCINET fix pending (UCINET issue 35). Steve, 26 September 2026 (issue #24).
+
+`xblockoptimize()` ports UCINET's Structural Equivalence | Optimization (Binary
+and Valued) and Maximal Regular Equivalence | Optimization, with Delphi's random
+number generator, so a seed gives UCINET's search. Five defects are corrected:
+the starting distance compares columns as well as rows; the valued routine's
+random starts are scored on themselves and kept when their R-square is higher;
+the regular routine's single moves can reach the last block; *Diagonal valid?*
+governs every count; missing cells are left out. Because the first changes the
+start, partitions can differ from UCINET's for the same seed; the golden tests
+compare the fit. Valued or binary is chosen from the data unless `weighted` says;
+UCINET has two menu items.

@@ -978,6 +978,41 @@ reset the count on improvement); treat `corr >= na` as fitness 0.
 
 ---
 
+## 35. Blockmodel optimization: the start's distance, the valued starts, the regular moves, the diagonal
+
+**bug** · **open — fix pending** · found 26 September 2026 (chapter 12, issue #24)
+
+`xsbmb.pas` (Structural Equivalence | Optimization | Binary), `xsbmv.pas`
+(| Valued) and `xrbm.pas` (Maximal Regular Equivalence | Optimization), ucinet
+c7b4956:
+
+1. Both structural routines build the starting partition from a profile
+   distance summing `sqr(d[i,k] - d[j,k]) + sqr(d[k,i] * d[k,i])`: the column
+   term is `d[k,i]` to the fourth power, not `sqr(d[k,i] - d[k,j])`.
+2. The valued routine, after each random start, computes
+   `fit := sqr(corr(bestp))` (the old best, not the start `p`) and keeps the
+   start `if fit < bestfit`, although R-square is better when higher. No
+   random start is ever used; the log prints `bestfit` for every iteration.
+3. The regular routine's `simpleoptimization` loops
+   `for j := 1 to nb do if j <> nb`: a node never moves into the last block
+   (`j <> p[i]` is meant).
+4. *Diagonal valid?* does not reach the costs: the binary structural cost
+   (`hammingdistance`) always leaves the diagonal out, and the regular cost
+   (`hamming`) always counts it; R-square and the densities do follow it.
+5. Missing cells are read as values: a missing cell (1E38) is a tie in both
+   binary costs and enters the valued block means.
+
+(The regular dialog's *Cut-off* feeds only `costof`, which nothing calls. Not
+a defect in the results; the argument is not offered.)
+
+**What xucinet does:** the column difference in the distance; the start's own
+R-square, higher kept; every other block tried; the diagonal in every count
+only when valid; missing cells left out. Ledger entry 46.
+
+**Fix:** as above, each a one-line change.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps

@@ -8,8 +8,8 @@ against the xucinet 2.0 function that serves it.
 | status | meaning | count |
 |---|---|---|
 | done | written, tested, and checked against UCINET goldens | 15 |
-| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 67 |
-| not started | no function yet | 2 |
+| coded, goldens pending | written and tested; the golden tests skip until the UCINET batch is run | 69 |
+| not started | no function yet | 0 |
 | dropped | will not be written; the reason is given below | 4 |
 
 ## Chapter 5
@@ -121,8 +121,8 @@ against the xucinet 2.0 function that serves it.
 |---|---|---|---|---|
 | 12.2 / 12.3 | Structural equivalence, profile similarity | Network\|Roles & Positions\|Structural Equivalence\|Profile | `xstructuralequivalence()` | coded, goldens pending |
 | 12.4 | Blockmodel display: permuted matrix, density table, image matrix | Transform\|Aggregate\|Block - Aggregate by Partitions | `xblockmodel()` | coded, goldens pending |
-| 12.5 | Structural-equivalence optimization | Network\|Roles & Positions\|Structural Equivalence\|Optimization | `xblockoptimize()` | not started |
-| 12.6 | Regular-equivalence optimization | Network\|Roles & Positions\|Maximum Regular\|Optimization | `xblockoptimize()` | not started |
+| 12.5 | Structural-equivalence optimization | Network\|Roles & Positions\|Structural Equivalence\|Optimization | `xblockoptimize()` | coded, goldens pending |
+| 12.6 | Regular-equivalence optimization | Network\|Roles & Positions\|Maximum Regular\|Optimization | `xblockoptimize()` | coded, goldens pending |
 | 12.7 | REGE | Network\|Roles & Positions\|Maximum Regular\|REGE | `xrege()` | coded, goldens pending |
 | 12.8 | Core–periphery, categorical and continuous | Network\|Core/Periphery\|Categorical; ...\|Continuous | `xcoreperiphery()` | coded, goldens pending |
 
