@@ -286,6 +286,24 @@ test_that("symmetric = TRUE uses one triangle; a constant Y is refused", {
   expect_error(xlrqap(A ~ B, z, nperm = 0), "constant")
 })
 
+test_that("Newcomb's fraternity reproduces Table 14.4 (14.5.2)", {
+  # The book's model, from the 1e practice (WebsitePractices, ASNR CHAPTER 14
+  # Practice Update 2 May 2022.Rmd, lines 266-270; issue #29): week 1 top-three
+  # choices on week 0's top-three choices, their transpose and the count of
+  # 2-paths among them (not dichotomized), diagonal excluded. It was fitted with
+  # sna::netlogit; the coefficients and log likelihood do not depend on the
+  # permutations.
+  top3 <- function(p) (p > 0 & p < 4) * 1
+  p0 <- top3(as.matrix(newfrat, relation = "PreferenceT00"))
+  nets <- list(week1 = top3(as.matrix(newfrat, relation = "PreferenceT01")),
+               week0 = p0, week0t = t(p0), twopaths = p0 %*% p0)
+  r <- xlrqap(week1 ~ week0 + week0t + twopaths, nets, nperm = 0)
+  expect_equal(round(unname(r$matrices[[1]][, "Coef"]), 3),
+               c(-2.642, 2.258, 0.829, 0.510))
+  expect_equal(round(r$summary$LL, 2), -100.08)
+  expect_equal(r$summary$Obs, 272)
+})
+
 # ---- ANOVA density models -----------------------------------------------------------
 
 test_that("the density models' coefficients are differences of densities", {
