@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 25 Sep 2026 (Claude Code; Cowork should
+Updated 26 Sep 2026 (Claude Code; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -59,9 +59,11 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - Chapter 7 (visualization) done 24 Sep, issue #30: `xplot` and `xlayout`, base graphics
   on igraph layouts, argument names without underscores. No goldens (NetDraw is not the
   oracle).
-- **Every chapter is now coded.** `dev/COVERAGE.md` (24 Sep): 15 done, 67 coded with
-  goldens pending, 3 not started (the chapter 12 and 2-mode items waiting on Steve), 3
-  dropped. What is left is the open questions below and the goldens sweep.
+- **Every chapter is now coded.** `dev/COVERAGE.md` (26 Sep): 15 done, 67 coded with
+  goldens pending, 2 not started (`xblockoptimize`, waiting on Steve), 4 dropped (project
+  bundle, QuickClus, Walktrap, ERGM wrappers per D-9). The 2-mode items are flags inside
+  existing functions, not rows. What is left is the open questions below and the goldens
+  sweep.
 - `inst/extdata/crosswalk-routines.csv` and `crosswalk.py` agree (25 Sep): every signature
   in the CSV appears verbatim in `crosswalk.py`, which now has the chapter 11 signatures,
   `elsevalue=` and the full 10.5 row; Walktrap and QuickClus are marked dropped in both.
@@ -80,7 +82,21 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - UCINET source for porting: `C:\Dev\ucinet\Source` and `C:\Dev\tools` (Delphi 13). The
   Dropbox copies are stale.
 
-## Done this session (25 Sep 2026, Claude Code)
+## Done this session (26 Sep 2026, Claude Code)
+
+- **Table 14.4 (#29, closed; 830fa83).** Steve found the model in the 1e practice:
+  week 1 top three on week 0's top three, its transpose, and the 2-path count, fitted with
+  `sna::netlogit` (semi-partialling). `xlrqap()` reproduces the coefficients (-2.642,
+  2.258, 0.829, 0.510) and log likelihood (-100.08); test added. The text says the 2-path
+  matrix is 0/1 and the test Y permutation; both are asnr2e T19, open: decision.
+- **`xplot(op =)` (17741ab).** The cutoff takes a rule, so Figure 7.18's top three is
+  `cutoff = 4, op = "<"`; a zero is never a tie.
+- **COVERAGE (d967244).** Dropped rows are matched by topic, so QuickClus and Walktrap no
+  longer show a function `drop()`, and the ERGM row is dropped per D-9 instead of a
+  not-started `statnet()`.
+- asnr2e `STATUS.md` brought up to date (7447008).
+
+## Done 25 Sep 2026 (Claude Code)
 
 - Housekeeping Steve asked for: issue #15 closed (answered 23 Sep); T8 in
   `asnr2e/docs/text-changes.md` turned from `open: decision` into a plain text edit (no
@@ -252,8 +268,6 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
    diagonal default (open question 8, T13).
 1. **2-mode:** Louvain (open question 4, #18) and core/periphery (open question 7, #25) both
    wait for Steve; each is a small follow-up once decided (T9, T14).
-   **Table 14.4 (#29):** once its week-1 dichotomization and predictors are known, a test
-   that reproduces it with `xlrqap(newfrat, ...)`.
 2. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
    `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence,twomode,hypotheses}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
