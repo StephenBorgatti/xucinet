@@ -403,31 +403,17 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   lines of nodes hide the structure the chapters discuss; `layout = "bipartite"` is there.
   Numbers with at most six distinct whole values count as categories for colour and shape.
 
+- 26 Sep 2026 (Steve; former open questions 4, 6, 7, 8):
+  (4) `xlouvain()` on 2-mode data maximizes bipartite modularity as UCINET's 2-mode Louvain
+  does; no dual projection in the package (T9 is a text edit; issue #18).
+  (6) `xblockoptimize` is a native port of UCINET's optimization routines, structural and
+  regular equivalence (issue #24).
+  (7) 2-mode core/periphery ports UCINET's `x2mcatcp.pas` only, no dual projection (T14 is
+  a text edit; issue #25).
+  (8) Profile similarity keeps the Reciprocal1 default; the text says Matrix 12.3 was
+  computed with Reciprocal2 and the practice passes `diagonal = "reciprocal2"` (T13).
+
 ## Open questions for Steve
 
-(Questions 1 and 2 were answered on 23 Sep, 9 and 10 on 24 Sep, and 3 and 5 are closed; the answers are under "Decisions". The remaining
-ones keep their numbers because other notes refer to them.)
+None open (26 Sep 2026). Questions 1-8 are answered; see Decisions.
 
-4. **2-mode Louvain (design question 11.4).** UCINET's 2-mode Louvain
-   (`uc_2modelouvain.pas`, engine `G2Tools/u2modelouvain.pas`) maximizes Barber's
-   bipartite modularity Q_b: one level of local moving, no aggregation, nodes visited in
-   a random order under a seed, communities spanning both modes. The book (13.5.1,
-   Figure 13.5, Practice 13.x) describes and uses dual projection instead (Everett and
-   Borgatti 2013: Louvain on each projection, then combine). Options: (a) `xlouvain()` on
-   2-mode data does bipartite modularity as UCINET does, and 13.5.1 is rewritten;
-   (b) it does dual projection, as the text says, with a ledger entry; (c) both, chosen by
-   an argument (the slot structure is the same either way). Recorded as
-   `asnr2e/docs/text-changes.md` T9.
-6. **`xblockoptimize` (design 12.3, issue #24).** Steve asked whether it differs from
-   `xblockmodel` (yes: it searches for the partition, `xblockmodel` summarizes a given
-   one), how to implement it, and whether a package exists. Options: (a) a native port of
-   UCINET's optimization routine, as factions was (factions' tabu search runs a 200-node
-   network in 0.4 s in R); (b) the CRAN package blockmodeling, fast, but with criterion
-   functions that are not UCINET's. Recommendation (a).
-7. **2-mode core/periphery (design 12.4, 13.6; issue #25).** UCINET's 2-mode routine
-   (`x2mcatcp.pas`) is a genetic algorithm on the row-by-column correlation, not the dual
-   projection the design note and 13.6 describe. Options: port UCINET's, do dual
-   projection, or both. Same shape as open question 4.
-8. **Profile similarity's diagonal default (design 12.1; T13).** UCINET's dialog and the
-   answer to 12.1 give Reciprocal1; the book's Matrix 12.3 and its prose are Reciprocal2.
-   Keep Reciprocal1 and change the text, or default to Reciprocal2 against the dialog?
