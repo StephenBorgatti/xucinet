@@ -465,7 +465,18 @@ xplot <- function(net, layout = "spring", relation = NULL, nodecolor = NULL,
   xr <- range(pts[, 1], na.rm = TRUE); yr <- range(pts[, 2], na.rm = TRUE)
   pad <- 0.08 * max(diff(xr), diff(yr), 1e-9)
   graphics::plot.new()
-  graphics::plot.window(xlim = xr + c(-pad, pad), ylim = yr + c(-pad, pad),
+  # Room on the right for the labels, which sit to the right of their symbols:
+  # the widest label (with its offset), as a share of the plot's width, is
+  # added to the right-hand side so that no label is clipped at the edge.
+  right <- pad
+  if (any(nzchar(lab[shown]))) {
+    lw_in <- max(graphics::strwidth(lab[shown], units = "inches", cex = lcex[shown]) +
+                 0.375 * graphics::par("cin")[2] * cex[shown] + 0.05)
+    pin <- graphics::par("pin")[1]
+    share <- min(lw_in / pin, 0.45)
+    right <- pad + (diff(xr) + 2 * pad) * share / (1 - share)
+  }
+  graphics::plot.window(xlim = c(xr[1] - pad, xr[2] + right), ylim = yr + c(-pad, pad),
                         asp = if (is.null(axes)) 1 else NA)
   if (!is.null(axes)) {
     graphics::axis(1); graphics::axis(2); graphics::box()

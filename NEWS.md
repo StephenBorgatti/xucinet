@@ -10,6 +10,8 @@
   comes back as NA with a note.
 * `xsimilarities(mode = "matrices")` is `mode = "relations"` (asnr2e T4; #32).
 * A report whose whole-network block is suppressed no longer prints its title.
+* `xplot()` leaves room on the right for node labels, which were clipped at
+  the edge of the plot (found drawing Figure 13.5).
 
 ## Relation names in any case (27 September 2026)
 

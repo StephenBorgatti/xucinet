@@ -194,3 +194,14 @@ test_that("Newcomb's top three: every man keeps his three choices", {
   expect_equal(nrow(xy), 17L)
   expect_true(all(rowSums(p > 0 & p < 4) == 3))
 })
+
+test_that("the plot leaves room for labels on the right", {
+  # CHARLOTTE, at the right edge of davis's layout, was clipped before.
+  f <- tempfile(fileext = ".png")
+  grDevices::png(f, width = 7, height = 7, units = "in", res = 72)
+  xy <- xplot(davis)
+  usr <- graphics::par("usr")
+  w <- max(graphics::strwidth(rownames(xy), cex = 0.7))
+  grDevices::dev.off(); unlink(f)
+  expect_gte(usr[2], max(xy[, 1]) + w)
+})
