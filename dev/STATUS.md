@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 26 Sep 2026 (Claude Code; Cowork should
+Updated 27 Sep 2026 (Claude Code; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -80,7 +80,19 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - UCINET source for porting: `C:\Dev\ucinet\Source` and `C:\Dev\tools` (Delphi 13). The
   Dropbox copies are stale.
 
-## Done this session (26 Sep 2026, Claude Code)
+## Done this session (27 Sep 2026, Claude Code)
+
+- **Relation names ignore case (issue #31; 6966112; asnr2e T23, T24).** `match_relation()`
+  in `R/class-xucinet.R`: an exact match first, then case-insensitive; two relations
+  differing only in case make such a name an error listing both. Used by
+  `pick_relation()` (so every `relation =` and `as.matrix(net, relation =)`), `xunpack()`,
+  `xcombine()`, `xrecode()`, `xblockmodel()`, `xrege()`, `xstructuralequivalence()`,
+  `xtiecomposition()`, `xplot()`/`xlayout()` and the QAP formulas. Reports print the
+  stored name through `relation_label()` (a position used to print as a number). Docs of
+  every relation argument and of `xrelations()`; NEWS. T23 and T24 done: the book text
+  stands.
+
+## Done earlier on 26 Sep 2026 (Claude Code)
 
 
 - **Steve's answers on T5, T11, T12, T19** (asnr2e `docs/text-changes.md`), carried out:
@@ -438,6 +450,9 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   xucinet reads (and UCINET is to read, issue 36); `xlouvain()` keeps the fixed order and
   offers `order = "random"`; the closeness-centralization exercise leaves Pucci out;
   Table 14.4 keeps the 2-path count and is regenerated with `xlrqap()`.
+
+- 27 Sep 2026 (Steve; asnr2e T23, T24): relation names are matched case-insensitively,
+  after an exact match, so the book's `relation = "games"` stands.
 
 ## Open questions for Steve
 
