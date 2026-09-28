@@ -7,7 +7,7 @@
 xsimilarities(
   net,
   method = "correlation",
-  mode = c("cols", "rows", "relations"),
+  mode = c("cols", "rows", "relations", "matrices"),
   diagonal = FALSE
 )
 }
@@ -21,7 +21,8 @@ xsimilarities(
 \code{"jaccarddistance"}, \code{"hamming"} or \code{"ssd"}.}
 
 \item{mode}{\code{"cols"} (the dialog's default), \code{"rows"}, or \code{"relations"} to
-compare the relations of a multi-relation dataset with each other.}
+compare the relations of a multi-relation dataset with each other;
+\code{"matrices"} is the same as \code{"relations"} (UCINET calls them matrices).}
 
 \item{diagonal}{Are the diagonal values valid? \code{FALSE} by default, as the
 dialog has it: the diagonal is set missing before the profiles are

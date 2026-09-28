@@ -62,7 +62,8 @@ sim_measures <- list(
 #'   `"euclidean"`, `"manhattan"`, `"avgabsdiff"`, `"nssd"`, `"nonmatches"`,
 #'   `"jaccarddistance"`, `"hamming"` or `"ssd"`.
 #' @param mode `"cols"` (the dialog's default), `"rows"`, or `"relations"` to
-#'   compare the relations of a multi-relation dataset with each other.
+#'   compare the relations of a multi-relation dataset with each other;
+#'   `"matrices"` is the same as `"relations"` (UCINET calls them matrices).
 #' @param diagonal Are the diagonal values valid? `FALSE` by default, as the
 #'   dialog has it: the diagonal is set missing before the profiles are
 #'   compared, so cells `(i,i)` and `(j,j)` drop out of every pair. Square
@@ -84,10 +85,11 @@ sim_measures <- list(
 #' round(as.matrix(xsimilarities(davis, method = "jaccard"))[1:4, 1:4], 3)
 #' @export
 xsimilarities <- function(net, method = "correlation",
-                          mode = c("cols", "rows", "relations"),
+                          mode = c("cols", "rows", "relations", "matrices"),
                           diagonal = FALSE) {
   net <- xnet(net, substitute(net))
   mode <- match.arg(mode)
+  if (mode == "matrices") mode <- "relations"    # Steve, 27 Sep 2026 (#32)
   method <- match.arg(method, names(sim_measures))
   spec <- sim_measures[[method]]
 

@@ -203,3 +203,10 @@ test_that("Jaccard on 2-mode columns matches UCINET", {
                unname(golden_matrix("g5_simil_davis_jacc", "transform")),
                tolerance = tol)
 })
+
+test_that("mode = \"matrices\" is mode = \"relations\" (#32)", {
+  expect_identical(xsimilarities(hightech, mode = "matrices"),
+                   xsimilarities(hightech, mode = "relations"))
+  expect_identical(xsimilarities(wiring, mode = "matrices"),
+                   xsimilarities(wiring, mode = "relations"))
+})
