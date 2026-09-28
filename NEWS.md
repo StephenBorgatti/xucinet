@@ -1,5 +1,16 @@
 # xucinet 2.0.0.9000 (development)
 
+## The ANOVA density test moves to xmixing() (27 September 2026)
+
+* `xmixing(test = TRUE)` tests UCINET's three ANOVA density models (constant
+  homophily, variable homophily, structural blockmodel), which it always fits
+  and now returns beside its seven mixing tables; `nperm`, `seed`, `tails`
+  come with it. `xdensitybygroups()` is the density table again and takes no
+  `test` (Steve, asnr2e T3; issue #33). A model whose dummies are collinear
+  comes back as NA with a note.
+* `xsimilarities(mode = "matrices")` is `mode = "relations"` (asnr2e T4; #32).
+* A report whose whole-network block is suppressed no longer prints its title.
+
 ## Relation names in any case (27 September 2026)
 
 * A relation named in `relation =`, `relations =`, `xunpack()` or an

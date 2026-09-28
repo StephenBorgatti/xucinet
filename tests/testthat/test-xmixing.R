@@ -14,10 +14,11 @@ grp <- function() c(a = 1, b = 1, c = 2, d = 2)
 
 gender <- function() camp92_attr$Gender
 
-test_that("seven tables, the same seven every time (Steve, 23 Sep)", {
+test_that("ten tables, the same ten every time (Steve, 23 and 27 Sep)", {
   want <- c("Observed", "Expected (density)", "Expected (configuration)",
             "Expected (fixed outdegree)", "Ratio (density)",
-            "Ratio (configuration)", "Ratio (fixed outdegree)")
+            "Ratio (configuration)", "Ratio (fixed outdegree)",
+            "Constant Homophily", "Variable Homophily", "Structural Blockmodel")
   expect_equal(names(xmixing(four(), grp())$matrices), want)
   expect_equal(names(xmixing(four(), grp(), directed = FALSE)$matrices), want)
 })
@@ -150,3 +151,11 @@ test_that("the density table matches UCINET's, now from xdensitybygroups", {
                unname(golden_matrix("g10_mix_campnet_den", "cohesion")),
                tolerance = 1e-5)
 })
+
+test_that("a model that cannot be estimated is NA, not an error (#33)", {
+  one <- c(a = 1, b = 2, c = 2, d = 2)      # a group of one: collinear dummies
+  r <- xmixing(four(), one)
+  expect_equal(length(r$matrices), 10)
+  expect_true(any(grepl("not estimable", r$assumptions)))
+})
+

@@ -4,7 +4,17 @@
 \alias{xmixing}
 \title{Mixing tables}
 \usage{
-xmixing(net, attribute, relation = NULL, directed = TRUE, data = NULL)
+xmixing(
+  net,
+  attribute,
+  relation = NULL,
+  directed = TRUE,
+  data = NULL,
+  test = FALSE,
+  nperm = 5000,
+  seed = NULL,
+  tails = 2
+)
 }
 \arguments{
 \item{net}{A network (any accepted form). 1-mode.}
@@ -20,10 +30,23 @@ position. Defaults to the first.}
 does. Has no effect on asymmetric data.}
 
 \item{data}{A data frame to look \code{attribute} up in.}
+
+\item{test}{Test the ANOVA density models by permutation, and print them?
+\code{FALSE} by default.}
+
+\item{nperm}{Number of random permutations for the test. UCINET's default
+is 5000.}
+
+\item{seed}{Random seed for the permutations.}
+
+\item{tails}{2 (the default) or 1.}
 }
 \value{
 An object of class \code{c("xmixing", "xucinet_output")} whose
-\verb{$matrices} holds the seven tables above, in that order.
+\verb{$matrices} holds the seven tables above, in that order, then the
+coefficients of the three ANOVA density models (\verb{Constant Homophily},
+\verb{Variable Homophily}, \verb{Structural Blockmodel}); \verb{$summary} holds each
+model's fit, one row per model.
 }
 \description{
 UCINET: Network | Mixing Tables. How the ties of a network fall within and
@@ -55,6 +78,14 @@ UCINET computes one model per run, chosen in the dialog, and prints the
 density table as well. Here all three models come back together, and the
 density table is \code{\link[=xdensitybygroups]{xdensitybygroups()}}'s.
 
+The result also holds UCINET's three ANOVA density models (book 14.5), each
+a regression of the tie values on dummies built from the partition:
+\strong{constant homophily} (one dummy, same group), \strong{variable homophily} (one
+dummy per group) and the \strong{structural blockmodel} (one dummy per block).
+They are always fitted; \code{test = TRUE} tests them by permuting the network's
+rows and columns together and prints them with their fit. UCINET's dialog
+fits one of them per run, the blockmodel by default.
+
 Symmetric data are treated as directed unless \code{directed = FALSE}, as in the
 dialog; asymmetric data are always directed. Undirected data count each
 edge once.
@@ -67,6 +98,7 @@ Network | Mixing Tables, run once for each \emph{Model for expected values}.
 
 \examples{
 xmixing(campnet, camp92_attr$Gender)
+xmixing(campnet, camp92_attr$Gender, test = TRUE, nperm = 1000, seed = 1)
 }
 \seealso{
 \code{\link[=xdensitybygroups]{xdensitybygroups()}} for the density table, \code{\link[=xhomophily]{xhomophily()}} for

@@ -293,12 +293,13 @@ print.xucinet_output <- function(x, digits = 3, sort = NULL, stats = NULL, ...) 
   # routines free of display logic.
   summary_block <- function() {
     if (is.null(x$summary)) return(invisible(NULL))
-    if (!is.null(x$summary_title)) cat(x$summary_title, "\n\n", sep = "")
     s <- x$summary
     if (!is.null(x$show_summary)) {
       s <- if (is.data.frame(s)) s[, x$show_summary, drop = FALSE] else s[x$show_summary]
     }
+    # Nothing to show, no title: a suppressed block leaves no empty heading.
     if (!length(s)) return(invisible(NULL))
+    if (!is.null(x$summary_title)) cat(x$summary_title, "\n\n", sep = "")
     if (is.list(s) && !is.data.frame(s)) {
       m <- matrix(vapply(s, function(v) as.numeric(v)[1], numeric(1)), nrow = 1,
                   dimnames = list(x$dataset, names(s)))

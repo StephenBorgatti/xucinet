@@ -308,8 +308,8 @@ test_that("Newcomb's fraternity reproduces Table 14.4 (14.5.2)", {
 
 test_that("the density models' coefficients are differences of densities", {
   g <- camp92_attr$Gender
-  r <- xdensitybygroups(campnet, g)
-  dens <- r$matrices$Density
+  r <- xmixing(campnet, g)
+  dens <- xdensitybygroups(campnet, g)$matrices$Density
   ch <- r$matrices[["Constant Homophily"]]
   m <- as.matrix(campnet); off <- row(m) != col(m)
   same <- outer(g, g, "==")
@@ -325,10 +325,9 @@ test_that("the density models' coefficients are differences of densities", {
   expect_true(all(is.na(r$matrices[["Constant Homophily"]][, "Significance"])))
 })
 
-test_that("test = TRUE adds the permutation p-values", {
+test_that("xmixing(test = TRUE) adds the permutation p-values (#33)", {
   expect_differs_from_ucinet(33)
-  r <- xdensitybygroups(campnet, camp92_attr$Gender, test = TRUE, nperm = 500,
-                        seed = 1)
+  r <- xmixing(campnet, camp92_attr$Gender, test = TRUE, nperm = 500, seed = 1)
   ch <- r$matrices[["Constant Homophily"]]
   expect_lt(ch["In-group", "Significance"], 0.05)
   expect_equal(rownames(r$summary), c("Constant Homophily", "Variable Homophily",
@@ -348,8 +347,8 @@ test_that("the reports print", {
                          seed = 1))
   expect_snapshot(xlrqap(Advice ~ Friendship + ReportTo, hightech, nperm = 50,
                          seed = 1))
-  expect_snapshot(xdensitybygroups(campnet, camp92_attr$Gender, test = TRUE,
-                                   nperm = 100, seed = 1))
+  expect_snapshot(xmixing(campnet, camp92_attr$Gender, test = TRUE,
+                          nperm = 100, seed = 1))
 })
 
 test_that("observed statistics match UCINET", {

@@ -107,11 +107,9 @@ test_that("the report prints", {
 
 # ---- xdensitybygroups --------------------------------------------------------
 
-test_that("only the density table prints unless test = TRUE (Steve, 23 Sep)", {
+test_that("one table comes back: the density table (Steve, 23 and 27 Sep)", {
   d <- xdensitybygroups(campnet, gender())
-  expect_equal(names(d$matrices), c("Density", "Constant Homophily",
-                                   "Variable Homophily", "Structural Blockmodel"))
-  expect_equal(setdiff(names(d$matrices), d$hide), "Density")
+  expect_equal(names(d$matrices), "Density")
 })
 
 test_that("the density table is the one xcombinenodes gives", {
@@ -138,10 +136,14 @@ test_that("there is no model argument any more; xmixing reports every model", {
                "unused argument")
 })
 
-test_that("test = TRUE adds p-values and keeps the same slots", {
-  a <- xdensitybygroups(campnet, gender())
-  b <- xdensitybygroups(campnet, gender(), test = TRUE, nperm = 200, seed = 1)
+test_that("the test is xmixing()'s now, and xdensitybygroups() has none (#33)", {
+  expect_error(xdensitybygroups(campnet, gender(), test = TRUE), "unused argument")
+  a <- xmixing(campnet, gender())
+  b <- xmixing(campnet, gender(), test = TRUE, nperm = 200, seed = 1)
   expect_equal(names(a$matrices), names(b$matrices))
+  expect_equal(setdiff(names(a$matrices), a$hide)[1:7], names(a$matrices)[1:7])
+  expect_true(all(c("Constant Homophily", "Variable Homophily",
+                    "Structural Blockmodel") %in% a$hide))
   expect_true(all(is.na(a$matrices[["Constant Homophily"]][, "Significance"])))
   expect_false(anyNA(b$matrices[["Constant Homophily"]][, "Significance"]))
 })

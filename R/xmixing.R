@@ -23,8 +23,13 @@
 # and a missing cell is stored as bna = 1e38, not na = 1e37, so missing cells
 # are summed into every table as 1e38. Here they are skipped.
 #
-# A group-level routine under the 23 Sep level-of-analysis rule: seven
-# group-by-group matrices, the same seven whatever the arguments.
+# A group-level routine under the 23 Sep level-of-analysis rule: ten
+# group-by-group tables, the same ten whatever the arguments: the observed
+# table, three expected, three ratios, and the coefficients of UCINET's three
+# ANOVA density models (Tools | Testing Hypotheses | Mixed Dyadic/Nodal |
+# Categorical attributes | Anova Density models), which Steve moved here from
+# xdensitybygroups() on 27 Sep 2026 (issue #33). `test = TRUE` adds their
+# permutation p-values and prints them.
 
 # The three models, in the dialog's order, with the heading each table gets.
 mixing_models <- c(density = "density", configuration = "configuration",
@@ -58,6 +63,14 @@ mixing_models <- c(density = "density", configuration = "configuration",
 #' density table as well. Here all three models come back together, and the
 #' density table is [xdensitybygroups()]'s.
 #'
+#' The result also holds UCINET's three ANOVA density models (book 14.5), each
+#' a regression of the tie values on dummies built from the partition:
+#' **constant homophily** (one dummy, same group), **variable homophily** (one
+#' dummy per group) and the **structural blockmodel** (one dummy per block).
+#' They are always fitted; `test = TRUE` tests them by permuting the network's
+#' rows and columns together and prints them with their fit. UCINET's dialog
+#' fits one of them per run, the blockmodel by default.
+#'
 #' Symmetric data are treated as directed unless `directed = FALSE`, as in the
 #' dialog; asymmetric data are always directed. Undirected data count each
 #' edge once.
@@ -75,15 +88,26 @@ mixing_models <- c(density = "density", configuration = "configuration",
 #' @param directed Treat symmetric data as directed? `TRUE`, as the dialog
 #'   does. Has no effect on asymmetric data.
 #' @param data A data frame to look `attribute` up in.
+#' @param test Test the ANOVA density models by permutation, and print them?
+#'   `FALSE` by default.
+#' @param nperm Number of random permutations for the test. UCINET's default
+#'   is 5000.
+#' @param seed Random seed for the permutations.
+#' @param tails 2 (the default) or 1.
 #' @return An object of class `c("xmixing", "xucinet_output")` whose
-#'   `$matrices` holds the seven tables above, in that order.
+#'   `$matrices` holds the seven tables above, in that order, then the
+#'   coefficients of the three ANOVA density models (`Constant Homophily`,
+#'   `Variable Homophily`, `Structural Blockmodel`); `$summary` holds each
+#'   model's fit, one row per model.
 #' @seealso [xdensitybygroups()] for the density table, [xhomophily()] for
 #'   summary measures of the same mixing, and [xcombinenodes()].
 #' @examples
 #' xmixing(campnet, camp92_attr$Gender)
+#' xmixing(campnet, camp92_attr$Gender, test = TRUE, nperm = 1000, seed = 1)
 #' @export
 xmixing <- function(net, attribute, relation = NULL, directed = TRUE,
-                    data = NULL) {
+                    data = NULL, test = FALSE, nperm = 5000, seed = NULL,
+                    tails = 2) {
   net <- xnet(net, substitute(net))
   rel <- ego_relation(net, relation, "xmixing()")
   m <- rel$m
@@ -114,9 +138,26 @@ xmixing <- function(net, attribute, relation = NULL, directed = TRUE,
   names(exps) <- paste0("Expected (", mixing_models[names(exps)], ")")
   names(ratios) <- paste0("Ratio (", mixing_models[names(ratios)], ")")
 
+  tails <- check_tails(tails)
+  models <- anova_density(m, g, labs, if (isTRUE(test)) nperm else 0, seed, tails)
+  if (length(models$failed)) {
+    assumptions <- c(assumptions, sprintf(
+      "ANOVA density model%s not estimable (collinear group dummies): %s.",
+      if (length(models$failed) > 1) "s" else "", paste(models$failed, collapse = ", ")))
+  }
+  if (isTRUE(test)) {
+    assumptions <- c(assumptions, sprintf(
+      "ANOVA density models tested by Y permutation: %d permutations, %d-tailed.",
+      as.integer(nperm), tails))
+  }
+
   new_xucinet_output(
     "Mixing Tables", net,
-    matrices = c(list(Observed = obs), exps, ratios),
+    matrices = c(list(Observed = obs), exps, ratios, models$tables),
+    summary = models$fit,
+    show_summary = if (isTRUE(test)) NULL else character(0),
+    hide = if (isTRUE(test)) character(0) else names(models$tables),
+    summary_title = "ANOVA density models: MODEL FIT",
     assumptions = assumptions,
     fields = c("Input Attribute:" = att$name,
                "(for undirected data) Treat ties as:" =
@@ -246,3 +287,77 @@ mixing_expected <- function(m, g, np, directed) {
   }
   out
 }
+# ---- ANOVA density models: XCatC2.pas, autocorranova (moved from xdensitybygroups.R, #33)
+#
+# UCINET: Tools | Testing Hypotheses | Mixed Dyadic/Nodal | Categorical
+# attributes | Anova Density models (XCatC2.pas; ucinet commit c7b4956). Each
+# model regresses the off-diagonal cells (both triangles) on dummies built
+# from the partition:
+#   Constant Homophily     one dummy: i and j in the same group
+#   Variable Homophily     one dummy per group: i and j both in group k
+#   Structural Blockmodel  one dummy per block (a, b) except the last
+# and the coefficients are tested by permuting Y (rows and columns together),
+# as the Y-permutation MRQAP does; that engine is used, so nothing is computed
+# twice. UCINET's default model is the blockmodel; all three are fitted here
+# (SPEC addendum, 23 Sep 2026, item 5). UCINET issue 33: the unit's adjusted
+# R-square is off by one; the standard one is reported. Missing cells, which
+# the unit reads as values, are dropped (ledger entry 42).
+anova_density <- function(m, g, labs, nperm, seed, tails) {
+  n <- nrow(m)
+  cells <- qap_cells(n, FALSE)
+  ri <- row(m)[cells]; ci <- col(m)[cells]
+  gi <- g[ri]; gj <- g[ci]
+  nb <- length(labs)
+  build <- list(
+    `Constant Homophily` = function() cbind(`In-group` = (gi == gj) * 1),
+    `Variable Homophily` = function() {
+      x <- vapply(seq_len(nb), function(k) (gi == k & gj == k) * 1, numeric(length(cells)))
+      x <- matrix(x, ncol = nb); colnames(x) <- paste("Group", labs); x
+    },
+    `Structural Blockmodel` = function() {
+      blk <- nb * (gi - 1) + gj
+      x <- vapply(seq_len(nb * nb - 1), function(k) (blk == k) * 1, numeric(length(cells)))
+      x <- matrix(x, ncol = nb * nb - 1)
+      colnames(x) <- as.vector(t(outer(labs, labs, paste, sep = "-")))[seq_len(nb * nb - 1)]
+      x
+    })
+  perms <- if (nperm > 0) qap_perms(n, nperm, seed, NULL) else list()
+  tables <- list()
+  failed <- character(0)
+  fit <- data.frame(`R-Square` = numeric(0), `Adj R-Sqr` = numeric(0),
+                    `P(R-Sqr)` = numeric(0), Obs = numeric(0), check.names = FALSE)
+  for (nm in names(build)) {
+    xmat <- build[[nm]]()
+    xok <- stats::complete.cases(xmat)
+    d <- list(y = m, xmat = xmat, xok = xok, cells = cells, n = n, sym = FALSE,
+              xnames = colnames(xmat))
+    k <- ncol(xmat)
+    # A model whose dummies are collinear (a group of one has an empty
+    # same-group dummy; a block with no cells an empty block dummy) cannot be
+    # estimated; it comes back as NA rather than stopping xmixing(), which
+    # fits all three whether or not they are printed.
+    obs <- tryCatch(mrqap_observed(d), error = function(e) NULL)
+    if (is.null(obs)) {
+      tab <- matrix(NA_real_, k + 1, 6, dimnames = list(c(colnames(xmat), "Intercept"),
+        c("Un-stdized Coefficient", "Stdized Coefficient", "Significance",
+          "Proportion As Large", "Proportion As Small", "Proportion As Extreme")))
+      tables[[nm]] <- tab
+      fit[nm, ] <- NA_real_
+      failed <- c(failed, nm)
+      next
+    }
+    yp <- if (nperm > 0) mrqap_yperm(d, obs, perms, tails) else
+      list(pvals = matrix(NA_real_, k + 1, 3), sig = rep(NA_real_, k + 1),
+           fitp = NA_real_)
+    tab <- cbind(`Un-stdized Coefficient` = obs$coef,
+                 `Stdized Coefficient` = obs$beta, Significance = yp$sig,
+                 `Proportion As Large` = yp$pvals[, 1],
+                 `Proportion As Small` = yp$pvals[, 2],
+                 `Proportion As Extreme` = yp$pvals[, 3])
+    rownames(tab) <- c(colnames(xmat), "Intercept")
+    tables[[nm]] <- tab
+    fit[nm, ] <- c(obs$r2, obs$adjr2, yp$fitp, obs$nobs)
+  }
+  list(tables = tables, fit = fit, failed = failed)
+}
+

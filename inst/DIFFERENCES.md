@@ -785,7 +785,8 @@ correlation and the ANOVA density models, 2000 for MRQAP, 1000 for LR-QAP.
 **Status:** UCINET fix pending for the adjusted R-square and missing cells
 (UCINET issue 33); deliberate otherwise. 24 September 2026.
 
-`xdensitybygroups()` always fits the constant homophily, variable homophily
+`xmixing()` (since 27 September 2026, issue #33; before, `xdensitybygroups()`)
+always fits the constant homophily, variable homophily
 and structural blockmodel models (the dialog fits one; its default is the
 blockmodel), and `test = TRUE` adds their permutation p-values, from the
 Y-permutation MRQAP engine. The adjusted R-square is the standard one and
