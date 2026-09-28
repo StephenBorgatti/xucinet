@@ -225,13 +225,18 @@ rescale <- function(v, lo, hi) {
   out
 }
 
-plot_palette <- function(k) {
+# Fills for k categories: colours, or (palette = "grey", for print that may be
+# greyscale) grey shades evenly spaced from near-white to dark.
+plot_palette <- function(k, palette = "color") {
+  if (identical(palette, "grey")) {
+    return(if (k == 1) grDevices::grey(0.8) else grDevices::grey(seq(0.97, 0.3, length.out = k)))
+  }
   p <- c("#56B4E9", "#E69F00", "#009E73", "#F0E442", "#0072B2", "#D55E00",
          "#CC79A7", "#999999")
   p[(seq_len(k) - 1L) %% length(p) + 1L]
 }
 
-shape_pch <- c(circle = 21L, square = 22L, diamond = 23L, triangle = 24L,
+shape_pch <- c(circle = 21L, square = 22L, triangle = 24L, diamond = 23L,
                downtriangle = 25L)
 
 is_colour <- function(x) {
@@ -258,10 +263,12 @@ is_colour <- function(x) {
 #'   attribute gets shades of grey, darker for larger values (Figure 7.15). A
 #'   colour name, such as `"white"`, colours every node.
 #' * Size: the symbol's diameter runs linearly from 1 to 3 times the default
-#'   between the smallest and the largest value.
-#' * Shape: categories get circle, square, diamond, triangle, down-triangle,
+#'   between the smallest and the largest value. A single number is a multiple
+#'   of the default size for every node.
+#' * Shape: categories get circle, square, triangle, diamond, down-triangle,
 #'   in that order. A shape name gives every node that shape.
-#' * Label size: from 0.6 to 1.6 times the default, linearly.
+#' * Label size: from 0.6 to 1.6 times the default, linearly; a single number
+#'   is a multiple of the default for every label.
 #'
 #' Text, factors, logicals and numbers with at most six distinct whole values
 #' are treated as categories; wrap a variable in [factor()] to force it.
@@ -288,6 +295,13 @@ is_colour <- function(x) {
 #' @param nodecolor,nodesize,nodeshape,labelsize Node attributes to draw; see
 #'   "How attributes are drawn".
 #' @param label `TRUE` (node labels), `FALSE`, or a character vector of labels.
+#' @param labelpos Where labels go: `"auto"` (the default) tries right, left,
+#'   above and below each node and takes the place that overlaps least with
+#'   the nodes and the labels already placed; `"right"` puts every label to
+#'   the right of its node.
+#' @param palette Fills for categories: `"color"` (the default) or `"grey"`,
+#'   shades from near-white to dark for print that may be greyscale. Shapes
+#'   then carry the categories first.
 #' @param edgewidth Line width: a number, or an n by n matrix. `NULL` follows
 #'   the tie values when they are not all equal.
 #' @param edgecolor Line colour; one per relation when several are drawn,
@@ -341,9 +355,12 @@ xplot <- function(net, layout = "spring", relation = NULL, nodecolor = NULL,
                   labelsize = NULL, edgewidth = NULL, edgecolor = NULL,
                   edgestyle = NULL, arrows = NULL, arrowsize = NULL,
                   cutoff = NULL, op = ">", keep = NULL, ego = NULL, isolates = TRUE,
-                  legend = TRUE, data = NULL, seed = 1, main = NULL,
+                  legend = TRUE, labelpos = c("auto", "right"),
+                  palette = c("color", "grey"), data = NULL, seed = 1, main = NULL,
                   file = NULL, width = 7, height = 7, dpi = 300, ...) {
   net <- xnet(net, substitute(net))
+  labelpos <- match.arg(labelpos)
+  palette <- match.arg(palette)
   g <- plot_graph(net, relation, all = FALSE)
   labels <- g$labels
   n <- length(labels)
@@ -428,7 +445,7 @@ xplot <- function(net, layout = "spring", relation = NULL, nodecolor = NULL,
             else ifelse(g$mode == "Rows", "#9ECAE1", "#FDAE6B")
           } else if (cat_col) {
             f <- as.factor(col_v)
-            plot_palette(nlevels(f))[as.integer(f)]
+            plot_palette(nlevels(f), palette)[as.integer(f)]
           } else grDevices::grey(rescale(-as.numeric(col_v), 0.1, 0.95))
   fill[is.na(fill)] <- "white"
   pch <- if (!is.null(nodeshape) && is.null(shape_v)) rep_len(shape_pch[nodeshape], n)
@@ -439,8 +456,13 @@ xplot <- function(net, layout = "spring", relation = NULL, nodecolor = NULL,
            shape_pch[(as.integer(f) - 1L) %% 5L + 1L]
          }
   pch[is.na(pch)] <- 21L
-  cex <- if (is.null(size_v)) rep(1.5, n) else 1.5 * rescale(as.numeric(size_v), 1, 3)
-  lcex <- if (is.null(lsize_v)) rep(0.7, n) else rescale(as.numeric(lsize_v), 0.6, 1.6)
+  one_number <- function(v) is.numeric(v) && length(v) == 1L
+  cex <- if (is.null(size_v)) rep(1.5, n)
+         else if (one_number(nodesize)) rep(1.5 * nodesize, n)
+         else 1.5 * rescale(as.numeric(size_v), 1, 3)
+  lcex <- if (is.null(lsize_v)) rep(0.7, n)
+          else if (one_number(labelsize)) rep(0.7 * labelsize, n)
+          else rescale(as.numeric(lsize_v), 0.6, 1.6)
 
   # Edge list: one row per drawn ordered pair (i, j), i != j, both shown.
   directed <- !all(vapply(tie, function(t) isSymmetric(unname(t)), logical(1)))
@@ -464,20 +486,33 @@ xplot <- function(net, layout = "spring", relation = NULL, nodecolor = NULL,
   pts <- xy[shown, , drop = FALSE]
   xr <- range(pts[, 1], na.rm = TRUE); yr <- range(pts[, 2], na.rm = TRUE)
   pad <- 0.08 * max(diff(xr), diff(yr), 1e-9)
+  asp <- if (is.null(axes)) 1 else NA
   graphics::plot.new()
-  # Room on the right for the labels, which sit to the right of their symbols:
-  # the widest label (with its offset), as a share of the plot's width, is
-  # added to the right-hand side so that no label is clipped at the edge.
-  right <- pad
-  if (any(nzchar(lab[shown]))) {
-    lw_in <- max(graphics::strwidth(lab[shown], units = "inches", cex = lcex[shown]) +
-                 0.375 * graphics::par("cin")[2] * cex[shown] + 0.05)
-    pin <- graphics::par("pin")[1]
-    share <- min(lw_in / pin, 0.45)
-    right <- pad + (diff(xr) + 2 * pad) * share / (1 - share)
+  graphics::plot.window(xlim = xr + c(-pad, pad), ylim = yr + c(-pad, pad), asp = asp)
+
+  # Labels are placed first and the window then fitted to the nodes and the
+  # labels together, a few times over, since fitting changes the scale and the
+  # labels (sized in inches) then take a different share of it. Nothing is
+  # clipped and no space is set aside that the labels do not use.
+  has_lab <- any(nzchar(lab[shown]))
+  rad <- 0.375 * graphics::par("cin")[2] * cex[shown] + 0.03
+  off <- matrix(0, length(shown), 2)
+  if (has_lab) {
+    w <- graphics::strwidth(lab[shown], units = "inches", cex = lcex[shown])
+    h <- graphics::strheight(rep("Mg", length(shown)), units = "inches", cex = lcex[shown])
+    for (pass in 1:4) {
+      ux <- graphics::xinch(1); uy <- graphics::yinch(1)
+      off <- if (labelpos == "right") cbind(rad + w / 2, 0)
+             else place_labels(pts[, 1] / ux, pts[, 2] / uy, w, h, rad,
+                               c(-Inf, Inf, -Inf, Inf), nzchar(lab[shown]))
+      cx <- pts[, 1] + off[, 1] * ux; cy <- pts[, 2] + off[, 2] * uy
+      bx <- c(cx - w / 2 * ux, cx + w / 2 * ux, pts[, 1] - rad * ux, pts[, 1] + rad * ux)
+      by <- c(cy - h / 2 * uy, cy + h / 2 * uy, pts[, 2] - rad * uy, pts[, 2] + rad * uy)
+      mx <- 0.02 * diff(range(bx)); my <- 0.02 * diff(range(by))
+      graphics::plot.window(xlim = range(bx) + c(-mx, mx), ylim = range(by) + c(-my, my),
+                            asp = asp)
+    }
   }
-  graphics::plot.window(xlim = c(xr[1] - pad, xr[2] + right), ylim = yr + c(-pad, pad),
-                        asp = if (is.null(axes)) 1 else NA)
   if (!is.null(axes)) {
     graphics::axis(1); graphics::axis(2); graphics::box()
     graphics::title(xlab = axes[1], ylab = axes[2])
@@ -488,13 +523,13 @@ xplot <- function(net, layout = "spring", relation = NULL, nodecolor = NULL,
              arrowsize, names(g$mats))
   graphics::points(pts[, 1], pts[, 2], pch = pch[shown], bg = fill[shown],
                    col = "black", cex = cex[shown])
-  if (any(nzchar(lab[shown]))) {
-    rad <- 0.375 * graphics::par("cin")[2] * cex[shown] + 0.03
-    graphics::text(pts[, 1] + rad * graphics::xinch(1), pts[, 2], labels = lab[shown],
-                   cex = lcex[shown], adj = c(0, 0.5))
+  if (has_lab) {
+    ux <- graphics::xinch(1); uy <- graphics::yinch(1)
+    graphics::text(pts[, 1] + off[, 1] * ux, pts[, 2] + off[, 2] * uy,
+                   labels = lab[shown], cex = lcex[shown], adj = c(0.5, 0.5))
   }
   if (length(leg)) draw_legends(leg, col_v, shape_v, cat_col, cat_shape,
-                                names(g$mats), edgecolor, edgestyle, g$mode,
+                                names(g$mats), edgecolor, edgestyle, g$mode, palette,
                                 arg_title(nodecolor, substitute(nodecolor)),
                                 arg_title(nodeshape, substitute(nodeshape)))
 
@@ -645,7 +680,7 @@ draw_edges <- function(el, xy, cex, mats, nrel, arrows, edgewidth, edgecolor,
 }
 
 draw_legends <- function(leg, col_v, shape_v, cat_col, cat_shape, relnames,
-                         edgecolor, edgestyle, mode, col_title, shape_title) {
+                         edgecolor, edgestyle, mode, palette, col_title, shape_title) {
   usr <- graphics::par("usr")
   x <- usr[2] + 0.02 * diff(usr[1:2])
   y <- usr[4]
@@ -657,11 +692,11 @@ draw_legends <- function(leg, col_v, shape_v, cat_col, cat_shape, relnames,
     if (cat_col && cat_shape && identical(as.character(col_v), as.character(shape_v))) {
       f <- as.factor(col_v)
       add(legend = levels(f), pch = shape_pch[(seq_len(nlevels(f)) - 1L) %% 5L + 1L],
-          pt.bg = plot_palette(nlevels(f)), pt.cex = 1.3, title = col_title)
+          pt.bg = plot_palette(nlevels(f), palette), pt.cex = 1.3, title = col_title)
     } else {
       if (cat_col) {
         f <- as.factor(col_v)
-        add(legend = levels(f), pch = 21, pt.bg = plot_palette(nlevels(f)), pt.cex = 1.3,
+        add(legend = levels(f), pch = 21, pt.bg = plot_palette(nlevels(f), palette), pt.cex = 1.3,
             title = col_title)
       }
       if (cat_shape) {
@@ -685,3 +720,44 @@ draw_legends <- function(leg, col_v, shape_v, cat_col, cat_shape, relnames,
   }
   invisible()
 }
+# Label placement for labelpos = "auto". Everything in inches. Each label may
+# sit right, left, above or below its node; nodes are taken most crowded
+# first, and each label takes the place whose box overlaps least with the
+# other nodes' symbols and the labels already placed, running outside the
+# plot counting heavily against a place. Ties keep the earlier place in that
+# order, so an uncrowded label stays on the right. Returns each label's centre
+# as an offset from its node.
+place_labels <- function(x, y, w, h, r, usr, has) {
+  n <- length(x)
+  gap <- 0.03
+  nodes <- cbind(x - r, x + r, y - r, y + r)
+  overlap <- function(b, B) {
+    if (!nrow(B)) return(0)
+    sum(pmax(0, pmin(b[2], B[, 2]) - pmax(b[1], B[, 1])) *
+        pmax(0, pmin(b[4], B[, 4]) - pmax(b[3], B[, 3])))
+  }
+  reach <- 2 * max(w) + max(r)
+  crowd <- vapply(seq_len(n), function(i) sum(abs(x - x[i]) < reach & abs(y - y[i]) < reach),
+                  numeric(1))
+  placed <- matrix(0, 0, 4)
+  off <- matrix(0, n, 2)
+  for (i in order(-crowd, seq_len(n))) {
+    if (!has[i]) next
+    cand <- rbind(c(r[i] + gap + w[i] / 2, 0), c(-(r[i] + gap + w[i] / 2), 0),
+                  c(0, r[i] + gap + h[i] / 2), c(0, -(r[i] + gap + h[i] / 2)))
+    best <- 1; bestscore <- Inf
+    for (k in 1:4) {
+      cx <- x[i] + cand[k, 1]; cy <- y[i] + cand[k, 2]
+      b <- c(cx - w[i] / 2, cx + w[i] / 2, cy - h[i] / 2, cy + h[i] / 2)
+      s <- overlap(b, placed) + overlap(b, nodes[-i, , drop = FALSE]) +
+        10 * (max(0, usr[1] - b[1]) + max(0, b[2] - usr[2]) +
+              max(0, usr[3] - b[3]) + max(0, b[4] - usr[4]))
+      if (s < bestscore - 1e-12) { bestscore <- s; best <- k }
+    }
+    off[i, ] <- cand[best, ]
+    cx <- x[i] + off[i, 1]; cy <- y[i] + off[i, 2]
+    placed <- rbind(placed, c(cx - w[i] / 2, cx + w[i] / 2, cy - h[i] / 2, cy + h[i] / 2))
+  }
+  off
+}
+

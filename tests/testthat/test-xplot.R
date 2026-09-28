@@ -205,3 +205,40 @@ test_that("the plot leaves room for labels on the right", {
   grDevices::dev.off(); unlink(f)
   expect_gte(usr[2], max(xy[, 1]) + w)
 })
+
+test_that("palette = \"grey\" gives grey fills, lightest first", {
+  g <- plot_palette(4, "grey")
+  rgb <- grDevices::col2rgb(g)
+  expect_true(all(rgb[1, ] == rgb[2, ] & rgb[2, ] == rgb[3, ]))   # no colour
+  expect_true(all(diff(rgb[1, ]) < 0))                              # light to dark
+  expect_silent(draw(hightech, relation = "Friendship", nodecolor = "Level",
+                     nodeshape = "Level", data = hightech_attr, palette = "grey"))
+})
+
+test_that("shapes go circle, square, triangle, diamond, down-triangle", {
+  expect_equal(unname(shape_pch), c(21L, 22L, 24L, 23L, 25L))
+})
+
+test_that("auto label placement keeps labels off each other", {
+  # Nine nodes on a tight grid: labels to the right would all collide.
+  x <- rep(1:3, 3) * 0.15; y <- rep(1:3, each = 3) * 0.12
+  w <- rep(0.25, 9); h <- rep(0.08, 9); r <- rep(0.03, 9)
+  off <- place_labels(x, y, w, h, r, c(-Inf, Inf, -Inf, Inf), rep(TRUE, 9))
+  box <- cbind(x + off[, 1] - w / 2, x + off[, 1] + w / 2,
+               y + off[, 2] - h / 2, y + off[, 2] + h / 2)
+  pair_overlap <- function(i, j) {
+    max(0, min(box[i, 2], box[j, 2]) - max(box[i, 1], box[j, 1])) *
+      max(0, min(box[i, 4], box[j, 4]) - max(box[i, 3], box[j, 3]))
+  }
+  right_only <- cbind(x + r + w / 2, 0)
+  total <- sum(outer(1:9, 1:9, Vectorize(function(i, j) if (i < j) pair_overlap(i, j) else 0)))
+  box <- cbind(right_only[, 1] - w / 2, right_only[, 1] + w / 2, y - h / 2, y + h / 2)
+  naive <- sum(outer(1:9, 1:9, Vectorize(function(i, j) if (i < j) pair_overlap(i, j) else 0)))
+  expect_gt(naive, 0)
+  expect_lt(total, naive)
+  expect_silent(draw(campnet, labelpos = "right"))
+})
+
+test_that("a single number for nodesize or labelsize is a multiple of the default", {
+  expect_silent(draw(campnet, nodesize = 0.5, labelsize = 1.2))
+})

@@ -24,6 +24,8 @@ xplot(
   ego = NULL,
   isolates = TRUE,
   legend = TRUE,
+  labelpos = c("auto", "right"),
+  palette = c("color", "grey"),
   data = NULL,
   seed = 1,
   main = NULL,
@@ -85,6 +87,15 @@ the layout is made, so the others keep their places (7.5.1).}
 \item{legend}{Draw legends for categorical colours and shapes and for
 relations?}
 
+\item{labelpos}{Where labels go: \code{"auto"} (the default) tries right, left,
+above and below each node and takes the place that overlaps least with
+the nodes and the labels already placed; \code{"right"} puts every label to
+the right of its node.}
+
+\item{palette}{Fills for categories: \code{"color"} (the default) or \code{"grey"},
+shades from near-white to dark for print that may be greyscale. Shapes
+then carry the categories first.}
+
 \item{data}{A data frame in which attribute names are looked up.}
 
 \item{seed}{Random seed for the layout; see \code{\link[=xlayout]{xlayout()}}.}
@@ -123,10 +134,12 @@ such as \code{xdegree(net)}, whose first numeric column is used.
 attribute gets shades of grey, darker for larger values (Figure 7.15). A
 colour name, such as \code{"white"}, colours every node.
 \item Size: the symbol's diameter runs linearly from 1 to 3 times the default
-between the smallest and the largest value.
-\item Shape: categories get circle, square, diamond, triangle, down-triangle,
+between the smallest and the largest value. A single number is a multiple
+of the default size for every node.
+\item Shape: categories get circle, square, triangle, diamond, down-triangle,
 in that order. A shape name gives every node that shape.
-\item Label size: from 0.6 to 1.6 times the default, linearly.
+\item Label size: from 0.6 to 1.6 times the default, linearly; a single number
+is a multiple of the default for every label.
 }
 
 Text, factors, logicals and numbers with at most six distinct whole values

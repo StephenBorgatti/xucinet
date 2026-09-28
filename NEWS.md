@@ -12,6 +12,12 @@
 * A report whose whole-network block is suppressed no longer prints its title.
 * `xplot()` leaves room on the right for node labels, which were clipped at
   the edge of the plot (found drawing Figure 13.5).
+* `xplot()` for print: `palette = "grey"` fills categories with grey shades;
+  `labelpos = "auto"` (the default) places each label right, left, above or
+  below its node, wherever it collides least, and the window is then fitted
+  to nodes and labels together; a single number for `nodesize` or `labelsize`
+  is a multiple of the default. Category shapes now go circle, square,
+  triangle, diamond, down-triangle (book Figures 7.25-7.26, 13.5-13.6).
 
 ## Relation names in any case (27 September 2026)
 
