@@ -42,7 +42,8 @@
 #' @param model `"lag"` (the default) or `"error"`.
 #' @param normalize Row-normalize \eqn{W}? `TRUE` by default. Rows of isolates
 #'   stay zero.
-#' @param relation Which relation of a multirelational network is \eqn{W}.
+#' @param relation Which relation of a multirelational network is \eqn{W}, by
+#'   name (in any case) or position.
 #' @return An object of class `c("xautoregression", "xucinet_output")`.
 #'   `$matrices` has the coefficient table (`Coef`, `SE`, `Z`, `Sig`),
 #'   the network parameter (`Rho` or `Lambda`) in its last row. `$summary` has

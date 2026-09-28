@@ -34,7 +34,7 @@ default 15.}
 \item{seed}{The random seed, a whole number. \code{NULL} picks one between 1 and
 1000, as the dialog does, and the report says which.}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 }
 \value{

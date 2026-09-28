@@ -13,7 +13,7 @@ xmixing(net, attribute, relation = NULL, directed = TRUE, data = NULL)
 first in \code{net}'s attribute table and then in \code{data}. Numbers are rounded
 to whole numbers, as UCINET does.}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 
 \item{directed}{Treat symmetric data as directed? \code{TRUE}, as the dialog

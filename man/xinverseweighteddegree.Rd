@@ -9,7 +9,7 @@ xinverseweighteddegree(net, relation = NULL, normalize = TRUE)
 \arguments{
 \item{net}{A network (any accepted form). 1-mode. Missing cells count as 0.}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 
 \item{normalize}{Print the normalized scores first? \code{TRUE}, the default,

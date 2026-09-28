@@ -29,7 +29,8 @@ formula was written.}
 \item{normalize}{Row-normalize \eqn{W}? \code{TRUE} by default. Rows of isolates
 stay zero.}
 
-\item{relation}{Which relation of a multirelational network is \eqn{W}.}
+\item{relation}{Which relation of a multirelational network is \eqn{W}, by
+name (in any case) or position.}
 }
 \value{
 An object of class \code{c("xautoregression", "xucinet_output")}.

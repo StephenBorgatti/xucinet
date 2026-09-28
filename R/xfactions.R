@@ -62,7 +62,7 @@
 #'   default 15.
 #' @param seed The random seed, a whole number. `NULL` picks one between 1 and
 #'   1000, as the dialog does, and the report says which.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @return An object of class `c("xfactions", "xucinet_output")`. `$nodes`
 #'   has `Cluster`, the faction of each node; `$summary` the fit under UCINET's

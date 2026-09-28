@@ -714,7 +714,7 @@ normalize_matrix <- function(m, by, method, diag_ok, tolerance, maxit) {
 #'   data, as in the dialog, and forced on for a non-square matrix.
 #' @param rows,cols Restrict the recoding to these rows or columns, by label
 #'   or index. `NULL` (the default) means all of them, UCINET's ALL.
-#' @param relations Restrict it to these relations of a stack, by name or
+#' @param relations Restrict it to these relations of a stack, by name (in any case) or
 #'   position. `NULL` means all.
 #' @return An `xucinet` object titled `<name>-Rec`, with a `history` attribute.
 #' @seealso [xdichotomize()] for the binary case.
@@ -746,7 +746,7 @@ recode_relations <- function(net, relations) {
   n <- xnrelations(net)
   if (is.null(relations)) return(seq_len(n))
   if (is.character(relations)) {
-    hit <- match(relations, xrelations(net))
+    hit <- match_relation(relations, xrelations(net))
     if (anyNA(hit)) {
       stop("no relation called \"", relations[is.na(hit)][1], "\".\n",
            "  Available: ", paste(xrelations(net), collapse = ", "),

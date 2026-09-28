@@ -15,7 +15,7 @@
 #' columns and does include one.
 #'
 #' @param net A network (any accepted form).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param directed `NULL` (detect from symmetry), `TRUE` or `FALSE`.
 #' @param mode For 2-mode data, which margin to report: `"rows"` (default) or
@@ -48,7 +48,7 @@ xcentrality <- function(net, relation = NULL, directed = NULL,
   if (xnrelations(net) > 1) {
     assumptions <- c(assumptions,
                      sprintf("Relation: %s (of %d).",
-                             if (is.null(relation)) xrelations(net)[1] else relation,
+                             relation_label(net, relation),
                              xnrelations(net)))
   }
   if (is.null(directed)) directed <- !isSymmetric(unname(m))

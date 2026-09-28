@@ -27,7 +27,7 @@
 #' for valued data as well as binary.
 #'
 #' @param net A network (any accepted form). 1-mode. Missing cells count as 0.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param normalize Print the normalized scores first? `TRUE`, the default,
 #'   as UCINET's dialog.

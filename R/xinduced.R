@@ -23,7 +23,7 @@
 #' since for those two an increase is the damage.
 #'
 #' @param net A network (any accepted form).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param k The cutoff for the "pairs within k links" column. UCINET's dialog
 #'   defaults to 3, and the column is named for whatever is used: `W'in3`.

@@ -61,7 +61,7 @@
 #' *Set pendants to* boxes are `isolate` and `pendant`.
 #'
 #' @param net A network (any accepted form). 1-mode.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param method `"ego"` (the default, UCINET's ego network model) or
 #'   `"whole"` (the whole network model).

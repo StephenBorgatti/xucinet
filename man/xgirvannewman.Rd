@@ -14,7 +14,7 @@ symmetrized by maximum; values are ignored.}
 clusters, where UCINET stops. UCINET's default is 10. Every partition is
 in the result whatever \code{k} is.}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 }
 \value{

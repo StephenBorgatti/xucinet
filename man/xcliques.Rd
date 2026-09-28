@@ -14,7 +14,7 @@ xcliques(net, min = 3, type = c("weak", "strong"), relation = NULL)
 \item{type}{\code{"weak"} (the default: a tie in either direction) or
 \code{"strong"} (ties both ways).}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 }
 \value{

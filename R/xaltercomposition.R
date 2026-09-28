@@ -62,7 +62,7 @@
 #'   first in `net`'s attribute table and then in `data`.
 #' @param type `"categorical"`, `"continuous"`, or `NULL` (the default) to
 #'   decide from the attribute.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param ties Who counts as an alter: `"any"` (the default, a tie
 #'   in either direction), `"out"`, `"in"` or `"reciprocated"`.

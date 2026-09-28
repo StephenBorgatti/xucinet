@@ -9,7 +9,7 @@ xeigenvector(net, relation = NULL, mode = c("both", "rows", "cols"))
 \arguments{
 \item{net}{A network (any accepted form).}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 
 \item{mode}{For 2-mode data: \code{"both"} (the default; the rows, then the

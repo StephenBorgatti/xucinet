@@ -48,8 +48,8 @@ layout_methods <- c("spring", "kk", "mds", "nmds", "circle", "random", "groups",
 #' @param attribute For `"groups"`: the grouping, a vector or the name of an
 #'   attribute (looked up in `net`, then `data`).
 #' @param data A data frame to look `attribute` up in.
-#' @param relation Which relations the layout is computed on; all of them by
-#'   default.
+#' @param relation Which relations the layout is computed on, by name (in any
+#'   case) or position; all of them by default.
 #' @param seed Random seed for `"spring"`, `"kk"` and `"random"`. The default
 #'   is fixed, so the same call always gives the same picture; `NULL` draws a
 #'   new one each time.
@@ -93,12 +93,12 @@ plot_graph <- function(net, relation, all = TRUE) {
     relation <- if (all) seq_along(rels) else 1L
   }
   if (is.character(relation)) {
-    bad <- setdiff(relation, rels)
-    if (length(bad)) {
-      stop("no relation called \"", bad[1], "\".\n  Available: ",
+    i <- match_relation(relation, rels)
+    if (anyNA(i)) {
+      stop("no relation called \"", relation[is.na(i)][1], "\".\n  Available: ",
            paste(rels, collapse = ", "), call. = FALSE)
     }
-    relation <- match(relation, rels)
+    relation <- i
   }
   mats <- lapply(relation, function(r) pick_relation(net, r))
   names(mats) <- rels[relation]
@@ -284,7 +284,7 @@ is_colour <- function(x) {
 #'   labels as row names or in node order. Coordinates are matched by label, so
 #'   a layout of a larger network serves a subset of its nodes.
 #' @param relation Which relations to draw: the first by default, or several
-#'   by name or position.
+#'   by name (in any case) or position.
 #' @param nodecolor,nodesize,nodeshape,labelsize Node attributes to draw; see
 #'   "How attributes are drawn".
 #' @param label `TRUE` (node labels), `FALSE`, or a character vector of labels.

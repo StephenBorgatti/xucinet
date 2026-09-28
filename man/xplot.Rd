@@ -45,7 +45,7 @@ labels as row names or in node order. Coordinates are matched by label, so
 a layout of a larger network serves a subset of its nodes.}
 
 \item{relation}{Which relations to draw: the first by default, or several
-by name or position.}
+by name (in any case) or position.}
 
 \item{nodecolor, nodesize, nodeshape, labelsize}{Node attributes to draw; see
 "How attributes are drawn".}

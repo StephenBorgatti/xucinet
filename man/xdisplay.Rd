@@ -9,7 +9,8 @@ xdisplay(net, relation = NULL)
 \arguments{
 \item{net}{A network (any accepted form).}
 
-\item{relation}{Which relation to show for a multi-relation dataset.}
+\item{relation}{Which relation to show for a multi-relation dataset, by name
+(in any case) or position.}
 }
 \value{
 The network, invisibly.

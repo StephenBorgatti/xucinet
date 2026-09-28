@@ -24,7 +24,7 @@ first in \code{net}'s attribute table and then in \code{data}.}
 \item{type}{\code{"categorical"}, \code{"continuous"}, or \code{NULL} (the default) to
 decide from the attribute.}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 
 \item{ties}{Which ties are ego's: \code{"out"} (the default, as in UCINET),

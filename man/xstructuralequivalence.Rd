@@ -22,7 +22,7 @@ xstructuralequivalence(
 \code{"matches"}, \code{"positivematches"}, \code{"overlaps"}, \code{"crossproducts"} or
 \code{"coverage"}.}
 
-\item{relations}{Which relations make up the profile, by name or position.
+\item{relations}{Which relations make up the profile, by name (in any case) or position.
 \code{NULL}, the default, uses all of them, as UCINET does.}
 
 \item{diagonal}{How the cells for the pair itself are treated; see Details.}

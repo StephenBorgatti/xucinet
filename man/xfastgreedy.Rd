@@ -10,7 +10,7 @@ xfastgreedy(net, relation = NULL)
 \item{net}{A network (any accepted form). 1-mode. Directed data are
 symmetrized by maximum; tie values are used as weights.}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 }
 \value{

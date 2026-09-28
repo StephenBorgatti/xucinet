@@ -12,7 +12,7 @@ xbicliques(net, min_rows = 3, min_cols = 3, relation = NULL)
 \item{min_rows, min_cols}{The fewest rows and columns a biclique may have.
 UCINET's defaults are 3 and 3.}
 
-\item{relation}{Which relation, by name or position. Defaults to the first.}
+\item{relation}{Which relation, by name (in any case) or position. Defaults to the first.}
 }
 \value{
 An object of class \code{c("xbicliques", "xucinet_output")}.

@@ -254,7 +254,12 @@ qap_design <- function(formula, nets, sym = NULL) {
   yname <- all.vars(formula[[2]])
   xnames <- attr(stats::terms(formula), "term.labels")
   need <- c(yname, xnames)
-  miss <- setdiff(need, names(mats))
+  # Formula terms name relations; a term that matches one only when case is
+  # ignored takes the formula's spelling (match_relation).
+  hit <- match_relation(need, names(mats))
+  ok <- !is.na(hit)
+  names(mats)[hit[ok]] <- need[ok]
+  miss <- need[!ok]
   if (length(miss)) {
     stop("Not relations of nets: ", paste(miss, collapse = ", "), ".\n",
          "  Available: ", paste(names(mats), collapse = ", "), call. = FALSE)

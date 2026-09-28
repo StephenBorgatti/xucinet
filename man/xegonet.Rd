@@ -9,7 +9,7 @@ xegonet(net, relation = NULL, ties = c("any", "out", "in"))
 \arguments{
 \item{net}{A network (any accepted form). 1-mode.}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 
 \item{ties}{\code{"any"} (UCINET's default, UNDIRECTED), \code{"out"}

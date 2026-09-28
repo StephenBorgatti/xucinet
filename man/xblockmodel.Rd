@@ -21,7 +21,7 @@ xblockmodel(
 an attribute (looked up in \code{net}'s attributes and then in \code{data}), or a
 result object whose \verb{$nodes} has a \code{Cluster} column.}
 
-\item{relations}{Which relations to block, by name or position. \code{NULL}, the
+\item{relations}{Which relations to block, by name (in any case) or position. \code{NULL}, the
 default, blocks every relation, as UCINET does.}
 
 \item{method}{The block summary: \code{"average"} (UCINET's default, the density

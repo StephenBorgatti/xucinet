@@ -40,7 +40,7 @@
 #' Network | Cohesion | Reciprocity).
 #'
 #' @param net A network (any accepted form). 1-mode only.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @return An object of class `c("xegoreciprocity", "xucinet_output")` with
 #'   the six columns in `$nodes`, in original node order.

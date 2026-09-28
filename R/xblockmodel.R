@@ -52,7 +52,7 @@ blockmodel_methods <- c(average = "Average", count = "Count > 0",
 #' @param partition The groups: a vector with one value per node, the name of
 #'   an attribute (looked up in `net`'s attributes and then in `data`), or a
 #'   result object whose `$nodes` has a `Cluster` column.
-#' @param relations Which relations to block, by name or position. `NULL`, the
+#' @param relations Which relations to block, by name (in any case) or position. `NULL`, the
 #'   default, blocks every relation, as UCINET does.
 #' @param method The block summary: `"average"` (UCINET's default, the density
 #'   for binary data), `"count"`, `"maximum"`, `"minimum"`, `"sd"` or `"sum"`.
@@ -89,7 +89,7 @@ xblockmodel <- function(net, partition, relations = NULL,
 
   mats <- relation_list(net)
   if (!is.null(relations)) {
-    idx <- if (is.character(relations)) match(relations, names(mats)) else
+    idx <- if (is.character(relations)) match_relation(relations, names(mats)) else
       as.integer(relations)
     if (anyNA(idx) || any(idx < 1 | idx > length(mats))) {
       stop("xblockmodel(): relations must name relations of the dataset.\n",

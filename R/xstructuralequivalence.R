@@ -83,7 +83,7 @@ se_diagonal <- c(ignore = "Ignore",
 #' @param method `"euclidean"` (UCINET's default), `"correlation"`,
 #'   `"matches"`, `"positivematches"`, `"overlaps"`, `"crossproducts"` or
 #'   `"coverage"`.
-#' @param relations Which relations make up the profile, by name or position.
+#' @param relations Which relations make up the profile, by name (in any case) or position.
 #'   `NULL`, the default, uses all of them, as UCINET does.
 #' @param diagonal How the cells for the pair itself are treated; see Details.
 #' @param transpose Add each node's column to its row? `TRUE` by default.
@@ -114,7 +114,7 @@ xstructuralequivalence <- function(net, method = c("euclidean", "correlation",
 
   mats <- relation_list(net)
   if (!is.null(relations)) {
-    idx <- if (is.character(relations)) match(relations, names(mats)) else
+    idx <- if (is.character(relations)) match_relation(relations, names(mats)) else
       as.integer(relations)
     if (anyNA(idx) || any(idx < 1 | idx > length(mats))) {
       stop("xstructuralequivalence(): relations must name relations of the ",

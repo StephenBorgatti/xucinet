@@ -30,7 +30,7 @@ data, as in the dialog, and forced on for a non-square matrix.}
 \item{rows, cols}{Restrict the recoding to these rows or columns, by label
 or index. \code{NULL} (the default) means all of them, UCINET's ALL.}
 
-\item{relations}{Restrict it to these relations of a stack, by name or
+\item{relations}{Restrict it to these relations of a stack, by name (in any case) or
 position. \code{NULL} means all.}
 }
 \value{

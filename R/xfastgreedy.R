@@ -33,7 +33,7 @@
 #'
 #' @param net A network (any accepted form). 1-mode. Directed data are
 #'   symmetrized by maximum; tie values are used as weights.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @return An object of class `c("xfastgreedy", "xucinet_output")` with
 #'   `Cluster` in `$nodes` and the number of clusters and modularity in

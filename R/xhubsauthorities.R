@@ -15,7 +15,7 @@
 #' the absolute values of the fixture.
 #'
 #' @param net A network (any accepted form).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @return An `xucinet_output` whose `$nodes` has `Hub` and `Authority`.
 #' @examples

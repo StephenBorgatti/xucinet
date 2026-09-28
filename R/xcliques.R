@@ -46,7 +46,7 @@
 #' @param min The smallest clique to report. UCINET's default is 3.
 #' @param type `"weak"` (the default: a tie in either direction) or
 #'   `"strong"` (ties both ways).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @return An object of class `c("xcliques", "xucinet_output")` with
 #'   `$cliques`, a list of label vectors in UCINET's order;

@@ -15,7 +15,7 @@ xcombine(
 \item{net}{A multi-relation network, or a list of separate networks with
 matching labels.}
 
-\item{relations}{Which relations to use, by name or position. \code{NULL}, the
+\item{relations}{Which relations to use, by name (in any case) or position. \code{NULL}, the
 default, uses all of them.}
 
 \item{method}{\code{"sum"} (the dialog's default), \code{"mean"}, \code{"min"}, \code{"max"},

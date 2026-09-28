@@ -20,7 +20,7 @@
 #' isolates alone do not trigger it.
 #'
 #' @param net A network (any accepted form).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param mode For 2-mode data: `"both"` (the default; the rows, then the
 #'   columns, with a `Mode` column), `"rows"` or `"cols"`. The scores are

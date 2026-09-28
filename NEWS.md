@@ -1,5 +1,14 @@
 # xucinet 2.0.0.9000 (development)
 
+## Relation names in any case (27 September 2026)
+
+* A relation named in `relation =`, `relations =`, `xunpack()` or an
+  `xmrqap()`/`xlrqap()` formula is matched exactly first and then ignoring
+  case, so `xdegree(wiring, relation = "games")` finds `Games`, as book 5.4.6
+  writes it (asnr2e T23, T24). Two relations that differ only in case make a
+  case-insensitive name ambiguous, and the error lists both. Reports name the
+  relation as it is stored.
+
 ## Steve's decisions of 26 September 2026
 
 * `xlouvain()` takes 2-mode data: UCINET's 2-Mode Bipartite Communities

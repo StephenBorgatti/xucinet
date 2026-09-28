@@ -238,3 +238,49 @@ test_that("xread passes duplicates through", {
   expect_equal(as.matrix(suppressMessages(
     xread(tmp, duplicates = "last")))["a", "b"], 5)
 })
+
+# ---- relation names ignore case (asnr2e T23, T24; Steve, 27 Sep 2026) ----------
+
+test_that("a relation can be named in any case", {
+  games <- as.matrix(wiring, relation = "Games")
+  expect_identical(as.matrix(wiring, relation = "games"), games)
+  expect_identical(as.matrix(wiring, relation = "GAMES"), games)
+  # book 5.4.6, word for word
+  expect_equal(xdegree(wiring, relation = "games")$nodes,
+               xdegree(wiring, relation = "Games")$nodes)
+  expect_identical(as.matrix(xunpack(wiring, "games")), games)
+  expect_identical(as.matrix(xunpack(wiring, relation = "GAMES")), games)
+})
+
+test_that("reports name the relation as it is stored", {
+  expect_true("Relation: Games (of 6)." %in% xdegree(wiring, relation = "games")$assumptions)
+})
+
+test_that("relations = takes any case too", {
+  expect_identical(as.matrix(xcombine(wiring, relations = c("games", "CONFLICT"))),
+                   as.matrix(xcombine(wiring, relations = c("Games", "Conflict"))))
+  grDevices::pdf(NULL); on.exit(grDevices::dev.off())
+  expect_identical(xplot(wiring, relation = "games"), xplot(wiring, relation = "Games"))
+})
+
+test_that("an MRQAP formula may name relations in any case", {
+  a <- xmrqap(advice ~ friendship + reportto, hightech, nperm = 0)
+  b <- xmrqap(Advice ~ Friendship + ReportTo, hightech, nperm = 0)
+  expect_equal(unname(a$matrices[[1]][, 1]), unname(b$matrices[[1]][, 1]))
+})
+
+test_that("an exact match wins; case alone is ambiguous between two relations", {
+  m1 <- as.matrix(campnet); m2 <- 1 - m1; diag(m2) <- 0
+  two <- xjoin(m1, m2, mode = "mat", names = c("games", "GAMES"))
+  expect_equal(xrelations(two), c("games", "GAMES"))
+  expect_equal(unname(as.matrix(two, relation = "games")), unname(m1))
+  expect_equal(unname(as.matrix(two, relation = "GAMES")), unname(m2))
+  expect_error(as.matrix(two, relation = "Games"), "ambiguous.*\"games\" and \"GAMES\"")
+  expect_error(xunpack(two, "Games"), "ambiguous")
+  expect_error(xcombine(two, relations = "Games"), "ambiguous")
+})
+
+test_that("an unknown name still lists what is there", {
+  expect_error(as.matrix(wiring, relation = "gams"), "Available: Games, Conflict")
+  expect_error(xunpack(wiring, "gams"), "Available: Games")
+})

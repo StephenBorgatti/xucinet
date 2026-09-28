@@ -136,7 +136,7 @@ join_bind <- function(nets, labs, mode) {
 #' UCINET: Data | Unpack. The other half of [xjoin()].
 #'
 #' @param net A multi-relation network.
-#' @param relation Which relation, by name or position. `NULL`, the default,
+#' @param relation Which relation, by name (in any case) or position. `NULL`, the default,
 #'   returns every one.
 #' @param prefix Put in front of each relation's name to title the dataset it
 #'   becomes. UCINET's dialog offers the same.
@@ -160,7 +160,7 @@ xunpack <- function(net, relation = NULL, prefix = "") {
     out
   }
   if (!is.null(relation)) {
-    i <- if (is.character(relation)) match(relation, rels) else as.integer(relation)
+    i <- if (is.character(relation)) match_relation(relation, rels) else as.integer(relation)
     if (is.na(i) || i < 1 || i > length(mats)) {
       stop("no relation \"", relation, "\".\n  Available: ",
            paste(rels, collapse = ", "), call. = FALSE)
@@ -179,7 +179,7 @@ xunpack <- function(net, relation = NULL, prefix = "") {
 #'
 #' @param net A multi-relation network, or a list of separate networks with
 #'   matching labels.
-#' @param relations Which relations to use, by name or position. `NULL`, the
+#' @param relations Which relations to use, by name (in any case) or position. `NULL`, the
 #'   default, uses all of them.
 #' @param method `"sum"` (the dialog's default), `"mean"`, `"min"`, `"max"`,
 #'   `"sd"` (the population form) or `"product"` (UCINET's elementwise
@@ -203,7 +203,7 @@ xcombine <- function(net, relations = NULL,
   rels <- xrelations(net)
 
   if (!is.null(relations)) {
-    i <- if (is.character(relations)) match(relations, rels) else as.integer(relations)
+    i <- if (is.character(relations)) match_relation(relations, rels) else as.integer(relations)
     if (anyNA(i)) {
       stop("no relation \"", relations[is.na(i)][1], "\".\n  Available: ",
            paste(rels, collapse = ", "), call. = FALSE)

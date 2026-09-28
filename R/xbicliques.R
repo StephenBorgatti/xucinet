@@ -34,7 +34,7 @@
 #' @param net A 2-mode network (any accepted form). Values above 0 are ties.
 #' @param min_rows,min_cols The fewest rows and columns a biclique may have.
 #'   UCINET's defaults are 3 and 3.
-#' @param relation Which relation, by name or position. Defaults to the first.
+#' @param relation Which relation, by name (in any case) or position. Defaults to the first.
 #' @return An object of class `c("xbicliques", "xucinet_output")`.
 #'   `$bicliques` lists each biclique's `rows` and `cols`. `$matrices` holds,
 #'   for each mode, the participation matrix (the share of the biclique's

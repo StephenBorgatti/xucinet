@@ -9,7 +9,7 @@ xinduced(net, relation = NULL, k = 3)
 \arguments{
 \item{net}{A network (any accepted form).}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 
 \item{k}{The cutoff for the "pairs within k links" column. UCINET's dialog

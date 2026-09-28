@@ -22,6 +22,13 @@ reports). \code{xrelations()} gives their names and \code{xnrelations()} how man
 are; \code{length(xrelations(net))} is always \code{xnrelations(net)}. A dataset with a
 single unnamed relation reports its own title as the relation name.
 }
+\details{
+Wherever a function takes a relation by name (\verb{relation =}, \verb{relations =},
+\code{\link[=xunpack]{xunpack()}}, the terms of an \code{\link[=xmrqap]{xmrqap()}} formula), the name is matched
+exactly first and then ignoring case, so \code{relation = "games"} finds
+\code{Games}. If two relations differ only in case, a name that matches neither
+exactly is an error that lists both.
+}
 \examples{
 m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3)
 xrelations(as_xucinet(list(liking = m, advice = t(m))))

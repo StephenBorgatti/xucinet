@@ -24,7 +24,8 @@ print.xucinet <- function(x, ...) {
 #' Display a dataset in UCINET's Data|Display style
 #'
 #' @param net A network (any accepted form).
-#' @param relation Which relation to show for a multi-relation dataset.
+#' @param relation Which relation to show for a multi-relation dataset, by name
+#'   (in any case) or position.
 #' @return The network, invisibly.
 #' @export
 xdisplay <- function(net, relation = NULL) {

@@ -16,7 +16,7 @@ xvaluedtiecomposition(
 \arguments{
 \item{net}{A network (any accepted form), usually with several relations.}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 
 \item{ties}{Which of ego's ties count: \code{"out"} (the default), \code{"in"},

@@ -13,7 +13,7 @@ symmetrized by maximum; tie values are used as weights.}
 \item{seed}{A random seed, for a repeatable result. \code{NULL} uses R's current
 random state. R's global random state is left as it was either way.}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 }
 \value{

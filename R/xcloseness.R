@@ -29,7 +29,7 @@
 #' fixed conventions, as UCINET's dialog does.
 #'
 #' @param net A network (any accepted form).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param directed `NULL` (detect from symmetry), `TRUE` or `FALSE`.
 #' @param undefined What to do with unreachable pairs: `"max1"` (default),
@@ -63,7 +63,7 @@ xcloseness <- function(net, relation = NULL, directed = NULL,
   if (xnrelations(net) > 1) {
     assumptions <- c(assumptions,
                      sprintf("Relation: %s (of %d).",
-                             if (is.null(relation)) xrelations(net)[1] else relation,
+                             relation_label(net, relation),
                              xnrelations(net)))
   }
   a <- adjacency(m)

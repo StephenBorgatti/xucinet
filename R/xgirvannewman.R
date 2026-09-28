@@ -53,7 +53,7 @@
 #' @param k Print the partitions up to the first with at least this many
 #'   clusters, where UCINET stops. UCINET's default is 10. Every partition is
 #'   in the result whatever `k` is.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @return An object of class `c("xgirvannewman", "xucinet_output")`.
 #' @seealso [xcommunities()], [xlouvain()].

@@ -68,7 +68,7 @@
 #' type* is `ties`.
 #'
 #' @param net A network (any accepted form). 1-mode.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param ties `"any"` (UCINET's default, UNDIRECTED), `"out"`
 #'   (OUT-NEIGHBORHOOD) or `"in"` (IN-NEIGHBORHOOD).

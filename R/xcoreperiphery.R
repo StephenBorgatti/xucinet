@@ -98,7 +98,7 @@
 #' @param net A network (any accepted form), 1-mode or 2-mode.
 #' @param type Which model to print: `"categorical"` (the default) or
 #'   `"continuous"`.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param diagonal Count the diagonal (self-ties)? `FALSE` by default, as in
 #'   both dialogs.
@@ -151,7 +151,7 @@ xcoreperiphery <- function(net, type = c("categorical", "continuous"),
   assumptions <- character()
   if (xnrelations(net) > 1) {
     assumptions <- sprintf("Relation: %s (of %d).",
-                           if (is.null(relation)) xrelations(net)[1] else relation,
+                           relation_label(net, relation),
                            xnrelations(net))
   }
   if (n < 3) stop("xcoreperiphery() needs at least three nodes.", call. = FALSE)

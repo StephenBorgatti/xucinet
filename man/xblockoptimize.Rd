@@ -27,7 +27,7 @@ xblockoptimize(
 \item{weighted}{Structural only: use the Valued routine? \code{NULL} decides from
 the data (valued if any tie value other than 0 or 1).}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 
 \item{starts}{Random starts. \code{NULL} uses UCINET's defaults: 5 for

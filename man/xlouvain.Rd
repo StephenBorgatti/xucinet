@@ -22,7 +22,7 @@ xlouvain(
 \item{maxlevels}{The most levels to run. \code{NULL}, the default, runs until
 nothing merges.}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 
 \item{seed}{For 2-mode data, and for \code{order = "random"}: the random seed, a

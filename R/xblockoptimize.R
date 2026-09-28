@@ -77,7 +77,7 @@
 #' @param type `"structural"` (the default) or `"regular"`.
 #' @param weighted Structural only: use the Valued routine? `NULL` decides from
 #'   the data (valued if any tie value other than 0 or 1).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param starts Random starts. `NULL` uses UCINET's defaults: 5 for
 #'   structural (the start counts as the first), 30 for regular (after the
@@ -119,7 +119,7 @@ xblockoptimize <- function(net, k = 2, type = c("structural", "regular"),
   assumptions <- character()
   if (xnrelations(net) > 1) {
     assumptions <- sprintf("Relation: %s (of %d).",
-                           if (is.null(relation)) xrelations(net)[1] else relation,
+                           relation_label(net, relation),
                            xnrelations(net))
   }
   if (anyNA(m)) assumptions <- c(assumptions, "Missing cells are left out of every count.")

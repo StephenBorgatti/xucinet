@@ -9,7 +9,7 @@ xhubsauthorities(net, relation = NULL)
 \arguments{
 \item{net}{A network (any accepted form).}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 }
 \value{

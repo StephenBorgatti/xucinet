@@ -15,7 +15,7 @@
 #' its own component. That is the natural reading and it is what UCINET does.
 #'
 #' @param net A network (any accepted form).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param directed `NULL` (detect from symmetry), `TRUE` or `FALSE`. Directed
 #'   data is reported out-wards; use `direction = "in"` for the other.
@@ -92,7 +92,7 @@ xreach <- function(net, relation = NULL, directed = NULL,
 #' degree over `n - 1`. UCINET's dialog defaults to 0.8 and so does this.
 #'
 #' @param net A network (any accepted form).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param beta The distance discount, between 0 and 1. UCINET's default is 0.8.
 #' @param directed `NULL` (detect from symmetry), `TRUE` or `FALSE`.

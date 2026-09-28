@@ -163,7 +163,7 @@ ego_relation <- function(net, relation, fn) {
   note <- NULL
   if (xnrelations(net) > 1) {
     note <- sprintf("Relation: %s (of %d).",
-                    if (is.null(relation)) xrelations(net)[1] else relation,
+                    relation_label(net, relation),
                     xnrelations(net))
   }
   list(m = m, note = note)

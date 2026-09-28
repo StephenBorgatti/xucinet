@@ -15,7 +15,7 @@
 #' is reproduced here rather than quietly changed.
 #'
 #' @param net A network (any accepted form).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param beta The attenuation parameter. `NULL`, the default, is UCINET's
 #'   automatic choice: `0.999` divided by the largest eigenvalue, which is just
@@ -42,7 +42,7 @@ xbeta <- function(net, relation = NULL, beta = NULL,
   if (xnrelations(net) > 1) {
     assumptions <- c(assumptions,
                      sprintf("Relation: %s (of %d).",
-                             if (is.null(relation)) xrelations(net)[1] else relation,
+                             relation_label(net, relation),
                              xnrelations(net)))
   }
   a <- m

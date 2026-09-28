@@ -70,7 +70,7 @@ mixing_models <- c(density = "density", configuration = "configuration",
 #' @param attribute The grouping: a vector, or the name of a column looked up
 #'   first in `net`'s attribute table and then in `data`. Numbers are rounded
 #'   to whole numbers, as UCINET does.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param directed Treat symmetric data as directed? `TRUE`, as the dialog
 #'   does. Has no effect on asymmetric data.

@@ -26,7 +26,7 @@ xcoreperiphery(
 \item{type}{Which model to print: \code{"categorical"} (the default) or
 \code{"continuous"}.}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 
 \item{diagonal}{Count the diagonal (self-ties)? \code{FALSE} by default, as in

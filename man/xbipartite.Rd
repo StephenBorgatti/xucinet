@@ -16,7 +16,7 @@ xbipartite(
 \arguments{
 \item{net}{A 2-mode network (any accepted form).}
 
-\item{relation}{Which relation, by name or position. Defaults to the first,
+\item{relation}{Which relation, by name (in any case) or position. Defaults to the first,
 the only one UCINET converts.}
 
 \item{fill}{The value of the row-by-row and column-by-column blocks. 0 by

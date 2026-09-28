@@ -165,6 +165,12 @@ as_xucinet.default <- function(x, directed = NULL, mode = NULL, title = NULL, ..
 #' are; `length(xrelations(net))` is always `xnrelations(net)`. A dataset with a
 #' single unnamed relation reports its own title as the relation name.
 #'
+#' Wherever a function takes a relation by name (`relation =`, `relations =`,
+#' [xunpack()], the terms of an [xmrqap()] formula), the name is matched
+#' exactly first and then ignoring case, so `relation = "games"` finds
+#' `Games`. If two relations differ only in case, a name that matches neither
+#' exactly is an error that lists both.
+#'
 #' @param net A network (any accepted form).
 #' @return `xrelations()` a character vector of relation names; `xnrelations()`
 #'   an integer.
@@ -210,6 +216,38 @@ xnrelations <- function(net) {
   if (is.list(net$data)) length(net$data) else 1L
 }
 
+# Positions of relations named in `x` among `rels`: an exact match first, then
+# one that ignores case, since the book writes relation = "games" for a
+# relation stored as Games (asnr2e T23, T24; Steve, 27 Sep 2026). A name that
+# matches two relations once case is ignored, and neither exactly, is an
+# error. Unmatched names come back NA, for the caller's own message.
+match_relation <- function(x, rels) {
+  x <- as.character(x)
+  vapply(x, function(r) {
+    i <- match(r, rels)
+    if (!is.na(i)) return(i)
+    hit <- which(tolower(rels) == tolower(r))
+    if (length(hit) > 1L) {
+      stop("relation \"", r, "\" is ambiguous: ignoring case it matches ",
+           paste0("\"", rels[hit], "\"", collapse = " and "), ".\n",
+           "  Name one of them exactly.", call. = FALSE)
+    }
+    if (length(hit)) hit else NA_integer_
+  }, integer(1), USE.NAMES = FALSE)
+}
+
+# The stored name of the relation a report is about: the first when `relation`
+# is NULL, the one at a position, or the one a name matches.
+relation_label <- function(net, relation) {
+  rels <- xrelations(net)
+  if (is.null(relation)) return(rels[1])
+  if (is.character(relation)) {
+    i <- match_relation(relation, rels)
+    return(if (is.na(i[1])) relation else rels[i[1]])
+  }
+  rels[as.integer(relation)]
+}
+
 # Pull one relation out of an xucinet, by position or by name. Errors list what
 # is actually available (SPEC D14: error messages that teach).
 pick_relation <- function(x, relation = NULL) {
@@ -217,7 +255,8 @@ pick_relation <- function(x, relation = NULL) {
   if (!is.list(d)) {
     if (is.null(relation)) return(d)
     ok <- (is.numeric(relation) && length(relation) == 1L && relation == 1) ||
-          identical(as.character(relation), x$title)
+          (length(relation) == 1L && !is.null(x$title) &&
+             tolower(as.character(relation)) == tolower(x$title))
     if (!ok) {
       stop("'", paste(as.character(relation), collapse = ", "),
            "' is not a relation in this dataset.\n",
@@ -232,7 +271,7 @@ pick_relation <- function(x, relation = NULL) {
          call. = FALSE)
   }
   if (is.character(relation)) {
-    i <- match(relation, nm)
+    i <- match_relation(relation, nm)
     if (is.na(i)) {
       stop("'", relation, "' is not a relation in this dataset.\n",
            "  Available: ", paste(nm, collapse = ", "), call. = FALSE)
@@ -340,7 +379,7 @@ resolve_index <- function(idx, labels, what) {
 #' an `xucinet` object.
 #'
 #' @param net A network (any accepted form).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @return An `igraph`, `network` or `tbl_graph` object.
 #' @examples

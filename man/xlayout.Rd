@@ -24,8 +24,8 @@ attribute (looked up in \code{net}, then \code{data}).}
 
 \item{data}{A data frame to look \code{attribute} up in.}
 
-\item{relation}{Which relations the layout is computed on; all of them by
-default.}
+\item{relation}{Which relations the layout is computed on, by name (in any
+case) or position; all of them by default.}
 
 \item{seed}{Random seed for \code{"spring"}, \code{"kk"} and \code{"random"}. The default
 is fixed, so the same call always gives the same picture; \code{NULL} draws a

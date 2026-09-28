@@ -9,7 +9,7 @@ xunpack(net, relation = NULL, prefix = "")
 \arguments{
 \item{net}{A multi-relation network.}
 
-\item{relation}{Which relation, by name or position. \code{NULL}, the default,
+\item{relation}{Which relation, by name (in any case) or position. \code{NULL}, the default,
 returns every one.}
 
 \item{prefix}{Put in front of each relation's name to title the dataset it

@@ -5,7 +5,7 @@
 #' template every later routine follows.
 #'
 #' @param net A network (any accepted form).
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position (SPEC D4). Defaults to the first. Reporting every relation as its
 #'   own section is still to come.
 #' @param directed `NULL` (detect), `TRUE` or `FALSE`. Detection is reported as
@@ -37,9 +37,7 @@ xdensity <- function(net, relation = NULL, directed = NULL, weighted = NULL,
   if (xnrelations(net) > 1) {
     assumptions <- c(assumptions,
                      sprintf("Relation: %s (of %d).",
-                             if (is.null(relation)) xrelations(net)[1] else
-                               xrelations(net)[if (is.character(relation))
-                                 match(relation, xrelations(net)) else relation],
+                             relation_label(net, relation),
                              xnrelations(net)))
   }
   if (is.null(directed)) {

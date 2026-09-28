@@ -49,7 +49,7 @@
 #'
 #' @param net A network (any accepted form). 1-mode; no negative values.
 #' @param iterations Number of rounds. UCINET's default is 3.
-#' @param relations Which relations to use, by name or position. `NULL`, the
+#' @param relations Which relations to use, by name (in any case) or position. `NULL`, the
 #'   default, uses all of them, as UCINET does.
 #' @param geodesics Replace each relation by its geodesic distances first
 #'   (dichotomized, unreachable pairs at `n`)?
@@ -68,7 +68,7 @@ xrege <- function(net, iterations = 3, relations = NULL, geodesics = FALSE,
   require_1mode(net, "xrege()")
   mats <- relation_list(net)
   if (!is.null(relations)) {
-    idx <- if (is.character(relations)) match(relations, names(mats)) else
+    idx <- if (is.character(relations)) match_relation(relations, names(mats)) else
       as.integer(relations)
     if (anyNA(idx) || any(idx < 1 | idx > length(mats))) {
       stop("xrege(): relations must name relations of the dataset.\n",

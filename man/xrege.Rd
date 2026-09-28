@@ -11,7 +11,7 @@ xrege(net, iterations = 3, relations = NULL, geodesics = FALSE, k = NULL)
 
 \item{iterations}{Number of rounds. UCINET's default is 3.}
 
-\item{relations}{Which relations to use, by name or position. \code{NULL}, the
+\item{relations}{Which relations to use, by name (in any case) or position. \code{NULL}, the
 default, uses all of them, as UCINET does.}
 
 \item{geodesics}{Replace each relation by its geodesic distances first

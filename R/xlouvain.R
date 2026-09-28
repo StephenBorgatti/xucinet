@@ -77,7 +77,7 @@
 #'   `"min"`, `"average"`, `"sum"`, or `"none"`.
 #' @param maxlevels The most levels to run. `NULL`, the default, runs until
 #'   nothing merges.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param order 1-mode data: `"fixed"` (the default, UCINET's) visits nodes in
 #'   their order; `"random"` in a random order under `seed`.

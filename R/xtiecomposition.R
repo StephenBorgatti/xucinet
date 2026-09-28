@@ -48,7 +48,7 @@
 #' *Include ties to self* is `diagonal`.
 #'
 #' @param net A network (any accepted form), usually with several relations.
-#' @param relations Which relations to use, by name or position. `NULL`, the
+#' @param relations Which relations to use, by name (in any case) or position. `NULL`, the
 #'   default, uses them all, as UCINET does.
 #' @param ties Which of ego's ties count: `"any"` (the default, a
 #'   tie in either direction counted once), `"both"` (in and out counted
@@ -78,7 +78,7 @@ xtiecomposition <- function(net, relations = NULL,
 
   mats <- relation_list(net)
   if (!is.null(relations)) {
-    idx <- if (is.character(relations)) match(relations, names(mats)) else
+    idx <- if (is.character(relations)) match_relation(relations, names(mats)) else
       as.integer(relations)
     if (anyNA(idx) || any(idx < 1 | idx > length(mats))) {
       stop("xtiecomposition(): relations must name relations of the dataset.\n",
@@ -139,7 +139,7 @@ xtiecomposition <- function(net, relations = NULL,
 #' *Include ties to self* is `diagonal`.
 #'
 #' @inheritParams xtiecomposition
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @param ties Which of ego's ties count: `"out"` (the default), `"in"`,
 #'   `"both"` (out and in, a reciprocated pair contributing both values),

@@ -17,7 +17,7 @@
 #' gone; a note says so.
 #'
 #' @param net A network (any accepted form), ideally signed.
-#' @param relation Which relation of a multi-relation dataset, by name or
+#' @param relation Which relation of a multi-relation dataset, by name (in any case) or
 #'   position. Defaults to the first.
 #' @return An `xucinet_output` whose `$nodes` has one column, `PN`.
 #' @examples

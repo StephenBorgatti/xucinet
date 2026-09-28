@@ -15,7 +15,7 @@ xdensity(
 \arguments{
 \item{net}{A network (any accepted form).}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position (SPEC D4). Defaults to the first. Reporting every relation as its
 own section is still to come.}
 

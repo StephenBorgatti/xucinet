@@ -16,7 +16,7 @@ xtiecomposition(
 \arguments{
 \item{net}{A network (any accepted form), usually with several relations.}
 
-\item{relations}{Which relations to use, by name or position. \code{NULL}, the
+\item{relations}{Which relations to use, by name (in any case) or position. \code{NULL}, the
 default, uses them all, as UCINET does.}
 
 \item{ties}{Which of ego's ties count: \code{"any"} (the default, a

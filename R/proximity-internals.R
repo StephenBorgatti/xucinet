@@ -37,7 +37,7 @@ xprox <- function(x, expr, what, square = TRUE, relation = NULL) {
   if (xnrelations(net) > 1) {
     assumptions <- c(assumptions,
                      sprintf("Relation: %s (of %d).",
-                             if (is.null(relation)) xrelations(net)[1] else relation,
+                             relation_label(net, relation),
                              xnrelations(net)))
   }
   list(net = net, m = m, assumptions = assumptions)

@@ -15,7 +15,7 @@ xbetareach(
 \arguments{
 \item{net}{A network (any accepted form).}
 
-\item{relation}{Which relation of a multi-relation dataset, by name or
+\item{relation}{Which relation of a multi-relation dataset, by name (in any case) or
 position. Defaults to the first.}
 
 \item{beta}{The distance discount, between 0 and 1. UCINET's default is 0.8.}
