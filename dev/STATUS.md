@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 27 Sep 2026 (Claude Code; Cowork should
+Updated 28 Sep 2026 (Claude Code; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -80,8 +80,20 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - UCINET source for porting: `C:\Dev\ucinet\Source` and `C:\Dev\tools` (Delphi 13). The
   Dropbox copies are stale.
 
-## Done this session (27 Sep 2026, Claude Code)
+## Done this session (27-28 Sep 2026, Claude Code)
 
+
+- **#32 (55567b1):** `xsimilarities(mode = "matrices")` is `mode = "relations"` (asnr2e T4).
+- **#33 (d803db5):** the ANOVA density models and `test = TRUE` moved from
+  `xdensitybygroups()` to `xmixing()` (asnr2e T3). `xmixing()` now returns ten tables, the
+  last three the models' coefficients, fitted always and printed with `test = TRUE`; a model
+  whose dummies are collinear is NA with a note instead of an error. `xdensitybygroups()` is
+  the density table only. The shared printer no longer prints the title of a suppressed
+  summary block. Crosswalk rows (both copies) and ledger 42 follow.
+- **xplot labels (f059ae4):** the plot widens on the right for node labels, which were
+  clipped at the edge (found drawing book Figure 13.5).
+- Package reinstalled from source, so the asnr2e generators (Figures 7.25-7.26, Matrix 12.3,
+  Figures 13.5-13.6, Table 14.4; asnr2e 2d81e23) run on the current code.
 - **Relation names ignore case (issue #31; 6966112; asnr2e T23, T24).** `match_relation()`
   in `R/class-xucinet.R`: an exact match first, then case-insensitive; two relations
   differing only in case make such a name an error listing both. Used by
@@ -299,8 +311,8 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. Nothing is waiting on Steve, in the package or in `asnr2e/docs/text-changes.md`
-   (26 Sep).
+0. No package issues open (28 Sep: #32 and #33 done). The book side is in
+   `asnr2e/STATUS.md`.
 1. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
    `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence,twomode,hypotheses}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
@@ -453,6 +465,9 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 - 27 Sep 2026 (Steve; asnr2e T23, T24): relation names are matched case-insensitively,
   after an exact match, so the book's `relation = "games"` stands.
+
+- 27 Sep 2026 (Steve; asnr2e T3, T4): the ANOVA density test belongs to `xmixing()`;
+  `mode = "matrices"` is accepted beside `"relations"`.
 
 ## Open questions for Steve
 
