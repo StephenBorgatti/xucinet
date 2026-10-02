@@ -1,5 +1,5 @@
 {
-  "uci": "1.0",
+  "uci": "1.1",
   "title": "campnet",
   "mode": "1-mode",
   "directed": true,
@@ -32,6 +32,12 @@
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1],
         [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0]
       ]
+    }
+  ],
+  "notes": [
+    {
+      "date": "2026-10-02",
+      "text": "Worked example for schema 1.1: campnet with three node attributes (Gender, Role, Betweenness) and this note."
     }
   ],
   "provenance": {

@@ -626,9 +626,27 @@
 #' and 2004, the years of the second natural court under Chief Justice William
 #' Rehnquist. A two-mode matrix of cases by judges.
 #'
-#' A cell is 1 where the judge voted with the majority on that case and 0 where
-#' not. Thirty-two cells across eighteen cases hold 0.5, and nine cells are
-#' missing; UCINET stores those as 1e38 and they arrive here as `NA`.
+#' The cells code each justice's vote on each case:
+#' \describe{
+#'   \item{1}{voted for the Court's judgment, including concurring in the
+#'     judgment only;}
+#'   \item{0}{dissented;}
+#'   \item{0.5}{concurred in part and dissented in part (wrote or joined such
+#'     an opinion). Thirty-four cells hold 0.5;}
+#'   \item{`NA`}{took no part in the case. Nine cells; UCINET stores them as
+#'     1e38.}
+#' }
+#'
+#' @details The codes were established in 2026 by comparing the cases that
+#'   contain 0.5 with the written vote summaries, and four coding errors in the
+#'   data of the 3rd edition were corrected on 2 October 2026: in E061 (Lewis
+#'   v. Casey, 1996) Scalia's 0.5 and Souter's 1 had been swapped; in E116
+#'   (Bousley v. United States, 1998) Stevens is 0.5, not 0; in E073 (United
+#'   States v. Armstrong, 1996) Breyer is 1, not 0.5; in E336 (Virginia v.
+#'   Black, 2003) Kennedy and Ginsburg are 0.5, not 1. The cells holding 0.5
+#'   went from 32 to 34, "Ginsberg" became "Ginsburg", and the derived
+#'   attributes in [supremecourt_cases_attr] and [supremecourt_judges_attr]
+#'   were recomputed. The dataset carries this as a note; see [notes()].
 #'
 #' @format An `xucinet` object, 376 cases x 9 judges, 2-mode.
 #' @source Borgatti, S. P., Everett, M. G., Johnson, J. C. and Agneessens, F.
@@ -646,7 +664,8 @@
 #' @format A data frame, 376 rows keyed by case id, 2 columns:
 #' \describe{
 #'   \item{Year}{year the case was decided}
-#'   \item{Majority Size}{number of justices in the majority. The space is
+#'   \item{Majority Size}{number of justices in the majority: the row sum of
+#'     [supremecourt], so a 0.5 counts as half. The space is
 #'     UCINET's own column label, so reach it with
 #'     `supremecourt_cases_attr[["Majority Size"]]`.}
 #' }
@@ -662,8 +681,9 @@
 #'
 #' @format A data frame, 9 rows keyed by justice name, 11 columns:
 #'   `NoTimesMajority`, the number of cases in which the justice was in the
-#'   majority, then one column per year from `1995` to `2004` giving the same
-#'   count within that year.
+#'   majority (the column sum of [supremecourt], so a 0.5 counts as half),
+#'   then one column per year from `1995` to `2004` giving the same count
+#'   within that year.
 #' @source As [supremecourt].
 #' @seealso [supremecourt], [supremecourt_cases_attr]
 #' @examples

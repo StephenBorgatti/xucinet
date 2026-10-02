@@ -8,7 +8,8 @@
 A data frame, 376 rows keyed by case id, 2 columns:
 \describe{
 \item{Year}{year the case was decided}
-\item{Majority Size}{number of justices in the majority. The space is
+\item{Majority Size}{number of justices in the majority: the row sum of
+\link{supremecourt}, so a 0.5 counts as half. The space is
 UCINET's own column label, so reach it with
 \code{supremecourt_cases_attr[["Majority Size"]]}.}
 }

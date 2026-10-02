@@ -7,8 +7,9 @@
 \format{
 A data frame, 9 rows keyed by justice name, 11 columns:
 \code{NoTimesMajority}, the number of cases in which the justice was in the
-majority, then one column per year from \code{1995} to \code{2004} giving the same
-count within that year.
+majority (the column sum of \link{supremecourt}, so a 0.5 counts as half),
+then one column per year from \code{1995} to \code{2004} giving the same count
+within that year.
 }
 \source{
 As \link{supremecourt}.

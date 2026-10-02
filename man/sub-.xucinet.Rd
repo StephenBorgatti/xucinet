@@ -27,8 +27,8 @@ An \code{xucinet} object, or a matrix if \code{drop = TRUE}.
 columns so the result stays square. \code{net[i, j]} keeps rows \code{i} and columns
 \code{j}, which is what 2-mode data needs. Indices may be positions, negative
 positions to drop nodes, a logical vector, or node labels. Labels, mode,
-directedness, the dataset title and every relation of a multi-relation stack
-are carried through.
+directedness, the dataset title, any \code{\link[=notes]{notes()}} and every relation of a
+multi-relation stack are carried through.
 }
 \examples{
 m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3,

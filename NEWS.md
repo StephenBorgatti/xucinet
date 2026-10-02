@@ -1,5 +1,28 @@
 # xucinet 2.0.0.9000 (development)
 
+## Notes on a dataset; Supreme Court data corrected (2 October 2026)
+
+* A dataset can carry dated notes (#35): `notes(x)` returns them as a data
+  frame with columns `date` and `text`, and `notes(x) <- value` sets them (a
+  data frame, a character vector dated today, or `NULL`). They are kept by
+  subsetting, the transformations, `xunpack()`, `xcombine()` and
+  `xmultiplex()`, and printing a network shows how many there are.
+* The `.uci` format is schema 1.1 (`inst/schema/uci-1.1.json`), which adds an
+  optional `notes` array; `xreaduci()`/`xsaveuci()` read and write it
+  (`xsaveuci(notes =)`), and 1.0 files read as before. Writing `##h`/`##d`
+  drops the notes without a warning, since that format has no room for them.
+* `supremecourt`, `supremecourt_cases_attr` and `supremecourt_judges_attr`
+  are rebuilt from the corrected 3e files (Steve): four coding errors fixed
+  (E061 Scalia 0.5 -> 1 and Souter 1 -> 0.5; E116 Stevens 0 -> 0.5; E073
+  Breyer 0.5 -> 1; E336 Kennedy and Ginsburg 1 -> 0.5), so 34 cells hold 0.5
+  instead of 32; "Ginsberg" is "Ginsburg"; Majority Size and NoTimesMajority
+  are recomputed. `notes(supremecourt)` records this, and `?supremecourt`
+  now documents the cell codes (1 = voted for the Court's judgment, 0 =
+  dissented, 0.5 = concurred in part and dissented in part, `NA` = took no
+  part). The SDSM backbone of the justices
+  (`xaffiliations(supremecourt, mode = "cols", method = "sdsm")`) keeps the
+  same ten pairs.
+
 ## Valente-Foreman spelled correctly (2 October 2026)
 
 * `xcloseness()` notes and help say Valente-Foreman (Valente and Foreman,

@@ -70,6 +70,16 @@ batch at the end.** Design questions for all remaining chapters are batched in
   anything. Rebuild with `python build_xlsx.py` in `asnr2e/crosswalk`, then copy the xlsx
   over the one in the book's Dropbox folder (`ASN R 2e - Fall 2026/`), which is there only
   for the coauthors and was last refreshed 25 Sep.
+- **Notes and .uci 1.1 (2 Oct, #35).** A dataset carries dated notes in `$notes` (data frame
+  date/text, absent when none), `notes(x)` / `notes(x) <- value`; kept by subsetting, the
+  transformations, `xunpack`/`xcombine`/`xmultiplex`; printed as a count. `.uci` is schema
+  1.1 (`inst/schema/uci-1.1.json`; 1.0 kept, still read), which adds `notes`. SPEC D1, D6.
+- **supremecourt corrected (2 Oct, #35).** Rebuilt from the corrected 3e files (four coding
+  errors, Ginsburg, Majority Size / NoTimesMajority); 34 cells of 0.5; carries a note;
+  `?supremecourt` documents the cell codes. `make-datasets.R` reads the three Supreme Court
+  files from `ASN3 Ucinet Files` only, because `DataUCINET.zip` (searched first) still has
+  the old ones. The fixture `inst/goldens/ucinet/supremecourt.##h` keeps the old values (no
+  test compares it with the dataset). SDSM backbone unchanged (10 pairs).
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
@@ -82,12 +92,13 @@ batch at the end.** Design questions for all remaining chapters are batched in
 
 ## Done this session (2 Oct 2026, Claude Code)
 
-- #34: `xcloseness()` notes, help and SPEC spell Valente-Foreman (f585ea9); UCINET's
-  closeness dialog and log have the misspelling too, recorded in UCINET-ISSUES entry 7.
-  Reinstalled. No snapshot held the string.
-- asnr2e #3: book Tables 9.1-9.5 regenerated from xucinet (`asnr2e/generators/ch09.R`);
-  every value agrees with the 3e UCINET tables except one printing tie (Table 9.4,
-  Lamberteschi beta reach 0.2875: 0.288 here, 0.287 in UCINET).
+- #35 (notes field; Supreme Court corrections), from
+  `asnr2e/docs/prompts/supremecourt-corrections.md`: see "Where things stand". Tests in
+  `tests/testthat/test-notes.R` and `test-data.R`. Package reinstalled.
+- UCINET-ISSUES 37-43 committed (79ace5c), as the ucinet STATUS asked; entry 44 added
+  (Datafiles corrected, Datafiles.zip stale, .uci notes; ucinet #43).
+- ucinet 779992a: the corrected Datafiles copies committed (Refs ucinet #43).
+- Earlier today: #34 (Valente-Foreman); asnr2e #3 (book Tables 9.1-9.5).
 
 ## Done 27 Sep 2026 (Claude Code)
 
@@ -324,8 +335,10 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. No package issues open (27 Sep: #32 and #33 done). The book side is in
-   `asnr2e/STATUS.md`.
+0. No package issues open (#35 done 2 Oct). The book side is in `asnr2e/STATUS.md`.
+   UCINET side of the Supreme Court corrections: rebuild both `Datafiles.zip` in the ucinet
+   repo (ucinet #43). `3e/data/DataUCINET.zip` in Dropbox also still holds the old Supreme
+   Court files (open question 9).
 1. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
    `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence,twomode,hypotheses}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
@@ -482,7 +495,21 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 - 27 Sep 2026 (Steve; asnr2e T3, T4): the ANOVA density test belongs to `xmixing()`;
   `mode = "matrices"` is accepted beside `"relations"`.
 
+- 2 Oct 2026 (Steve, #35): datasets carry dated notes, in the object and in `.uci`; the
+  Supreme Court data are corrected everywhere.
+- 2 Oct 2026 (Claude Code, #35): the notes field makes `.uci` schema 1.1, not an amendment
+  of 1.0, by the schema's own rule (a minor version adds optional keys; readers refuse only
+  an unknown major version). Notes are kept by every transformation built on
+  `map_relations()`, including those that change the nodes (projections, `xcombinenodes`,
+  `xmatch`), since the notes describe the data they derive from; routines that build a new
+  object (`xsimilarities()`, `xattributetomatrix()`, `xbipartite()`) start without them. The accessor is
+  `notes()` without the x prefix, as Steve named it.
+
 ## Open questions for Steve
 
-None open (26 Sep 2026). Questions 1-8 are answered; see Decisions.
+Questions 1-8 are answered; see Decisions.
+
+9. `3e/data/DataUCINET.zip` (Dropbox) still holds the uncorrected Supreme Court files.
+   `make-datasets.R` now bypasses it for those three, so nothing in xucinet is blocked;
+   replace the three files in the zip, or leave it as the historical 3e battery?
 

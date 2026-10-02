@@ -28,7 +28,8 @@
 #' @param ... Passed to methods.
 #' @return An object of class `xucinet`: a list with elements `data` (a matrix,
 #'   or a named list of matrices for a multi-relation dataset), `mode`,
-#'   `directed`, and `title`.
+#'   `directed`, and `title`, and `notes` when the dataset carries any (see
+#'   [notes()]).
 #' @seealso [xrelations()] for the relation names, [as_igraph()] and friends to
 #'   convert the other way, and `[.xucinet` to subset nodes.
 #' @examples
@@ -209,6 +210,62 @@ xattributes <- function(net) {
   as_xucinet(net)$attributes
 }
 
+#' Notes on a dataset
+#'
+#' A dataset can carry dated notes: what was corrected and when, where it came
+#' from, anything a user of the data should know. They are written to and read
+#' from the `.uci` format (schema 1.1), kept by subsetting and by the
+#' transformations, and shown as a count when the network is printed. The
+#' `##h`/`##d` pair has no room for them, so [xsaveucinet()] leaves them out.
+#'
+#' @param x A network (any accepted form).
+#' @param value A data frame with columns `date` and `text`, a character
+#'   vector of texts (each dated today), or `NULL` to remove the notes.
+#' @return `notes()` a data frame with columns `date` (`"YYYY-MM-DD"`) and
+#'   `text`, one row per note in the order written, or `NULL` when there are
+#'   none. `notes<-` returns the network with its notes replaced.
+#' @seealso [xreaduci()], [xsaveuci()]
+#' @examples
+#' notes(supremecourt)
+#'
+#' m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3)
+#' net <- as_xucinet(m)
+#' notes(net) <- data.frame(date = "2026-10-02", text = "Coded from field notes.")
+#' net
+#' @export
+notes <- function(x) {
+  as_xucinet(x)$notes
+}
+
+#' @rdname notes
+#' @export
+`notes<-` <- function(x, value) {
+  x <- as_xucinet(x)
+  x$notes <- as_notes(value)
+  x
+}
+
+# Notes in their one shape: a data frame of character columns date and text,
+# or NULL when there are none.
+as_notes <- function(value) {
+  if (is.null(value)) return(NULL)
+  if (is.character(value)) {
+    value <- data.frame(date = rep(format(Sys.Date()), length(value)), text = value)
+  }
+  if (!is.data.frame(value) || !all(c("date", "text") %in% names(value))) {
+    stop("notes must be a data frame with columns date and text, or a character ",
+         "vector of texts.", call. = FALSE)
+  }
+  if (!nrow(value)) return(NULL)
+  date <- as.character(value$date)
+  bad <- is.na(date) | !grepl("^[0-9]{4}-[0-9]{2}-[0-9]{2}$", date)
+  if (any(bad)) {
+    stop("a note's date is written YYYY-MM-DD; got \"", date[bad][1], "\".",
+         call. = FALSE)
+  }
+  data.frame(date = date, text = as.character(value$text), stringsAsFactors = FALSE)
+}
+
 #' @rdname xrelations
 #' @export
 xnrelations <- function(net) {
@@ -294,8 +351,8 @@ pick_relation <- function(x, relation = NULL) {
 #' columns so the result stays square. `net[i, j]` keeps rows `i` and columns
 #' `j`, which is what 2-mode data needs. Indices may be positions, negative
 #' positions to drop nodes, a logical vector, or node labels. Labels, mode,
-#' directedness, the dataset title and every relation of a multi-relation stack
-#' are carried through.
+#' directedness, the dataset title, any [notes()] and every relation of a
+#' multi-relation stack are carried through.
 #'
 #' @param x An `xucinet` object.
 #' @param i Rows (and, for a 1-mode network with `j` missing, columns) to keep.
@@ -328,7 +385,8 @@ pick_relation <- function(x, relation = NULL) {
   newdirected <- if (newmode == "1-mode" && identical(ii, jj)) x$directed else
     detect_directed(sub, newmode)
   new_xucinet(if (is.list(x$data)) sub else sub[[1L]],
-              mode = newmode, directed = newdirected, title = x$title)
+              mode = newmode, directed = newdirected, title = x$title,
+              notes = x$notes)
 }
 
 # Turn positions / negative positions / logicals / labels into positions.
@@ -454,9 +512,14 @@ xnet <- function(net, expr, ...) {
   as_xucinet(net, title = deparse1(expr), ...)
 }
 
-new_xucinet <- function(data, mode, directed, title) {
-  structure(list(data = data, mode = mode, directed = directed, title = title),
-            class = "xucinet")
+# `notes` is NULL (the element is then absent) or the data frame as_notes()
+# makes. The transformations keep it without asking, because map_relations()
+# edits the object in place; the routines that build a new object from the old
+# one's matrices pass it on here.
+new_xucinet <- function(data, mode, directed, title, notes = NULL) {
+  x <- list(data = data, mode = mode, directed = directed, title = title)
+  x$notes <- as_notes(notes)
+  structure(x, class = "xucinet")
 }
 
 match_mode <- function(mode) {

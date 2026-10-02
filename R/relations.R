@@ -155,7 +155,7 @@ xunpack <- function(net, relation = NULL, prefix = "") {
 
   one <- function(i) {
     out <- new_xucinet(mats[[i]], mode = net$mode, directed = net$directed,
-                       title = paste0(prefix, rels[i]))
+                       title = paste0(prefix, rels[i]), notes = net$notes)
     attr(out, "history") <- paste0("unpacked from ", net$title)
     out
   }
@@ -221,7 +221,7 @@ xcombine <- function(net, relations = NULL,
   dimnames(out) <- dimnames(mats[[1]])
 
   res <- new_xucinet(out, mode = net$mode, directed = net$directed,
-                     title = net$title)
+                     title = net$title, notes = net$notes)
   transformed(res, "-agg",
               paste0("combined ", length(mats), " relations (", method, "): ",
                      paste(rels, collapse = ", ")))
@@ -276,7 +276,7 @@ xmultiplex <- function(net) {
   }
 
   res <- new_xucinet(out, mode = net$mode, directed = net$directed,
-                     title = net$title)
+                     title = net$title, notes = net$notes)
   transformed(res, "-mpx",
               c("multiplex codes", multiplex_legend(out, rels)))
 }

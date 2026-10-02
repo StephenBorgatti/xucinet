@@ -56,6 +56,7 @@ structure(list(
   mode      = "1-mode" | "2-mode",
   directed  = TRUE | FALSE | NA,          # NA = not yet determined; auto-detected on use
   title     = "...",                      # dataset name, used in printed output headers
+  notes     = data.frame(date, text)      # optional; absent when there are none
 ), class = "xucinet")
 ```
 
@@ -66,6 +67,16 @@ structure(list(
   `as_xucinet(net)` internally, so users who live in matrix-land never see the class.
 - Attributes (node covariates) live in ordinary data frames, matched to networks by row name —
   not buried inside the network object. (See D2 for the project bundle.)
+- **Notes (Steve, 2 Oct 2026; issue #35).** A dataset may carry dated notes: what was
+  corrected and when, where the data came from. `$notes` is a data frame with character
+  columns `date` (`YYYY-MM-DD`) and `text`, one row per note, oldest first; the element is
+  absent, not `NULL`-valued, when there are none. Reached with `notes(x)` and set with
+  `notes(x) <- value` (a data frame, a character vector dated today, or `NULL`). Kept by
+  `as_xucinet()`, subsetting, the transformations (which edit the object in place) and the
+  routines that rebuild a network of the same nodes (`xunpack`, `xcombine`, `xmultiplex`).
+  `print()` shows `Notes: n (see notes(x))`. Read and written in `.uci` (schema 1.1, D6);
+  the `##h`/`##d` pair has no room for them, so writing it drops them without a warning.
+  The shipped `supremecourt` carries one (the 2026 corrections).
 
 Why not igraph as the core: igraph objects hide the matrix, drop dimnames semantics UCINET
 relies on, and make "identical output" harder. Why not bare matrices: no home for mode/
@@ -172,6 +183,16 @@ day one with `.uci` as its default save; UCINET gets reader/writer in a future u
 (XE7 System.JSON quirks known and workable, or a small dedicated writer for speed) and stays
 backward compatible with ##h/##d forever. ##h/##d support in xUcinet remains mandatory
 regardless — decades of existing datasets.
+
+**Schema versions.** The schema is `inst/schema/uci-<version>.json`, with the worked example
+`campnet-example.uci` beside it. A minor version only adds optional keys, so a reader of an
+earlier minor version reads a later file whole except for the keys it does not know; a
+reader refuses only a major version it does not know. xucinet reads any 1.x and writes the
+current version. 1.0 was the first draft (Sep 2026). **1.1 (2 Oct 2026; issue #35)** added
+the optional top-level `notes`: an array of `{"date": "YYYY-MM-DD", "text": "..."}`, oldest
+first, omitted when there are none. Notes travel with the data from file to file, unlike
+`provenance`, which describes the file. UCINET should read and write them when it gains
+`.uci` support (dev/UCINET-ISSUES.md, entry 44).
 
 - **Native, full-fidelity read/write of UCINET ##h/##d files in pure R.** This is what makes
   "switch back and forth" real. The exact binary format will be ported from the Delphi source

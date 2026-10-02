@@ -1,4 +1,4 @@
-# The .uci single-file JSON format (SPEC D6). Schema in inst/schema/uci-1.0.json.
+# The .uci single-file JSON format (SPEC D6). Schema in inst/schema/uci-1.1.json.
 #
 # The format is meant to be written by xucinet and read by UCINET, so the tests
 # lean on exactness: a value that survives a round trip here has to survive it
@@ -18,7 +18,7 @@ roundtrip <- function(net, ...) {
 
 test_that("the schema ships and is valid JSON", {
   skip_if_no_jsonlite()
-  p <- system.file("schema", "uci-1.0.json", package = "xucinet")
+  p <- system.file("schema", "uci-1.1.json", package = "xucinet")
   expect_true(nzchar(p))
   s <- jsonlite::fromJSON(p, simplifyVector = FALSE)
   expect_equal(s[["$schema"]], "http://json-schema.org/draft-07/schema#")
@@ -27,7 +27,7 @@ test_that("the schema ships and is valid JSON", {
   # output for having additionalProperties
   expect_true(all(c("uci", "title", "mode", "directed", "nrows", "ncols",
                     "rowlabels", "collabels", "datatype", "relations",
-                    "attributes", "provenance") %in% names(s$properties)))
+                    "attributes", "notes", "provenance") %in% names(s$properties)))
 })
 
 test_that("the worked example reads back as campnet", {
@@ -46,7 +46,7 @@ test_that("the worked example reads back as campnet", {
 
 test_that("every key the writer emits is allowed by the schema", {
   skip_if_no_jsonlite()
-  s <- jsonlite::fromJSON(system.file("schema", "uci-1.0.json", package = "xucinet"),
+  s <- jsonlite::fromJSON(system.file("schema", "uci-1.1.json", package = "xucinet"),
                           simplifyVector = FALSE)
   f <- tmpuci(); on.exit(unlink(f), add = TRUE)
   xsaveuci(campnet, f, attributes = camp92_attr)
@@ -234,7 +234,7 @@ test_that("a schema version from the future is refused, not guessed at", {
   skip_if_no_jsonlite()
   f <- tmpuci(); on.exit(unlink(f), add = TRUE)
   xsaveuci(campnet, f)
-  txt <- sub('"uci": "1.0"', '"uci": "9.0"', readLines(f), fixed = TRUE)
+  txt <- sub('"uci": "1\\.[0-9]+"', '"uci": "9.0"', readLines(f))
   writeLines(txt, f)
   expect_error(xreaduci(f), "schema version 9.0")
   expect_error(xreaduci(f), "Upgrade xucinet")
@@ -289,7 +289,7 @@ test_that("xattributes() is the documented way to reach them", {
 
 test_that("the schema tells the Delphi side about the decimal separator", {
   skip_if_no_jsonlite()
-  s <- jsonlite::fromJSON(system.file("schema", "uci-1.0.json", package = "xucinet"),
+  s <- jsonlite::fromJSON(system.file("schema", "uci-1.1.json", package = "xucinet"),
                           simplifyVector = FALSE)
   expect_true(grepl("decimal separator", s[["x-numbers"]]))
   expect_true(grepl("TFormatSettings", s[["x-numbers"]]))

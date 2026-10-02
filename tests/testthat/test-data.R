@@ -167,3 +167,18 @@ test_that("the three newly named datasets carry their structure", {
   expect_equal(colnames(as.matrix(sc))[1], "Rehnquist")
   expect_equal(sum(is.na(as.matrix(sc))), 9)
 })
+
+test_that("supremecourt has the 2 Oct 2026 corrections", {
+  m <- as.matrix(get_data("supremecourt"))
+  ca <- get_data("supremecourt_cases_attr")
+  ja <- get_data("supremecourt_judges_attr")
+  expect_equal(sum(m == 0.5, na.rm = TRUE), 34)
+  expect_equal(m["E061_Lew96", c("Scalia", "Souter")], c(Scalia = 1, Souter = 0.5))
+  expect_equal(m["E116_Bou98", "Stevens"], 0.5)
+  expect_equal(m["E073_U_S96", "Breyer"], 1)
+  expect_equal(m["E336_Vir03", c("Kennedy", "Ginsburg")], c(Kennedy = 0.5, Ginsburg = 0.5))
+  expect_true("Ginsburg" %in% colnames(m))
+  expect_true("Ginsburg" %in% rownames(ja))
+  expect_equal(unname(ca[["Majority Size"]]), unname(rowSums(m, na.rm = TRUE)))
+  expect_equal(unname(ja$NoTimesMajority), unname(colSums(m, na.rm = TRUE)))
+})

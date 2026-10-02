@@ -66,6 +66,7 @@ reference:
   - xfromnodelist
   - xrelations
   - xattributes
+  - notes
   - "`[.xucinet`"
 
 - title: Transform

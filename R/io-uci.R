@@ -1,9 +1,14 @@
 # Reader and writer for the .uci single-file JSON format (SPEC D6).
 #
-# The schema is inst/schema/uci-1.0.json, with a worked example beside it. It is
+# The schema is inst/schema/uci-1.1.json, with a worked example beside it. It is
 # a joint UCINET/xucinet format, so the structure is kept shallow and its arrays
 # homogeneous: whatever is easy here has to be easy in Delphi XE7's System.JSON
 # too.
+#
+# Versions: a minor version adds optional keys and nothing else, so a reader of
+# 1.0 reads a 1.1 file whole except for the keys it does not know, and this
+# reader takes any 1.x. 1.1 (2 Oct 2026) added "notes". The writer always
+# writes the current version.
 #
 # Two details that decide whether a round trip is exact:
 #   - numbers are written with 17 significant digits, which is what a double
@@ -12,7 +17,7 @@
 #   - a matrix of whole numbers reads back as integer storage, so it is forced
 #     to double, which is what UCINET holds and what every routine expects.
 
-uci_schema_version <- "1.0"
+uci_schema_version <- "1.1"
 
 need_jsonlite <- function() {
   need_pkg("jsonlite", "Reading and writing .uci files")
@@ -21,9 +26,9 @@ need_jsonlite <- function() {
 #' Read a .uci dataset
 #'
 #' Reads the single-file JSON format described in
-#' `system.file("schema/uci-1.0.json", package = "xucinet")`: matrices, labels,
+#' `system.file("schema/uci-1.1.json", package = "xucinet")`: matrices, labels,
 #' mode, directedness, relation names and, if the file carries them, node
-#' attributes.
+#' attributes and dated notes. Files of schema 1.0 read the same way.
 #'
 #' @param file Path to the `.uci` file.
 #' @param directed,mode,title Override what the file says. `title` defaults to
@@ -31,7 +36,8 @@ need_jsonlite <- function() {
 #' @param ... Reserved.
 #' @return An `xucinet` object. When the file carries node attributes they are
 #'   attached as `$attributes`, a plain data frame keyed by node label; it is
-#'   `NULL` otherwise and no routine reads it (SPEC D1).
+#'   `NULL` otherwise and no routine reads it (SPEC D1). Notes, when the file
+#'   has any, are `$notes`; see [notes()].
 #' @seealso [xsaveuci()], and [xreaducinet()] for the older `##h`/`##d` pair.
 #' @examples
 #' f <- system.file("schema", "campnet-example.uci", package = "xucinet")
@@ -68,6 +74,7 @@ xreaduci <- function(file, directed = NULL, mode = NULL, title = NULL, ...) {
     as_xucinet(rels, directed = directed, mode = mode, title = title)
   }
   net$attributes <- uci_attributes(doc)
+  notes(net) <- uci_notes(doc, file)
   net
 }
 
@@ -84,6 +91,8 @@ xreaduci <- function(file, directed = NULL, mode = NULL, title = NULL, ...) {
 #' @param attributes Optional data frame of node attributes, keyed by node
 #'   label. Defaults to `net$attributes` when the network carries one.
 #' @param title Dataset title stored in the file. Defaults to the network's.
+#' @param notes Dated notes to store, in any form [notes()] accepts. Defaults
+#'   to the network's own notes.
 #' @param datatype Advisory hint for a reader converting back to `##h`/`##d`,
 #'   which has to choose a fixed cell width. Ignored when reading.
 #' @param pretty Indent the JSON? Readable but larger.
@@ -96,7 +105,7 @@ xreaduci <- function(file, directed = NULL, mode = NULL, title = NULL, ...) {
 #' xreaduci(f)
 #' @export
 xsaveuci <- function(net, file, layout = NULL, attributes = NULL, title = NULL,
-                     datatype = "single", pretty = TRUE) {
+                     notes = NULL, datatype = "single", pretty = TRUE) {
   need_jsonlite()
   net <- as_xucinet(net)
   if (!grepl("\\.[A-Za-z0-9]+$", file) && !grepl("\\.uci$", file)) {
@@ -104,6 +113,7 @@ xsaveuci <- function(net, file, layout = NULL, attributes = NULL, title = NULL,
   }
   if (is.null(title)) title <- net$title
   if (is.null(attributes)) attributes <- net$attributes
+  notes <- as_notes(if (is.null(notes)) net$notes else notes)
 
   mats <- if (is.list(net$data)) net$data else list(net$data)
   names(mats) <- xrelations(net)
@@ -126,6 +136,8 @@ xsaveuci <- function(net, file, layout = NULL, attributes = NULL, title = NULL,
     )
   )
   if (!is.null(attributes)) doc$attributes <- uci_attribute_block(attributes)
+  # A data frame goes out row-wise: [{"date": ..., "text": ...}, ...].
+  if (!is.null(notes)) doc$notes <- notes
   doc$uci <- jsonlite::unbox(uci_schema_version)
 
   # 17 significant digits: fewer and a double does not survive the round trip.
@@ -236,6 +248,16 @@ uci_attributes <- function(doc) {
   df <- as.data.frame(cols, stringsAsFactors = FALSE, check.names = FALSE)
   if (!is.null(a$rows)) rownames(df) <- as.character(a$rows)
   df
+}
+
+uci_notes <- function(doc, file) {
+  n <- doc$notes
+  if (is.null(n) || !length(n)) return(NULL)
+  if (!is.data.frame(n) || !all(c("date", "text") %in% names(n))) {
+    stop("'", basename(file), "' has a \"notes\" key that is not an array of ",
+         "{\"date\", \"text\"} objects.", call. = FALSE)
+  }
+  n[c("date", "text")]
 }
 
 # Dense unless the matrix is big enough for sparsity to be worth having, and

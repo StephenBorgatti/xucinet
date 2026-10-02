@@ -17,13 +17,14 @@ the file's own title, or the file name when it has none.}
 \value{
 An \code{xucinet} object. When the file carries node attributes they are
 attached as \verb{$attributes}, a plain data frame keyed by node label; it is
-\code{NULL} otherwise and no routine reads it (SPEC D1).
+\code{NULL} otherwise and no routine reads it (SPEC D1). Notes, when the file
+has any, are \verb{$notes}; see \code{\link[=notes]{notes()}}.
 }
 \description{
 Reads the single-file JSON format described in
-\code{system.file("schema/uci-1.0.json", package = "xucinet")}: matrices, labels,
+\code{system.file("schema/uci-1.1.json", package = "xucinet")}: matrices, labels,
 mode, directedness, relation names and, if the file carries them, node
-attributes.
+attributes and dated notes. Files of schema 1.0 read the same way.
 }
 \examples{
 f <- system.file("schema", "campnet-example.uci", package = "xucinet")

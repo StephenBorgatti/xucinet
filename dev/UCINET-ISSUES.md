@@ -1203,6 +1203,40 @@ so the dataset named in the dialog is never written.
 
 ---
 
+## 44. Supreme Court data corrected; Datafiles.zip stale; .uci notes
+
+**data / request** · **open — fix pending** · 2 October 2026 (Steve; Cowork corrected the
+files, Claude Code committed them; xucinet issue #35)
+
+Four coding errors in the Supreme Court (Rehnquist Court) voting data were corrected on
+2 October 2026 in UCINET's own copies, `C:\Dev\ucinet\Datafiles\SupremeCourt`,
+`supremecourt case attributes` and `supremecourt judge attributes` (committed in the ucinet
+repository; the corrections are listed in `Datafiles\SupremeCourt corrections.txt`):
+Lew96 (Lewis v. Casey) Scalia 0.5 -> 1 and Souter 1 -> 0.5; Bou98 (Bousley v. United
+States) Stevens 0 -> 0.5; U.S96 (United States v. Armstrong) Breyer 0.5 -> 1; Vir03
+(Virginia v. Black) Kennedy and Ginsburg 1 -> 0.5. "Ginsberg" is spelled "Ginsburg", and
+the derived attributes (Majority Size, NoTimesMajority) were recomputed. The cells holding
+0.5 go from 32 to 34. The cell codes are 1 = voted for the Court's judgment (including
+concurring in the judgment only), 0 = dissented, 0.5 = concurred in part and dissented in
+part, missing = took no part.
+
+**Still to do on the UCINET side:**
+
+1. `Datafiles.zip` in the ucinet repository, which exists twice (the root and
+   `Datafiles\`), still holds the old files. Rebuild both from `Datafiles\` for the 6.850
+   installer.
+2. When UCINET gains `.uci` support, it reads and writes the optional `notes` key of
+   schema 1.1 (`inst/schema/uci-1.1.json`; SPEC D6): an array of
+   `{"date": "YYYY-MM-DD", "text": "..."}`, oldest first, kept when a dataset is saved
+   again and dropped when it is written as `##h`/`##d`, which has no room for it.
+
+**What xucinet does:** `supremecourt` and its two attribute tables were rebuilt from the
+corrected 3e files and carry the corrections as a note (`notes(supremecourt)`). The `.uci`
+reader and writer handle `notes`. The fixture `inst/goldens/ucinet/supremecourt.##h` is a
+reader test of UCINET's file format and keeps the old values.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps

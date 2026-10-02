@@ -28,8 +28,8 @@ if (!length(list.files(sources[1], pattern = "h$")) && file.exists(zip)) {
   sources <- c(cache, sources)
 }
 
-find_ucinet <- function(stem) {
-  for (d in sources) {
+find_ucinet <- function(stem, dirs = sources) {
+  for (d in dirs) {
     for (ext in c(".##h", ".##H")) {
       p <- file.path(d, paste0(stem, ext))
       if (file.exists(p)) return(p)
@@ -97,9 +97,26 @@ zachary_attr,Zachary_KarateClub_Attributes,attr
 #     18 people as camp92, so camp92_attr is the attribute table for both. The
 #     campnet help page says so, and the crosswalk row has been dropped.
 #
-# lazega, newguinea and supremecourt come from 'ASN3 Ucinet Files' rather than
-# DataUCINET, which holds neither Lazega nor Knecht. supremecourt is 2-mode
-# (cases x judges), so it has one attribute table per mode.
+# lazega and newguinea come from 'ASN3 Ucinet Files' rather than DataUCINET,
+# which holds neither Lazega nor Knecht. supremecourt is 2-mode (cases x
+# judges), so it has one attribute table per mode.
+#
+# The three Supreme Court files are read from 'ASN3 Ucinet Files' only. Four
+# coding errors were corrected there on 2 Oct 2026 (README Rehnquist_SupremeCourt
+# corrections.txt beside them); DataUCINET.zip still holds the old files, and
+# it is searched first, so without this the old data would come back.
+asn3_only <- c("Rehnquist_SupremeCourt", "Rehnquist_SupremeCourt_Attributes_Cases",
+               "Rehnquist_SupremeCourt_Attributes_Judges")
+
+# Notes attached to a dataset (see ?notes), oldest first.
+dataset_notes <- list(
+  supremecourt = data.frame(date = "2026-10-02", text = paste(
+    "Four coding errors in the 3e data corrected (Steve Borgatti): E061 Lewis v. Casey,",
+    "Scalia 0.5 -> 1 and Souter 1 -> 0.5 (they had been swapped); E116 Bousley v.",
+    "United States, Stevens 0 -> 0.5; E073 United States v. Armstrong, Breyer 0.5 -> 1;",
+    "E336 Virginia v. Black, Kennedy and Ginsburg 1 -> 0.5. Ginsberg is now spelled",
+    "Ginsburg, and the attributes Majority Size and NoTimesMajority were recomputed."))
+)
 
 # ---- build ------------------------------------------------------------------
 
@@ -117,13 +134,18 @@ dir.create("data", showWarnings = FALSE)
 built <- character(0)
 for (i in seq_len(nrow(manifest))) {
   nm <- manifest$name[i]
-  path <- find_ucinet(manifest$stem[i])
+  path <- if (manifest$stem[i] %in% asn3_only) {
+    find_ucinet(manifest$stem[i], file.path(book, "ASN3 Ucinet Files"))
+  } else {
+    find_ucinet(manifest$stem[i])
+  }
   if (is.na(path)) {
     warning("no UCINET file for ", manifest$stem[i], " (", nm, ")", call. = FALSE)
     next
   }
   net <- xreaducinet(path, title = nm)
   value <- if (manifest$kind[i] == "attr") as_attribute_frame(net) else net
+  if (!is.null(dataset_notes[[nm]])) notes(value) <- dataset_notes[[nm]]
   assign(nm, value)
   save(list = nm, file = file.path("data", paste0(nm, ".rda")),
        compress = "xz", version = 2)
