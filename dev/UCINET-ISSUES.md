@@ -1036,6 +1036,173 @@ label. Ledger entry 47.
 
 ---
 
+## 37. Scatter Plot Viewer: saved and copied plots ignore the font size
+
+**bug** · **open — no xucinet impact** · found 27 September 2026 (Steve)
+
+In the Scatter Plot Viewer (seen with the correspondence analysis output on the
+`doctorates` data), the Style panel's Font setting changes the label size on
+screen, but File | Save and the clipboard button (Cp) produce a plot with labels
+at the default small size. In the example, Font was 18 and the saved image had
+labels of roughly 8 points. The point markers also look smaller in the saved
+image than the Size setting (4) gives on screen, so the export probably redraws
+the plot with default style settings instead of the ones in the panel.
+
+The viewer's unit is not yet identified: `PlotOut.pas` and `uc_tempscatter.pas`
+are older scatter forms without the Style panel.
+
+**Fix:** make the save and copy routines draw with the current Style settings
+(font size, point size, and any other panel option that affects the picture),
+so the exported plot matches what is on screen.
+
+---
+
+## 38. REGE reads a missing cell as a tie of 1E37
+
+**bug** · **open — fix pending** · confirmed for UCINET 6.850 30 September 2026 (Steve)
+
+REGE (`Urege.pas`, `sStdrege`) reads the matrix as stored, so a missing cell enters
+its sums as the missing-value code, 1E37, a tie far stronger than any real one.
+
+**What xucinet does:** `xrege()` sets missing cells to 0 and says so in its notes.
+Ledger entry 36.
+
+**Fix:** treat a missing cell as no tie (0) before the iterations, and say so in the
+log when the input has missing cells.
+
+---
+
+## 39. The CLI `dichot` and the menu Dichotomize disagree about the diagonal
+
+**inconsistency** · **open — fix pending** · confirmed for UCINET 6.850 30 September
+2026 (Steve)
+
+`G2Tools\udichotomize.pas`, used by the CLI, applies the rule to the diagonal by
+default. The menu form (`uc_Dichotomize.pas`) has a five-way Diagonals option whose
+default (ItemIndex 3) writes the "else" value on the diagonal. The same data therefore
+dichotomize differently from the command line and from the menu. Same kind of problem
+as issue 4.
+
+**What xucinet does:** `xdichotomize()` follows the menu form, `diagonal = "else"` by
+default. Ledger entry 13.
+
+**Fix:** the CLI default follows the menu's (the "else" value on the diagonal), with
+the rule still available as an option. The 6.849 fix stays: the pseudo-diagonal of
+non-square (2-mode) data is never touched. The Phase 0 density fixtures made with the
+CLI change with this and are regenerated in the 6.850 goldens sweep.
+
+---
+
+## 40. Whole-network routines print and save node-level output
+
+**request** · **open — fix pending** · step 3 of the 6.850 plan, audit of 2 October 2026
+(Claude Code); decisions by Steve, 2 October 2026
+
+The rule (Steve, 2 October 2026): a routine under the whole-network menus does not print or
+save node-level (or dyad-level) output; group-level tables stay. Every routine under
+Network > Whole-Network Measures, and the other whole-network items, was run on campnet
+(`C:\Dev\ucinet\Planning\tests\level-audit\`). The moves:
+
+1. **Reciprocity** (`uc_reciprocitydlg.pas`): the six-column node table (printed, and saved
+   as "Output node dataset") goes to Network > Ego Networks > Egonet Reciprocity, which
+   becomes its own routine (it opens the whole-network dialog now). The block-by-block table
+   given with a row/column partition stays.
+2. **Clustering Coefficient**: the node column had already gone from the menu routine before
+   6.850 (its log points to Ego Networks > Node-level Clustering Coefficients). The dialog's
+   output field is still labelled "(output) Node-level coefficients"; relabel it. The
+   definitions are entry 41.
+3. **E-I Index** (`uc_EiIndex.pas`): the Individual Level E-I table (printed, and saved as
+   "Individual E-I scores") goes; Egonet Homophily (categorical) has the EI column. The
+   group density matrix and the Group level E-I table stay. The CLI `ei()`, which returns
+   only node-level scores, is left as it is.
+4. **Whole-Network Homophily**: the within/between mixing matrix goes (plan decision 15 of
+   30 September), pointing to Network > Mixing Tables w/ Expected Values. This is not a
+   level-of-analysis move: the table is group-level, but Mixing Tables already gives it, so
+   printing it here is redundant (Steve, 2 October 2026).
+5. **Density (legacy)**: the actor-by-actor pre-image matrix ("Output pre-image matrix",
+   n x n) is dropped.
+
+Each routine that loses output prints, in 6.850 only, a line saying where it went.
+
+Not in scope, and unchanged: Balance Counter (network and node counts, by design), P1 (a
+model with node parameters and dyadic expected values), and Mixing Tables and Density by
+Groups (group-level routines).
+
+**What xucinet does:** whole-network functions return no node table (SPEC addendum,
+23 September 2026).
+
+---
+
+## 41. Clustering coefficient on directed data: three routines, three definitions
+
+**inconsistency** · **open — fix pending** · found 2 October 2026 (step 3 audit); decided by
+Steve, 2 October 2026
+
+On campnet (directed), the overall and weighted overall coefficients are:
+
+| routine | overall | weighted | node coefficient |
+|---|---|---|---|
+| menu, both Clustering Coefficient items (`xclusteringcoefficient.pas`); CLI `oldcc()` | 0.473 | 0.411 | density of ego's network, direction kept (= Egonet Basic Measures Density / 100) |
+| CLI `cc()` (`OpsahlPanzarosaCC`, tools `G2Tools\uclusteringcoefficient.pas`) | 0.526 | 0.484 | Opsahl-Panzarasa: of the two-paths j->i->k, the share closed by j->k |
+| xucinet `xtransitivity()` | 0.569 | | density of ego's network on the underlying (symmetrized) graph |
+
+Each was checked against an independent computation in R; none has an arithmetic error. On
+symmetric data all three give 0.569 and 0.505. `oldcc()`'s procedure is named `fagiolo`, but
+it computes the directed ego density, not Fagiolo's (2007) coefficient, which gives a mean of
+0.509 on campnet.
+
+**Decision (Steve, 2 October 2026):** for directed data, report three coefficients side by
+side, each as overall (mean of node values) and weighted overall:
+- the underlying graph (direction ignored), the value igraph and xucinet report;
+- Fagiolo (2007);
+- Opsahl-Panzarasa (2009), whose weighted overall equals triplet transitivity.
+
+The node-level routine (Ego Networks > Node-level Clustering Coefficients) gives the same
+three columns. On undirected data the three are equal. The directed ego density is no longer
+reported as a clustering coefficient: it is the Density column of Egonet Basic Measures, and
+in 6.850 the log says so. The CLI `cc()` is changed to match the menu routine; `oldcc()` is
+deprecated.
+
+**Valued data (Steve, 2 October 2026: every option available, the canonical one the
+default):** Opsahl-Panzarasa offers the four triplet values (arithmetic mean, geometric
+mean, minimum, maximum), default arithmetic mean, as in Opsahl's tnet (`cc()` defaults to
+the geometric mean now). Fagiolo uses his weighted form, cube roots of the weights divided by
+the largest weight, with dichotomizing as the option. The underlying-graph coefficient is
+binary (ties above 0) by default, with the average tie value among ego's neighbours (the
+menu routine's present valued form) as the option; pairs are symmetrized by the larger value.
+
+**What xucinet does:** the underlying-graph value only; Fagiolo and Opsahl-Panzarasa to be
+added on the R side.
+
+---
+
+## 42. Balance Counter crashes when the attribute has a different number of nodes
+
+**bug** · **open — fix pending** · found 2 October 2026 (step 3 audit)
+
+`uc_BalanceCounter.pas`. GAMA (16 nodes) with campattr (18) as the attribute dataset gives
+an access violation (read of address 00000009) instead of a message.
+
+**What xucinet does:** not applicable (no balance counter yet).
+
+**Fix:** check that the attribute vector has one value per node, and refuse with both
+counts when it does not.
+
+---
+
+## 43. Transitivity (experimental) and DenVar do not save their output dataset
+
+**bug** · **open — no xucinet impact** · found 2 October 2026 (step 3 audit)
+
+`uc_NetworkTransitivity.pas` (Network > Extras > Transitivity (experimental)) and
+`uc_denvar.pas` (Network > Whole-Network Measures > DenVar Clumpiness, a hidden menu item)
+print their results and name the output dataset in the log, but neither has a `save` call,
+so the dataset named in the dialog is never written.
+
+**Fix:** save the results table under the output name.
+
+---
+
 ## Fixed since this list started
 
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps
