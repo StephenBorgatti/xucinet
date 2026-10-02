@@ -50,7 +50,7 @@ golden run rather than chosen here:
 \describe{
 \item{\code{FreeClo}}{Freeman closeness. Unreachable pairs are set to the
 maximum observed distance plus one, then the score is \code{(n - 1) / sum(d)}.}
-\item{\code{ValClo}}{Valente-Forman reverse distance. \code{diameter + 1 - d}, zero
+\item{\code{ValClo}}{Valente-Foreman reverse distance. \code{diameter + 1 - d}, zero
 where unreachable, averaged over \code{n - 1}, then divided by the diameter.}
 \item{\code{RecipClo}}{Reciprocal distance. \code{1/d}, zero where unreachable,
 averaged over \code{n - 1}.}

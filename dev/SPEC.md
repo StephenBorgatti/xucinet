@@ -395,7 +395,7 @@ bind every node-level routine in the package rather than centrality alone.
      `(n - 1) / sum(d)`. For `g9_disc` the max observed distance is 3, so unreachable pairs
      count 4. `n1` has four neighbours at distance 1 and seven unreachable: `4 + 7·4 = 32`,
      and `11/32 = 0.34375`.
-   - **Valente-Forman** — reverse distance `diameter + 1 - d`, zero where unreachable,
+   - **Valente-Foreman** — reverse distance `diameter + 1 - d`, zero where unreachable,
      averaged over `n - 1`, then divided by the diameter.
    - **Reciprocal** — `1/d`, zero where unreachable, averaged over `n - 1`.
 

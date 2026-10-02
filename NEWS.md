@@ -1,5 +1,11 @@
 # xucinet 2.0.0.9000 (development)
 
+## Valente-Foreman spelled correctly (2 October 2026)
+
+* `xcloseness()` notes and help say Valente-Foreman (Valente and Foreman,
+  1998), not Valente-Forman (#34). UCINET's closeness log has the same
+  misspelling (dev/UCINET-ISSUES.md, entry 7).
+
 ## The ANOVA density test moves to xmixing() (27 September 2026)
 
 * `xmixing(test = TRUE)` tests UCINET's three ANOVA density models (constant

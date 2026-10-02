@@ -64,7 +64,7 @@ test_that("the other three substitutions are UCINET's, and differ", {
   expect_equal(length(unique(round(vals, 6))), 4L)
 })
 
-test_that("Valente-Forman is reverse distance over the diameter", {
+test_that("Valente-Foreman is reverse distance over the diameter", {
   res <- xcloseness(disc())
   # n1: four neighbours at distance 1, reverse distance 3+1-1 = 3 each, zero for
   # the seven unreachable; (12/11)/3 = 0.36364.
@@ -81,7 +81,7 @@ test_that("reciprocal distance averages 1/d over n - 1", {
 test_that("the options used are recorded, as UCINET records them", {
   res <- xcloseness(campnet)
   expect_true(any(grepl("\\(Freeman\\) Output options", res$assumptions)))
-  expect_true(any(grepl("\\(Valente-Forman\\)", res$assumptions)))
+  expect_true(any(grepl("\\(Valente-Foreman\\)", res$assumptions)))
   expect_true(any(grepl("\\(Reciprocal\\)", res$assumptions)))
   # No statistics block: uc_ClosenessMeasures.pas prints none.
   expect_false(any(grepl("DESCRIPTIVE STATISTICS",

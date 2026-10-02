@@ -11,7 +11,7 @@
 #' \describe{
 #'   \item{`FreeClo`}{Freeman closeness. Unreachable pairs are set to the
 #'     maximum observed distance plus one, then the score is `(n - 1) / sum(d)`.}
-#'   \item{`ValClo`}{Valente-Forman reverse distance. `diameter + 1 - d`, zero
+#'   \item{`ValClo`}{Valente-Foreman reverse distance. `diameter + 1 - d`, zero
 #'     where unreachable, averaged over `n - 1`, then divided by the diameter.}
 #'   \item{`RecipClo`}{Reciprocal distance. `1/d`, zero where unreachable,
 #'     averaged over `n - 1`.}
@@ -89,7 +89,7 @@ xcloseness <- function(net, relation = NULL, directed = NULL,
     tot <- rowSums(dd)
     ifelse(tot > 0, (n - 1) / tot, NA_real_)
   }
-  # Valente-Forman: reverse distance, zero where unreachable, averaged, then
+  # Valente-Foreman: reverse distance, zero where unreachable, averaged, then
   # divided by the diameter.
   valente <- function(dm) {
     rd <- diameter + 1 - dm
@@ -128,8 +128,8 @@ xcloseness <- function(net, relation = NULL, directed = NULL,
                    zero = "Missing (ignore unreachables)",
                    avg  = "Mean observed distance")),
     "(Freeman) Output options: Divide totals into N-1 (Freeman normalization)",
-    "(Valente-Forman) Handle undefined distances: Set reverse distance to zero",
-    "(Valente-Forman) Output options: Divide averages by diameter",
+    "(Valente-Foreman) Handle undefined distances: Set reverse distance to zero",
+    "(Valente-Foreman) Output options: Divide averages by diameter",
     "(Reciprocal) Handle undefined distances: Set reciprocal distance to zero",
     "(Reciprocal) Output options: Averages")
 

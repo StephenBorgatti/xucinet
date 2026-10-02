@@ -265,6 +265,12 @@ A radio group with a single item is a label wearing a control's clothes. Either
 the other conventions should be offered, as they are for Freeman and reciprocal
 distance, or this should be static text.
 
+The name is also misspelled: the group caption (`Valente-Forman options`) and both
+log lines (`(Valente-Forman) Handle undefined distances`, `(Valente-Forman) Output
+options`, `uc_ClosenessMeasures.pas` lines 89-90) should read Valente-Foreman
+(Valente and Foreman, 1998). xucinet prints Valente-Foreman since 2 October 2026
+(xucinet #34).
+
 ---
 
 ## 8. Node-level output is sorted by value
