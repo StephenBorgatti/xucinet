@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 27 Sep 2026 (Claude Code; Cowork should
+Updated 2 Oct 2026 (Claude Code; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -80,7 +80,16 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - UCINET source for porting: `C:\Dev\ucinet\Source` and `C:\Dev\tools` (Delphi 13). The
   Dropbox copies are stale.
 
-## Done this session (27 Sep 2026, Claude Code)
+## Done this session (2 Oct 2026, Claude Code)
+
+- #34: `xcloseness()` notes, help and SPEC spell Valente-Foreman (f585ea9); UCINET's
+  closeness dialog and log have the misspelling too, recorded in UCINET-ISSUES entry 7.
+  Reinstalled. No snapshot held the string.
+- asnr2e #3: book Tables 9.1-9.5 regenerated from xucinet (`asnr2e/generators/ch09.R`);
+  every value agrees with the 3e UCINET tables except one printing tie (Table 9.4,
+  Lamberteschi beta reach 0.2875: 0.288 here, 0.287 in UCINET).
+
+## Done 27 Sep 2026 (Claude Code)
 
 
 - **#32 (55567b1):** `xsimilarities(mode = "matrices")` is `mode = "relations"` (asnr2e T4).
