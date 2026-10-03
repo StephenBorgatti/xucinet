@@ -31,11 +31,13 @@ family_of <- c("5" = "transform", "6" = "multivariate", "9" = "centrality",
 family_of_fn <- c(xdensity = "density", xcohesion = "density")
 
 # A family counts as generated once it holds at least one ##h fixture.
+# Fixtures are named g<chapter>_..., so the input datasets shipped beside
+# them (inst/goldens/transform/lsp_*, 3 Oct 2026) do not count.
 family_has_goldens <- function(family) {
   if (is.na(family)) return(FALSE)
   d <- file.path("inst", "goldens", family)
   if (!dir.exists(d)) return(FALSE)
-  length(list.files(d, pattern = "\\.##[hH]$")) > 0
+  length(list.files(d, pattern = "^[gG].*\\.##[hH]$")) > 0
 }
 families <- unique(c(family_of, family_of_fn))
 generated <- vapply(families, family_has_goldens, logical(1))

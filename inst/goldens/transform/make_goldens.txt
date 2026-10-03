@@ -104,3 +104,10 @@ g5_simil_davis_jacc   = simil(davis columns jaccard)
 // Both outputs are 2 x 2 (the two Gender groups). For Density, note in the
 // log what UCINET puts on the diagonal: the within-group cell divides by
 // n(n-1) for a 1-mode network, and the fixture is what settles it.
+
+// --- Transform | Local Sparsification (UCINET-ISSUES 45) -----------------
+// 24 runs, written as dialog-driver lines in
+// C:\Dev\ucinet\Planning\tests\lspar\lspar_dialogs.txt: inputs lsp_barbell,
+// campnet, lsp_valued, lsp_missing (shipped here); e = 0.3, 0.5, 1; Rank ties
+// by Neighborhood overlap (L-Spar) and Tie value. Save each output
+// out_<net>_e<e>_m<k> here as g5_lspar_<net>_e<e>_m<k>, with its log.

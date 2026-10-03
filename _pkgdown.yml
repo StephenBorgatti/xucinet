@@ -78,6 +78,7 @@ reference:
   - xtranspose
   - xsymmetrize
   - xdichotomize
+  - xsparsify
   - xnormalize
   - xrecode
   - xcombinenodes

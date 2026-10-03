@@ -80,6 +80,13 @@ batch at the end.** Design questions for all remaining chapters are batched in
   files from `ASN3 Ucinet Files` only, because `DataUCINET.zip` (searched first) still has
   the old ones. The fixture `inst/goldens/ucinet/supremecourt.##h` keeps the old values (no
   test compares it with the dataset). SDSM backbone unchanged (10 pairs).
+- **xsparsify() (3 Oct, #37).** UCINET's Local Sparsification as fixed for 6.850
+  (UCINET-ISSUES 45, ucinet #44): each node keeps ceiling(d^e) ties by neighborhood overlap
+  (L-Spar) or by tie value, on the symmetrized network. Agrees with the 6.850 dialog runs
+  (`C:\Dev\ucinet\Planning\tests\lspar`); 24 golden tests `g5_lspar_*` skip until the sweep,
+  with their three inputs (`lsp_barbell`, `lsp_valued`, `lsp_missing`) already in
+  `inst/goldens/transform/`. Crosswalk row "5.5.2 (2e)"; book Section 5.5.2 checked (ch05
+  `changes.txt`): nothing in it the function does not do.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
@@ -91,6 +98,14 @@ batch at the end.** Design questions for all remaining chapters are batched in
   Dropbox copies are stale.
 
 ## Done this session (3 Oct 2026, Claude Code)
+
+- #37 `xsparsify()` (R/xsparsify.R, tests/testthat/test-xsparsify.R), from asnr2e
+  `docs/prompts/sparsify.md` block B after block A in ucinet/tools. Help with the SIGMOD 2011
+  citation, NEWS, pkgdown Transform group, crosswalk row (both copies; xhelp finds it by
+  "sparsify", "sparsification", "lspar"), goldens README and batch. `dev/make-coverage.R`
+  now counts only `g*` fixtures, so input datasets in a goldens folder do not mark the family
+  generated; COVERAGE regenerated (15 done, 70 coded). UCINET-ISSUES 45 committed and marked
+  fixed in 6.850 (0d5b42f).
 
 - #36: `notes()` / `notes<-` renamed `xnotes()` / `xnotes<-` (Steve), no alias; the `$notes`
   element and the `.uci` key keep their name.
@@ -340,7 +355,7 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. No package issues open (#35 done 2 Oct). The book side is in `asnr2e/STATUS.md`.
+0. No package issues open (#37 done 3 Oct). The book side is in `asnr2e/STATUS.md`.
    UCINET side of the Supreme Court corrections: rebuild both `Datafiles.zip` in the ucinet
    repo (ucinet #43).
 1. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
@@ -513,6 +528,10 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 - 3 Oct 2026 (Steve): the Dropbox datasets (`3e/data/DataUCINET.zip`) are not updated;
   `make-datasets.R` keeps reading the Supreme Court files from `ASN3 Ucinet Files`. Former
   open question 9.
+- 3 Oct 2026 (Steve; UCINET-ISSUES 45): `xsparsify()` does exactly what UCINET's fixed Local
+  Sparsification does. Implementation details shared with ulspar.pas (Claude Code): neighborhoods
+  of the symmetrized network without the diagonal; ceiling(d^e) with a 1e-9 tolerance; ties counted
+  as symmetrized pairs; the title is `<name>-lspar`, as UCINET names the output.
 
 ## Open questions for Steve
 

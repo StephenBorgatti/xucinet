@@ -1,5 +1,17 @@
 # xucinet 2.0.0.9000 (development)
 
+## xsparsify(): local sparsification (3 October 2026)
+
+* `xsparsify(net, e = 0.5, method = c("lspar", "value"))` is UCINET's
+  Transform | Local Sparsification as fixed for 6.850 (UCINET-ISSUES 45;
+  #37). Each node keeps its ceiling(d^e) best ties, ranked by the Jaccard
+  similarity of the two nodes' neighborhoods (L-Spar; Satuluri, Parthasarathy
+  and Ruan, 2011) or by tie value, and a tie is kept if either node keeps it.
+  Directed data are ranked on the symmetrized network and a kept pair keeps
+  both cells; missing cells stay missing; `e = 1` returns the input.
+  1-mode only (2-mode projections: `xaffiliations(method = "sdsm")`). Book
+  Section 5.5.2.
+
 ## Notes on a dataset; Supreme Court data corrected (2 October 2026)
 
 * A dataset can carry dated notes (#35): `xnotes(x)` returns them as a data

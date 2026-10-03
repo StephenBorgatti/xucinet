@@ -24,6 +24,12 @@ All are shipped datasets, already readable by UCINET from this package:
 `camp92` carries `Gender` and `Role` in `camp92_attr`, which is what the
 attribute-to-matrix and collapse fixtures key on.
 
+Three small inputs for Local Sparsification are shipped here as `##h`/`##d`
+(made by `C:\Dev\ucinet\Planning\tests\lspar\make_inputs.R`): `lsp_barbell`
+(two 4-cliques joined by a bridge, the hand-worked case), `lsp_valued` (a
+valued complete graph on 5 nodes, every pair with Jaccard 0.6, one asymmetric
+pair) and `lsp_missing` (the barbell with two missing cells).
+
 ## Fixtures the tests expect
 
 | fixture | routine | what it is |
@@ -48,6 +54,15 @@ attribute-to-matrix and collapse fixtures key on.
 | `g5_coll_campnet_den` | `xcombinenodes` | collapse by Gender, density |
 
 ## What the unreachable fixture is for
+
+Local Sparsification (`xsparsify`, UCINET-ISSUES 45, added 3 Oct 2026): 24
+fixtures `g5_lspar_<net>_e<e>_m<k>`, for `<net>` in `barbell`, `campnet`,
+`valued`, `missing`, `<e>` in `03`, `05`, `1` (e = 0.3, 0.5, 1) and `<k>` = 0
+(rank by neighborhood overlap, `method = "lspar"`) or 1 (by tie value,
+`method = "value"`). They are the outputs of the 24 dialog runs in
+`C:\Dev\ucinet\Planning\tests\lspar\lspar_dialogs.txt`, `out_<net>_e<e>_m<k>`
+renamed `g5_lspar_<net>_e<e>_m<k>`, with their logs; until the sweep the tests
+compare with that script's 3 Oct results.
 
 `g5_geo_disc` is the one fixture whose *value* matters as much as its numbers.
 `xgeodesic()` returns `NA` for an unreachable pair, because that is what
