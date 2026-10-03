@@ -1237,8 +1237,70 @@ reader test of UCINET's file format and keeps the old values.
 
 ---
 
+## 45. Local Sparsification (L-Spar) departs from the published method
+
+**bug** · **fixed in UCINET 6.850** (branch `v6850`, ucinet #44, 3 October 2026) · decided
+3 October 2026 (Steve)
+
+Transform > Local Sparsification (`uc_lspar.pas`; computation in `G2Tools\ulspar.pas`)
+implements L-Spar (Satuluri, Parthasarathy and Ruan, 2011). For each node it ranks the
+node's ties by the Jaccard similarity of the two endpoints' neighborhoods, keeps the top
+ones, and keeps a tie if either endpoint keeps it; kept ties keep their values. Five
+problems:
+
+1. **Keep rule.** Each node keeps ceil(epsilon * d_i) ties, and the dialog calls epsilon the
+   "fraction of edges to keep per node". The paper keeps ceil(d_i^e) ties, 0 < e <= 1, so
+   that high-degree nodes lose a larger share of their ties (e = 0.5: degree 100 keeps 10,
+   degree 4 keeps 2). That is the point of the method.
+2. **Citation.** The unit header says CIKM 2011. The paper is in the Proceedings of the 2011
+   ACM SIGMOD International Conference on Management of Data, pp. 721-732.
+3. **Directed data.** The ranking uses each node's row (its out-ties), but the retention
+   test `retain[i][j] or retain[j][i]` treats "j keeps i", which refers to the tie j->i,
+   as a reason to keep i->j.
+4. **Missing cells** are written as 0 in the output.
+5. **Ties in the Jaccard score** are broken by node order (stable insertion sort), so the
+   result depends on the order of the nodes, and this is not documented.
+
+**What xucinet does:** nothing yet. `xsparsify(net, e = 0.5, method = c("lspar", "value"))` will
+follow the fixed routine, both methods.
+
+**Done in 6.850 (3 October 2026):** fixes 1-6 in tools `G2Tools\ulspar.pas`, the dialog
+`uc_lspar.pas`/`.dfm` and the CLI `lspar(<net> [<e>] [lspar|value])` in `Xdpmat.pas`.
+Neighborhoods are those of the symmetrized network without the diagonal; the keep count is
+ceil(d^e) taken with a 1e-9 tolerance (so 4^0.5 keeps 2); the log counts ties as pairs of the
+symmetrized network and states the tie-break rule (the routine has no help page). Tested
+through the dialog driver against an R reference, 37 checks, all passing:
+`C:\Dev\ucinet\Planning\tests\lspar\`.
+
+**Fix (Steve, 3 October 2026):**
+1. Each node keeps ceil(d_i^e) ties, 0 < e <= 1, default 0.5; e = 1 keeps every tie.
+   Dialog label: "Exponent e (each node keeps its d^e highest-scoring ties)". The log
+   reports e.
+2. Correct the citation in the unit header and in the help.
+3. L-Spar is defined for undirected graphs. Degrees, Jaccard scores and the keep decision
+   are computed on the symmetrized network (a tie between i and j if either cell is
+   non-zero). A kept pair keeps both of its original cells, x(i,j) and x(j,i), so directed
+   values survive. When the input is not symmetric, the log says that the ranking used the
+   symmetrized network.
+4. A missing cell counts as no tie in the ranking and stays missing in the output.
+5. Ties in the score are broken by the larger tie value (the larger of x(i,j) and x(j,i)),
+   then by node order; the help says so.
+The log keeps the counts of original and retained ties and the percentage retained.
+6. **New option (Steve, 3 October 2026): rank by tie value.** A dialog choice "Rank ties
+   by: Neighborhood overlap (L-Spar) / Tie value". With tie value, each node keeps its
+   ceil(d_i^e) ties with the largest values (on the symmetrized network, the larger of
+   x(i,j) and x(j,i)); everything else as in 1-5: a tie is kept if either endpoint keeps
+   it, both cells of a kept pair are written, missing cells are no tie and stay missing,
+   ties in value are broken by node order. On binary data every tie has the same value, so
+   the log warns that the result depends only on node order. Default stays L-Spar.
+
+---
+
 ## Fixed since this list started
 
+- **Local Sparsification (L-Spar)** — **fixed in UCINET 6.850** (entry 45): the d^e keep rule,
+  symmetrized ranking, missing cells, tie-breaks, the SIGMOD citation, and ranking by tie value.
+  `xsparsify()` follows it.
 - **`dichot()` zeroed the diagonal** — **fixed in UCINET 6.849**. It now keeps
   it, which is what we argued for: on 2-mode data zeroing the pseudo-diagonal
   deleted 12 of davis's 89 attendances. The special case is gone from
