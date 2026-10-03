@@ -9,7 +9,7 @@ print.xucinet <- function(x, ...) {
       if (isTRUE(x$directed)) "directed" else if (isFALSE(x$directed)) "undirected" else "directedness not determined",
       "\n")
   if (k > 1) cat("Relations:", paste(xrelations(x), collapse = ", "), "\n")
-  if (!is.null(x$notes)) cat("Notes: ", nrow(x$notes), " (see notes(x))\n", sep = "")
+  if (!is.null(x$notes)) cat("Notes: ", nrow(x$notes), " (see xnotes(x))\n", sep = "")
   if (nrow(m) > 30 || ncol(m) > 30) {
     cat("(matrix larger than 30 x 30 not shown; use as.matrix() or xdisplay())\n")
     return(invisible(x))

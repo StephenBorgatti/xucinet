@@ -71,7 +71,7 @@ batch at the end.** Design questions for all remaining chapters are batched in
   over the one in the book's Dropbox folder (`ASN R 2e - Fall 2026/`), which is there only
   for the coauthors and was last refreshed 25 Sep.
 - **Notes and .uci 1.1 (2 Oct, #35).** A dataset carries dated notes in `$notes` (data frame
-  date/text, absent when none), `notes(x)` / `notes(x) <- value`; kept by subsetting, the
+  date/text, absent when none), `xnotes(x)` / `xnotes(x) <- value` (renamed 3 Oct, #36); kept by subsetting, the
   transformations, `xunpack`/`xcombine`/`xmultiplex`; printed as a count. `.uci` is schema
   1.1 (`inst/schema/uci-1.1.json`; 1.0 kept, still read), which adds `notes`. SPEC D1, D6.
 - **supremecourt corrected (2 Oct, #35).** Rebuilt from the corrected 3e files (four coding
@@ -90,7 +90,12 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - UCINET source for porting: `C:\Dev\ucinet\Source` and `C:\Dev\tools` (Delphi 13). The
   Dropbox copies are stale.
 
-## Done this session (2 Oct 2026, Claude Code)
+## Done this session (3 Oct 2026, Claude Code)
+
+- #36: `notes()` / `notes<-` renamed `xnotes()` / `xnotes<-` (Steve), no alias; the `$notes`
+  element and the `.uci` key keep their name.
+
+## Done 2 Oct 2026 (Claude Code)
 
 - #35 (notes field; Supreme Court corrections), from
   `asnr2e/docs/prompts/supremecourt-corrections.md`: see "Where things stand". Tests in
@@ -337,8 +342,7 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 0. No package issues open (#35 done 2 Oct). The book side is in `asnr2e/STATUS.md`.
    UCINET side of the Supreme Court corrections: rebuild both `Datafiles.zip` in the ucinet
-   repo (ucinet #43). `3e/data/DataUCINET.zip` in Dropbox also still holds the old Supreme
-   Court files (open question 9).
+   repo (ucinet #43).
 1. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
    `inst/goldens/{transform,multivariate,ego,cohesion,subgroups,equivalence,twomode,hypotheses}/README.md` join the
    sweep. The Louvain golden is expected to differ until UCINET issue 26 is fixed.
@@ -504,12 +508,14 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   `xmatch`), since the notes describe the data they derive from; routines that build a new
   object (`xsimilarities()`, `xattributetomatrix()`, `xbipartite()`) start without them. The accessor is
   `notes()` without the x prefix, as Steve named it.
+- 3 Oct 2026 (Steve, #36): the notes accessor follows the x prefix: `xnotes()`, `xnotes<-`;
+  no deprecated `notes()`, since nothing has been released.
+- 3 Oct 2026 (Steve): the Dropbox datasets (`3e/data/DataUCINET.zip`) are not updated;
+  `make-datasets.R` keeps reading the Supreme Court files from `ASN3 Ucinet Files`. Former
+  open question 9.
 
 ## Open questions for Steve
 
-Questions 1-8 are answered; see Decisions.
+None open. Questions 1-9 are answered; see Decisions.
 
-9. `3e/data/DataUCINET.zip` (Dropbox) still holds the uncorrected Supreme Court files.
-   `make-datasets.R` now bypasses it for those three, so nothing in xucinet is blocked;
-   replace the three files in the zip, or leave it as the historical 3e battery?
 

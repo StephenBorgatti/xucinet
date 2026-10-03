@@ -30,7 +30,7 @@ the object passed in.}
 An object of class \code{xucinet}: a list with elements \code{data} (a matrix,
 or a named list of matrices for a multi-relation dataset), \code{mode},
 \code{directed}, and \code{title}, and \code{notes} when the dataset carries any (see
-\code{\link[=notes]{notes()}}).
+\code{\link[=xnotes]{xnotes()}}).
 }
 \description{
 An \code{xucinet} object mirrors a UCINET dataset: one or more matrices with node

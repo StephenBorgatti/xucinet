@@ -2,8 +2,8 @@
 
 ## Notes on a dataset; Supreme Court data corrected (2 October 2026)
 
-* A dataset can carry dated notes (#35): `notes(x)` returns them as a data
-  frame with columns `date` and `text`, and `notes(x) <- value` sets them (a
+* A dataset can carry dated notes (#35): `xnotes(x)` returns them as a data
+  frame with columns `date` and `text`, and `xnotes(x) <- value` sets them (a
   data frame, a character vector dated today, or `NULL`). They are kept by
   subsetting, the transformations, `xunpack()`, `xcombine()` and
   `xmultiplex()`, and printing a network shows how many there are.
@@ -16,7 +16,7 @@
   (E061 Scalia 0.5 -> 1 and Souter 1 -> 0.5; E116 Stevens 0 -> 0.5; E073
   Breyer 0.5 -> 1; E336 Kennedy and Ginsburg 1 -> 0.5), so 34 cells hold 0.5
   instead of 32; "Ginsberg" is "Ginsburg"; Majority Size and NoTimesMajority
-  are recomputed. `notes(supremecourt)` records this, and `?supremecourt`
+  are recomputed. `xnotes(supremecourt)` records this, and `?supremecourt`
   now documents the cell codes (1 = voted for the Court's judgment, 0 =
   dissented, 0.5 = concurred in part and dissented in part, `NA` = took no
   part). The SDSM backbone of the justices

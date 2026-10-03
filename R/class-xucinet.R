@@ -29,7 +29,7 @@
 #' @return An object of class `xucinet`: a list with elements `data` (a matrix,
 #'   or a named list of matrices for a multi-relation dataset), `mode`,
 #'   `directed`, and `title`, and `notes` when the dataset carries any (see
-#'   [notes()]).
+#'   [xnotes()]).
 #' @seealso [xrelations()] for the relation names, [as_igraph()] and friends to
 #'   convert the other way, and `[.xucinet` to subset nodes.
 #' @examples
@@ -221,25 +221,25 @@ xattributes <- function(net) {
 #' @param x A network (any accepted form).
 #' @param value A data frame with columns `date` and `text`, a character
 #'   vector of texts (each dated today), or `NULL` to remove the notes.
-#' @return `notes()` a data frame with columns `date` (`"YYYY-MM-DD"`) and
+#' @return `xnotes()` a data frame with columns `date` (`"YYYY-MM-DD"`) and
 #'   `text`, one row per note in the order written, or `NULL` when there are
-#'   none. `notes<-` returns the network with its notes replaced.
+#'   none. `xnotes<-` returns the network with its notes replaced.
 #' @seealso [xreaduci()], [xsaveuci()]
 #' @examples
-#' notes(supremecourt)
+#' xnotes(supremecourt)
 #'
 #' m <- matrix(c(0,1,1, 1,0,0, 1,0,0), 3, 3)
 #' net <- as_xucinet(m)
-#' notes(net) <- data.frame(date = "2026-10-02", text = "Coded from field notes.")
+#' xnotes(net) <- data.frame(date = "2026-10-02", text = "Coded from field notes.")
 #' net
 #' @export
-notes <- function(x) {
+xnotes <- function(x) {
   as_xucinet(x)$notes
 }
 
-#' @rdname notes
+#' @rdname xnotes
 #' @export
-`notes<-` <- function(x, value) {
+`xnotes<-` <- function(x, value) {
   x <- as_xucinet(x)
   x$notes <- as_notes(value)
   x
@@ -351,7 +351,7 @@ pick_relation <- function(x, relation = NULL) {
 #' columns so the result stays square. `net[i, j]` keeps rows `i` and columns
 #' `j`, which is what 2-mode data needs. Indices may be positions, negative
 #' positions to drop nodes, a logical vector, or node labels. Labels, mode,
-#' directedness, the dataset title, any [notes()] and every relation of a
+#' directedness, the dataset title, any [xnotes()] and every relation of a
 #' multi-relation stack are carried through.
 #'
 #' @param x An `xucinet` object.

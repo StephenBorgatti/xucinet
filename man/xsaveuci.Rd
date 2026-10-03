@@ -29,7 +29,7 @@ label. Defaults to \code{net$attributes} when the network carries one.}
 
 \item{title}{Dataset title stored in the file. Defaults to the network's.}
 
-\item{notes}{Dated notes to store, in any form \code{\link[=notes]{notes()}} accepts. Defaults
+\item{notes}{Dated notes to store, in any form \code{\link[=xnotes]{xnotes()}} accepts. Defaults
 to the network's own notes.}
 
 \item{datatype}{Advisory hint for a reader converting back to \verb{##h}/\verb{##d},

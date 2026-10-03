@@ -70,11 +70,11 @@ structure(list(
 - **Notes (Steve, 2 Oct 2026; issue #35).** A dataset may carry dated notes: what was
   corrected and when, where the data came from. `$notes` is a data frame with character
   columns `date` (`YYYY-MM-DD`) and `text`, one row per note, oldest first; the element is
-  absent, not `NULL`-valued, when there are none. Reached with `notes(x)` and set with
-  `notes(x) <- value` (a data frame, a character vector dated today, or `NULL`). Kept by
+  absent, not `NULL`-valued, when there are none. Reached with `xnotes(x)` and set with
+  `xnotes(x) <- value` (a data frame, a character vector dated today, or `NULL`). Kept by
   `as_xucinet()`, subsetting, the transformations (which edit the object in place) and the
   routines that rebuild a network of the same nodes (`xunpack`, `xcombine`, `xmultiplex`).
-  `print()` shows `Notes: n (see notes(x))`. Read and written in `.uci` (schema 1.1, D6);
+  `print()` shows `Notes: n (see xnotes(x))`. Read and written in `.uci` (schema 1.1, D6);
   the `##h`/`##d` pair has no room for them, so writing it drops them without a warning.
   The shipped `supremecourt` carries one (the 2026 corrections).
 

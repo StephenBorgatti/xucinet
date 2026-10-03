@@ -145,7 +145,7 @@ for (i in seq_len(nrow(manifest))) {
   }
   net <- xreaducinet(path, title = nm)
   value <- if (manifest$kind[i] == "attr") as_attribute_frame(net) else net
-  if (!is.null(dataset_notes[[nm]])) notes(value) <- dataset_notes[[nm]]
+  if (!is.null(dataset_notes[[nm]])) xnotes(value) <- dataset_notes[[nm]]
   assign(nm, value)
   save(list = nm, file = file.path("data", paste0(nm, ".rda")),
        compress = "xz", version = 2)

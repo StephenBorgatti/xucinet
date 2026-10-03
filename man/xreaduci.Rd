@@ -18,7 +18,7 @@ the file's own title, or the file name when it has none.}
 An \code{xucinet} object. When the file carries node attributes they are
 attached as \verb{$attributes}, a plain data frame keyed by node label; it is
 \code{NULL} otherwise and no routine reads it (SPEC D1). Notes, when the file
-has any, are \verb{$notes}; see \code{\link[=notes]{notes()}}.
+has any, are \verb{$notes}; see \code{\link[=xnotes]{xnotes()}}.
 }
 \description{
 Reads the single-file JSON format described in

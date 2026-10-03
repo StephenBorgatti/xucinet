@@ -37,7 +37,7 @@ need_jsonlite <- function() {
 #' @return An `xucinet` object. When the file carries node attributes they are
 #'   attached as `$attributes`, a plain data frame keyed by node label; it is
 #'   `NULL` otherwise and no routine reads it (SPEC D1). Notes, when the file
-#'   has any, are `$notes`; see [notes()].
+#'   has any, are `$notes`; see [xnotes()].
 #' @seealso [xsaveuci()], and [xreaducinet()] for the older `##h`/`##d` pair.
 #' @examples
 #' f <- system.file("schema", "campnet-example.uci", package = "xucinet")
@@ -74,7 +74,7 @@ xreaduci <- function(file, directed = NULL, mode = NULL, title = NULL, ...) {
     as_xucinet(rels, directed = directed, mode = mode, title = title)
   }
   net$attributes <- uci_attributes(doc)
-  notes(net) <- uci_notes(doc, file)
+  xnotes(net) <- uci_notes(doc, file)
   net
 }
 
@@ -91,7 +91,7 @@ xreaduci <- function(file, directed = NULL, mode = NULL, title = NULL, ...) {
 #' @param attributes Optional data frame of node attributes, keyed by node
 #'   label. Defaults to `net$attributes` when the network carries one.
 #' @param title Dataset title stored in the file. Defaults to the network's.
-#' @param notes Dated notes to store, in any form [notes()] accepts. Defaults
+#' @param notes Dated notes to store, in any form [xnotes()] accepts. Defaults
 #'   to the network's own notes.
 #' @param datatype Advisory hint for a reader converting back to `##h`/`##d`,
 #'   which has to choose a fixed cell width. Ignored when reading.

@@ -40,11 +40,12 @@ States v. Armstrong, 1996) Breyer is 1, not 0.5; in E336 (Virginia v.
 Black, 2003) Kennedy and Ginsburg are 0.5, not 1. The cells holding 0.5
 went from 32 to 34, "Ginsberg" became "Ginsburg", and the derived
 attributes in \link{supremecourt_cases_attr} and \link{supremecourt_judges_attr}
-were recomputed. The dataset carries this as a note; see \code{\link[=notes]{notes()}}.
+were recomputed. The dataset carries this as a note; see \code{\link[=xnotes]{xnotes()}}.
 }
 \examples{
 dim(supremecourt)
 sum(is.na(as.matrix(supremecourt)))
+xnotes(supremecourt)
 }
 \seealso{
 \link{supremecourt_cases_attr}, \link{supremecourt_judges_attr}

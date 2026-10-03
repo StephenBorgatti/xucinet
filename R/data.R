@@ -646,7 +646,7 @@
 #'   Black, 2003) Kennedy and Ginsburg are 0.5, not 1. The cells holding 0.5
 #'   went from 32 to 34, "Ginsberg" became "Ginsburg", and the derived
 #'   attributes in [supremecourt_cases_attr] and [supremecourt_judges_attr]
-#'   were recomputed. The dataset carries this as a note; see [notes()].
+#'   were recomputed. The dataset carries this as a note; see [xnotes()].
 #'
 #' @format An `xucinet` object, 376 cases x 9 judges, 2-mode.
 #' @source Borgatti, S. P., Everett, M. G., Johnson, J. C. and Agneessens, F.
@@ -655,6 +655,7 @@
 #' @examples
 #' dim(supremecourt)
 #' sum(is.na(as.matrix(supremecourt)))
+#' xnotes(supremecourt)
 "supremecourt"
 
 #' Supreme Court case attributes
