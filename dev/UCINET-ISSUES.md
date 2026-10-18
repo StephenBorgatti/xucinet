@@ -1348,6 +1348,10 @@ Found while doing it (18 Oct 2026), in 6.849's LR-QAP:
 - `tunivariate.addcase` counts with exact comparisons, so permuted statistics equal to the
   observed one up to rounding (automorphisms; common on small networks) count as smaller.
   On the 5-node test the DSP p-value was 0.118 against an exact 0.236.
+- The Y-permutations depended on the thread layout: `tlrqap.runperm` shuffled the workspace's
+  previous permutation in place instead of the identity, so a draw depended on the draws its
+  thread made before it, and the same seed gave other results serially, in parallel or on
+  another number of cores (still uniform permutations, so the p-values were valid).
 - With missing cells the predicted-values matrix was misplaced: the fitter wrote the fitted
   probabilities in valid-row order and `saveresiduals` read them by cell.
 
@@ -1364,7 +1368,8 @@ SE at the final coefficients; the same fit as xucinet's `lr_fit`); permuted valu
 reported as two p-values (rule 4: `Sig.Upper` and `Failed` columns in the saved fit and
 coefficient datasets, shown in the log and the CLI output only when some fit failed, with
 the note); the CLI command `lrqap(<y> <x1> [<x2> ...] [dsp|yperm] [sym] [<nperm> [<seed>]])`.
-Tests: `C:\Dev\ucinet\Planning\tests\lrqap\` (47/47 against xucinet since #39).
+Each Y-permutation drawn from the identity (Steve, 18 Oct 2026).
+Tests: `C:\Dev\ucinet\Planning\tests\lrqap\` (49/49 against xucinet since #39).
 
 ---
 

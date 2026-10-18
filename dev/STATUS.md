@@ -97,7 +97,7 @@ batch at the end.** Design questions for all remaining chapters are batched in
   coefficient table (always present, equal when nothing failed); a `Failed` column per term
   (not printed) and `$summary$Failed` for the model's test; the report prints `Sig.Upper` and
   a note after the table only when some fit failed. UCINET 6.850 the same (tools
-  `ulrqap.pas`, `uc_lrqap.pas`, CLI `lrqap()`): 47/47 in
+  `ulrqap.pas`, `uc_lrqap.pas`, CLI `lrqap()`): 49/49 in
   `ucinet/Planning/tests/lrqap/compare_lrqap.out.txt`.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
@@ -169,7 +169,8 @@ batch at the end.** Design questions for all remaining chapters are batched in
   ledger 49 (retitled), UCINET-ISSUES 47 rule 4, goldens README (column layout).
   `devtools::check()`: 0 errors, 0 warnings, 0 notes. COVERAGE not affected (no status change).
 - Table 14.4, 5000 permutations by DSP, seeds 1-4: no coefficient test ever failed; the
-  model's Y-permutation test failed once in 5000 for seed 2 (and in UCINET's seed-1 run).
+  model's Y-permutation test failed once in 5000 for seed 2. (UCINET's seed-1 run had one too
+  until its Y-permutations were made reproducible later the same day; now it has none.)
 - UCINET side and the asnr2e practice prompt in the same session (ucinet STATUS; asnr2e
   `docs/prompts/ch14-table143-practice143.md` 14.3.3).
 
