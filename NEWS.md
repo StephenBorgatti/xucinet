@@ -1,5 +1,26 @@
 # xucinet 2.0.0.9000 (development)
 
+## LR-QAP by double semi-partialling (18 October 2026)
+
+* `xlrqap()` gains `method = c("dsp", "yperm")`, the values `xmrqap()` uses,
+  and the default is now `"dsp"`: Dekker, Krackhardt and Snijders' double
+  semi-partialling, as UCINET 6.850's LR-QAP does by default (UCINET-ISSUES
+  47; #38). Each predictor's OLS residual on the others is permuted in its
+  place and the logistic model refitted; the predictor's z is compared with
+  its permutation distribution. `method = "yperm"` gives the Y-permutation
+  p-values of before. The model's significance is by Y permutation under both.
+  The method is printed in the report header (`Method:`). **Changes results**
+  for code that relied on the old default; `method = "yperm"` restores them.
+  The new argument comes after `nperm`, as in `xmrqap()`, so a `seed` given
+  by position must now be named.
+* The logistic fit is Newton-Raphson to convergence, as UCINET's: T moves in
+  the fourth decimal against glm()'s default stopping point. A permuted fit
+  that does not converge in 20 iterations (complete or quasi-complete
+  separation) is left out of the proportions and counted in
+  `$summary$Failed` and the notes, under either method (#39 asks whether
+  they should count). A model that does not converge on the observed data is
+  now an error.
+
 ## xsparsify(): local sparsification (3 October 2026)
 
 * `xsparsify(net, e = 0.5, method = c("lspar", "value"))` is UCINET's

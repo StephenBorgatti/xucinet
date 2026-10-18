@@ -257,8 +257,10 @@ test_that("the logistic coefficients are glm()'s", {
   r <- xlrqap(Advice ~ Friendship + ReportTo, hightech, nperm = 0)
   m <- relation_list(hightech)
   off <- row(m$Advice) != col(m$Advice)
+  # glm() run to full convergence: its default stops a step early for the SE
   g <- stats::glm((m$Advice[off] > 0) ~ m$Friendship[off] + m$ReportTo[off],
-                  family = stats::binomial)
+                  family = stats::binomial,
+                  control = stats::glm.control(epsilon = 1e-14, maxit = 100))
   tab <- r$matrices[[1]]
   expect_equal(unname(tab[, "Coef"]), unname(stats::coef(g)), tolerance = 1e-6)
   expect_equal(unname(tab[, "T"]), unname(summary(g)$coefficients[, 3]), tolerance = 1e-6)
@@ -269,12 +271,150 @@ test_that("the logistic coefficients are glm()'s", {
                tolerance = 1e-6)
 })
 
-test_that("LR-QAP p-values come from permuting Y", {
-  r <- xlrqap(Advice ~ Friendship + ReportTo, hightech, nperm = 300, seed = 1)
+test_that("LR-QAP: double semi-partialling is the default, Y permutation on request (#38)", {
+  a <- xlrqap(Advice ~ Friendship + ReportTo, hightech, nperm = 300, seed = 1)
+  b <- xlrqap(Advice ~ Friendship + ReportTo, hightech, nperm = 300, seed = 1,
+              method = "yperm")
+  expect_equal(a$fields[["Method:"]], "Double Dekker semi-partialling")
+  expect_equal(b$fields[["Method:"]], "Y-permutation")
+  # the same slots and observed values whichever method (SPEC, level of analysis 5)
+  expect_identical(names(a$summary), names(b$summary))
+  expect_identical(dimnames(a$matrices[[1]]), dimnames(b$matrices[[1]]))
+  expect_equal(a$matrices[[1]][, c("Coef", "T")], b$matrices[[1]][, c("Coef", "T")])
+  # the model's significance is by Y permutation under both
+  expect_equal(a$summary$Sig, b$summary$Sig)
+  for (r in list(a, b)) {
+    tab <- r$matrices[[1]]
+    expect_true(is.na(tab["Intercept", "Sig"]))
+    expect_lt(tab["ReportTo", "Sig"], 0.05)
+    expect_equal(r$summary$Perms, 300)
+    expect_equal(r$summary$Failed, 0)
+  }
+  expect_false(isTRUE(all.equal(a$matrices[[1]][, "Sig"], b$matrices[[1]][, "Sig"])))
+})
+
+test_that("method = 'yperm' reproduces the Y-permutation results of before #38", {
+  # Values printed by xlrqap() at xucinet 82c9ed3, when Y permutation was the
+  # only method. The p-values are identical; T and the permuted coefficients'
+  # summaries move by up to 2e-4 because the fit is now Newton-Raphson to
+  # convergence (glm.fit's default stopped a step early for the SE).
+  r <- xlrqap(Advice ~ Friendship + ReportTo, hightech, nperm = 300, seed = 1,
+              method = "yperm")
   tab <- r$matrices[[1]]
-  expect_true(is.na(tab["Intercept", "Sig"]))
-  expect_lt(tab["ReportTo", "Sig"], 0.05)
-  expect_equal(r$summary$Perms, 300)
+  expect_equal(unname(tab[-1, "Sig"]), c(41 / 301, 2 / 301))
+  expect_equal(unname(tab[-1, "P(ge)"]), c(19 / 301, 2 / 301))
+  expect_equal(unname(tab[-1, "Avg"]), c(-0.022552492, -0.001518157), tolerance = 1e-6)
+  top3 <- function(p) (p > 0 & p < 4) * 1
+  p0 <- top3(as.matrix(newfrat, relation = "PreferenceT00"))
+  nets <- list(week1 = top3(as.matrix(newfrat, relation = "PreferenceT01")),
+               week0 = p0, week0t = t(p0), twopaths = p0 %*% p0)
+  r <- xlrqap(week1 ~ week0 + week0t + twopaths, nets, nperm = 200, seed = 1,
+              method = "yperm")
+  tab <- r$matrices[[1]]
+  expect_equal(unname(tab[-1, "Sig"]), c(1, 3, 23) / 201)
+  expect_equal(unname(tab[-1, "Avg"]), c(-0.03667286, -0.04166641, -0.01362706),
+               tolerance = 1e-6)
+  expect_equal(r$summary$Sig, 1 / 201)
+})
+
+test_that("the DSP statistic: the residual's z equals the predictor's", {
+  # replacing X_k by its residual on the other X's reparameterizes the model,
+  # so the identity permutation reproduces the observed z exactly
+  m <- relation_list(hightech)
+  d <- qap_design(Advice ~ Friendship + ReportTo, m, sym = FALSE)
+  X <- cbind(Intercept = 1, d$xmat)
+  yobs <- (d$y > 0)[d$cells] * 1
+  obs <- lr_fit(X, yobs, d$xok)
+  r <- lr_dsp_one(d, X, yobs, 3, obs, list(seq_len(21)), 2)
+  expect_equal(r$b$mean, obs$b[["ReportTo"]], tolerance = 1e-6)
+  expect_equal(r$t$ext, 1)
+})
+
+test_that("a permuted fit that separates is left out and counted (#39)", {
+  # 5 nodes. Y's three ties: two on X = 1 cells, one on an X = 0 cell, so the
+  # observed fit converges; a permutation that puts all three on X = 1 cells
+  # separates the data (quasi-complete) and cannot converge.
+  x <- matrix(0, 5, 5); x[1, 2:5] <- 1; x[2, 3:4] <- 1
+  y <- matrix(0, 5, 5); y[1, 2] <- y[2, 3] <- y[4, 5] <- 1
+  sep <- lr_fit(cbind(1, c(1, 1, 0, 0)), c(1, 1, 0, 0), rep(TRUE, 4))
+  expect_true(sep$failed)
+  for (meth in c("dsp", "yperm")) {
+    r <- xlrqap(Y ~ X, list(Y = y, X = x), nperm = 300, seed = 2, method = meth)
+    expect_gt(r$summary$Failed, 0)
+    expect_true(any(grepl("left out", r$assumptions)))
+  }
+  # a separated observed model is an error
+  y2 <- y; y2[4, 5] <- 0
+  expect_error(xlrqap(Y ~ X, list(Y = y2, X = x), nperm = 0), "does not converge")
+})
+
+test_that("LR-QAP DSP: missing cells are dropped listwise, the diagonal ignored", {
+  m <- relation_list(hightech)
+  y <- m$Advice; f <- m$Friendship
+  y[1, 2] <- NA; f[3, 4] <- NA
+  diag(y) <- 1; diag(f) <- 5
+  r <- xlrqap(Y ~ F + R, list(Y = y, F = f, R = m$ReportTo), nperm = 50, seed = 1)
+  expect_equal(r$summary$Obs, 21 * 20 - 2)
+  expect_false(anyNA(r$matrices[[1]][-1, "Sig"]))
+  off <- row(y) != col(y) & !is.na(y) & !is.na(f)
+  g <- stats::glm((y[off] > 0) ~ f[off] + m$ReportTo[off], family = stats::binomial,
+                  control = stats::glm.control(epsilon = 1e-14, maxit = 100))
+  expect_equal(unname(r$matrices[[1]][, "Coef"]), unname(stats::coef(g)), tolerance = 1e-6)
+})
+
+test_that("LR-QAP DSP agrees with sna's netlogit(nullhyp = 'qapspp')", {
+  skip_if_not_installed("sna")
+  skip_on_cran()
+  # sna's "qap"/"qapspp" is double semi-partialling: each X regressed on the
+  # others by OLS, the residual permuted and refitted, z compared (Step 1 of
+  # #38). Two independent samples of 2000 permutations: |difference| < 0.03.
+  # Table 14.4's model:
+  top3 <- function(p) (p > 0 & p < 4) * 1
+  p0 <- top3(as.matrix(newfrat, relation = "PreferenceT00"))
+  nets <- list(week1 = top3(as.matrix(newfrat, relation = "PreferenceT01")),
+               week0 = p0, week0t = t(p0), twopaths = p0 %*% p0)
+  r <- xlrqap(week1 ~ week0 + week0t + twopaths, nets, nperm = 2000, seed = 1)
+  set.seed(1)
+  s <- sna::netlogit(nets$week1, list(nets$week0, nets$week0t, nets$twopaths),
+                     reps = 2000, nullhyp = "qapspp")
+  expect_equal(unname(r$matrices[[1]][, "T"]), s$tstat, tolerance = 1e-6)
+  expect_lt(max(abs(r$matrices[[1]][-1, "Sig"] - s$pgreqabs[-1])), 0.03)
+  # strongly collinear predictors (r about 0.9), Y driven by X1 alone
+  set.seed(7)
+  n <- 20
+  x1 <- matrix(stats::rnorm(n * n), n); x1 <- x1 + outer(stats::rnorm(n), stats::rnorm(n), "+")
+  x2 <- x1 + matrix(stats::rnorm(n * n, sd = 0.5), n)
+  y <- matrix(stats::rbinom(n * n, 1, stats::plogis(-1 + 0.4 * x1)), n)
+  diag(x1) <- diag(x2) <- diag(y) <- 0
+  r <- xlrqap(Y ~ X1 + X2, list(Y = y, X1 = x1, X2 = x2), nperm = 2000, seed = 3)
+  set.seed(3)
+  s <- sna::netlogit(y, list(x1, x2), reps = 2000, nullhyp = "qapspp")
+  expect_lt(max(abs(r$matrices[[1]][-1, "Sig"] - s$pgreqabs[-1])), 0.03)
+})
+
+test_that("MRQAP DSP agrees with sna's netlm(nullhyp = 'qapspp')", {
+  skip_if_not_installed("sna")
+  skip_on_cran()
+  # Table 14.3's model; netlm's t is the classical t, which xmrqap permutes
+  m <- relation_list(hightech)
+  r <- xmrqap(Advice ~ Friendship + ReportTo, hightech, nperm = 2000, seed = 1)
+  set.seed(1)
+  s <- sna::netlm(m$Advice, list(m$Friendship, m$ReportTo), reps = 2000,
+                  nullhyp = "qapspp")
+  p <- r$matrices[[1]][c("Friendship", "ReportTo"), "P-value"]
+  expect_lt(max(abs(p - s$pgreqabs[-1])), 0.03)
+  # strongly collinear predictors
+  set.seed(7)
+  n <- 20
+  x1 <- matrix(stats::rnorm(n * n), n); x1 <- x1 + outer(stats::rnorm(n), stats::rnorm(n), "+")
+  x2 <- x1 + matrix(stats::rnorm(n * n, sd = 0.5), n)
+  y <- 0.3 * x1 + matrix(stats::rnorm(n * n), n)
+  diag(x1) <- diag(x2) <- diag(y) <- 0
+  r <- xmrqap(Y ~ X1 + X2, list(Y = y, X1 = x1, X2 = x2), nperm = 2000, seed = 3)
+  set.seed(3)
+  s <- sna::netlm(y, list(x1, x2), reps = 2000, nullhyp = "qapspp")
+  p <- r$matrices[[1]][c("X1", "X2"), "P-value"]
+  expect_lt(max(abs(p - s$pgreqabs[-1])), 0.03)
 })
 
 test_that("symmetric = TRUE uses one triangle; a constant Y is refused", {

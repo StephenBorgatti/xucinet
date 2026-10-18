@@ -4,7 +4,15 @@
 \alias{xlrqap}
 \title{Logistic regression QAP}
 \usage{
-xlrqap(formula, nets, nperm = 1000, seed = NULL, tails = 2, symmetric = FALSE)
+xlrqap(
+  formula,
+  nets,
+  nperm = 1000,
+  method = c("dsp", "yperm"),
+  seed = NULL,
+  tails = 2,
+  symmetric = FALSE
+)
 }
 \arguments{
 \item{formula}{\code{y ~ x1 + x2}, where the names are relations of \code{nets}.}
@@ -13,6 +21,8 @@ xlrqap(formula, nets, nperm = 1000, seed = NULL, tails = 2, symmetric = FALSE)
 multi-relation network whose relations the formula names.}
 
 \item{nperm}{Number of random permutations. UCINET's default is 1000.}
+
+\item{method}{\code{"dsp"} (the default) or \code{"yperm"}.}
 
 \item{seed}{Random seed.}
 
@@ -23,26 +33,54 @@ multi-relation network whose relations the formula names.}
 \value{
 An object of class \code{c("xlrqap", "xucinet_output")}. \verb{$summary}:
 log-likelihood, McFadden's pseudo R-square, the significance of the
-model, the number of observations and permutations. \verb{$matrices}: the
-coefficients, odds ratios, t, the p-value, the mean, minimum, maximum and
-sd of the permuted coefficients and the three proportions.
+model, the number of observations and permutations, and the number of
+permuted fits that failed (over every test). \verb{$matrices}: the
+coefficients, odds ratios, z (T), the p-value, the mean, minimum, maximum
+and sd of the permuted coefficients and the three proportions. The method
+is the report's \verb{Method:} field (\verb{$fields}).
 }
 \description{
 UCINET: Tools | Testing Hypotheses | Dyadic (QAP) | LR-QAP Logistic
 Regression. Logistic regression of a binary network on others, cell by
-cell, with p-values from permuting the dependent network's rows and columns
-together (book, 14.5.2). The dependent network is dichotomized (values
-above 0 are ties).
+cell, with p-values from QAP permutations (book, 14.5.2). The dependent
+network is dichotomized (values above 0 are ties).
+}
+\details{
+\code{method = "dsp"}, the default, is Dekker, Krackhardt and Snijders' (2007)
+double semi-partialling, as in \code{\link[=xmrqap]{xmrqap()}}: each predictor is regressed on
+the others by ordinary least squares, the residual matrix is permuted (rows
+and columns together) and put in the predictor's place, the logistic model
+is refitted, and the predictor's z (b / SE, labelled T) is compared with its
+permutation distribution. Since the residual differs from the predictor by
+a linear combination of the other predictors, the observed coefficient,
+standard error and z are those of the original model. \code{method = "yperm"}
+permutes the dependent network against the fixed predictors instead.
+Either way the model's significance comes from permuting the dependent
+network (the test of the hypothesis that no predictor matters).
+
+The model is fitted by Newton-Raphson from zero, as UCINET fits it, and a
+fit has failed when it has not converged in 20 iterations (every step at
+most 1e-4) or its information matrix is singular. Complete or
+quasi-complete separation shows up this way. A permutation whose fit fails
+gives no value and is left out of that test's proportions; the number left
+out is reported (\verb{$summary$Failed} and the notes). A model that fails on the
+observed data is an error.
 }
 \section{UCINET equivalent}{
 
 Tools | Testing Hypotheses | Dyadic (QAP) | LR-QAP Logistic Regression.
-\emph{Number of permutations} is \code{nperm}, \emph{P-values} is \code{tails}, \emph{Data are}
-symmetric is \code{symmetric = TRUE}.
+\emph{Permutation method} is \code{method} (Double Dekker semi-partialling or
+Y-permutation), \emph{Number of permutations} is \code{nperm}, \emph{P-values} is
+\code{tails}, \emph{Data are} symmetric is \code{symmetric = TRUE}.
 }
 
 \examples{
 xlrqap(Advice ~ Friendship + ReportTo, hightech, nperm = 100, seed = 1)
+}
+\references{
+Dekker, D., Krackhardt, D. and Snijders, T. A. B. (2007).
+Sensitivity of MRQAP tests to collinearity and autocorrelation
+conditions. \emph{Psychometrika} 72(4), 563-581.
 }
 \seealso{
 \code{\link[=xmrqap]{xmrqap()}}.

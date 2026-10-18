@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 2 Oct 2026 (Claude Code; Cowork should
+Updated 18 Oct 2026 (Claude Code; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -87,6 +87,13 @@ batch at the end.** Design questions for all remaining chapters are batched in
   with their three inputs (`lsp_barbell`, `lsp_valued`, `lsp_missing`) already in
   `inst/goldens/transform/`. Crosswalk row "5.5.2 (2e)"; book Section 5.5.2 checked (ch05
   `changes.txt`): nothing in it the function does not do.
+- **LR-QAP by double semi-partialling (18 Oct, #38).** `xlrqap(method = c("dsp", "yperm"))`,
+  default `"dsp"`, as UCINET 6.850's LR-QAP (UCINET-ISSUES 47, ucinet #45); the model's
+  significance by Y permutation under both; the fit is Newton-Raphson as UCINET's, and
+  permuted fits that do not converge (separation) are left out and counted in
+  `$summary$Failed` (open question: #39). Agrees with `sna::netlogit(nullhyp = "qapspp")` and
+  with the 6.850 build within Monte Carlo error (`ucinet/Planning/tests/lrqap/compare_lrqap.out.txt`,
+  25/25). `xmrqap()` already defaulted to DSP; a netlm cross-check test was added. Ledger 49.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
@@ -97,7 +104,69 @@ batch at the end.** Design questions for all remaining chapters are batched in
 - UCINET source for porting: `C:\Dev\ucinet\Source` and `C:\Dev\tools` (Delphi 13). The
   Dropbox copies are stale.
 
-## Done this session (3 Oct 2026, Claude Code)
+## Findings 18 Oct 2026: permutation methods for MRQAP and LR-QAP (#38, Step 1 of asnr2e `docs/prompts/ch14-dsp-default.md`)
+
+- **xucinet.** `xmrqap(method = c("dsp", "yperm"))`, default `"dsp"`. DSP permutes the
+  residual of X_k on the other X's (OLS with intercept, over the off-diagonal cells used)
+  and compares the classical t = b / SE of that term; `"yperm"` permutes Y and compares the
+  coefficients. `xlrqap()` has no method argument: Y permutation only, comparing each
+  coefficient's Wald z (labelled T), the model by its log-likelihood (pseudo R-square when
+  cells are missing). Both: `nperm`, `seed`, `tails = 2` by default, two-tailed = as extreme
+  in absolute value, p = (1 + count) / (1 + nperm) (ledger 40). `xlrqap()` keeps glm.fit's
+  result even when it did not converge; only a draw with a constant Y gives no value.
+- **UCINET.** MR-QAP is two menu entries, not a method control: Tools > Testing Hypotheses >
+  Dyadic (QAP) > MR-QAP Linear Regression > *Double Dekker Semi-Partialling MRQAP* (first,
+  Ctrl+R; `uc_QaPDekkerRegression.pas`, tools `G1Tools/umrqapdekker.pas`) and *Original (Y
+  permutation) method* (`xmrqapna.pas`). Dekker tracks t (b / SE^2 on the fast path, UCINET
+  issue 31), P-values 1- or 2-tailed (default 2), 2-tailed = |t| as extreme; Y-permutation
+  compares coefficients. LR-QAP (`uc_lrqap.pas`, tools `G1Tools/ulrqap.pas`) is Y permutation
+  only and says so in its caption and log; "Statistics to track" Betas / T-Statistics
+  (default T: z = b / SE from the Newton-Raphson information matrix), P-values default
+  2-tailed (|z| as extreme), the model's significance from the log-likelihood (pseudo
+  R-square with missing data). A permutation whose Newton-Raphson does not converge in 20
+  iterations is dropped silently. No method setting is stored anywhere (dialogs keep only
+  the session's values, no ini key); neither routine has a CLI command; both are reachable
+  from the headless dialog driver (UCINET-ISSUES 24). So the linear case needs no change in
+  either program; only LR-QAP does.
+- **sna 2.8**, `netlm()` and `netlogit()` (same structure): `"qap"` and `"qapspp"` run the
+  *same* branch, so the 3e-errors review is right that the default is semi-partialling. For
+  each term i (the intercept included, so its p-value is meaningless) it regresses X_i on
+  all other columns (OLS, `qr.resid`, intercept column among them), permutes the residual
+  matrix (`rmperm`, rows and columns together), refits the full model with the permuted
+  residual in place of X_i, and records t (netlm) or z = b / SE (netlogit; `test.statistic
+  = "beta"` gives b). That is DSP as Dekker et al. describe it. `"qapy"` permutes Y against
+  the fixed X's; `"qapx"` permutes each X_i alone (cumulatively, without resetting between
+  draws); `"qapallx"` permutes every X at once. p-values are proportions of the draws only
+  (no +1), `pgreqabs` = |draw| >= |observed|. With one predictor besides the intercept,
+  `"qap"`/`"qapspp"` silently becomes `"qapy"`. netlogit keeps glm.fit's result whatever
+  its convergence (separated draws count, at the iteration limit).
+- **Dekker, Krackhardt and Snijders (2007), 3.2.2**, against the prompt's summary: the same
+  procedure (regress X on Z by OLS, permute the residuals, regress Y on the permuted
+  residuals and Z, use a pivotal statistic, t). Differences: the paper defines DSP for the
+  linear model only; the logistic version (OLS residualizing, logistic refit, z) is an
+  extension, justified because replacing X_k by X_k - Z gamma is a reparameterization of the
+  logistic model, so the observed b_k, SE_k and z_k are unchanged. The paper's p-value is
+  the one-sided proportion "larger than or equal to the observed value"; two-tailed with
+  absolute values is our (and UCINET's) convention.
+
+## Done this session (18 Oct 2026, Claude Code)
+
+- #38, from asnr2e `docs/prompts/ch14-dsp-default.md`: Step 1 findings above ("Findings 18 Oct
+  2026"); `xlrqap()` gains `method`, default `"dsp"`, `$summary$Failed`, the `Method:` field;
+  helpers `lr_fit()` (Newton-Raphson, UCINET's convergence rule) and `lr_dsp_one()`. Tests:
+  glm() at full convergence, DSP default vs `"yperm"` (same slots and observed values),
+  `"yperm"` reproduces the pre-#38 p-values exactly (82c9ed3), the reparameterization identity,
+  separation counted (5-node case) and a separated observed model an error, missing cells and
+  diagonal, and the sna cross-checks (netlogit on Table 14.4's model and a collinear example;
+  netlm on Table 14.3's model and a collinear example). Snapshot updated. NEWS, ledger 49,
+  UCINET-ISSUES 47, crosswalk row (both copies; xlsx rebuilt in asnr2e, Dropbox copy not
+  refreshed), goldens README and batch (`g14_lrqap_hightech` now DSP, `_yperm` added, driver
+  lines), COVERAGE regenerated. `devtools::check()`: 0 errors, 0 warnings, 0 notes.
+- UCINET side in the same session: tools `G1Tools/ulrqap.pas`, ucinet `uc_lrqap.pas`/`.dfm`,
+  CLI `lrqap()`, help, `Planning/6.850-changes.md` (ucinet #45).
+- Table 14.3/14.4 by both methods: asnr2e text-changes T34-T37.
+
+## Done 3 Oct 2026 (Claude Code)
 
 - #37 `xsparsify()` (R/xsparsify.R, tests/testthat/test-xsparsify.R), from asnr2e
   `docs/prompts/sparsify.md` block B after block A in ucinet/tools. Help with the SIGMOD 2011
@@ -355,7 +424,8 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. No package issues open (#37 done 3 Oct). The book side is in `asnr2e/STATUS.md`.
+0. Open: #39 (`steve`, separation handling in LR-QAP); #38 stays open until Steve has seen the
+   Table 14.3/14.4 comparison (asnr2e T34-T37). The book side is in `asnr2e/STATUS.md`.
    UCINET side of the Supreme Court corrections: rebuild both `Datafiles.zip` in the ucinet
    repo (ucinet #43).
 1. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
@@ -532,9 +602,28 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   Sparsification does. Implementation details shared with ulspar.pas (Claude Code): neighborhoods
   of the symmetrized network without the diagonal; ceiling(d^e) with a 1e-9 tolerance; ties counted
   as symmetrized pairs; the title is `<name>-lspar`, as UCINET names the output.
+- 18 Oct 2026 (Steve's prompt `asnr2e/docs/prompts/ch14-dsp-default.md`; #38; UCINET-ISSUES 47):
+  LR-QAP defaults to double semi-partialling in both programs, Y permutation on request; the
+  argument and values are `xmrqap()`'s (`method = c("dsp", "yperm")`, not the prompt's `"y"`,
+  since the prompt says to match xmrqap). Claude Code's details: the model's significance stays
+  a Y-permutation test (its null is that no predictor matters, under which Y is exchangeable);
+  the logistic fit is Newton-Raphson from zero, 20 iterations, steps <= 1e-4, with pivoted
+  elimination rather than UCINET's SVD pseudo-inverse, which let separated fits pass as
+  converged; SE at the final coefficients; failed fits left out and counted (pending #39).
 
 ## Open questions for Steve
 
-None open. Questions 1-9 are answered; see Decisions.
+1. (#39, 18 Oct 2026) LR-QAP: should permutations whose logistic fit fails (no convergence:
+   complete or quasi-complete separation) count toward the p-value? Implemented in both
+   programs: left out, and counted in the report. Alternatives: count them as at least as
+   extreme (conservative), or keep the fit at the iteration limit (sna does). They are rare
+   on real data (0 of 5000 on Table 14.4's model under DSP; 1 under Y permutation in UCINET's
+   draws) and common only on tiny networks.
+2. (18 Oct 2026) UCINET's permutation counters (`tunivariate.addcase`) compare with no
+   tolerance, so a permuted statistic equal to the observed one up to rounding can count as
+   smaller; xucinet treats values within 1e-10 (relative) as ties. LR-QAP now does the same in
+   UCINET (it mattered on the 5-node separation test: 0.118 against an exact 0.236). Apply the
+   same rule to UCINET's other permutation routines (QAP correlation, MRQAP, node-level
+   regression)? Not yet a UCINET-ISSUES entry.
 
 

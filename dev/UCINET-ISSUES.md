@@ -1296,6 +1296,63 @@ The log keeps the counts of original and retained ties and the percentage retain
 
 ---
 
+## 47. LR-QAP offers only Y-permutation; double semi-partialling should be the default
+
+**design** · **open — fix pending** · found 18 October 2026 (asnr2e `docs/prompts/ch14-dsp-default.md`; xucinet #38, ucinet #45), for UCINET 6.850
+
+ASN 3e chapter 14 recommends Dekker, Krackhardt and Snijders' (2007) double
+semi-partialling (DSP) for MRQAP, and MR-QAP's first menu entry is Double Dekker
+semi-partialling, but LR-QAP (`uc_lrqap.pas`, tools `G1Tools/ulrqap.pas`) permutes Y
+only, and its caption and log say so. Its Table 14.4 model has three correlated
+predictors, the case DSP was designed for.
+
+The rule, the same in both programs:
+
+1. LR-QAP has a method choice, Double Dekker semi-partialling (default) and
+   Y-permutation. In UCINET a *Permutation method* radio group; in xucinet
+   `xlrqap(method = c("dsp", "yperm"))`, the values `xmrqap()` takes.
+2. DSP for predictor k: regress X_k on the other predictors by OLS (with intercept)
+   over the off-diagonal cells the observed model uses; permute the residual
+   matrix's rows and columns together, put it in X_k's place, refit the logistic
+   model, and compare z_k = b_k / SE_k (or b_k, "Statistics to track: Betas") with
+   the observed. The observed b_k, SE_k and z_k are those of the original model,
+   since the residual differs from X_k by a combination of the other predictors.
+3. The model's significance stays a Y-permutation test of the log-likelihood (the
+   pseudo R-square with missing data) under both methods: its null hypothesis is
+   that no predictor matters, under which Y is exchangeable.
+4. A permutation whose Newton-Raphson fit does not converge in 20 iterations, or
+   whose information matrix is singular (complete or quasi-complete separation), is
+   left out of that test's proportions and counted; the log and the xucinet notes
+   give the counts per test. Whether they should count instead is xucinet #39.
+5. Missing cells are dropped listwise as in the observed fit; the diagonal is never
+   used.
+6. Release note: LR-QAP now defaults to double semi-partialling; Y-permutation
+   remains available.
+
+Found while doing it (18 Oct 2026), in 6.849's LR-QAP:
+
+- `ulogisticregressionnr` inverts X'VX by SVD, and the pseudo-inverse drops the tiny
+  singular values of a separated fit, so the steps shrink and the fit "converges" with
+  coefficients near -16: separated permutations were kept, not detected.
+- `tunivariate.addcase` counts with exact comparisons, so permuted statistics equal to the
+  observed one up to rounding (automorphisms; common on small networks) count as smaller.
+  On the 5-node test the DSP p-value was 0.118 against an exact 0.236.
+- With missing cells the predicted-values matrix was misplaced: the fitter wrote the fitted
+  probabilities in valid-row order and `saveresiduals` read them by cell.
+
+**What xucinet does:** as above since #38 (18 Oct 2026); ledger entry 49. Values within
+1e-10 (relative) of the observed statistic are ties (perm_summary).
+
+**Fix (done in 6.850, tools `G1Tools/ulrqap.pas`, ucinet `uc_lrqap.pas`/`.dfm`,
+`Xdpmat.pas` `runlrqap`; ucinet #45):** the method choice as above; LR-QAP fits with its own
+Newton-Raphson (`lrfit`: from zero, 20 iterations, every step <= 1e-4, pivoted elimination,
+SE at the final coefficients; the same fit as xucinet's `lr_fit`); permuted values within
+1e-10 of the observed count as ties; predicted values indexed by cell; failed fits counted in
+the log; the CLI command `lrqap(<y> <x1> [<x2> ...] [dsp|yperm] [sym] [<nperm> [<seed>]])`.
+Tests: `C:\Dev\ucinet\Planning\tests\lrqap\` (25/25 against xucinet).
+
+---
+
 ## Fixed since this list started
 
 - **Local Sparsification (L-Spar)** — **fixed in UCINET 6.850** (entry 45): the d^e keep rule,

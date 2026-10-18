@@ -154,23 +154,24 @@
       
       Dependent variable:                     Advice
       Independent variables:                  Friendship, ReportTo
+      Method:                                 Double Dekker semi-partialling
       Data are:                               Non-symmetric
       Random seed:                            1
       Input dataset:                          Advice
       Note:                                   Dependent variable dichotomized: values above 0 are ties.
       Note:                                   The r-squared shown is McFadden's pseudo r-squared.
-      Note:                                   50 permutations; p-values are 2-tailed.
+      Note:                                   50 permutations by Double Dekker semi-partialling; p-values are 2-tailed, from the t-statistics; the model's significance by Y-permutation.
       
       
       
       Overall fit of the logistic regression model
       
-                           1        2        3        4        5 
-                          LL    R-Sqr      Sig      Obs    Perms 
-                    -------- -------- -------- -------- -------- 
-           1 Advice -274.073    0.052    0.020      420       50 
+                           1        2        3        4        5        6 
+                          LL    R-Sqr      Sig      Obs    Perms   Failed 
+                    -------- -------- -------- -------- -------- -------- 
+           1 Advice -274.073    0.052    0.020      420       50        0 
       
-      1 rows, 5 columns, 1 levels.
+      1 rows, 6 columns, 1 levels.
       
       LR Coefficients & Permutation Results (T-stats used in permutations)
       
@@ -179,8 +180,8 @@
                                     t                                                                
                         ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ 
            1  Intercept -0.425  0.654 -3.666                                                         
-           2 Friendship  0.579  1.785  2.418  0.118  0.054 -0.703  0.867  0.329  0.078  0.941  0.118 
-           3   ReportTo  3.059 21.306  2.957  0.020 -0.122 -1.041  1.009  0.437  0.020  1.000  0.020 
+           2 Friendship  0.579  1.785  2.418  0.137 -0.029 -0.836  0.728  0.383  0.098  0.922  0.137 
+           3   ReportTo  3.059 21.306  2.956  0.020 -0.116 -1.489  0.708  0.491  0.020  1.000  0.020 
       
       3 rows, 11 columns, 1 levels.
       

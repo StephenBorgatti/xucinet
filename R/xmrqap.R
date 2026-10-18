@@ -34,11 +34,17 @@
 # are obtained. Defaults: 2000 permutations, 2-tailed, t-statistics tracked.
 #
 # LR-QAP: logistic regression of the dichotomized Y (> 0) on the X's by
-# maximum likelihood, Y permuted against the fixed X's, each coefficient's
-# Wald t compared with the observed; the model's significance is the
-# proportion of permuted log-likelihoods as large. McFadden's pseudo R-square.
-# Defaults: 1000 permutations, 2-tailed, data treated as non-symmetric (both
-# triangles), as the dialog.
+# maximum likelihood (Newton-Raphson from zero, 20 iterations, steps <= 1e-4,
+# as ulogisticregressionnr), each coefficient's Wald z (labelled T) compared
+# with its permutation distribution. Double Dekker semi-partialling (default
+# since UCINET 6.850, UCINET-ISSUES 47; xucinet #38): X_k's OLS residual on the
+# other X's is permuted in X_k's place and the logistic model refitted, as for
+# MRQAP; or Y permuted against the fixed X's. The model's significance is the
+# proportion of Y-permuted log-likelihoods as large (pseudo R-squares with
+# missing data) under either method. Permutations whose fit fails (no
+# convergence, singular information: separation) are left out and counted.
+# McFadden's pseudo R-square. Defaults: 1000 permutations, 2-tailed, data
+# treated as non-symmetric (both triangles), as the dialog.
 
 #' Multiple regression QAP
 #'
@@ -154,87 +160,191 @@ xmrqap <- function(formula, nets, nperm = 2000, method = c("dsp", "yperm"),
 #'
 #' UCINET: Tools | Testing Hypotheses | Dyadic (QAP) | LR-QAP Logistic
 #' Regression. Logistic regression of a binary network on others, cell by
-#' cell, with p-values from permuting the dependent network's rows and columns
-#' together (book, 14.5.2). The dependent network is dichotomized (values
-#' above 0 are ties).
+#' cell, with p-values from QAP permutations (book, 14.5.2). The dependent
+#' network is dichotomized (values above 0 are ties).
+#'
+#' `method = "dsp"`, the default, is Dekker, Krackhardt and Snijders' (2007)
+#' double semi-partialling, as in [xmrqap()]: each predictor is regressed on
+#' the others by ordinary least squares, the residual matrix is permuted (rows
+#' and columns together) and put in the predictor's place, the logistic model
+#' is refitted, and the predictor's z (b / SE, labelled T) is compared with its
+#' permutation distribution. Since the residual differs from the predictor by
+#' a linear combination of the other predictors, the observed coefficient,
+#' standard error and z are those of the original model. `method = "yperm"`
+#' permutes the dependent network against the fixed predictors instead.
+#' Either way the model's significance comes from permuting the dependent
+#' network (the test of the hypothesis that no predictor matters).
+#'
+#' The model is fitted by Newton-Raphson from zero, as UCINET fits it, and a
+#' fit has failed when it has not converged in 20 iterations (every step at
+#' most 1e-4) or its information matrix is singular. Complete or
+#' quasi-complete separation shows up this way. A permutation whose fit fails
+#' gives no value and is left out of that test's proportions; the number left
+#' out is reported (`$summary$Failed` and the notes). A model that fails on the
+#' observed data is an error.
 #'
 #' @section UCINET equivalent:
 #' Tools | Testing Hypotheses | Dyadic (QAP) | LR-QAP Logistic Regression.
-#' *Number of permutations* is `nperm`, *P-values* is `tails`, *Data are*
-#' symmetric is `symmetric = TRUE`.
+#' *Permutation method* is `method` (Double Dekker semi-partialling or
+#' Y-permutation), *Number of permutations* is `nperm`, *P-values* is
+#' `tails`, *Data are* symmetric is `symmetric = TRUE`.
 #'
 #' @inheritParams xmrqap
 #' @param nperm Number of random permutations. UCINET's default is 1000.
+#' @param method `"dsp"` (the default) or `"yperm"`.
 #' @param symmetric Use only one triangle? `FALSE` by default, as the dialog.
 #' @return An object of class `c("xlrqap", "xucinet_output")`. `$summary`:
 #'   log-likelihood, McFadden's pseudo R-square, the significance of the
-#'   model, the number of observations and permutations. `$matrices`: the
-#'   coefficients, odds ratios, t, the p-value, the mean, minimum, maximum and
-#'   sd of the permuted coefficients and the three proportions.
+#'   model, the number of observations and permutations, and the number of
+#'   permuted fits that failed (over every test). `$matrices`: the
+#'   coefficients, odds ratios, z (T), the p-value, the mean, minimum, maximum
+#'   and sd of the permuted coefficients and the three proportions. The method
+#'   is the report's `Method:` field (`$fields`).
+#' @references Dekker, D., Krackhardt, D. and Snijders, T. A. B. (2007).
+#'   Sensitivity of MRQAP tests to collinearity and autocorrelation
+#'   conditions. *Psychometrika* 72(4), 563-581.
 #' @seealso [xmrqap()].
 #' @examples
 #' xlrqap(Advice ~ Friendship + ReportTo, hightech, nperm = 100, seed = 1)
 #' @export
-xlrqap <- function(formula, nets, nperm = 1000, seed = NULL, tails = 2,
-                   symmetric = FALSE) {
+xlrqap <- function(formula, nets, nperm = 1000, method = c("dsp", "yperm"),
+                   seed = NULL, tails = 2, symmetric = FALSE) {
+  method <- match.arg(method)
   tails <- check_tails(tails)
   d <- qap_design(formula, nets, sym = isTRUE(symmetric))
   n <- d$n
   y01 <- (d$y > 0) * 1
   X <- cbind(Intercept = 1, d$xmat)
-  fit <- function(yv) {
-    use <- d$xok & !is.na(yv)
-    if (length(unique(yv[use])) < 2) return(NULL)
-    g <- suppressWarnings(stats::glm.fit(X[use, , drop = FALSE], yv[use],
-                                         family = stats::binomial()))
-    b <- g$coefficients
-    se <- tryCatch(sqrt(diag(chol2inv(qr.R(g$qr)))), error = function(e) rep(NA, length(b)))
-    ll <- sum(stats::dbinom(yv[use], 1, g$fitted.values, log = TRUE))
-    p0 <- mean(yv[use])
-    ll0 <- sum(stats::dbinom(yv[use], 1, p0, log = TRUE))
-    list(b = b, t = b / se, ll = ll, r2 = 1 - ll / ll0, nobs = sum(use))
-  }
+  k1 <- ncol(X)
   yobs <- y01[d$cells]
   if (length(unique(yobs[d$xok & !is.na(yobs)])) < 2) {
     stop("xlrqap(): the dependent variable is a constant.", call. = FALSE)
   }
-  obs <- fit(yobs)
+  obs <- lr_fit(X, yobs, d$xok)
+  if (obs$failed) {
+    stop("xlrqap(): the logistic regression does not converge on these data ",
+         "(complete or quasi-complete separation, or collinear predictors).",
+         call. = FALSE)
+  }
   perms <- qap_perms(n, nperm, seed, NULL)
   hasmiss <- obs$nobs < length(d$cells)
+
+  # Y permutation: the model's significance under either method, and the
+  # coefficients' under method = "yperm"
   stat <- function(p) {
-    f <- fit(y01[p, p][d$cells])
-    if (is.null(f)) return(rep(NA_real_, 2 * ncol(X) + 1))
+    f <- lr_fit(X, y01[p, p][d$cells], d$xok)
+    if (is.null(f) || f$failed) return(rep(NA_real_, 2 * k1 + 1))
     c(f$t, f$b, if (hasmiss) f$r2 else f$ll)
   }
-  k1 <- ncol(X)
   res <- perm_test(stat, n, nperm, tails = tails, perms = perms,
                    observed = c(obs$t, obs$b, if (hasmiss) obs$r2 else obs$ll))
   ti <- seq_len(k1); bi <- k1 + ti
+  failed <- c(Model = nperm - res$n[2 * k1 + 1])
+  sig <- res$sig[ti]; ge <- res$ge[ti]; le <- res$le[ti]; ext <- res$ext[ti]
+  avg <- res$mean[bi]; mn <- res$min[bi]; mx <- res$max[bi]; sdv <- res$sd[bi]
+
+  if (method == "dsp" && nperm >= 1) {
+    for (j in 2:k1) {
+      r <- lr_dsp_one(d, X, yobs, j, obs, perms, tails)
+      sig[j] <- r$t$sig; ge[j] <- r$t$ge; le[j] <- r$t$le; ext[j] <- r$t$ext
+      avg[j] <- r$b$mean; mn[j] <- r$b$min; mx[j] <- r$b$max; sdv[j] <- r$b$sd
+      failed[colnames(X)[j]] <- nperm - r$t$n
+    }
+  }
+
   blank <- function(v) { v[1] <- NA; v }
   tab <- cbind(Coef = obs$b, OddsRat = exp(obs$b), T = obs$t,
-               Sig = blank(res$sig[ti]), Avg = blank(res$mean[bi]),
-               Min = blank(res$min[bi]), Max = blank(res$max[bi]),
-               SD = blank(res$sd[bi]), `P(ge)` = blank(res$ge[ti]),
-               `P(le)` = blank(res$le[ti]), `P(ext)` = blank(res$ext[ti]))
-  rownames(tab) <- c("Intercept", d$xnames)
+               Sig = blank(sig), Avg = blank(avg), Min = blank(mn),
+               Max = blank(mx), SD = blank(sdv), `P(ge)` = blank(ge),
+               `P(le)` = blank(le), `P(ext)` = blank(ext))
+  rownames(tab) <- colnames(X)
+  nfail <- sum(failed)
+  mname <- if (method == "dsp") "Double Dekker semi-partialling" else "Y-permutation"
 
   new_xucinet_output(
     "Logistic Regression QAP", list(title = d$yname),
     summary = list(LL = obs$ll, `R-Sqr` = obs$r2, Sig = res$ge[2 * k1 + 1],
-                   Obs = obs$nobs, Perms = nperm),
+                   Obs = obs$nobs, Perms = nperm, Failed = nfail),
     matrices = list(
       `LR Coefficients & Permutation Results (T-stats used in permutations)` = tab),
     assumptions = c(
       "Dependent variable dichotomized: values above 0 are ties.",
       "The r-squared shown is McFadden's pseudo r-squared.",
       if (hasmiss) "Your data have missing values; the model's significance compares pseudo r-squares.",
-      sprintf("%d permutations; p-values are %d-tailed.", nperm, tails)),
+      sprintf("%d permutations by %s; p-values are %d-tailed, from the t-statistics%s.",
+              nperm, mname, tails,
+              if (method == "dsp") "; the model's significance by Y-permutation" else ""),
+      if (nfail > 0) paste0(
+        "Permuted fits that failed (no convergence or separation), left out: ",
+        if (method == "dsp")
+          paste(names(failed), failed, sep = " ", collapse = "; ")
+        else failed[["Model"]], ".")),
     fields = c("Dependent variable:" = d$yname,
                "Independent variables:" = paste(d$xnames, collapse = ", "),
+               "Method:" = mname,
                "Data are:" = if (isTRUE(symmetric)) "Symmetric" else "Non-symmetric",
                "Random seed:" = if (is.null(seed)) "(R session)" else format(seed)),
     summary_title = "Overall fit of the logistic regression model",
     subclass = "xlrqap", call = match.call())
+}
+
+# Logistic regression of yv (0/1) on X over the cells `ok` where yv is
+# present, as ulogisticregressionnr fits it: Newton-Raphson from zero, at most
+# 20 iterations, converged when every step is at most 1e-4 (singletolerance).
+# `failed` when it has not converged or X'VX is singular; that is how complete
+# and quasi-complete separation show. SE and z are taken at the final
+# coefficients. NULL when yv is constant over the cells used.
+lr_fit <- function(X, yv, ok) {
+  use <- ok & !is.na(yv)
+  Xu <- X[use, , drop = FALSE]
+  yu <- yv[use]
+  if (length(unique(yu)) < 2) return(NULL)
+  b <- numeric(ncol(Xu))
+  info <- function(b) {
+    pr <- 1 / (1 + exp(-drop(Xu %*% b)))
+    list(pr = pr, xvx = crossprod(Xu * (pr * (1 - pr)), Xu))
+  }
+  converged <- FALSE
+  for (it in seq_len(20)) {
+    s <- info(b)
+    step <- tryCatch(solve(s$xvx, crossprod(Xu, yu - s$pr)),
+                     error = function(e) NULL)
+    if (is.null(step) || anyNA(step)) break
+    b <- b + drop(step)
+    if (all(abs(step) <= 1e-4)) { converged <- TRUE; break }
+  }
+  s <- info(b)
+  v <- tryCatch(solve(s$xvx), error = function(e) NULL)
+  failed <- !converged || is.null(v)
+  se <- if (is.null(v)) rep(NA_real_, length(b)) else sqrt(pmax(diag(v), 0))
+  pr <- s$pr
+  ll <- sum(ifelse(yu > 0, log(pr), log(1 - pr)))
+  p0 <- mean(yu)
+  ll0 <- sum(ifelse(yu > 0, log(p0), log(1 - p0)))
+  names(b) <- colnames(X)
+  list(b = b, t = b / se, ll = ll, r2 = 1 - ll / ll0, nobs = sum(use),
+       failed = failed)
+}
+
+# Double semi-partialling for column jx of X (not the intercept): the OLS
+# residual of X_jx on the other columns over the cells the observed model
+# used, permuted rows and columns together, in X_jx's place; the logistic
+# refit's z and b for that term.
+lr_dsp_one <- function(d, X, yobs, jx, obs, perms, tails) {
+  n <- d$n
+  use0 <- d$xok & !is.na(yobs)
+  Z <- X[, -jx, drop = FALSE]
+  rj <- stats::lm.fit(Z[use0, , drop = FALSE], X[use0, jx])$residuals
+  R <- matrix(NA_real_, n, n); R[d$cells[use0]] <- rj
+  if (d$sym) R[upper.tri(R)] <- t(R)[upper.tri(R)]
+  draws <- vapply(perms, function(p) {
+    xk <- R[p, p][d$cells]
+    Xp <- X; Xp[, jx] <- xk
+    f <- lr_fit(Xp, yobs, use0 & !is.na(xk))
+    if (is.null(f) || f$failed) c(NA_real_, NA_real_) else c(f$t[[jx]], f$b[[jx]])
+  }, numeric(2))
+  list(t = perm_summary(obs$t[[jx]], draws[1, , drop = FALSE], tails),
+       b = perm_summary(obs$b[[jx]], draws[2, , drop = FALSE], tails))
 }
 
 # ---- shared machinery -----------------------------------------------------------

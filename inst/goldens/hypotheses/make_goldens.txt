@@ -30,7 +30,14 @@
 
 // --- LR-QAP Logistic Regression --------------------------------------------------
 // Same variables; 1000 permutations; T-Statistics; 2-tailed; Data are:
-// Non-symmetric.  -> Coefficients dataset  g14_lrqap_hightech
+// Non-symmetric; Permutation method: Double Dekker semi-partialling (the
+// 6.850 default; UCINET-ISSUES 47).  -> Coefficients dataset  g14_lrqap_hightech
+// Keep the log: it gives the number of permutations whose fit failed.
+// The same with Permutation method: Y-permutation.
+//   -> Coefficients dataset  g14_lrqap_hightech_yperm
+// Driver lines (6.850), with the inputs unpacked as Advice, Friendship, ReportTo:
+//   dialog menu:LRQAPLogisticRegression1 inputdep=Advice InputInd="Friendship\nReportTo" noperms=1000 randomseed=1 PermMethod=#0 CoefFn=g14_lrqap_hightech ok log:g14_lrqap_hightech.log
+//   dialog menu:LRQAPLogisticRegression1 inputdep=Advice InputInd="Friendship\nReportTo" noperms=1000 randomseed=1 PermMethod=#1 CoefFn=g14_lrqap_hightech_yperm ok log:g14_lrqap_hightech_yperm.log
 
 // --- Node-level | Regression ------------------------------------------------------
 // Dependent: campnet's outdegree is constant, so use camp92 attributes:

@@ -13,5 +13,6 @@ of them.
 |---|---|---|
 | `g14_qap_padgett` | `xqap` | QAP results, Marriage by Business |
 | `g14_mrqap_hightech` | `xmrqap` | Dekker coefficients, Advice on Friendship and ReportTo |
-| `g14_lrqap_hightech` | `xlrqap` | LR-QAP coefficients, same model |
+| `g14_lrqap_hightech` | `xlrqap` | LR-QAP coefficients, same model, double semi-partialling (6.850 default) |
+| `g14_lrqap_hightech_yperm` | `xlrqap(method = "yperm")` | the same by Y permutation |
 | `g14_nodereg_camp92_coef` | `xregression` | node-level regression coefficients |
