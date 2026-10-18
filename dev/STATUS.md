@@ -424,8 +424,8 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. Open: #39 (`steve`, separation handling in LR-QAP); #38 stays open until Steve has seen the
-   Table 14.3/14.4 comparison (asnr2e T34-T37). The book side is in `asnr2e/STATUS.md`.
+0. Open: #39 (`steve`, separation handling in LR-QAP). #38 done (e893b90); its book side is
+   asnr2e T34-T37 and `asnr2e/STATUS.md`.
    UCINET side of the Supreme Court corrections: rebuild both `Datafiles.zip` in the ucinet
    repo (ucinet #43).
 1. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
