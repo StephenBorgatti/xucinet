@@ -903,6 +903,13 @@ residual. Ledger entry 41.
 fallback path, rebuild the design matrix per permutation over the cells valid
 after permuting.
 
+**More evidence (18 October 2026, testing entry 49):** on a 6-cycle against a function of its
+distances the fast path's coefficient p is 0.231 and on its directed version 0.038, where the
+exact p of b / SE² (and of t) over all 720 permutations is 1/60 and 1/120. Its permuted
+statistics average -5.4 and -1.1 where b / SE² averages 0.0, so the fast path computes
+something other than b / SE² as well; not yet traced. The R-square test is right on both.
+Tests: `C:\Dev\ucinet\Planning\tests\ties\`.
+
 ---
 
 ## 32. MRQAP (Y permutation): symmetry is decided without looking at Y
@@ -1398,6 +1405,74 @@ that table).
 Found with it: a whole-number column holding a value above 2^31 printed NA (`formatC(format
 = "d")`); now fixed. Tests: `C:\Dev\ucinet\Planning\tests\lrqap\` (run (6), 54/54);
 xucinet `test-output.R`.
+
+---
+
+## 49. Permutation counts compare exactly: rounding-level ties count as smaller
+
+**bug** · **fixed in UCINET 6.850** · found 18 October 2026 (on #39), decided the same day (Steve: "yes")
+
+Every permutation test counts a permuted statistic as at least as large as the observed one
+with an exact `>=`. A permutation that reproduces the observed arrangement (an automorphism,
+or any permutation that keeps the statistic, common on small networks) computes the same value
+from the cells in another order, and in floating point it can land a hair below; it is then
+counted as smaller and p comes out too small. On LR-QAP's 5-node test the DSP p-value was
+0.118 against an exact 0.236; on a 6-cycle against a function of its distances (see Tests),
+Double Dekker MR-QAP's coefficient p went from 0.187 to 0.231 when ties were counted.
+
+**Rule (Steve, 18 Oct 2026):** values within 1E-10 * max(1, |observed|) of the observed
+statistic are ties, as xucinet's `perm_summary` has always done.
+
+**Fix (6.850, tools):** `utunivariate` gains `permge`, `permle`, `permext` and an optional
+`tie` argument on `tunivariate.addcase`; used by QAP correlation (`utqapsim`, Fast and
+Detailed, parallel and serial), MR-QAP by Double Dekker semi-partialling (`umrqapdekker`, both
+paths) and its R-square test (`urestrictedqap`), MR-QAP by Y permutation (ucinet `xmrqapna`)
+and node-level regression (`uMtxvecRegression.getypermsig`). LR-QAP has done it since #39
+(entry 47). Other permutation routines (homophily, ANOVA density, ego-network tests) still
+compare exactly.
+
+**What xucinet does:** the rule, in every permutation test (`perm_summary`).
+
+Tests: `C:\Dev\ucinet\Planning\tests\ties\` (`compare_ties.R`, against the exact p-values
+from all 720 permutations and against xucinet).
+
+---
+
+## 50. MR-QAP (Y permutation), symmetric data: each permutation uses a random subset of the dyads
+
+**bug** · **open — fix pending** · found 18 October 2026 (testing entry 49)
+
+`xmrqapna.pas`. With symmetric data `readdata` marks only the lower-triangle cells valid
+(`ijok`), but `createcolumnvars` reads the X's at the permuted cell (`dsl[i], dsl[j]`) and
+keeps it only if `valid` is set there, so every cell whose permuted pair lands in the upper
+triangle is dropped. Each permutation's regression runs on a random subset of the dyads and
+the permutation distribution is wrong. On a 6-cycle against a function of its distances (15
+dyads; exact p 1/60) the coefficient's p is 0.051 and R-square's 0.069; on the directed
+version of the same data (both triangles) the routine is right (0.009 against an exact
+0.0083).
+
+**What xucinet does:** permutes the whole matrix (`mrqap_yperm`). Its own DSP R-square test
+had the same flaw (the fitted values were stored in one triangle) and was fixed the same day.
+
+**Fix:** set `valid` in both triangles when the data are symmetric (or look `valid` up at
+`max(ii,jj), min(ii,jj)`).
+
+---
+
+## 51. QAP correlation (Detailed, parallel) and MR-QAP's R-square test are not reproducible
+
+**bug** · **open — fix pending** · found 18 October 2026 (testing entry 49)
+
+- QAP correlation, Detailed, parallel (`utqapsim.runpermutations`, `runparallel`): the counts
+  use `tinterlocked`, but `s[i].addcase` updates the shared `tunivariate` from every thread
+  without a lock, so the N Obs, Average and Std Dev columns vary from run to run with the same
+  seed (4999 and 4998 instead of 5000). The p-values are not affected.
+- Double Dekker MR-QAP's R-square test (`urestrictedqap`, called by
+  `tmrqapdekker.runrsquaredpermutations`) does not use the dialog's seed reproducibly: the same
+  seed gave 0.014, 0.022 (parallel) and 0.015, 0.014 (serial) in four runs of the same data.
+
+**Fix:** a lock (or per-thread accumulators) around `s[i].addcase`; seed the R-square
+permutations from the dialog's seed, one per permutation, as the coefficients' are.
 
 ---
 

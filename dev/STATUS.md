@@ -97,8 +97,18 @@ batch at the end.** Design questions for all remaining chapters are batched in
   coefficient table (always present, equal when nothing failed); a `Failed` column per term
   (not printed) and `$summary$Failed` for the model's test; the report prints `Sig.Upper` and
   a note after the table only when some fit failed. UCINET 6.850 the same (tools
-  `ulrqap.pas`, `uc_lrqap.pas`, CLI `lrqap()`): 49/49 in
+  `ulrqap.pas`, `uc_lrqap.pas`, CLI `lrqap()`): 54/54 in
   `ucinet/Planning/tests/lrqap/compare_lrqap.out.txt`.
+- **Reports: huge values in exponent form (18 Oct, UCINET-ISSUES 48).** `format_values()`
+  prints a value of 1e10 or more as `1.631E+31`, as UCINET 6.850's `tmat.display`; whole
+  numbers above 2^31 no longer print `NA`.
+- **Permutation ties in UCINET (18 Oct, UCINET-ISSUES 49, Steve).** UCINET 6.850's QAP
+  correlation, MR-QAP and node-level regression now count values within 1e-10 of the observed
+  statistic as ties, as xucinet always has; `ucinet/Planning/tests/ties/` (20/20 against the
+  exact p-values of all 720 permutations of a 6-cycle, and against xucinet). It found a bug of
+  ours: `xmrqap(method = "dsp")`'s R-square test on symmetric data ran on a random subset of
+  the dyads (fitted values stored in one triangle); fixed. UCINET's Y-permutation MRQAP has
+  the same flaw (UCINET-ISSUES 50, ledger 41).
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
@@ -154,7 +164,20 @@ batch at the end.** Design questions for all remaining chapters are batched in
   the one-sided proportion "larger than or equal to the observed value"; two-tailed with
   absolute values is our (and UCINET's) convention.
 
-## Done this session (18 Oct 2026, Claude Code, #39)
+## Done this session (18 Oct 2026, Claude Code, Steve's answers on the tie rule and LR-QAP's output)
+
+- UCINET-ISSUES 48 (report layout, from Steve's LR-QAP log): `format_values()` exponent form
+  from 1e10, and its `formatC(format = "d")` overflow above 2^31 fixed (it printed `NA`; `-0`
+  still prints `0`). Test in `test-output.R`. NEWS.
+- UCINET-ISSUES 49 (the tie rule, done on the UCINET side), 50 (UCINET Y-permutation MRQAP,
+  symmetric data, open) and 51 (two reproducibility bugs in UCINET, open); more evidence on 31.
+- `xmrqap(method = "dsp")` R-square test on symmetric data: the fitted matrix is mirrored
+  before permuting (it ran on a random subset of the dyads; 6-cycle p 0.045 -> about 1/60).
+  Test "symmetric data: the DSP R-square test permutes the whole fitted matrix". Table 14.3
+  (hightech, asymmetric) is unaffected. Ledger 41 gains issue 50. NEWS.
+  `devtools::check()`: 0 errors, 0 warnings, 0 notes.
+
+## Done earlier on 18 Oct 2026 (Claude Code, #39)
 
 - From asnr2e `docs/prompts/lrqap-failures.md` (Steve's decision on #39). `xlrqap()`:
   `Sig.Upper` beside `Sig` in `$summary` and the coefficient table, `Failed` column per term
@@ -644,14 +667,13 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   `method`); one display rule for both tables (any failure in any test shows `Sig.Upper` in
   both); UCINET's saved datasets always carry `Sig.Upper` and `Failed`, since a saved
   dataset's columns follow the dialog's options (Betas / T-statistics), not the run's outcome.
+- 18 Oct 2026 (Steve, former open question 1): UCINET's QAP correlation, MR-QAP and
+  node-level regression count values within 1e-10 * max(1, |obs|) of the observed statistic
+  as ties, xucinet's rule (UCINET-ISSUES 49).
 
 ## Open questions for Steve
 
-1. (18 Oct 2026) UCINET's permutation counters (`tunivariate.addcase`) compare with no
-   tolerance, so a permuted statistic equal to the observed one up to rounding can count as
-   smaller; xucinet treats values within 1e-10 (relative) as ties. LR-QAP now does the same in
-   UCINET (it mattered on the 5-node separation test: 0.118 against an exact 0.236). Apply the
-   same rule to UCINET's other permutation routines (QAP correlation, MRQAP, node-level
-   regression)? Not yet a UCINET-ISSUES entry.
+(Former question 1, the tie rule in UCINET, answered 18 Oct: see Decisions.) UCINET-side
+questions on UCINET-ISSUES 50, 51 and 31 are in `ucinet/STATUS.md`.
 
 

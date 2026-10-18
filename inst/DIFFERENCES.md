@@ -776,6 +776,10 @@ correlation and the ANOVA density models, 2000 for MRQAP, 1000 for LR-QAP.
   permuting, where UCINET's column falls out of step.
 - Y permutation: UCINET decides whether to use one triangle from the X's
   alone; xucinet requires Y and every X to be symmetric.
+- Y permutation, symmetric data (UCINET issue 50, found 18 October 2026):
+  UCINET marks only the lower triangle valid and then drops every permuted cell
+  that lands in the upper one, so each permutation's regression uses a random
+  subset of the dyads; xucinet permutes the whole matrix.
 - Both methods return the same table (robust SE and t, the proportions, the
   permuted coefficients' mean and sd, the collinearity diagnostics); `method`
   changes only how the p-values are obtained.

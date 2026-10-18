@@ -109,6 +109,10 @@ xmrqap <- function(formula, nets, nperm = 2000, method = c("dsp", "yperm"),
   if (method == "dsp") {
     # R-square: QAP correlation of Y with the fitted values, as large
     yhat <- matrix(NA_real_, n, n); yhat[d$cells[obs$use]] <- obs$fitted
+    # one triangle: mirror it, or a permutation that maps a cell into the
+    # other triangle reads NA there and the test runs on a random subset
+    # of the dyads (as dsp_one does for its residuals; UCINET-ISSUES 50)
+    if (d$sym) yhat[upper.tri(yhat)] <- t(yhat)[upper.tri(yhat)]
     rq <- perm_test(function(p) qap_r(d$y, yhat[p, p], d$cells), n, nperm,
                     perms = perms)
     fitp <- rq$ge

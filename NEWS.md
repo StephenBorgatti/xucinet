@@ -1,5 +1,15 @@
 # xucinet 2.0.0.9000 (development)
 
+## MRQAP: the R-square test on symmetric data (18 October 2026)
+
+* `xmrqap(method = "dsp")` on symmetric data: the R-square test stored the
+  fitted values in one triangle, so a permutation that moved a cell into the
+  other read a missing value there and the test ran on a random subset of the
+  dyads. It now permutes the whole fitted matrix. On a 6-cycle the p-value went
+  from about 0.045 to the exact 1/60. Asymmetric data (the book's Table 14.3)
+  are unaffected. UCINET's Y-permutation MRQAP has the same flaw for its
+  coefficients and R-square (UCINET-ISSUES 50, fix pending; ledger entry 41).
+
 ## Printed reports: huge values (18 October 2026)
 
 * A value of 1e10 or more in size now prints in exponent form (`1.631E+31`),

@@ -232,6 +232,24 @@ test_that("an asymmetric Y is used whole even when the X's are symmetric (issue 
   expect_length(d$cells, 21 * 20)
 })
 
+test_that("symmetric data: the DSP R-square test permutes the whole fitted matrix", {
+  # A 6-cycle against a function of the distance in it: 12 of the 720
+  # permutations reach the observed |r|, so the exact p is 1/60. The fitted
+  # values were stored in one triangle only, so a permutation that moved a
+  # cell into the other read NA there and the test ran on a random subset of
+  # the dyads (p about 0.045). UCINET's Y-permutation MRQAP does the same
+  # (issue 50); its DSP R-square test does not.
+  expect_differs_from_ucinet(50)
+  n <- 6
+  d <- outer(1:n, 1:n, function(i, j) pmin(abs(i - j), n - abs(i - j)))
+  y <- (d == 1) * 1
+  x <- matrix(c(0, 0.1, 0.7, 0.3)[d + 1], n)
+  for (m in c("dsp", "yperm")) {
+    p <- xmrqap(Y ~ X, list(Y = y, X = x), nperm = 5000, seed = 1, method = m)$summary$`P(R-Sqr)`
+    expect_lt(abs(p - 1 / 60), 3 * sqrt((1 / 60) * (59 / 60) / 5000) + 2 / 5000)
+  }
+})
+
 test_that("a partition keeps permutations within groups", {
   g <- rep(1:3, 7)
   ps <- qap_perms(21, 50, 1, g)
