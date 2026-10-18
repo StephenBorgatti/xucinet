@@ -32,12 +32,18 @@ multi-relation network whose relations the formula names.}
 }
 \value{
 An object of class \code{c("xlrqap", "xucinet_output")}. \verb{$summary}:
-log-likelihood, McFadden's pseudo R-square, the significance of the
-model, the number of observations and permutations, and the number of
-permuted fits that failed (over every test). \verb{$matrices}: the
-coefficients, odds ratios, z (T), the p-value, the mean, minimum, maximum
-and sd of the permuted coefficients and the three proportions. The method
-is the report's \verb{Method:} field (\verb{$fields}).
+log-likelihood (\code{LL}), McFadden's pseudo R-square (\code{R-Sqr}), the
+significance of the model (\code{Sig}, failed fits left out, and \code{Sig.Upper},
+failed fits counted as extreme), the number of observations (\code{Obs}) and
+permutations (\code{Perms}), and the number of permuted fits that failed in
+the model's test (\code{Failed}, the Y permutations). \verb{$matrices}: the
+coefficient table, one row per term: the coefficients (\code{Coef}), odds
+ratios, z (\code{T}), the two p-values (\code{Sig}, \code{Sig.Upper}), the mean, minimum,
+maximum and sd of the permuted coefficients, the three proportions, and
+\code{Failed}, the number of that term's permuted fits that failed (its own
+permutations under \code{"dsp"}, the shared Y permutations under \code{"yperm"};
+kept in the object, not printed). The intercept's test columns are
+missing. The method is the report's \verb{Method:} field (\verb{$fields}).
 }
 \description{
 UCINET: Tools | Testing Hypotheses | Dyadic (QAP) | LR-QAP Logistic
@@ -61,10 +67,18 @@ network (the test of the hypothesis that no predictor matters).
 The model is fitted by Newton-Raphson from zero, as UCINET fits it, and a
 fit has failed when it has not converged in 20 iterations (every step at
 most 1e-4) or its information matrix is singular. Complete or
-quasi-complete separation shows up this way. A permutation whose fit fails
-gives no value and is left out of that test's proportions; the number left
-out is reported (\verb{$summary$Failed} and the notes). A model that fails on the
-observed data is an error.
+quasi-complete separation shows up this way. Those permutations are not a
+random subset (separation is likeliest where the predictor looks strong), so
+each p-value is given as two bounds (xucinet #39): \code{Sig} leaves the failed
+permutations out, (1 + count) / (1 + permutations that converged), and
+\code{Sig.Upper} counts them as at least as extreme as the observed value,
+(1 + count + failed) / (1 + \code{nperm}). The true p-value lies between the two.
+Both columns are always in the object and are equal when nothing failed; the
+report prints \code{Sig.Upper} (in the model fit and the coefficient table) only
+when some permuted fit failed, and then adds a note after the table with the
+number that failed, per test under \code{"dsp"}. The proportions \code{P(ge)}, \code{P(le)}
+and \code{P(ext)} and the summaries of the permuted coefficients are over the fits
+that converged. A model that fails on the observed data is an error.
 }
 \section{UCINET equivalent}{
 

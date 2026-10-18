@@ -341,11 +341,84 @@ test_that("a permuted fit that separates is left out and counted (#39)", {
   for (meth in c("dsp", "yperm")) {
     r <- xlrqap(Y ~ X, list(Y = y, X = x), nperm = 300, seed = 2, method = meth)
     expect_gt(r$summary$Failed, 0)
-    expect_true(any(grepl("left out", r$assumptions)))
+    expect_true(any(grepl("did not converge", r$epilogue)))
   }
   # a separated observed model is an error
   y2 <- y; y2[4, 5] <- 0
   expect_error(xlrqap(Y ~ X, list(Y = y2, X = x), nperm = 0), "does not converge")
+})
+
+test_that("failed permuted fits give two p-values, checked by hand (#39)", {
+  # The 5-node case above. Every draw is refitted here with lr_fit() from the
+  # same permutations, and both bounds are computed from the counts:
+  # lower (1 + count) / (1 + converged), upper (1 + count + failed) / (1 + nperm).
+  x <- matrix(0, 5, 5); x[1, 2:5] <- 1; x[2, 3:4] <- 1
+  y <- matrix(0, 5, 5); y[1, 2] <- y[2, 3] <- y[4, 5] <- 1
+  nperm <- 300
+  perms <- qap_perms(5, nperm, 2, NULL)
+  cells <- which(row(x) != col(x))
+  X <- cbind(1, x[cells])
+  yobs <- y[cells]
+  ok <- rep(TRUE, length(cells))
+  obs <- lr_fit(X, yobs, ok)
+  tol <- 1e-10 * max(1, abs(obs$t[2]))
+  bounds <- function(z, o, ext) {
+    f <- sum(is.na(z)); z <- z[!is.na(z)]
+    k <- if (ext) sum(abs(z) >= abs(o) - tol) else sum(z >= o - 1e-10 * max(1, abs(o)))
+    c(lower = (1 + k) / (1 + nperm - f), upper = (1 + k + f) / (1 + nperm), failed = f)
+  }
+  # Y permutation: z of X and the log-likelihood, one set of draws for both
+  yp <- vapply(perms, function(p) {
+    f <- lr_fit(X, y[p, p][cells], ok)
+    if (is.null(f) || f$failed) c(NA, NA) else c(f$t[2], f$ll)
+  }, numeric(2))
+  hz <- bounds(yp[1, ], obs$t[2], TRUE)
+  hm <- bounds(yp[2, ], obs$ll, FALSE)
+  expect_gt(hz[["failed"]], 0)
+  r <- xlrqap(Y ~ X, list(Y = y, X = x), nperm = nperm, seed = 2, method = "yperm")
+  tab <- r$matrices[[1]]
+  expect_equal(unname(tab["X", c("Sig", "Sig.Upper", "Failed")]), unname(hz))
+  expect_equal(c(r$summary$Sig, r$summary$Sig.Upper, r$summary$Failed), unname(hm))
+  # DSP: the residual of X on the intercept is X minus its mean
+  e <- x - mean(x[cells]); diag(e) <- NA
+  dp <- vapply(perms, function(p) {
+    Xp <- X; Xp[, 2] <- e[p, p][cells]
+    f <- lr_fit(Xp, yobs, ok)
+    if (is.null(f) || f$failed) NA_real_ else f$t[2]
+  }, numeric(1))
+  hd <- bounds(dp, obs$t[2], TRUE)
+  expect_gt(hd[["failed"]], 0)
+  r <- xlrqap(Y ~ X, list(Y = y, X = x), nperm = nperm, seed = 2)
+  tab <- r$matrices[[1]]
+  expect_equal(unname(tab["X", c("Sig", "Sig.Upper", "Failed")]), unname(hd))
+  # the model's test is the Y permutation under DSP too
+  expect_equal(c(r$summary$Sig, r$summary$Sig.Upper, r$summary$Failed), unname(hm))
+  # the report: both columns, and the note with the counts per test
+  out <- paste(utils::capture.output(print(r)), collapse = " ")
+  expect_match(out, "Sig.Up", fixed = TRUE)
+  expect_match(out, sprintf("%d of the %d permuted fits did not converge (%d per test: the model %d, X",
+                            hm[["failed"]] + hd[["failed"]], 2 * nperm, nperm, hm[["failed"]]),
+               fixed = TRUE)
+  expect_true(is.na(tab["Intercept", "Sig.Upper"]) && is.na(tab["Intercept", "Failed"]))
+})
+
+test_that("no failed fits: one p column printed, both equal in the object (#39)", {
+  top3 <- function(p) (p > 0 & p < 4) * 1
+  p0 <- top3(as.matrix(newfrat, relation = "PreferenceT00"))
+  nets <- list(week1 = top3(as.matrix(newfrat, relation = "PreferenceT01")),
+               week0 = p0, week0t = t(p0), twopaths = p0 %*% p0)
+  for (meth in c("dsp", "yperm")) {
+    r <- xlrqap(week1 ~ week0 + week0t + twopaths, nets, nperm = 200, seed = 1,
+                method = meth)
+    tab <- r$matrices[[1]]
+    expect_equal(r$summary$Failed, 0)
+    expect_equal(unname(tab[-1, "Failed"]), c(0, 0, 0))
+    expect_identical(tab[, "Sig.Upper"], tab[, "Sig"])
+    expect_identical(r$summary$Sig.Upper, r$summary$Sig)
+    out <- utils::capture.output(print(r))
+    expect_false(any(grepl("Sig.Up|did not converge", out)))
+    expect_null(r$epilogue)
+  }
 })
 
 test_that("LR-QAP DSP: missing cells are dropped listwise, the diagonal ignored", {
@@ -487,6 +560,9 @@ test_that("the reports print", {
                          seed = 1))
   expect_snapshot(xlrqap(Advice ~ Friendship + ReportTo, hightech, nperm = 50,
                          seed = 1))
+  x <- matrix(0, 5, 5); x[1, 2:5] <- 1; x[2, 3:4] <- 1
+  y <- matrix(0, 5, 5); y[1, 2] <- y[2, 3] <- y[4, 5] <- 1
+  expect_snapshot(xlrqap(Y ~ X, list(Y = y, X = x), nperm = 300, seed = 2))
   expect_snapshot(xmixing(campnet, camp92_attr$Gender, test = TRUE,
                           nperm = 100, seed = 1))
 })

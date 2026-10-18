@@ -1,5 +1,23 @@
 # xucinet 2.0.0.9000 (development)
 
+## LR-QAP: failed permuted fits give two p-values (18 October 2026)
+
+* When a permuted logistic fit fails to converge (almost always complete or
+  quasi-complete separation), `xlrqap()` now reports each p-value as two
+  bounds (Steve's decision, #39): `Sig` leaves the failed permutations out,
+  (1 + count) / (1 + permutations that converged), as before, and the new
+  `Sig.Upper` counts them as at least as extreme, (1 + count + failed) /
+  (1 + nperm). This covers the coefficients under both methods and the model's
+  significance. Both columns are always in `$summary` and the coefficient
+  table, equal when nothing failed; the report prints `Sig.Upper` only when
+  some permuted fit failed, followed by a note with the counts (per test under
+  `"dsp"`). Output without failures is unchanged.
+* The coefficient table has a new last column, `Failed`: the number of that
+  term's permuted fits that failed (not printed). `$summary$Failed` is now the
+  count for the model's test (the Y permutations); under `"dsp"` it used to be
+  the total over every test. The old "left out" note is replaced by the note
+  after the table. As UCINET 6.850's LR-QAP (UCINET-ISSUES 47).
+
 ## LR-QAP by double semi-partialling (18 October 2026)
 
 * `xlrqap()` gains `method = c("dsp", "yperm")`, the values `xmrqap()` uses,
@@ -17,9 +35,9 @@
   the fourth decimal against glm()'s default stopping point. A permuted fit
   that does not converge in 20 iterations (complete or quasi-complete
   separation) is left out of the proportions and counted in
-  `$summary$Failed` and the notes, under either method (#39 asks whether
-  they should count). A model that does not converge on the observed data is
-  now an error.
+  `$summary$Failed` and the notes, under either method (superseded by the
+  two p-values above, #39). A model that does not converge on the observed
+  data is now an error.
 
 ## xsparsify(): local sparsification (3 October 2026)
 

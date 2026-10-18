@@ -16,3 +16,8 @@ of them.
 | `g14_lrqap_hightech` | `xlrqap` | LR-QAP coefficients, same model, double semi-partialling (6.850 default) |
 | `g14_lrqap_hightech_yperm` | `xlrqap(method = "yperm")` | the same by Y permutation |
 | `g14_nodereg_camp92_coef` | `xregression` | node-level regression coefficients |
+
+The LR-QAP coefficient datasets from 6.850 have the columns `Coef OddsRat T Sig Sig.Upper
+Avg Min Max SD P(ge) P(le) P(ext) Failed` (xucinet #39), the same names and order as
+`xlrqap()`'s coefficient table; read them by name. On hightech no permuted fit is expected
+to fail, so `Sig.Upper` equals `Sig` and `Failed` is 0.

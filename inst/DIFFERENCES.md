@@ -864,7 +864,7 @@ order drawn afresh each pass, so that different seeds test a partition's
 robustness (book 11.4.2). UCINET's Louvain has only the fixed order, which stays
 the default.
 
-## 49. LR-QAP: double semi-partialling by default; failed permutations left out
+## 49. LR-QAP: double semi-partialling by default; failed permutations as two p-values
 
 **Status:** UCINET fix pending (UCINET-ISSUES 47, for 6.850; #38). 18 October
 2026, from the asnr2e chapter 14 prompt (`docs/prompts/ch14-dsp-default.md`).
@@ -873,6 +873,8 @@ UCINET 6.849's LR-QAP tests the coefficients by Y permutation only. `xlrqap()`
 uses double semi-partialling by default, as 6.850 will, and offers Y
 permutation as `method = "yperm"`; the model's significance is by Y permutation
 either way. Both programs fit by Newton-Raphson and leave out a permutation
-whose fit does not converge in 20 iterations; 6.849 does so without saying,
-xucinet counts them in `$summary$Failed` and the notes, and 6.850's log will
-report them. Whether they should count toward the p-value is open (#39).
+whose fit does not converge in 20 iterations; 6.849 does so without saying.
+Steve decided (18 October 2026, #39) that both programs report the p-value as
+two bounds when that happens: failures left out (`Sig`) and failures counted as
+at least as extreme (`Sig.Upper`), printed only when some fit failed, with a
+note giving the counts; 6.850 does the same in its log and saved datasets.

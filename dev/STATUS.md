@@ -89,11 +89,16 @@ batch at the end.** Design questions for all remaining chapters are batched in
   `changes.txt`): nothing in it the function does not do.
 - **LR-QAP by double semi-partialling (18 Oct, #38).** `xlrqap(method = c("dsp", "yperm"))`,
   default `"dsp"`, as UCINET 6.850's LR-QAP (UCINET-ISSUES 47, ucinet #45); the model's
-  significance by Y permutation under both; the fit is Newton-Raphson as UCINET's, and
-  permuted fits that do not converge (separation) are left out and counted in
-  `$summary$Failed` (open question: #39). Agrees with `sna::netlogit(nullhyp = "qapspp")` and
-  with the 6.850 build within Monte Carlo error (`ucinet/Planning/tests/lrqap/compare_lrqap.out.txt`,
-  25/25). `xmrqap()` already defaulted to DSP; a netlm cross-check test was added. Ledger 49.
+  significance by Y permutation under both; the fit is Newton-Raphson as UCINET's. Agrees
+  with `sna::netlogit(nullhyp = "qapspp")` and with the 6.850 build within Monte Carlo error.
+  `xmrqap()` already defaulted to DSP; a netlm cross-check test was added. Ledger 49.
+- **LR-QAP failed permuted fits as two p-values (18 Oct, #39, Steve's decision).** `Sig`
+  leaves them out, `Sig.Upper` counts them as at least as extreme, in `$summary` and the
+  coefficient table (always present, equal when nothing failed); a `Failed` column per term
+  (not printed) and `$summary$Failed` for the model's test; the report prints `Sig.Upper` and
+  a note after the table only when some fit failed. UCINET 6.850 the same (tools
+  `ulrqap.pas`, `uc_lrqap.pas`, CLI `lrqap()`): 47/47 in
+  `ucinet/Planning/tests/lrqap/compare_lrqap.out.txt`.
 - Machine: R 4.6.1, Rtools45, devtools/roxygen2/testthat/rcmdcheck, Pandoc, TinyTeX (it
   needs `psnfss`, `cm-super`, `makeindex` for the PDF manual; `devtools::check()` passes
   `--no-manual`). igraph, sna, network and tidygraph installed 23 Sep, so the cross-check
@@ -149,7 +154,26 @@ batch at the end.** Design questions for all remaining chapters are batched in
   the one-sided proportion "larger than or equal to the observed value"; two-tailed with
   absolute values is our (and UCINET's) convention.
 
-## Done this session (18 Oct 2026, Claude Code)
+## Done this session (18 Oct 2026, Claude Code, #39)
+
+- From asnr2e `docs/prompts/lrqap-failures.md` (Steve's decision on #39). `xlrqap()`:
+  `Sig.Upper` beside `Sig` in `$summary` and the coefficient table, `Failed` column per term
+  (DSP: its own permutations; yperm: the shared ones), `$summary$Failed` now the model test's
+  count (it was the total over every test under DSP); `show_summary`/`show_matrix_columns`
+  hide `Sig.Upper` when nothing failed and always hide `Failed`; the note is the report's
+  epilogue (helpers `lr_upper()`, `lr_fail_note()`), replacing the "left out" assumption
+  line. Tests: both bounds hand-checked on the 5-node case by refitting every draw with
+  `lr_fit()` (DSP and yperm, the model's test too), Table 14.4 under both methods with no
+  failures (one p column, columns equal, no note), a snapshot of the failure report; the
+  hightech snapshot and the pre-#38 Y-permutation p-values are unchanged. Roxygen, NEWS,
+  ledger 49 (retitled), UCINET-ISSUES 47 rule 4, goldens README (column layout).
+  `devtools::check()`: 0 errors, 0 warnings, 0 notes. COVERAGE not affected (no status change).
+- Table 14.4, 5000 permutations by DSP, seeds 1-4: no coefficient test ever failed; the
+  model's Y-permutation test failed once in 5000 for seed 2 (and in UCINET's seed-1 run).
+- UCINET side and the asnr2e practice prompt in the same session (ucinet STATUS; asnr2e
+  `docs/prompts/ch14-table143-practice143.md` 14.3.3).
+
+## Done earlier on 18 Oct 2026 (Claude Code, #38)
 
 - #38, from asnr2e `docs/prompts/ch14-dsp-default.md`: Step 1 findings above ("Findings 18 Oct
   2026"); `xlrqap()` gains `method`, default `"dsp"`, `$summary$Failed`, the `Method:` field;
@@ -424,8 +448,8 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
-0. Open: #39 (`steve`, separation handling in LR-QAP). #38 done (e893b90); its book side is
-   asnr2e T34-T37 and `asnr2e/STATUS.md`.
+0. #38 and #39 done; their book side is asnr2e T34-T37, the practice prompt
+   `docs/prompts/ch14-table143-practice143.md` and `asnr2e/STATUS.md`.
    UCINET side of the Supreme Court corrections: rebuild both `Datafiles.zip` in the ucinet
    repo (ucinet #43).
 1. Golden tests for chapters 5, 6, 8, 10, 11, 12, 13 and 14 stay skipped (chapter 7 has none); the fixtures named in
@@ -610,16 +634,19 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   the logistic fit is Newton-Raphson from zero, 20 iterations, steps <= 1e-4, with pivoted
   elimination rather than UCINET's SVD pseudo-inverse, which let separated fits pass as
   converged; SE at the final coefficients; failed fits left out and counted (pending #39).
+- 18 Oct 2026 (Steve, #39; former open question 1; asnr2e `docs/prompts/lrqap-failures.md`):
+  LR-QAP permutations whose fit fails are reported as two bounds in both programs, lower
+  p = (1 + count) / (1 + converged), upper p = (1 + count + failed) / (1 + nperm); one p-value
+  printed when nothing failed, both and a note when something did. Claude Code's details: the
+  per-term counts are a `Failed` column of the coefficient table rather than a vector in
+  `$summary` (SPEC level-of-analysis rule 4/5: `$summary$Failed` keeps one shape whatever
+  `method`); one display rule for both tables (any failure in any test shows `Sig.Upper` in
+  both); UCINET's saved datasets always carry `Sig.Upper` and `Failed`, since a saved
+  dataset's columns follow the dialog's options (Betas / T-statistics), not the run's outcome.
 
 ## Open questions for Steve
 
-1. (#39, 18 Oct 2026) LR-QAP: should permutations whose logistic fit fails (no convergence:
-   complete or quasi-complete separation) count toward the p-value? Implemented in both
-   programs: left out, and counted in the report. Alternatives: count them as at least as
-   extreme (conservative), or keep the fit at the iteration limit (sna does). They are rare
-   on real data (0 of 5000 on Table 14.4's model under DSP; 1 under Y permutation in UCINET's
-   draws) and common only on tiny networks.
-2. (18 Oct 2026) UCINET's permutation counters (`tunivariate.addcase`) compare with no
+1. (18 Oct 2026) UCINET's permutation counters (`tunivariate.addcase`) compare with no
    tolerance, so a permuted statistic equal to the observed one up to rounding can count as
    smaller; xucinet treats values within 1e-10 (relative) as ties. LR-QAP now does the same in
    UCINET (it mattered on the 5-node separation test: 0.118 against an exact 0.236). Apply the

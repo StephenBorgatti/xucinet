@@ -178,10 +178,18 @@ xmrqap <- function(formula, nets, nperm = 2000, method = c("dsp", "yperm"),
 #' The model is fitted by Newton-Raphson from zero, as UCINET fits it, and a
 #' fit has failed when it has not converged in 20 iterations (every step at
 #' most 1e-4) or its information matrix is singular. Complete or
-#' quasi-complete separation shows up this way. A permutation whose fit fails
-#' gives no value and is left out of that test's proportions; the number left
-#' out is reported (`$summary$Failed` and the notes). A model that fails on the
-#' observed data is an error.
+#' quasi-complete separation shows up this way. Those permutations are not a
+#' random subset (separation is likeliest where the predictor looks strong), so
+#' each p-value is given as two bounds (xucinet #39): `Sig` leaves the failed
+#' permutations out, (1 + count) / (1 + permutations that converged), and
+#' `Sig.Upper` counts them as at least as extreme as the observed value,
+#' (1 + count + failed) / (1 + `nperm`). The true p-value lies between the two.
+#' Both columns are always in the object and are equal when nothing failed; the
+#' report prints `Sig.Upper` (in the model fit and the coefficient table) only
+#' when some permuted fit failed, and then adds a note after the table with the
+#' number that failed, per test under `"dsp"`. The proportions `P(ge)`, `P(le)`
+#' and `P(ext)` and the summaries of the permuted coefficients are over the fits
+#' that converged. A model that fails on the observed data is an error.
 #'
 #' @section UCINET equivalent:
 #' Tools | Testing Hypotheses | Dyadic (QAP) | LR-QAP Logistic Regression.
@@ -194,12 +202,18 @@ xmrqap <- function(formula, nets, nperm = 2000, method = c("dsp", "yperm"),
 #' @param method `"dsp"` (the default) or `"yperm"`.
 #' @param symmetric Use only one triangle? `FALSE` by default, as the dialog.
 #' @return An object of class `c("xlrqap", "xucinet_output")`. `$summary`:
-#'   log-likelihood, McFadden's pseudo R-square, the significance of the
-#'   model, the number of observations and permutations, and the number of
-#'   permuted fits that failed (over every test). `$matrices`: the
-#'   coefficients, odds ratios, z (T), the p-value, the mean, minimum, maximum
-#'   and sd of the permuted coefficients and the three proportions. The method
-#'   is the report's `Method:` field (`$fields`).
+#'   log-likelihood (`LL`), McFadden's pseudo R-square (`R-Sqr`), the
+#'   significance of the model (`Sig`, failed fits left out, and `Sig.Upper`,
+#'   failed fits counted as extreme), the number of observations (`Obs`) and
+#'   permutations (`Perms`), and the number of permuted fits that failed in
+#'   the model's test (`Failed`, the Y permutations). `$matrices`: the
+#'   coefficient table, one row per term: the coefficients (`Coef`), odds
+#'   ratios, z (`T`), the two p-values (`Sig`, `Sig.Upper`), the mean, minimum,
+#'   maximum and sd of the permuted coefficients, the three proportions, and
+#'   `Failed`, the number of that term's permuted fits that failed (its own
+#'   permutations under `"dsp"`, the shared Y permutations under `"yperm"`;
+#'   kept in the object, not printed). The intercept's test columns are
+#'   missing. The method is the report's `Method:` field (`$fields`).
 #' @references Dekker, D., Krackhardt, D. and Snijders, T. A. B. (2007).
 #'   Sensitivity of MRQAP tests to collinearity and autocorrelation
 #'   conditions. *Psychometrika* 72(4), 563-581.
@@ -239,53 +253,82 @@ xlrqap <- function(formula, nets, nperm = 1000, method = c("dsp", "yperm"),
   res <- perm_test(stat, n, nperm, tails = tails, perms = perms,
                    observed = c(obs$t, obs$b, if (hasmiss) obs$r2 else obs$ll))
   ti <- seq_len(k1); bi <- k1 + ti
-  failed <- c(Model = nperm - res$n[2 * k1 + 1])
+  mfail <- nperm - res$n[2 * k1 + 1]
   sig <- res$sig[ti]; ge <- res$ge[ti]; le <- res$le[ti]; ext <- res$ext[ti]
   avg <- res$mean[bi]; mn <- res$min[bi]; mx <- res$max[bi]; sdv <- res$sd[bi]
+  failed <- nperm - res$n[ti]
 
   if (method == "dsp" && nperm >= 1) {
     for (j in 2:k1) {
       r <- lr_dsp_one(d, X, yobs, j, obs, perms, tails)
       sig[j] <- r$t$sig; ge[j] <- r$t$ge; le[j] <- r$t$le; ext[j] <- r$t$ext
       avg[j] <- r$b$mean; mn[j] <- r$b$min; mx[j] <- r$b$max; sdv[j] <- r$b$sd
-      failed[colnames(X)[j]] <- nperm - r$t$n
+      failed[j] <- nperm - r$t$n
     }
   }
 
   blank <- function(v) { v[1] <- NA; v }
   tab <- cbind(Coef = obs$b, OddsRat = exp(obs$b), T = obs$t,
-               Sig = blank(sig), Avg = blank(avg), Min = blank(mn),
+               Sig = blank(sig), Sig.Upper = blank(lr_upper(sig, failed, nperm)),
+               Avg = blank(avg), Min = blank(mn),
                Max = blank(mx), SD = blank(sdv), `P(ge)` = blank(ge),
-               `P(le)` = blank(le), `P(ext)` = blank(ext))
+               `P(le)` = blank(le), `P(ext)` = blank(ext),
+               Failed = blank(failed))
   rownames(tab) <- colnames(X)
-  nfail <- sum(failed)
+  tname <- "LR Coefficients & Permutation Results (T-stats used in permutations)"
+  anyfail <- mfail > 0 || any(tab[, "Failed"] > 0, na.rm = TRUE)
   mname <- if (method == "dsp") "Double Dekker semi-partialling" else "Y-permutation"
+  summ <- list(LL = obs$ll, `R-Sqr` = obs$r2, Sig = res$ge[2 * k1 + 1],
+               Sig.Upper = lr_upper(res$ge[2 * k1 + 1], mfail, nperm),
+               Obs = obs$nobs, Perms = nperm, Failed = mfail)
+  # the upper bounds are printed only when some permuted fit failed; Failed
+  # per term is in the note
+  showcols <- setdiff(colnames(tab), c("Failed", if (!anyfail) "Sig.Upper"))
 
   new_xucinet_output(
     "Logistic Regression QAP", list(title = d$yname),
-    summary = list(LL = obs$ll, `R-Sqr` = obs$r2, Sig = res$ge[2 * k1 + 1],
-                   Obs = obs$nobs, Perms = nperm, Failed = nfail),
-    matrices = list(
-      `LR Coefficients & Permutation Results (T-stats used in permutations)` = tab),
+    summary = summ,
+    matrices = stats::setNames(list(tab), tname),
     assumptions = c(
       "Dependent variable dichotomized: values above 0 are ties.",
       "The r-squared shown is McFadden's pseudo r-squared.",
       if (hasmiss) "Your data have missing values; the model's significance compares pseudo r-squares.",
       sprintf("%d permutations by %s; p-values are %d-tailed, from the t-statistics%s.",
               nperm, mname, tails,
-              if (method == "dsp") "; the model's significance by Y-permutation" else ""),
-      if (nfail > 0) paste0(
-        "Permuted fits that failed (no convergence or separation), left out: ",
-        if (method == "dsp")
-          paste(names(failed), failed, sep = " ", collapse = "; ")
-        else failed[["Model"]], ".")),
+              if (method == "dsp") "; the model's significance by Y-permutation" else "")),
     fields = c("Dependent variable:" = d$yname,
                "Independent variables:" = paste(d$xnames, collapse = ", "),
                "Method:" = mname,
                "Data are:" = if (isTRUE(symmetric)) "Symmetric" else "Non-symmetric",
                "Random seed:" = if (is.null(seed)) "(R session)" else format(seed)),
     summary_title = "Overall fit of the logistic regression model",
+    show_summary = if (anyfail) NULL else setdiff(names(summ), "Sig.Upper"),
+    show_matrix_columns = stats::setNames(list(showcols), tname),
+    epilogue = if (anyfail) lr_fail_note(method, nperm, mfail, failed[-1],
+                                         colnames(X)[-1]),
     subclass = "xlrqap", call = match.call())
+}
+
+# The upper bound of a permutation p-value when `f` of the `nperm` draws gave
+# no value (#39): p = (1 + count) / (1 + nperm - f) left them out, and
+# (1 + count + f) / (1 + nperm) counts them as at least as extreme.
+lr_upper <- function(p, f, nperm) (p * (1 + nperm - f) + f) / (1 + nperm)
+
+# The note printed after the coefficient table when permuted fits failed.
+lr_fail_note <- function(method, nperm, mfail, tfail, tnames) {
+  if (method == "dsp") {
+    ntest <- 1 + length(tfail)
+    what <- sprintf("%d of the %d permuted fits did not converge (%d per test: the model %d, %s)",
+                    mfail + sum(tfail), ntest * nperm, nperm, mfail,
+                    paste(tnames, tfail, collapse = ", "))
+  } else {
+    what <- sprintf("%d of the %d permuted fits did not converge", mfail, nperm)
+  }
+  strwrap(paste0(what, ", usually because a predictor perfectly separates the 0s ",
+    "from the 1s in that permutation. Sig leaves those permutations out; Sig.Upper ",
+    "counts them as at least as extreme as the observed value. The true p-value lies ",
+    "between the two. If they lead to different conclusions, the result depends on ",
+    "the failed permutations and should be reported with both values."), width = 80)
 }
 
 # Logistic regression of yv (0/1) on X over the cells `ok` where yv is

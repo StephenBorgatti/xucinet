@@ -1321,9 +1321,20 @@ The rule, the same in both programs:
    pseudo R-square with missing data) under both methods: its null hypothesis is
    that no predictor matters, under which Y is exchangeable.
 4. A permutation whose Newton-Raphson fit does not converge in 20 iterations, or
-   whose information matrix is singular (complete or quasi-complete separation), is
-   left out of that test's proportions and counted; the log and the xucinet notes
-   give the counts per test. Whether they should count instead is xucinet #39.
+   whose information matrix is singular (complete or quasi-complete separation), has
+   failed. Those permutations are not a random subset (separation is likeliest where
+   the predictor looks strong), so leaving them out can make p too small. Every
+   p-value (each coefficient's, under either method, and the model's) is reported as
+   two bounds (Steve, 18 Oct 2026, xucinet #39): `Sig`, failures left out,
+   (1 + count) / (1 + permutations that converged); `Sig.Upper`, failures counted as
+   at least as extreme, (1 + count + failures) / (1 + permutations). Failures are
+   counted per term under DSP (each term has its own permutations) and once under
+   Y-permutation (the model's test is the Y-permutations under both). With no
+   failures the two are equal and only `Sig` is shown, exactly as before; with
+   failures both are shown, in the model-fit and the coefficient tables, and a note
+   after the coefficient table gives the counts and says what they mean. The saved
+   datasets always carry `Sig.Upper` (and `Failed`), so their columns do not depend
+   on the run. A model that fails on the observed data is an error.
 5. Missing cells are dropped listwise as in the observed fit; the diagonal is never
    used.
 6. Release note: LR-QAP now defaults to double semi-partialling; Y-permutation
@@ -1340,16 +1351,20 @@ Found while doing it (18 Oct 2026), in 6.849's LR-QAP:
 - With missing cells the predicted-values matrix was misplaced: the fitter wrote the fitted
   probabilities in valid-row order and `saveresiduals` read them by cell.
 
-**What xucinet does:** as above since #38 (18 Oct 2026); ledger entry 49. Values within
-1e-10 (relative) of the observed statistic are ties (perm_summary).
+**What xucinet does:** as above since #38 (18 Oct 2026); the two p-values since #39 (18 Oct
+2026: `Sig.Upper` in `$summary` and the coefficient table, a `Failed` column per term, the
+note as the report's epilogue); ledger entry 49. Values within 1e-10 (relative) of the
+observed statistic are ties (perm_summary).
 
 **Fix (done in 6.850, tools `G1Tools/ulrqap.pas`, ucinet `uc_lrqap.pas`/`.dfm`,
 `Xdpmat.pas` `runlrqap`; ucinet #45):** the method choice as above; LR-QAP fits with its own
 Newton-Raphson (`lrfit`: from zero, 20 iterations, every step <= 1e-4, pivoted elimination,
 SE at the final coefficients; the same fit as xucinet's `lr_fit`); permuted values within
-1e-10 of the observed count as ties; predicted values indexed by cell; failed fits counted in
-the log; the CLI command `lrqap(<y> <x1> [<x2> ...] [dsp|yperm] [sym] [<nperm> [<seed>]])`.
-Tests: `C:\Dev\ucinet\Planning\tests\lrqap\` (25/25 against xucinet).
+1e-10 of the observed count as ties; predicted values indexed by cell; failed fits counted and
+reported as two p-values (rule 4: `Sig.Upper` and `Failed` columns in the saved fit and
+coefficient datasets, shown in the log and the CLI output only when some fit failed, with
+the note); the CLI command `lrqap(<y> <x1> [<x2> ...] [dsp|yperm] [sym] [<nperm> [<seed>]])`.
+Tests: `C:\Dev\ucinet\Planning\tests\lrqap\` (47/47 against xucinet since #39).
 
 ---
 

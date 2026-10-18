@@ -189,6 +189,55 @@
 ---
 
     Code
+      xlrqap(Y ~ X, list(Y = y, X = x), nperm = 300, seed = 2)
+    Output
+      LOGISTIC REGRESSION QAP
+      --------------------------------------------------------------------------------
+      
+      Dependent variable:                     Y
+      Independent variables:                  X
+      Method:                                 Double Dekker semi-partialling
+      Data are:                               Non-symmetric
+      Random seed:                            2
+      Input dataset:                          Y
+      Note:                                   Dependent variable dichotomized: values above 0 are ties.
+      Note:                                   The r-squared shown is McFadden's pseudo r-squared.
+      Note:                                   300 permutations by Double Dekker semi-partialling; p-values are 2-tailed, from the t-statistics; the model's significance by Y-permutation.
+      
+      
+      
+      Overall fit of the logistic regression model
+      
+                    1      2      3      4      5      6      7 
+                   LL  R-Sqr    Sig Sig.Up    Obs  Perms Failed 
+                                       per                      
+               ------ ------ ------ ------ ------ ------ ------ 
+           1 Y -7.422  0.122  0.226  0.465     20    300     93 
+      
+      1 rows, 7 columns, 1 levels.
+      
+      LR Coefficients & Permutation Results (T-stats used in permutations)
+      
+                            1      2      3      4      5      6      7      8      9     10     11     12 
+                         Coef OddsRa      T    Sig Sig.Up    Avg    Min    Max     SD  P(ge)  P(le) P(ext) 
+                                   t                  per                                                  
+                       ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ ------ 
+           1 Intercept -2.565  0.077 -2.472                                                                
+           2         X  1.872  6.500  1.385  0.240  0.432  0.582  0.182  1.872  0.720  0.240      1  0.240 
+      
+      2 rows, 12 columns, 1 levels.
+      
+      169 of the 600 permuted fits did not converge (300 per test: the model 93, X
+      76), usually because a predictor perfectly separates the 0s from the 1s in that
+      permutation. Sig leaves those permutations out; Sig.Upper counts them as at
+      least as extreme as the observed value. The true p-value lies between the two.
+      If they lead to different conclusions, the result depends on the failed
+      permutations and should be reported with both values.
+      
+
+---
+
+    Code
       xmixing(campnet, camp92_attr$Gender, test = TRUE, nperm = 100, seed = 1)
     Output
       MIXING TABLES
