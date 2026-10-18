@@ -73,6 +73,17 @@ test_that("missing cells print as blanks", {
   expect_equal(format_values(c(1, NA)), c("1", " "))
 })
 
+test_that("values of 1e10 or more print in exponent form, as UCINET's tables", {
+  # dispfstr in utmat.pas: an odds ratio of 1.6e31 would otherwise widen every
+  # column to 35 characters (an LR-QAP report, Steve 18 Oct 2026)
+  expect_equal(trimws(format_values(c(0.003, 1.6305e31))), c("0.003", "1.631E+31"))
+  expect_equal(trimws(format_values(c(-2e12, 5))), c("-2.000E+12", "5"))
+  expect_equal(trimws(format_values(9999999999)), "9999999999")
+  m <- matrix(c(-5.658, 71.869, 0.003, exp(71.869)), 2,
+              dimnames = list(c("Intercept", "DC"), c("Coef", "OddsRat")))
+  expect_equal(max(nchar(format_uci_matrix(m, footer = FALSE))), 6 + 1 + 9 + 1 + 2 * 10)
+})
+
 # ---- the report -------------------------------------------------------------
 
 fake_output <- function() {

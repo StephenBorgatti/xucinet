@@ -61,10 +61,17 @@ format_values <- function(x, digits = 3) {
   # The decision is made once for the whole column, not per cell: a column
   # holding 1 and 0.5 prints 1.000 and 0.500, so the decimal points line up.
   if (all(x[ok] == round(x[ok]))) {
-    out[ok] <- formatC(x[ok], format = "d")
+    # "f" with no decimals, not "d": "d" coerces to integer, and a whole
+    # number above 2^31 came out as NA (+ 0 turns -0 into 0, which "d" did)
+    out[ok] <- formatC(x[ok] + 0, format = "f", digits = 0)
   } else {
     out[ok] <- formatC(x[ok], format = "f", digits = digits)
   }
+  # A value of 1e10 or more in size prints in exponent form, as tmat.display
+  # (dispfstr in utmat.pas): in fixed form one odds ratio of 1e31 widens every
+  # column of the table to 35 characters.
+  big <- ok & abs(x) >= 1e10
+  out[big] <- formatC(x[big], format = "E", digits = 3)
   out[!is.na(x) & !is.finite(x)] <- formatC(x[!is.na(x) & !is.finite(x)])
   out[is.na(x)] <- ""
   formatC(out, width = max(0L, max(nchar(out))), flag = "")

@@ -1,5 +1,12 @@
 # xucinet 2.0.0.9000 (development)
 
+## Printed reports: huge values (18 October 2026)
+
+* A value of 1e10 or more in size now prints in exponent form (`1.631E+31`),
+  as UCINET 6.850 does (UCINET-ISSUES 48): one near-separated odds ratio no
+  longer widens every column of an `xlrqap()` table to 35 characters. A whole
+  number above 2^31 printed as `NA`; it now prints. Stored values are unchanged.
+
 ## LR-QAP: failed permuted fits give two p-values (18 October 2026)
 
 * When a permuted logistic fit fails to converge (almost always complete or

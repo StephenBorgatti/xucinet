@@ -1373,6 +1373,34 @@ Tests: `C:\Dev\ucinet\Planning\tests\lrqap\` (49/49 against xucinet since #39).
 
 ---
 
+## 48. Report layout: one huge value widens every column; dataset paths lose their ")"
+
+**display** · **fixed in UCINET 6.850** · found 18 October 2026 (Steve, an LR-QAP log of campnet on its dyadic constraint)
+
+- `tmat.display` gives every column of a matrix the width of its widest value (`getwdbycol`
+  as well, despite its name, calls `getminwidthfstr`, which looks at the whole matrix), and
+  `fstr` prints any value in fixed form. A near-separated logistic model's odds ratio,
+  exp(71.869) = 1.6E+31, printed as 33 digits and 3 decimals, so all eleven columns of the
+  LR-QAP coefficient table were 36 characters wide. The CLI's `lrqap` printed it the same way.
+- `tlogfile.putfn`, which writes every "Input dataset:"-style line of every log, opens a
+  parenthesis before the full path and never closes it.
+- LR-QAP's log printed "Dependent variable: :" again before the tables (`putstr` adds a
+  colon to a label that ends in a space), and labelled the fit table's row "Statistics:".
+
+**Fix (6.850; tools `G2Tools/utmat.pas` `dispfstr`, `G2Tools/utlogfile.pas` `putfn`; ucinet
+`uc_lrqap.pas`, `Xdpmat.pas` `runlrqap`):** a value of 1E10 or more in size prints in
+exponent form with four significant digits (1.631E+31), in every matrix display; the saved
+datasets keep the value. `putfn` closes its parenthesis. The repeated line is gone and the fit
+table's row is the dependent variable, as in xucinet. Columns still share one width (now 9 in
+that table).
+
+**What xucinet does:** the same rule in `format_values()` (R/output.R) since 18 Oct 2026.
+Found with it: a whole-number column holding a value above 2^31 printed NA (`formatC(format
+= "d")`); now fixed. Tests: `C:\Dev\ucinet\Planning\tests\lrqap\` (run (6), 54/54);
+xucinet `test-output.R`.
+
+---
+
 ## Fixed since this list started
 
 - **Local Sparsification (L-Spar)** — **fixed in UCINET 6.850** (entry 45): the d^e keep rule,
