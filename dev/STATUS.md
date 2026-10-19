@@ -173,6 +173,10 @@ batch at the end.** Design questions for all remaining chapters are batched in
   remaining UCINET permutation test, with its limit (ties that exist only in decimal
   arithmetic, in single-precision data). DIFFERENCES 41: 32 and 50 fixed for 6.850.
 - xucinet reinstalled in the main R library (Steve: "yes"), at 5a94ab3's code.
+- Later: Steve chose xucinet's convention for every UCINET permutation test (UCINET-ISSUES
+  53, now fixed in 6.850): nperm permutations, p = (1 + count) / (1 + nperm), summaries of
+  the permuted values only. xucinet already does this, so nothing changes here; UCINET 6.850's
+  permutation p-values and summaries move toward ours. New entry 55 (UCINET only, open).
 
 ## Done 18 Oct 2026 (Claude Code, Steve's answers on the tie rule and LR-QAP's output)
 
@@ -689,6 +693,6 @@ questions (UCINET-ISSUES 53) are in `ucinet/STATUS.md`.
 1. (19 Oct 2026) The 1e-10 tie tolerance catches summation-order ties, not ties that exist
    only in decimal arithmetic: data read from UCINET files are single precision, and such a
    tie is about 1e-8 (relative) away (UCINET-ISSUES 49, "Limit"). Keep 1e-10, or widen to
-   about 1e-6 in `perm_summary` and in UCINET together? Also `ucinet/STATUS.md` question 3.
+   about 1e-6 in `perm_summary` and in UCINET together? Also `ucinet/STATUS.md` question 1.
 
 

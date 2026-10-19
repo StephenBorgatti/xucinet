@@ -1544,51 +1544,64 @@ X's).
 
 ## 53. Permutation tests: how the observed arrangement is counted, and other counting defects
 
-**bug** · **open — partly fixed in UCINET 6.850** · found 19 October 2026 (the survey for entry 49)
+**bug** · **fixed in UCINET 6.850** · found 19 October 2026 (the survey for entry 49); decided and fixed the same day (Steve: "every routine should use the xucinet version"; "fix all, including legacy routines")
 
-The routines do not agree on whether the observed arrangement counts as one of the
-permutations, and some get it wrong either way:
+The routines did not agree on whether the observed arrangement counts as one of the
+permutations, how many permutations they ran, or what their summaries included:
 
-- **Counted twice (fixed, 6.850):** QAP Relational CrossTabs (`utqaptab.runpermutations`)
-  counted the observed table before the loop and again in `(1 + count) / (1 + nperm)`, so a
-  proportion could exceed 1 ((nperm + 2) / (nperm + 1)). Test: with one permutation, the
-  chi-square's Prop <= Obs (the observed value is the maximum) is 1, was 1.5.
-- **Denominator one too large (fixed, 6.850):** one-way ANOVA (`Xanova`) and the t-test
-  (`Xttest`) run nperm - 1 permutations, counting the observed as the first, and divided by
-  nperm + 1 instead of nperm.
-- **Observed not counted (open, a convention for Steve):** ANOVA density models (`XCatC2`),
-  MR-QAP by Y permutation (`xmrqapna`), QAP correlation (old) (`Xqap`), Moran/Geary
-  (`Xiatc`), the legacy Regression (`Xregress`) and the CLI's `densitydiff` and `@dist1`
-  divide the count of permuted values by the number of permutations, so p can be 0. `XCatC2`
-  and `xmrqapna` run nperm - 1 permutations (`for p:= 2 to nperm`), and ANOVA density reports
-  "Number of permutations performed: nperm". xucinet counts the observed, (1 + count) / (1 +
-  nperm), as QAP correlation (`utqapsim`) and the Double Dekker R-square test
-  (`urestrictedqap`) do.
+- **Counted twice:** QAP Relational CrossTabs (`utqaptab`) counted the observed table before
+  the loop and again in `(1 + count) / (1 + nperm)`, so a proportion could exceed 1, and added
+  it to the summaries.
+- **Observed not counted** (p = count / nperm, which can be 0): ANOVA density models
+  (`XCatC2`), MR-QAP by Y permutation (`xmrqapna`), QAP correlation (old) (`Xqap`),
+  Moran/Geary (`Xiatc`), the legacy Regression (`Xregress`), the CLI's `densitydiff`.
+- **nperm - 1 permutations run:** one-way ANOVA, the t-test, ANOVA density, MR-QAP by Y
+  permutation, QAP correlation (old), Double Dekker MR-QAP (`umrqapdekker`), LR-QAP
+  (`ulrqap`), node-level regression (`uMtxvecRegression.getypermsig`) and the CLI's `spatial`
+  counted the observed as the first of nperm draws. ANOVA and the t-test then divided by
+  nperm + 1.
+- **Observed in the summaries:** Double Dekker MR-QAP (Perm Avg and Perm SD, serial path; the
+  parallel path divided the SD by one too many), LR-QAP (Avg, SD, Min, Max, the coefficients'
+  covariance), QAP correlation (old) (NPerm, Avg, SD, both biased toward 0), crosstabs, and
+  the CLI's `groupden` (min, mean, max, SD).
 
-Other defects in the counting code, found by reading (not run):
+**Rule (Steve, 19 Oct 2026):** xucinet's. Every routine runs the number of permutations asked
+for; p = (1 + count) / (1 + permutations), the observed arrangement counted as one of them;
+the summaries of the permutation distribution (mean, SD, min, max, N) hold the permuted values
+only. LR-QAP's Sig.Upper (#39) is (1 + count + failed) / (1 + permutations).
 
-- Division by zero with fewer than 10 permutations in Join-Count (`xjoincount`, `nperm div
-  10`), the E-I Index (`xeiIndex`) and QAP correlation (old) (`Xqap`), and with fewer than 100
-  in the legacy Double-Dekker regression (`nperm div 100`), from the progress counter.
-- Join-Count computes the E-I row and its p-values but hides them (`jc.nr:= 3`).
+Other defects, all fixed (6.850):
+
+- Division by zero with fewer than 10 permutations in Join-Count, the E-I Index and QAP
+  correlation (old), and with fewer than 100 in the legacy Double-Dekker regression, from the
+  progress counter.
+- Join-Count computed the E-I row and its p-values but hid them (`jc.nr:= 3`).
 - Compare Densities > Against theoretical parameter (`xcomparedensity.rundensityparam`): the
-  two-tailed count compares `abs(d - mean + param)` with `den1`; it should compare
-  `abs(d - mean)` with `abs(den1 - param)`.
-- Legacy Regression (`Xregress`): the intercept's counts are never incremented (the loop runs
-  over the X's only), so its three proportions print 0.000.
-- Legacy Double-Dekker regression: a permuted coefficient below `doubleprecision` is set to 0
-  but the observed one is not; with an observed SE of 0 the observed t is `bna` and is still
+  two-tailed count compared `abs(d - mean + param)` with `den1`; now `abs(d - mean)` with
+  `abs(den1 - param)`.
+- Legacy Regression (`Xregress`): the intercept's counts were never made; its proportions
+  printed 0.000.
+- Double Dekker MR-QAP, current (`umrqapdekker`) and legacy: a permuted coefficient below
+  `doubleprecision` was set to 0 and the observed one was not; the snap is gone (the tie
+  rule's tolerance covers rounding). Legacy: an observed t of `bna` (SE 0) is no longer
   compared.
-- Delia (`uc_randombinaryfixeddlg`) counts strictly greater and strictly less; equal values
-  count as neither (integer statistics, so not a rounding matter).
+- MR-QAP by Y permutation, mediation: the confidence interval read index 0 when nperm < 20 and
+  zeros left by skipped permutations; it now runs over the permutations' indirect effects only.
 
-**Fix:** the first two done. The rest wait for Steve: whether every routine counts the
-observed arrangement as xucinet does (this changes p-values, slightly, in each routine named
-under "Observed not counted"), and whether to fix the defects in legacy and little-used
-routines or leave them.
+Left as it is: Delia (`uc_randombinaryfixeddlg`) reports, for each pair, the share of random
+matrices the observed co-occurrence strictly exceeds ("Positive") or falls below
+("Negative"). That is the measure, not a p-value, so the convention does not apply.
 
-**What xucinet does:** counts the observed arrangement everywhere (`perm_summary`). Of the
-routines named, it implements ANOVA density (`xmixing`) and the QAP correlation.
+Tests: `C:\Dev\ucinet\Planning\tests\ties2\` (25 of 25: with one permutation every summary
+has SD 0 and min = max and every p is 0.5 or 1, in Double Dekker serial and parallel, MR-QAP
+by Y permutation, QAP correlation (old), ANOVA density and LR-QAP; crosstabs' one-permutation
+p is 1, was 1.5; Join-Count and the E-I Index with 5 permutations, Join-Count's E-I row; the
+legacy Double-Dekker with 50; the legacy Regression's intercept against the exact values);
+`ties\` 29 of 29 and `lrqap\` 54 of 54 (its Sig.Upper check counts the observed fit among the
+draws). Not run: the CLI's `groupden`, `spatial`, `densitydiff` and Compare Densities against
+a parameter.
+
+**What xucinet does:** the rule (`perm_summary`).
 
 ---
 
@@ -1615,6 +1628,20 @@ is loaded, bounded by its columns; `nperm` and the seed `integer`. Test
 values (40000 permutations) are within Monte Carlo error of the exact ones.
 
 **What xucinet does:** has no Moran/Geary routine.
+
+---
+
+## 55. Legacy Regression and E-I Index: three display and dialog defects
+
+**bug** · **open** · found 19 October 2026 (testing entry 53); not looked into
+
+- Tools > Legacy Routines > Regression (legacy): Cancel in the dialog raises an access
+  violation (not traced).
+- The same routine's log prints the correlation matrix under "INVERSE OF CORRELATION MATRIX"
+  and "Determinant = 1.00000000" (one predictor, r = 0.663; the inverse has 1.786 and -1.185),
+  though its coefficients are right (0.1607 and 0.8344, as `lm`).
+- E-I Index: the attribute's translation table shows "3 => 1" and "3 => 2" for an attribute
+  coded 1 and 2 (the group sizes, it seems, in place of the old codes).
 
 ---
 
