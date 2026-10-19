@@ -914,7 +914,7 @@ Tests: `C:\Dev\ucinet\Planning\tests\ties\`.
 
 ## 32. MRQAP (Y permutation): symmetry is decided without looking at Y
 
-**bug** · **open — fix pending** · found 24 September 2026 (chapter 14, issue #27)
+**bug** · **fixed in UCINET 6.850** · found 24 September 2026 (chapter 14, issue #27); fixed 19 October 2026 with entry 50 (Steve: "yes")
 
 `xmrqapna.pas`, `readdata`: `tmp.checksymmetry(temp); symmetric:= temp;` runs
 on `tmp` before anything has been loaded into it, and Y itself is never
@@ -925,7 +925,9 @@ dropped.
 **What xucinet does:** one triangle only when Y and every X are symmetric.
 Ledger entry 41.
 
-**Fix:** `ymat.checksymmetry(temp)` in place of `tmp.checksymmetry(temp)`.
+**Fix:** `ymat.checksymmetry(temp)` in place of `tmp.checksymmetry(temp)`. Done (6.850). Test:
+`ucinet\Planning\tests\ties\` (an asymmetric directed 6-cycle on a symmetric X: 30 dyads, and
+p within Monte Carlo error of the exact one).
 
 ---
 
@@ -1440,7 +1442,7 @@ from all 720 permutations and against xucinet).
 
 ## 50. MR-QAP (Y permutation), symmetric data: each permutation uses a random subset of the dyads
 
-**bug** · **open — fix pending** · found 18 October 2026 (testing entry 49)
+**bug** · **fixed in UCINET 6.850** · found 18 October 2026 (testing entry 49); fixed 19 October 2026 (Steve: "yes")
 
 `xmrqapna.pas`. With symmetric data `readdata` marks only the lower-triangle cells valid
 (`ijok`), but `createcolumnvars` reads the X's at the permuted cell (`dsl[i], dsl[j]`) and
@@ -1455,13 +1457,17 @@ version of the same data (both triangles) the routine is right (0.009 against an
 had the same flaw (the fitted values were stored in one triangle) and was fixed the same day.
 
 **Fix:** set `valid` in both triangles when the data are symmetric (or look `valid` up at
-`max(ii,jj), min(ii,jj)`).
+`max(ii,jj), min(ii,jj)`). Done (6.850): `readdata` copies the lower triangle's flags to the
+upper. On the 6-cycle the coefficient's and R-square's p are now 0.012 (exact 0.0167, 2000
+permutations), and no permutation is skipped (54 of 2000 were, for having fewer than 3 dyads
+left). The saved `mrqap-valid` now has both triangles set for symmetric data. Fixed with
+entries 32 and 52; test: `ucinet\Planning\tests\ties\`.
 
 ---
 
 ## 51. QAP correlation (Detailed, parallel) and MR-QAP's R-square test are not reproducible
 
-**bug** · **open — fix pending** · found 18 October 2026 (testing entry 49)
+**bug** · **fixed in UCINET 6.850** · found 18 October 2026 (testing entry 49); fixed 19 October 2026 (Steve: "yes")
 
 - QAP correlation, Detailed, parallel (`utqapsim.runpermutations`, `runparallel`): the counts
   use `tinterlocked`, but `s[i].addcase` updates the shared `tunivariate` from every thread
@@ -1473,6 +1479,42 @@ had the same flaw (the fitted values were stored in one triangle) and was fixed 
 
 **Fix:** a lock (or per-thread accumulators) around `s[i].addcase`; seed the R-square
 permutations from the dialog's seed, one per permutation, as the coefficients' are.
+
+Done (6.850, tools): `utqapsim.runpermutations`' parallel loop keeps each permutation's
+measures and adds them to the summaries afterwards in permutation order, so the Average, Std
+Dev and N Obs columns are the serial run's; `tmrqapdekker.runrsquaredpermutations` sets
+`trqapcorr.seed` from the dialog's seed (as advanced by drawing the coefficients' seeds), and so
+does the legacy Double-Dekker routine (ucinet `xmrqapdekkersemipartial`). Test
+`ucinet\Planning\tests\ties\`: two parallel Detailed runs give the same table with N Obs 5000
+throughout, and the R-square p is 0.0145 in the parallel, serial and Betas runs and in a repeat
+(it was 0.021, 0.017 and 0.0165). The R-square test still permutes serially and does not use
+the per-permutation seeds; the seed now fixes its draws.
+
+---
+
+## 52. MR-QAP (Y permutation): the saved expected values are wrong; the mediation p counts each permutation k+1 times
+
+**bug** · **fixed in UCINET 6.850** · found and fixed 19 October 2026 (fixing entry 50)
+
+`xmrqapna.pas`, `networkregressionNA`:
+
+- `lineartransformofmatrix` built the expected values (the `mrqap-predicted` dataset, "Expected
+  values" in the dialog) from `x`, the design matrix, which after the permutation loop holds the
+  last permutation's rows and only the cells used (one triangle for symmetric data, none with a
+  missing X), read in the order of every off-diagonal cell. The saved values were wrong whenever
+  more than one permutation was run: on the 6-cycle off by up to 0.91 (symmetric; the lower half
+  of the matrix 0) and 0.80 (directed).
+- With "Run mediation" checked, the indirect effect's `geindirect` was incremented inside the
+  loop over the k+1 coefficients, so its count, and p, were multiplied by k+1; p was divided by
+  `nperm` rather than the number of regressions run.
+
+**Fix (6.850):** the expected values from the observed X's (`xmats`) and coefficients, missing
+where an X is; `geindirect` counted once per permutation and divided by the regressions run.
+Test `ucinet\Planning\tests\ties\`: the saved expected values match the fitted values to 4e-7
+for symmetric, directed and asymmetric-Y data. The mediation change is not tested (it needs two
+X's).
+
+**What xucinet does:** `xmrqap()` does not save expected values and has no mediation option.
 
 ---
 

@@ -768,7 +768,9 @@ correlation and the ANOVA density models, 2000 for MRQAP, 1000 for LR-QAP.
 
 ## 41. MRQAP: t on every path, Y's symmetry checked
 
-**Status:** UCINET fix pending (UCINET issues 31 and 32). 24 September 2026.
+**Status:** UCINET fix pending (UCINET issue 31); issues 32 and 50 fixed for
+6.850 (19 October 2026), to be removed from this entry when the reference
+version moves to 6.850. 24 September 2026.
 
 - Double Dekker: UCINET's fast path (no missing data) permutes b / SE² rather
   than t; xucinet permutes t = b / SE, as UCINET's own path for missing data
