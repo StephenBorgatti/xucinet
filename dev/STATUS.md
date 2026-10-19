@@ -164,7 +164,17 @@ batch at the end.** Design questions for all remaining chapters are batched in
   the one-sided proportion "larger than or equal to the observed value"; two-tailed with
   absolute values is our (and UCINET's) convention.
 
-## Done this session (18 Oct 2026, Claude Code, Steve's answers on the tie rule and LR-QAP's output)
+## Done this session (19 Oct 2026, Claude Code, Steve's "yes" to the 18 Oct UCINET questions)
+
+- UCINET side only; no change to `R/`. Ledger: 32, 50, 51 fixed in 6.850; new 52 (UCINET
+  MR-QAP Y-permutation expected values and mediation count; fixed), 53 (how UCINET's
+  permutation tests count the observed arrangement, and other counting defects; partly fixed,
+  questions in `ucinet/STATUS.md`), 54 (UCINET Moran/Geary NaN; fixed); 49 extended to every
+  remaining UCINET permutation test, with its limit (ties that exist only in decimal
+  arithmetic, in single-precision data). DIFFERENCES 41: 32 and 50 fixed for 6.850.
+- xucinet reinstalled in the main R library (Steve: "yes"), at 5a94ab3's code.
+
+## Done 18 Oct 2026 (Claude Code, Steve's answers on the tie rule and LR-QAP's output)
 
 - UCINET-ISSUES 48 (report layout, from Steve's LR-QAP log): `format_values()` exponent form
   from 1e10, and its `formatC(format = "d")` overflow above 2^31 fixed (it printed `NA`; `-0`
@@ -674,6 +684,11 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 ## Open questions for Steve
 
 (Former question 1, the tie rule in UCINET, answered 18 Oct: see Decisions.) UCINET-side
-questions on UCINET-ISSUES 50, 51 and 31 are in `ucinet/STATUS.md`.
+questions (UCINET-ISSUES 53) are in `ucinet/STATUS.md`.
+
+1. (19 Oct 2026) The 1e-10 tie tolerance catches summation-order ties, not ties that exist
+   only in decimal arithmetic: data read from UCINET files are single precision, and such a
+   tie is about 1e-8 (relative) away (UCINET-ISSUES 49, "Limit"). Keep 1e-10, or widen to
+   about 1e-6 in `perm_summary` and in UCINET together? Also `ucinet/STATUS.md` question 3.
 
 

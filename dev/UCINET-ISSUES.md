@@ -1430,8 +1430,32 @@ statistic are ties, as xucinet's `perm_summary` has always done.
 Detailed, parallel and serial), MR-QAP by Double Dekker semi-partialling (`umrqapdekker`, both
 paths) and its R-square test (`urestrictedqap`), MR-QAP by Y permutation (ucinet `xmrqapna`)
 and node-level regression (`uMtxvecRegression.getypermsig`). LR-QAP has done it since #39
-(entry 47). Other permutation routines (homophily, ANOVA density, ego-network tests) still
-compare exactly.
+(entry 47).
+
+**Extended 19 October 2026 (Steve: "yes")** to every other live permutation test with a
+real-valued statistic, found by a survey of ucinet and tools: one-way ANOVA (`Xanova`), t-test
+(`Xttest`), ANOVA density models (`XCatC2`), Relational Contingency Table analysis
+(`xloglinassoc`), Moran/Geary (`UQap.genericqap`, also `fastgenericqap`), QAP correlation (old)
+(`Xqap`), QAP relational crosstabs (`utqaptab`), Compare Aggregate Proximity Matrices
+(`xcompagprox`, both), Profit (`uc_profitdlg`, which counted only strictly larger values), the
+legacy Regression (`Xregress`) and Double-Dekker regression (`xmrqapdekkersemipartial`), the
+hidden semi/full-partialling MRQAP (`utqapcorr.runpermutations`), and the CLI's `spatial`
+(`ucountrelative`), `groupden` (`utdensities`) and `rectqap` (`utrectqapcorr`). Left as they
+are: join-count, E-I index and Delia, whose statistics are integers; the density comparisons
+(`xcomparedensity`, `utcomparestats`, `@density1/2`), which are bootstraps; and units no menu
+or command reaches (no ego-network or live homophily routine has a permutation test). Tests:
+`C:\Dev\ucinet\Planning\tests\ties2\` (15 of 15 against the exact p-values: ANOVA, t-test,
+ANOVA density, Moran, Geary, old QAP correlation, crosstabs; the CLI routines, RCT, Profit,
+aggregate proximities and the legacy units are built but not run).
+
+**Limit: ties in decimal arithmetic only.** UCINET stores data in single precision. A
+permutation that reproduces the observed statistic only in decimal arithmetic (sums like 0.1 +
+0.7 = 0.8, not a rearrangement of the same terms) gives a value about 1e-8 (relative) away in
+single precision, beyond the 1e-10 rule, and lands either side. Moran's I of (0.1, 0.2, 0.3,
+0.7, 0.8, 0.9) on the valued 6-cycle: exact p 0.2 in decimal, 1/6 from the stored values with
+the 1e-10 rule; UCINET 0.186 (40000 permutations), its own single-precision arithmetic
+counting some. xucinet reads the same single-precision files with the same rule. A tolerance
+of about 1e-6 would count them (open question for Steve, 19 Oct 2026).
 
 **What xucinet does:** the rule, in every permutation test (`perm_summary`).
 
@@ -1515,6 +1539,82 @@ for symmetric, directed and asymmetric-Y data. The mediation change is not teste
 X's).
 
 **What xucinet does:** `xmrqap()` does not save expected values and has no mediation option.
+
+---
+
+## 53. Permutation tests: how the observed arrangement is counted, and other counting defects
+
+**bug** · **open — partly fixed in UCINET 6.850** · found 19 October 2026 (the survey for entry 49)
+
+The routines do not agree on whether the observed arrangement counts as one of the
+permutations, and some get it wrong either way:
+
+- **Counted twice (fixed, 6.850):** QAP Relational CrossTabs (`utqaptab.runpermutations`)
+  counted the observed table before the loop and again in `(1 + count) / (1 + nperm)`, so a
+  proportion could exceed 1 ((nperm + 2) / (nperm + 1)). Test: with one permutation, the
+  chi-square's Prop <= Obs (the observed value is the maximum) is 1, was 1.5.
+- **Denominator one too large (fixed, 6.850):** one-way ANOVA (`Xanova`) and the t-test
+  (`Xttest`) run nperm - 1 permutations, counting the observed as the first, and divided by
+  nperm + 1 instead of nperm.
+- **Observed not counted (open, a convention for Steve):** ANOVA density models (`XCatC2`),
+  MR-QAP by Y permutation (`xmrqapna`), QAP correlation (old) (`Xqap`), Moran/Geary
+  (`Xiatc`), the legacy Regression (`Xregress`) and the CLI's `densitydiff` and `@dist1`
+  divide the count of permuted values by the number of permutations, so p can be 0. `XCatC2`
+  and `xmrqapna` run nperm - 1 permutations (`for p:= 2 to nperm`), and ANOVA density reports
+  "Number of permutations performed: nperm". xucinet counts the observed, (1 + count) / (1 +
+  nperm), as QAP correlation (`utqapsim`) and the Double Dekker R-square test
+  (`urestrictedqap`) do.
+
+Other defects in the counting code, found by reading (not run):
+
+- Division by zero with fewer than 10 permutations in Join-Count (`xjoincount`, `nperm div
+  10`), the E-I Index (`xeiIndex`) and QAP correlation (old) (`Xqap`), and with fewer than 100
+  in the legacy Double-Dekker regression (`nperm div 100`), from the progress counter.
+- Join-Count computes the E-I row and its p-values but hides them (`jc.nr:= 3`).
+- Compare Densities > Against theoretical parameter (`xcomparedensity.rundensityparam`): the
+  two-tailed count compares `abs(d - mean + param)` with `den1`; it should compare
+  `abs(d - mean)` with `abs(den1 - param)`.
+- Legacy Regression (`Xregress`): the intercept's counts are never incremented (the loop runs
+  over the X's only), so its three proportions print 0.000.
+- Legacy Double-Dekker regression: a permuted coefficient below `doubleprecision` is set to 0
+  but the observed one is not; with an observed SE of 0 the observed t is `bna` and is still
+  compared.
+- Delia (`uc_randombinaryfixeddlg`) counts strictly greater and strictly less; equal values
+  count as neither (integer statistics, so not a rounding matter).
+
+**Fix:** the first two done. The rest wait for Steve: whether every routine counts the
+observed arrangement as xucinet does (this changes p-values, slightly, in each routine named
+under "Observed not counted"), and whether to fix the defects in legacy and little-used
+routines or leave them.
+
+**What xucinet does:** counts the observed arrangement everywhere (`perm_summary`). Of the
+routines named, it implements ANOVA density (`xmixing`) and the QAP correlation.
+
+---
+
+## 54. Moran/Geary: always NaN since the July 2026 port; more than 32767 permutations wrap
+
+**bug** · **fixed in UCINET 6.850** · found and fixed 19 October 2026 (testing entry 49)
+
+Tools > Testing Hypotheses > Mixed Dyadic/Nodal > Continuous attributes > Moran/Geary
+statistics (`Xiatc.intervalautocorrelation`):
+
+- The G2 port of `numberlist` (tools `ug2dsl`, 10 July 2026) kept G1's test of `allocsize`
+  (an error code, so nonzero meant failure); G2's `allocsize` returns true on success, so the
+  list of attribute columns was never filled and every column number read as 0. The
+  similarity matrix was all zeros and the statistic, its average and its standard error
+  printed NaN, with p 1.000, for every input. `Xiatc` is `numberlist`'s only caller.
+- The column list was bounded by the network's number of nodes, not the attribute file's
+  columns, so "ALL" (an attribute file named without a column) read past the last column.
+- `nperm` and the seed were `smallint`: 32768 permutations or more wrapped negative, none ran,
+  and p printed NaN.
+
+**Fix (6.850):** `if not dsl.allocsize(...)`; the column list re-read after the attribute file
+is loaded, bounded by its columns; `nperm` and the seed `integer`. Test
+`C:\Dev\ucinet\Planning\tests\ties2\`: Moran's I and Geary's C equal the formulas, and their p
+values (40000 permutations) are within Monte Carlo error of the exact ones.
+
+**What xucinet does:** has no Moran/Geary routine.
 
 ---
 
