@@ -1648,6 +1648,39 @@ values (40000 permutations) are within Monte Carlo error of the exact ones.
 
 ---
 
+## 56. MtxVec objects not returned to the pool: a message box when UCINET closes
+
+**bug** · **fixed in UCINET 6.850** · found 19 October 2026 (Steve: a "Ucinet 6 for Windows"
+box after a run, "MtxVec.Controller.Pool[0].TMtx.Cache[2].Used = true, Item.RefCount = 1")
+
+MtxVec checks its object pool when the program ends and shows a message box for every object
+taken with `CreateIt` and never given back with `FreeIt`. In a headless run (`batch:`) the box
+arrives after the script has finished, so the run hangs until killed. Found and reproduced:
+
+- Node-level regression's permutation test (`uMtxvecRegression.getypermsig`, every run with
+  permutations, menu and CLI `regress ... perm`): `partialcopy` links the observed copy's `A`
+  to the regression's own, so freeing the copy returned the regression's `A` (which its
+  destructor returned again) and never the copy's own. The copy was also not freed when the
+  permutations raised an error.
+- Eigenvector centrality (`ug3la.eigen`, menu and CLI `eigencent`, connected networks): its
+  working matrix was never freed.
+- Not reproduced but the same kind: `ug3la`'s `SVD`, `ginvert`, `solve`, `eigenasym` and
+  `eigensym` returned nothing when an error was raised (no `try/finally`); the CLI's `regress`
+  kept its regression object when the matrices differed in size; `uc_NodeRegression.calculate`
+  (unused) never freed its object.
+
+**Fix (6.850, tools `G3Tools/ug3la.pas`, `G2Tools/uMtxvecRegression.pas`; ucinet `Xdpmat.pas`
+`regress`, `uc_NodeRegression.pas`):** every `CreateIt` paired with a `FreeIt` in a `finally`;
+`getypermsig` gives the copy back its own `A` before freeing it. Tests: `eigencent(campnet)`
+and the node-level regression lines of `Planning\tests\ties\` now exit without the box;
+`ties` and `ties2` give the same results. Also `ucinet-cli.sh run`: a timed-out run's process
+is now stopped by path as well, since the PID kill could miss it and the stray process then
+locked `Uci.exe` against the next build.
+
+**What xucinet does:** nothing to do (R has no such pool).
+
+---
+
 ## Fixed since this list started
 
 - **Local Sparsification (L-Spar)** — **fixed in UCINET 6.850** (entry 45): the d^e keep rule,
