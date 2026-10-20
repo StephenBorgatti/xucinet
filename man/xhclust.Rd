@@ -26,14 +26,14 @@ Required; see Details.}
 \item{k}{Optional number of clusters. Fills the \code{Cluster} column of \verb{$nodes}
 with \code{cutree(hc, k)}; the level table itself is unchanged.}
 
-\item{plot}{Draw the dendrogram with base graphics. The text cluster diagram
-is printed regardless.}
+\item{plot}{Draw the dendrogram with base graphics (\code{\link[=plot.xhclust]{plot.xhclust()}}). The
+text cluster diagram is printed regardless.}
 }
 \value{
 An \code{xucinet_output} of subclass \code{xhclust}. \verb{$nodes} is the
 partition indicator matrix as a data frame, one column per distinct merge
 level, named as UCINET names them (\verb{1(8)206} is level 1, eight clusters,
-merge distance 206), plus \code{Cluster}, which is missing unless \code{k} is
+merge level 206), plus \code{Cluster}, which is missing unless \code{k} is
 given. As in UCINET, which saves this matrix but does not print it, it is
 not part of the printed report. \verb{$summary} holds the cophenetic
 correlation, the number of levels and the number of clusters requested
@@ -41,8 +41,13 @@ correlation, the number of levels and the number of clusters requested
 \verb{Measures of cluster adequacy} (\code{Corr}, \code{Modularity}, \code{Silhouette} by
 level) and \verb{Cluster sizes} (proportion of items in each cluster, by
 level). \verb{$hclust} is the underlying \code{stats::hclust} object, so \code{cutree()}
-and \code{as.dendrogram()} work on it directly. \verb{$levels} is the numeric vector
-of merge distances.
+and \code{as.dendrogram()} work on it directly; it is always built on the
+dissimilarities, so for similarity input its heights are
+\verb{$max_similarity - level}. \verb{$levels} is the numeric vector of merge
+levels in the units of the input: distances for dissimilarity input
+(increasing), similarities for similarity input (decreasing).
+\verb{$max_similarity} is the largest off-diagonal similarity used in the
+conversion, missing for dissimilarity input.
 
 \code{Corr} is the correlation between the proximities and a same-cluster
 indicator, signed so that higher is better for both input types; for
@@ -63,9 +68,12 @@ sizes. Book section 6.4.
 and a matrix of co-membership counts all have the same shape, and only the
 caller knows whether large values mean close or far. Pass \code{type = "similarities"} when larger values mean closer (correlations, tie strengths,
 co-memberships) and \code{type = "dissimilarities"} when larger values mean
-further apart (distances, geodesics). Similarities are converted to
-dissimilarities as \code{max - x}, where the maximum is taken over the
-off-diagonal cells.
+further apart (distances, geodesics). Similarities are clustered as
+dissimilarities \code{max - x}, where the maximum is taken over the off-diagonal
+cells, but the levels are reported as similarities, as UCINET reports them:
+the text cluster diagram, the \verb{$nodes} column names, \verb{$levels} and the axis
+of the plot all show the values of the input matrix, decreasing down the
+diagram.
 
 UCINET records a new partition only when the merge distance changes, so
 tied merges collapse into one level; the partition table here does the

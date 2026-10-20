@@ -38,7 +38,9 @@ adjacency matrix? Unreachable pairs are set to \code{n}, as UCINET does.}
 An object of class \code{c("xstructuralequivalence", "xucinet_output")}.
 \verb{$matrices} holds the structural equivalence matrix; \verb{$nodes} holds the
 partition at each level of the clustering and \code{Cluster}; \verb{$hclust} the
-tree.
+tree. Levels are in the units of the measure; for a similarity measure
+the tree is built on \verb{$max_similarity - x} (see \code{\link[=xhclust]{xhclust()}}), and
+\verb{$max_similarity} is missing for distances and for coverage.
 }
 \description{
 UCINET: Network | Roles & Positions | Structural Equivalence | Profile.

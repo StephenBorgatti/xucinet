@@ -105,16 +105,19 @@ check_proximities <- function(m, fn) {
 # convention should not move every point on the map. Port note in
 # inst/reference/borgworld/README.md.
 #
-# Returns the dissimilarity matrix (diagonal 0, no negatives) and the
-# assumption lines describing what was done.
-to_dissimilarity <- function(m, type, fn) {
+# Returns the dissimilarity matrix (diagonal 0, no negatives), the maximum
+# used (NA for dissimilarity input) and the assumption lines describing what
+# was done. xhclust() reports its levels back on the similarity scale, so it
+# passes note = FALSE and the conversion line is left out.
+to_dissimilarity <- function(m, type, fn, note = TRUE) {
   notes <- character()
   d <- m
+  mx <- NA_real_
   if (type == "similarities") {
     off <- d[row(d) != col(d)]
     mx <- max(off)
     d <- mx - d
-    notes <- c(notes, sprintf(
+    if (note) notes <- c(notes, sprintf(
       "Similarities converted to dissimilarities as %s - x (largest off-diagonal value).",
       format_number(mx)))
   }
@@ -125,7 +128,7 @@ to_dissimilarity <- function(m, type, fn) {
     d[d < 0] <- 0
     notes <- c(notes, "Negative dissimilarities set to 0.")
   }
-  list(d = d, notes = notes)
+  list(d = d, mx = mx, notes = notes)
 }
 
 # UCINET's Johnson's routine (HandleAsymmetry in XCluster.pas) averages Xij and

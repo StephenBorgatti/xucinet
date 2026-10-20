@@ -56,8 +56,9 @@
 #' @param k Optional number of clusters: fills the `Cluster` column.
 #' @return An object of class `c("xrege", "xucinet_output")`. `$matrices`
 #'   holds the REGE similarities on 0-1 (UCINET prints them times 100);
-#'   `$nodes` the partitions of the clustering and `Cluster`; `$hclust` the
-#'   tree.
+#'   `$nodes` the partitions of the clustering (named by their REGE level)
+#'   and `Cluster`; `$hclust` the tree, built on `$max_similarity - x`, so its
+#'   heights are `$max_similarity` minus the REGE level of each merge.
 #' @seealso [xstructuralequivalence()], [xhclust()].
 #' @examples
 #' xrege(campnet)
@@ -118,6 +119,7 @@ xrege <- function(net, iterations = 3, relations = NULL, geodesics = FALSE,
     nodes_title = "Partition indicator matrix",
     subclass = "xrege", call = match.call())
   out$hclust <- cl$hclust
+  out$max_similarity <- cl$max_similarity
   out
 }
 

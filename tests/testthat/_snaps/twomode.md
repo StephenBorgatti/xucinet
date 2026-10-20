@@ -100,33 +100,33 @@
                 1 1 1 2   2 1       2   2   2 2       2 2 1 1 1 1 2 1 2 1 3 3 3
         Level   6 7 8 9 8 0 9 9 6 5 2 7 5 1 1 4 2 4 3 3 6 5 0 4 1 8 2 7 3 0 1 2
       -------   - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-       0.0000   . . . . . . . . . . . . . . . . . . XXX . . . . . . . . . . . .
-       1.5000   . . . . . . . . . . . . . . . . . XXXXX . . . . . . . . . . . .
-       2.3333   . . . . . . . . . . . . . . . . . XXXXXXX . . . . . . . . . . .
-       3.0000   . . . . . . . . . . . . . . . . . XXXXXXX . . . . . . . XXX . .
-       3.7500   . . . . . . . . . . . . . . . . XXXXXXXXX . . . . . . . XXX . .
-       4.2000   . . . . . . . . . . . . . . . XXXXXXXXXXX . . . . . . . XXX . .
-       4.8333   . . . . . . . . . . . . . . XXXXXXXXXXXXX . . . . . . . XXX . .
-       5.1429   . . . . . . . . . . . . . XXXXXXXXXXXXXXX . . . . . . . XXX . .
+      11.0000   . . . . . . . . . . . . . . . . . . XXX . . . . . . . . . . . .
+       9.5000   . . . . . . . . . . . . . . . . . XXXXX . . . . . . . . . . . .
+       8.6667   . . . . . . . . . . . . . . . . . XXXXXXX . . . . . . . . . . .
+       8.0000   . . . . . . . . . . . . . . . . . XXXXXXX . . . . . . . XXX . .
+       7.2500   . . . . . . . . . . . . . . . . XXXXXXXXX . . . . . . . XXX . .
+       6.8000   . . . . . . . . . . . . . . . XXXXXXXXXXX . . . . . . . XXX . .
+       6.1667   . . . . . . . . . . . . . . XXXXXXXXXXXXX . . . . . . . XXX . .
+       5.8571   . . . . . . . . . . . . . XXXXXXXXXXXXXXX . . . . . . . XXX . .
        5.5000   . . . . . . . . . . . . . XXXXXXXXXXXXXXX . . . . . . XXXXX . .
-       6.3333   . . . . . . . . . . . . . XXXXXXXXXXXXXXX . . . . . XXXXXXX . .
-       6.7500   . . . . . . . . . . . . . XXXXXXXXXXXXXXX . . . . XXXXXXXXX . .
-       7.2500   . . . . . . . . . . . . XXXXXXXXXXXXXXXXX . . . . XXXXXXXXX . .
-       7.4000   . . . . . . . . . . . . XXXXXXXXXXXXXXXXX . . . XXXXXXXXXXX . .
-       8.1667   . . . . . . . . . . . . XXXXXXXXXXXXXXXXX . . XXXXXXXXXXXXX . .
-       8.7778   . . . . . . . . . . . XXXXXXXXXXXXXXXXXXX . . XXXXXXXXXXXXX . .
-       9.0000   . . . . . . . . . XXX XXXXXXXXXXXXXXXXXXX . . XXXXXXXXXXXXX . .
-       9.1429   . . . . . . . . . XXX XXXXXXXXXXXXXXXXXXX . XXXXXXXXXXXXXXX . .
-       9.3500   . . . . . . . . . XXXXXXXXXXXXXXXXXXXXXXX . XXXXXXXXXXXXXXX . .
-       9.5000   . . . . . . . . . XXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXX . .
-       9.6667   . . . . . . . . XXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXX . .
-       9.9231   . . . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXX . .
-      10.0000   . . . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXX XXX
-      10.3333   . . . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXX
-      10.5000   . . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXX
-      10.5333   . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXX
-      10.6761   . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-      10.8148   . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
-      11.0000   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+       4.6667   . . . . . . . . . . . . . XXXXXXXXXXXXXXX . . . . . XXXXXXX . .
+       4.2500   . . . . . . . . . . . . . XXXXXXXXXXXXXXX . . . . XXXXXXXXX . .
+       3.7500   . . . . . . . . . . . . XXXXXXXXXXXXXXXXX . . . . XXXXXXXXX . .
+       3.6000   . . . . . . . . . . . . XXXXXXXXXXXXXXXXX . . . XXXXXXXXXXX . .
+       2.8333   . . . . . . . . . . . . XXXXXXXXXXXXXXXXX . . XXXXXXXXXXXXX . .
+       2.2222   . . . . . . . . . . . XXXXXXXXXXXXXXXXXXX . . XXXXXXXXXXXXX . .
+       2.0000   . . . . . . . . . XXX XXXXXXXXXXXXXXXXXXX . . XXXXXXXXXXXXX . .
+       1.8571   . . . . . . . . . XXX XXXXXXXXXXXXXXXXXXX . XXXXXXXXXXXXXXX . .
+       1.6500   . . . . . . . . . XXXXXXXXXXXXXXXXXXXXXXX . XXXXXXXXXXXXXXX . .
+       1.5000   . . . . . . . . . XXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXX . .
+       1.3333   . . . . . . . . XXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXX . .
+       1.0769   . . . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXX . .
+       1.0000   . . . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXX XXX
+       0.6667   . . . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXX
+       0.5000   . . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXX
+       0.4667   . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXXXXXXX
+       0.3239   . . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+       0.1852   . . . . XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+       0.0000   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
       
 

@@ -15,6 +15,12 @@
 #     diagonal out of the null model;
 #   - k = fills a Cluster column and one summary line (question 12); since
 #     23 Sep 2026 both are always present, missing without k.
+#
+# Similarity input is clustered on max - x, but every level is reported back on
+# the similarity scale (Steve, 19 Oct 2026; issue #40), as Johnson2 does with
+# sim = true: GetClosestPair takes the largest value and level.cell^[npart]
+# stores the similarity itself (Tools/G1Tools/Uclus.pas). The partitions are
+# the same either way; only the labels change.
 
 #' Johnson's hierarchical clustering
 #'
@@ -29,9 +35,12 @@
 #' caller knows whether large values mean close or far. Pass `type =
 #' "similarities"` when larger values mean closer (correlations, tie strengths,
 #' co-memberships) and `type = "dissimilarities"` when larger values mean
-#' further apart (distances, geodesics). Similarities are converted to
-#' dissimilarities as `max - x`, where the maximum is taken over the
-#' off-diagonal cells.
+#' further apart (distances, geodesics). Similarities are clustered as
+#' dissimilarities `max - x`, where the maximum is taken over the off-diagonal
+#' cells, but the levels are reported as similarities, as UCINET reports them:
+#' the text cluster diagram, the `$nodes` column names, `$levels` and the axis
+#' of the plot all show the values of the input matrix, decreasing down the
+#' diagram.
 #'
 #' UCINET records a new partition only when the merge distance changes, so
 #' tied merges collapse into one level; the partition table here does the
@@ -55,12 +64,12 @@
 #'   `"single"` or `"complete"`.
 #' @param k Optional number of clusters. Fills the `Cluster` column of `$nodes`
 #'   with `cutree(hc, k)`; the level table itself is unchanged.
-#' @param plot Draw the dendrogram with base graphics. The text cluster diagram
-#'   is printed regardless.
+#' @param plot Draw the dendrogram with base graphics ([plot.xhclust()]). The
+#'   text cluster diagram is printed regardless.
 #' @return An `xucinet_output` of subclass `xhclust`. `$nodes` is the
 #'   partition indicator matrix as a data frame, one column per distinct merge
 #'   level, named as UCINET names them (`1(8)206` is level 1, eight clusters,
-#'   merge distance 206), plus `Cluster`, which is missing unless `k` is
+#'   merge level 206), plus `Cluster`, which is missing unless `k` is
 #'   given. As in UCINET, which saves this matrix but does not print it, it is
 #'   not part of the printed report. `$summary` holds the cophenetic
 #'   correlation, the number of levels and the number of clusters requested
@@ -68,8 +77,13 @@
 #'   `Measures of cluster adequacy` (`Corr`, `Modularity`, `Silhouette` by
 #'   level) and `Cluster sizes` (proportion of items in each cluster, by
 #'   level). `$hclust` is the underlying `stats::hclust` object, so `cutree()`
-#'   and `as.dendrogram()` work on it directly. `$levels` is the numeric vector
-#'   of merge distances.
+#'   and `as.dendrogram()` work on it directly; it is always built on the
+#'   dissimilarities, so for similarity input its heights are
+#'   `$max_similarity - level`. `$levels` is the numeric vector of merge
+#'   levels in the units of the input: distances for dissimilarity input
+#'   (increasing), similarities for similarity input (decreasing).
+#'   `$max_similarity` is the largest off-diagonal similarity used in the
+#'   conversion, missing for dissimilarity input.
 #'
 #'   `Corr` is the correlation between the proximities and a same-cluster
 #'   indicator, signed so that higher is better for both input types; for
@@ -98,9 +112,11 @@ xhclust <- function(x, type, method = c("average", "single", "complete"),
 
   sym <- symmetrize_average(m)
   assumptions <- c(assumptions, sym$notes)
-  conv <- to_dissimilarity(sym$m, type, "xhclust")
+  conv <- to_dissimilarity(sym$m, type, "xhclust", note = FALSE)
   assumptions <- c(assumptions, conv$notes)
   d <- conv$d
+  mx <- conv$mx
+  is_sim <- type == "similarities"
   labels <- rownames(m)
 
   hc <- stats::hclust(stats::as.dist(d), method = method)
@@ -109,7 +125,8 @@ xhclust <- function(x, type, method = c("average", "single", "complete"),
   lv <- collapse_levels(hc, n)
   part <- lv$part                       # n x npart, renumbered 1..k
   ids <- lv$ids                         # n x npart, largest-index ids for the diagram
-  levels <- lv$levels
+  # Reported levels are in the units of the input (see the file header).
+  levels <- if (is_sim) mx - lv$levels else lv$levels
   npart <- length(levels)
   nclus <- apply(part, 2, function(v) length(unique(v)))
   dd <- hclust_decimals(levels)
@@ -123,7 +140,7 @@ xhclust <- function(x, type, method = c("average", "single", "complete"),
   coph_corr <- suppressWarnings(stats::cor(d[lower.tri(d)], as.matrix(coph)[lower.tri(d)]))
 
   # ---- measures of cluster adequacy and cluster sizes ----------------------
-  sim <- if (type == "similarities") sym$m else 1 / (1 + d)
+  sim <- if (is_sim) sym$m else 1 / (1 + d)
   diag(sim) <- 0
   moca <- moca_table(d, sim, part)
   colnames(moca) <- paste0(seq_len(npart), " (", nclus, ")")
@@ -155,14 +172,6 @@ xhclust <- function(x, type, method = c("average", "single", "complete"),
                     complete = "COMPLETE_LINK (maximum)")[[method]]
   diagram <- format_uci_dendrogram(part, level_lab, ids, labels)
 
-  if (isTRUE(plot)) {
-    old <- graphics::par(mar = c(5, 4, 4, 2) + 0.1)
-    on.exit(graphics::par(old), add = TRUE)
-    graphics::plot(hc, labels = labels, hang = -1,
-                   main = "Hierarchical Clustering Dendrogram",
-                   xlab = "", sub = "", ylab = "Level")
-  }
-
   out <- new_xucinet_output(
     "Johnson's hierarchical clustering", px$net,
     nodes = nodes, summary = summary,
@@ -179,9 +188,57 @@ xhclust <- function(x, type, method = c("average", "single", "complete"),
     subclass = "xhclust", call = match.call())
   out$hclust <- hc
   out$levels <- levels
+  out$max_similarity <- mx
   out$type <- type
   out$method <- method
+  if (isTRUE(plot)) {
+    old <- graphics::par(mar = c(5, 4, 4, 2) + 0.1)
+    on.exit(graphics::par(old), add = TRUE)
+    plot(out)
+  }
   if (isTRUE(plot)) invisible(out) else out
+}
+
+#' Plot the dendrogram of a hierarchical clustering
+#'
+#' Draws the dendrogram of an [xhclust()] result with base graphics, its
+#' vertical axis in the units of the input. For dissimilarity input the axis is
+#' the merge level. For similarity input the tree is drawn on the
+#' dissimilarities used for clustering, so the leaves sit at the largest
+#' similarity and the axis, labelled `Similarity`, runs downwards from there.
+#' `xhclust(plot = TRUE)` calls this; call it yourself to redraw, to drop the
+#' title or to change the labels.
+#'
+#' @param x An `xhclust` result.
+#' @param main Title. `""` for none.
+#' @param ylab Axis label; `"Level"` for dissimilarities and `"Similarity"`
+#'   for similarities when not given.
+#' @param labels Leaf labels, in the original order of the items; the row
+#'   names of the input when not given.
+#' @param ... Passed to [stats::plot.hclust()], e.g. `cex`.
+#' @return `x`, invisibly.
+#' @examples
+#' res <- xhclust(cities, type = "d", method = "single", plot = FALSE)
+#' plot(res, main = "")
+#' @export
+plot.xhclust <- function(x, main = "Hierarchical Clustering Dendrogram",
+                         ylab = NULL, labels = NULL, ...) {
+  hc <- x$hclust
+  mx <- x$max_similarity
+  if (is.null(labels)) labels <- hc$labels
+  sim <- !is.null(mx) && !is.na(mx)
+  if (is.null(ylab)) ylab <- if (sim) "Similarity" else "Level"
+  graphics::plot(hc, labels = labels, hang = -1, main = main,
+                 xlab = "", sub = "", ylab = ylab, axes = !sim, ...)
+  if (sim) {
+    # Ticks at round similarity values, placed at height mx - s.
+    top <- max(hc$height)
+    tol <- 1e-9 * max(1, abs(mx))
+    s <- pretty(mx - c(0, top))
+    s <- s[s <= mx + tol & s >= mx - top - tol]
+    graphics::axis(2, at = mx - s, labels = format(s))
+  }
+  invisible(x)
 }
 
 # Walk hclust's merges and record a partition whenever the merge distance

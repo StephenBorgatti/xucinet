@@ -22,8 +22,9 @@ default, uses all of them, as UCINET does.}
 \value{
 An object of class \code{c("xrege", "xucinet_output")}. \verb{$matrices}
 holds the REGE similarities on 0-1 (UCINET prints them times 100);
-\verb{$nodes} the partitions of the clustering and \code{Cluster}; \verb{$hclust} the
-tree.
+\verb{$nodes} the partitions of the clustering (named by their REGE level)
+and \code{Cluster}; \verb{$hclust} the tree, built on \verb{$max_similarity - x}, so its
+heights are \verb{$max_similarity} minus the REGE level of each merge.
 }
 \description{
 UCINET: Network | Roles & Positions | Maximal Regular Equivalence | REGE.

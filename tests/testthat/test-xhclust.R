@@ -79,7 +79,10 @@ test_that("similarity input agrees with borgworld's bhiclus, which uses the same
   bw <- fx$hclus_campnet_average
   expect_equal(res$summary$Cophenetic,
                cor(as.dist(1 - m), cophenetic(res$hclust)), tolerance = tol)
-  expect_true(any(grepl("converted to dissimilarities as 1 - x", res$assumptions)))
+  # Clustered on 1 - x, reported as similarities (#40), so no conversion note.
+  expect_equal(res$max_similarity, 1)
+  expect_false(any(grepl("converted to dissimilarities", res$assumptions)))
+  expect_equal(res$levels, 1 - unique(res$hclust$height), tolerance = tol)
   for (j in seq_len(res$summary$Levels)) {
     k <- length(unique(res$nodes[[j]]))
     expect_same_partition(res$nodes[[j]], borgworld_partition_at(bw, k), info = paste("level", j))
@@ -129,8 +132,43 @@ test_that("the partition matrix is kept but not printed, as in UCINET", {
 test_that("levels below 1 print with four decimals, as getdd() decides", {
   m <- as.matrix(campnet); m <- (m + t(m)) / 2
   res <- xhclust(m, type = "s", plot = FALSE)
-  expect_match(names(res$nodes)[1], "\\)0\\.0000$")
-  expect_true(any(grepl("^0\\.0000   ", res$preamble)))
+  # The first level is the largest similarity, 1; the smallest is below 1.
+  expect_match(names(res$nodes)[1], "\\)1\\.0000$")
+  expect_true(any(grepl("^1\\.0000   ", res$preamble)))
+})
+
+test_that("similarity levels are reported as similarities, as Johnson2 does (#40)", {
+  # Book 12.7: single-link clustering of the REGE coefficients for Sampson's
+  # esteem and disesteem (Matrix 12.6, Figure 12.8). UCINET's 3e figure shows
+  # 88.377, 85.295, ... on the 0-100 scale.
+  r <- xrege(sampson, relations = c("Esteem", "Disesteem"))$matrices[[1]]
+  res <- xhclust(r, type = "similarities", method = "single", plot = FALSE)
+  expect_equal(round(res$levels[1:4], 5), c(0.88377, 0.85295, 0.85003, 0.80413))
+  expect_true(all(diff(res$levels) < 0))
+  expect_equal(res$max_similarity, max(r[row(r) != col(r)]))
+  expect_equal(res$levels, res$max_similarity - unique(res$hclust$height),
+               tolerance = tol)
+  expect_match(names(res$nodes)[1], "^1\\(17\\)0\\.8838$")
+  expect_true(any(grepl("^0\\.8838   ", res$preamble)))
+  j <- which(vapply(res$nodes[seq_len(res$summary$Levels)],
+                    function(v) length(unique(v)), integer(1)) == 9L)
+  groups <- unname(split(rownames(res$nodes), res$nodes[[j]]))
+  multi <- lapply(groups[lengths(groups) > 1], sort)
+  expect_setequal(multi, lapply(list(
+    c("BONAVENTURE", "AMBROSE", "HUGH", "BONIFACE", "MARK", "ALBERT"),
+    c("BERTHOLD", "VICTOR"), c("PETER", "GREGORY"),
+    c("BASIL", "ELIAS", "SIMPLICIUS")), sort))
+  # Dissimilarity input is unchanged.
+  expect_true(is.na(xhclust(cities, type = "d", plot = FALSE)$max_similarity))
+})
+
+test_that("plot() redraws the dendrogram for both input types", {
+  pdf(NULL); on.exit(dev.off())
+  res <- xhclust(cities, type = "d", plot = FALSE)
+  expect_invisible(plot(res, main = ""))
+  m <- as.matrix(campnet); m <- (m + t(m)) / 2
+  s <- xhclust(m, type = "s", plot = FALSE)
+  expect_identical(plot(s), s)
 })
 
 test_that("the printed report snapshot", {

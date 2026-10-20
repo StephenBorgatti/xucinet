@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 18 Oct 2026 (Claude Code; Cowork should
+Updated 20 Oct 2026 (Claude Code; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -31,6 +31,8 @@ batch at the end.** Design questions for all remaining chapters are batched in
   Issue #15 (`steve`) holds its open items.
 - Chapter 6 complete 18/20 Sep: `xmds`, `xshepard`, `xcorrespondence`, `xhclust`; goldens
   named in `inst/goldens/multivariate/`. `xhclust()` no longer prints the partition matrix.
+  Since 20 Oct (#40) it reports similarity input's levels as similarities, as UCINET does,
+  and `plot()` redraws its dendrogram.
 - Chapter 5 complete 22 Sep, issue #12: seventeen transformations; goldens named in
   `inst/goldens/transform/`. `xnormalize()` was brought into line with `Xstdize.pas` on
   23 Sep (#16).
@@ -164,7 +166,27 @@ batch at the end.** Design questions for all remaining chapters are batched in
   the one-sided proportion "larger than or equal to the observed value"; two-tailed with
   absolute values is our (and UCINET's) convention.
 
-## Done this session (19 Oct 2026, Claude Code, Steve's "yes" to the 18 Oct UCINET questions)
+## Done this session (20 Oct 2026, Claude Code, #40)
+
+- `xhclust()` with `type = "similarities"` reports every level as a similarity (Johnson2 with
+  `sim = true`, Uclus.pas): the text diagram, the `$nodes` column names, `$levels` and the
+  plot axis. Clustering still runs on `max - x`; `$hclust` keeps those heights, and the new
+  `$max_similarity` (missing for dissimilarities) converts between them. The "Similarities
+  converted to dissimilarities" note is gone from `xhclust()` (still printed by `xmds()`).
+  `to_dissimilarity()` returns `mx` and takes `note =`.
+- New S3 method `plot.xhclust()` (main, ylab, labels, `...` to `plot.hclust`); `xhclust(plot =
+  TRUE)` calls it. For similarities the axis is relabelled `Similarity`, running down from
+  the largest value.
+- `xrege()` and `xstructuralequivalence()` carry `$max_similarity` beside `$hclust`. The
+  diagrams printed by `xrege()`, `xcliques()` and `xbicliques()` now show REGE
+  coefficients and co-membership counts (snapshots `xrege`, `subgroups`, `twomode`
+  updated).
+- Test: single-link levels of the sampson REGE matrix start 0.88377, 0.85295, 0.85003,
+  0.80413, and the nine-cluster partition is the one in book 12.7. `check()` 0/0/0.
+- Spec split: package part `dev/design/xhclust-similarity-levels.md`; book part
+  asnr2e#9 (Figures 12.8 and 13.4 now use `plot()`).
+
+## Done 19 Oct 2026 (Claude Code, Steve's "yes" to the 18 Oct UCINET questions)
 
 - Tie tolerance widened from 1e-10 to 1e-6 (relative) in `perm_summary` and the matching
   test in `test-hypotheses.R` (Steve, 19 Oct); UCINET's `permtol` the same. `check()` 0/0/0;
@@ -692,6 +714,8 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 - 19 Oct 2026 (Steve, former open question 1): the tie tolerance is 1e-6 * max(1, |obs|), not
   1e-10, in `perm_summary` and in UCINET (tools `utunivariate.permtol`) together, so that ties
   holding only in decimal arithmetic in single-precision data count too (UCINET-ISSUES 49).
+- 19 Oct 2026 (Steve; #40): `xhclust()` reports similarity input's levels as similarities, as
+  UCINET does; `$hclust` stays on the dissimilarities `max - x` so `cutree()` works.
 
 ## Open questions for Steve
 

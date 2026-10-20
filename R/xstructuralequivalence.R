@@ -93,7 +93,9 @@ se_diagonal <- c(ignore = "Ignore",
 #' @return An object of class `c("xstructuralequivalence", "xucinet_output")`.
 #'   `$matrices` holds the structural equivalence matrix; `$nodes` holds the
 #'   partition at each level of the clustering and `Cluster`; `$hclust` the
-#'   tree.
+#'   tree. Levels are in the units of the measure; for a similarity measure
+#'   the tree is built on `$max_similarity - x` (see [xhclust()]), and
+#'   `$max_similarity` is missing for distances and for coverage.
 #' @seealso [xhclust()], [xsimilarities()], [xblockmodel()], [xrege()].
 #' @examples
 #' xstructuralequivalence(sampson, relations = c("Esteem", "Disesteem"))
@@ -150,6 +152,7 @@ xstructuralequivalence <- function(net, method = c("euclidean", "correlation",
 
   nodes <- NULL
   hc <- NULL
+  mx <- NA_real_
   summary <- NULL
   preamble <- NULL
   kind <- se_measures[[method]]$kind
@@ -157,6 +160,7 @@ xstructuralequivalence <- function(net, method = c("euclidean", "correlation",
     cl <- xhclust(r, type = kind, method = "average", k = k, plot = FALSE)
     nodes <- cl$nodes
     hc <- cl$hclust
+    mx <- cl$max_similarity
     summary <- cl$summary
     preamble <- cl$preamble
   } else if (!is.null(k)) {
@@ -182,6 +186,7 @@ xstructuralequivalence <- function(net, method = c("euclidean", "correlation",
     nodes_title = "Partition indicator matrix",
     subclass = "xstructuralequivalence", call = match.call())
   out$hclust <- hc
+  out$max_similarity <- mx
   out
 }
 
