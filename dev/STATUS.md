@@ -103,8 +103,8 @@ batch at the end.** Design questions for all remaining chapters are batched in
   prints a value of 1e10 or more as `1.631E+31`, as UCINET 6.850's `tmat.display`; whole
   numbers above 2^31 no longer print `NA`.
 - **Permutation ties in UCINET (18 Oct, UCINET-ISSUES 49, Steve).** UCINET 6.850's QAP
-  correlation, MR-QAP and node-level regression now count values within 1e-10 of the observed
-  statistic as ties, as xucinet always has; `ucinet/Planning/tests/ties/` (20/20 against the
+  correlation, MR-QAP and node-level regression now count values within 1e-6 (1e-10 until
+  19 Oct) of the observed statistic as ties, as xucinet does; `ucinet/Planning/tests/ties/` (20/20 against the
   exact p-values of all 720 permutations of a 6-cycle, and against xucinet). It found a bug of
   ours: `xmrqap(method = "dsp")`'s R-square test on symmetric data ran on a random subset of
   the dyads (fitted values stored in one triangle); fixed. UCINET's Y-permutation MRQAP has
@@ -165,6 +165,11 @@ batch at the end.** Design questions for all remaining chapters are batched in
   absolute values is our (and UCINET's) convention.
 
 ## Done this session (19 Oct 2026, Claude Code, Steve's "yes" to the 18 Oct UCINET questions)
+
+- Tie tolerance widened from 1e-10 to 1e-6 (relative) in `perm_summary` and the matching
+  test in `test-hypotheses.R` (Steve, 19 Oct); UCINET's `permtol` the same. `check()` 0/0/0;
+  `ucinet/Planning/tests/ties` 29/29 and `ties2` 26/26, Moran on the decimal-tie data now
+  0.203 against the exact 0.2.
 
 - UCINET side only; no change to `R/`. Ledger: 32, 50, 51 fixed in 6.850; new 52 (UCINET
   MR-QAP Y-permutation expected values and mediation count; fixed), 53 (how UCINET's
@@ -684,15 +689,13 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 - 18 Oct 2026 (Steve, former open question 1): UCINET's QAP correlation, MR-QAP and
   node-level regression count values within 1e-10 * max(1, |obs|) of the observed statistic
   as ties, xucinet's rule (UCINET-ISSUES 49).
+- 19 Oct 2026 (Steve, former open question 1): the tie tolerance is 1e-6 * max(1, |obs|), not
+  1e-10, in `perm_summary` and in UCINET (tools `utunivariate.permtol`) together, so that ties
+  holding only in decimal arithmetic in single-precision data count too (UCINET-ISSUES 49).
 
 ## Open questions for Steve
 
-(Former question 1, the tie rule in UCINET, answered 18 Oct: see Decisions.) UCINET-side
-questions (UCINET-ISSUES 53) are in `ucinet/STATUS.md`.
-
-1. (19 Oct 2026) The 1e-10 tie tolerance catches summation-order ties, not ties that exist
-   only in decimal arithmetic: data read from UCINET files are single precision, and such a
-   tie is about 1e-8 (relative) away (UCINET-ISSUES 49, "Limit"). Keep 1e-10, or widen to
-   about 1e-6 in `perm_summary` and in UCINET together? Also `ucinet/STATUS.md` question 1.
+(Former questions 1, the tie rule in UCINET, answered 18 Oct, and the decimal-tie tolerance,
+answered 19 Oct: see Decisions.)
 
 

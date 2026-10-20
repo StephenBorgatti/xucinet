@@ -1448,14 +1448,17 @@ or command reaches (no ego-network or live homophily routine has a permutation t
 ANOVA density, Moran, Geary, old QAP correlation, crosstabs; the CLI routines, RCT, Profit,
 aggregate proximities and the legacy units are built but not run).
 
-**Limit: ties in decimal arithmetic only.** UCINET stores data in single precision. A
-permutation that reproduces the observed statistic only in decimal arithmetic (sums like 0.1 +
-0.7 = 0.8, not a rearrangement of the same terms) gives a value about 1e-8 (relative) away in
-single precision, beyond the 1e-10 rule, and lands either side. Moran's I of (0.1, 0.2, 0.3,
-0.7, 0.8, 0.9) on the valued 6-cycle: exact p 0.2 in decimal, 1/6 from the stored values with
-the 1e-10 rule; UCINET 0.186 (40000 permutations), its own single-precision arithmetic
-counting some. xucinet reads the same single-precision files with the same rule. A tolerance
-of about 1e-6 would count them (open question for Steve, 19 Oct 2026).
+**Ties in decimal arithmetic: tolerance widened to 1e-6 (Steve, 19 Oct 2026).** UCINET stores
+data in single precision. A permutation that reproduces the observed statistic only in decimal
+arithmetic (sums like 0.1 + 0.7 = 0.8, not a rearrangement of the same terms) gives a value
+about 1e-8 (relative) away in single precision, beyond the 1e-10 rule, and landed either side.
+Moran's I of (0.1, 0.2, 0.3, 0.7, 0.8, 0.9) on the valued 6-cycle: exact p 0.2 in decimal, 1/6
+from the stored values with the 1e-10 rule; UCINET 0.186 (40000 permutations). The rule is now
+values within **1E-6** * max(1, |observed|), in both programs: tools `utunivariate.permtol`
+(which every test above uses; LR-QAP's `snap` now calls it instead of its own 1E-10) and
+xucinet's `perm_summary`. A false tie can only raise p, by a permutation or two, so the error
+is conservative; a missed tie lowers it. One tolerance whatever the data's source, so a result
+does not depend on how the data were read.
 
 **What xucinet does:** the rule, in every permutation test (`perm_summary`).
 

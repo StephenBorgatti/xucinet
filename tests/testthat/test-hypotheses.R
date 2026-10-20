@@ -379,10 +379,10 @@ test_that("failed permuted fits give two p-values, checked by hand (#39)", {
   yobs <- y[cells]
   ok <- rep(TRUE, length(cells))
   obs <- lr_fit(X, yobs, ok)
-  tol <- 1e-10 * max(1, abs(obs$t[2]))
+  tol <- 1e-6 * max(1, abs(obs$t[2]))
   bounds <- function(z, o, ext) {
     f <- sum(is.na(z)); z <- z[!is.na(z)]
-    k <- if (ext) sum(abs(z) >= abs(o) - tol) else sum(z >= o - 1e-10 * max(1, abs(o)))
+    k <- if (ext) sum(abs(z) >= abs(o) - tol) else sum(z >= o - 1e-6 * max(1, abs(o)))
     c(lower = (1 + k) / (1 + nperm - f), upper = (1 + k + f) / (1 + nperm), failed = f)
   }
   # Y permutation: z of X and the log-likelihood, one set of draws for both

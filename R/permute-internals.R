@@ -55,7 +55,8 @@ perm_test <- function(stat, n, nperm, seed = NULL, tails = 2, observed = NULL,
 # (NA where a permutation gave no value, which is then not counted).
 perm_summary <- function(obs, draws, tails = 2) {
   k <- length(obs)
-  tol <- 1e-10 * pmax(1, abs(obs))       # ties within rounding count as ties
+  tol <- 1e-6 * pmax(1, abs(obs))        # ties within rounding count as ties,
+                                         # also decimal ones in single-precision data
   one <- function(i) {
     d <- draws[i, ]
     d <- d[!is.na(d)]
