@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 20 Oct 2026 (Claude Code; Cowork should
+Updated 23 Oct 2026 (Claude Code; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -166,7 +166,24 @@ batch at the end.** Design questions for all remaining chapters are batched in
   the one-sided proportion "larger than or equal to the observed value"; two-tailed with
   absolute values is our (and UCINET's) convention.
 
-## Done this session (20 Oct 2026, Claude Code, #40)
+## Done this session (23 Oct 2026, Claude Code, #41)
+
+- `xleiden()` (R/xleiden.R): Leiden community detection (Traag, Waltman & van Eck 2019),
+  modularity with `resolution`, seeded with Delphi's Random. Spec shared with UCINET,
+  step for step: `dev/design/leiden.md`. UCINET's port (ucinet #46, branch `leiden` in
+  ucinet and tools) gives the same partition for every seed tried: 115 of 115 checks in
+  `ucinet\Planning	ests\leiden\`. Tests: `test-xleiden.R` (Zachary's optimum 0.4198 for
+  every seed, connected communities, no improving single move, igraph's Leiden in
+  distribution, snapshot).
+- `xcommunities()` has a Leiden column after Louvain (snapshot `subgroups` updated).
+- Crosswalk row added (asnr2e #10); `inst/extdata/crosswalk-routines.csv` and
+  `dev/COVERAGE.md` regenerated (they also pick up crosswalk edits since 25 Sep: 7.6
+  `xplot`, the 10.5 wording, "dropped"). `_pkgdown.yml` lists `xleiden` and
+  `plot.xhclust` (missed on 20 Oct). `check()` 0/0/0.
+- The installed xucinet is still 3f39661 (no `xleiden()`); the UCINET comparison loads
+  the source with `load_all()`.
+
+## Done 20 Oct 2026 (Claude Code, #40)
 
 - `xhclust()` with `type = "similarities"` reports every level as a similarity (Johnson2 with
   `sim = true`, Uclus.pas): the text diagram, the `$nodes` column names, `$levels` and the
@@ -716,6 +733,9 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
   holding only in decimal arithmetic in single-precision data count too (UCINET-ISSUES 49).
 - 19 Oct 2026 (Steve; #40): `xhclust()` reports similarity input's levels as similarities, as
   UCINET does; `$hclust` stays on the dissimilarities `max - x` so `cutree()` works.
+- 23 Oct 2026 (Steve; #41): Leiden in xucinet and UCINET: modularity with a resolution
+  parameter (no CPM); seeded with Delphi's Random so one seed gives one partition in both;
+  `xcommunities()` gets a Leiden column; UCINET's goes in after 6.850, on branch `leiden`.
 
 ## Open questions for Steve
 

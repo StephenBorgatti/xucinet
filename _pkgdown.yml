@@ -146,6 +146,7 @@ reference:
   - xfactions
   - xgirvannewman
   - xlouvain
+  - xleiden
   - xfastgreedy
   - xlabelpropagation
   - xcommunities
@@ -221,6 +222,7 @@ reference:
   desc: Chapter 6. Johnson's hierarchical clustering, reported as UCINET reports it.
   contents:
   - xhclust
+  - plot.xhclust
 
 - title: Visualize
   desc: >

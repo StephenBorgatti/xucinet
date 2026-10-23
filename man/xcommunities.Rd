@@ -11,7 +11,8 @@ xcommunities(net, ...)
 
 \item{...}{Passed to every routine that takes the argument: \code{k} (the number
 of factions; it also sets what \code{\link[=xgirvannewman]{xgirvannewman()}} would print, which does
-not matter here), \code{seed} (label propagation and factions), \code{relation}, and
+not matter here), \code{seed} (Leiden, label propagation and factions),
+\code{resolution} (Leiden), \code{relation}, and
 so on. A method that fails is reported as missing, with the reason in
 \verb{$assumptions}.}
 }
@@ -19,7 +20,7 @@ so on. A method that fails is reported as missing, with the reason in
 An object of class \code{c("xcommunities", "xucinet_output")}.
 }
 \description{
-Runs all five of the chapter's community-detection methods and puts their
+Runs six community-detection methods, the chapter's five and Leiden, and puts their
 partitions side by side: \verb{$nodes} has one column per method, the cluster each
 node is in, and \verb{$summary} one row per method with the number of clusters and
 the modularity. Modularity is computed the same way for every method, so the
@@ -27,7 +28,8 @@ partitions can be compared on it directly.
 }
 \details{
 Each column is the \code{Cluster} column of the routine's own result: the
-partition of the top level for Louvain, the highest-modularity partition for
+partition of the top level for Louvain, the partition found for Leiden, the
+highest-modularity partition for
 fast greedy and Girvan-Newman, and the partition found for label propagation
 and factions. Cluster numbers are labels, so the same group can carry
 different numbers in different columns. For each method's own report, with
@@ -37,6 +39,6 @@ its extra tables, call the routine itself.
 xcommunities(campnet, seed = 1)
 }
 \seealso{
-\code{\link[=xlouvain]{xlouvain()}}, \code{\link[=xfastgreedy]{xfastgreedy()}}, \code{\link[=xgirvannewman]{xgirvannewman()}},
+\code{\link[=xlouvain]{xlouvain()}}, \code{\link[=xleiden]{xleiden()}}, \code{\link[=xfastgreedy]{xfastgreedy()}}, \code{\link[=xgirvannewman]{xgirvannewman()}},
 \code{\link[=xlabelpropagation]{xlabelpropagation()}}, \code{\link[=xfactions]{xfactions()}}.
 }

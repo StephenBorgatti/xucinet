@@ -5,10 +5,12 @@
 # cluster membership." So it runs every method, not one, and the node table
 # has a column per method. It reads each routine's Cluster column rather than
 # recomputing anything, as xcentralization() reads the centrality routines.
+# Leiden added 23 Oct 2026 (Steve; issue #41), after Louvain.
 
 # Column label, and the routine that provides it.
 community_methods <- list(
   Louvain            = "xlouvain",
+  Leiden             = "xleiden",
   FastGreedy         = "xfastgreedy",
   GirvanNewman       = "xgirvannewman",
   LabelProp          = "xlabelpropagation",
@@ -16,14 +18,15 @@ community_methods <- list(
 
 #' Community detection
 #'
-#' Runs all five of the chapter's community-detection methods and puts their
+#' Runs six community-detection methods, the chapter's five and Leiden, and puts their
 #' partitions side by side: `$nodes` has one column per method, the cluster each
 #' node is in, and `$summary` one row per method with the number of clusters and
 #' the modularity. Modularity is computed the same way for every method, so the
 #' partitions can be compared on it directly.
 #'
 #' Each column is the `Cluster` column of the routine's own result: the
-#' partition of the top level for Louvain, the highest-modularity partition for
+#' partition of the top level for Louvain, the partition found for Leiden, the
+#' highest-modularity partition for
 #' fast greedy and Girvan-Newman, and the partition found for label propagation
 #' and factions. Cluster numbers are labels, so the same group can carry
 #' different numbers in different columns. For each method's own report, with
@@ -32,11 +35,12 @@ community_methods <- list(
 #' @param net A network (any accepted form). 1-mode.
 #' @param ... Passed to every routine that takes the argument: `k` (the number
 #'   of factions; it also sets what [xgirvannewman()] would print, which does
-#'   not matter here), `seed` (label propagation and factions), `relation`, and
+#'   not matter here), `seed` (Leiden, label propagation and factions),
+#'   `resolution` (Leiden), `relation`, and
 #'   so on. A method that fails is reported as missing, with the reason in
 #'   `$assumptions`.
 #' @return An object of class `c("xcommunities", "xucinet_output")`.
-#' @seealso [xlouvain()], [xfastgreedy()], [xgirvannewman()],
+#' @seealso [xlouvain()], [xleiden()], [xfastgreedy()], [xgirvannewman()],
 #'   [xlabelpropagation()], [xfactions()].
 #' @examples
 #' xcommunities(campnet, seed = 1)

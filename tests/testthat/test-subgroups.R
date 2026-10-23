@@ -373,13 +373,14 @@ test_that("label propagation repeats under a seed and leaves R's RNG alone", {
 test_that("xcommunities puts every method's partition side by side", {
   # Steve, 23 Sep 2026: a node-by-method membership matrix (issue #21).
   r <- xcommunities(campnet, seed = 1)
-  meths <- c("Louvain", "FastGreedy", "GirvanNewman", "LabelProp",
+  meths <- c("Louvain", "Leiden", "FastGreedy", "GirvanNewman", "LabelProp",
              "Factions")
   expect_equal(names(r$nodes), meths)
   expect_equal(rownames(r$nodes), rownames(as.matrix(campnet)))
   expect_equal(rownames(r$summary), meths)
   # each column is the routine's own Cluster column, read, not recomputed
   expect_equal(r$nodes$Louvain, xlouvain(campnet)$nodes$Cluster)
+  expect_equal(r$nodes$Leiden, xleiden(campnet, seed = 1)$nodes$Cluster)
   expect_equal(r$nodes$Factions, xfactions(campnet, seed = 1)$nodes$Cluster)
   expect_equal(r$nodes$LabelProp,
                xlabelpropagation(campnet, seed = 1)$nodes$Cluster)
