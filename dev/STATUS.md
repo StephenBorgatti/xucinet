@@ -172,7 +172,7 @@ batch at the end.** Design questions for all remaining chapters are batched in
   modularity with `resolution`, seeded with Delphi's Random. Spec shared with UCINET,
   step for step: `dev/design/leiden.md`. UCINET's port (ucinet #46, branch `leiden` in
   ucinet and tools) gives the same partition for every seed tried: 115 of 115 checks in
-  `ucinet\Planning	ests\leiden\`. Tests: `test-xleiden.R` (Zachary's optimum 0.4198 for
+  `ucinet/Planning/tests/leiden/`. Tests: `test-xleiden.R` (Zachary's optimum 0.4198 for
   every seed, connected communities, no improving single move, igraph's Leiden in
   distribution, snapshot).
 - `xcommunities()` has a Leiden column after Louvain (snapshot `subgroups` updated).
