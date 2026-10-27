@@ -354,7 +354,9 @@
 #' @format A data frame, 26 rows keyed by pupil id, 14 columns: `Sex2M`
 #'   (2 = male), `Age` at wave 1, `Ethnicity`, `Religion`, `DelinquencyT1` to
 #'   `DelinquencyT4`, `AlcoholT2` to `AlcoholT4` (alcohol was not measured at
-#'   wave 1), `CapacityT0`, `PresenceStarts` and `PresenceEnds`.
+#'   wave 1), `CapacityT0`, `PresenceStarts` and `PresenceEnds`. As in the
+#'   original files, 0 marks a missing value in `Ethnicity`, `Religion` and the
+#'   delinquency scores (1-5); set it to `NA` before use.
 #' @source As [knecht].
 #' @seealso [knecht]
 #' @examples

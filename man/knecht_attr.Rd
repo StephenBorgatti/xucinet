@@ -8,7 +8,9 @@
 A data frame, 26 rows keyed by pupil id, 14 columns: \code{Sex2M}
 (2 = male), \code{Age} at wave 1, \code{Ethnicity}, \code{Religion}, \code{DelinquencyT1} to
 \code{DelinquencyT4}, \code{AlcoholT2} to \code{AlcoholT4} (alcohol was not measured at
-wave 1), \code{CapacityT0}, \code{PresenceStarts} and \code{PresenceEnds}.
+wave 1), \code{CapacityT0}, \code{PresenceStarts} and \code{PresenceEnds}. As in the
+original files, 0 marks a missing value in \code{Ethnicity}, \code{Religion} and the
+delinquency scores (1-5); set it to \code{NA} before use.
 }
 \source{
 As \link{knecht}.

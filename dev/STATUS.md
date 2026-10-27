@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 23 Oct 2026 (Claude Code; Cowork should
+Updated 27 Oct 2026 (Claude Code; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -166,7 +166,23 @@ batch at the end.** Design questions for all remaining chapters are batched in
   the one-sided proportion "larger than or equal to the observed value"; two-tailed with
   absolute values is our (and UCINET's) convention.
 
-## Done this session (23 Oct 2026, Claude Code, #41)
+## Done this session (27 Oct 2026, Claude Code, #42, for asnr2e #11)
+
+- Dataset `friendship_abc` (relations NetworkA, NetworkB, NetworkC; nodes a01-a14,
+  undirected) and `friendship_abc_attr` (Gender, 1 = male): the Figure 15.1 networks,
+  built by `data-raw/make-friendship-abc.R` (not from a UCINET file; the matrices come
+  from the 2022 1e practice) and checked against the chapter's counts; `test-data.R`
+  tests them. Named in the house style (`<dataset>_attr`). 717a6be.
+- `knecht` and `knecht_attr` help pages now say what the codes mean: 9 = missing answer and
+  10 = pupil has left (structural zero) in the friendship relations; 0 = missing in
+  Ethnicity, Religion and the delinquency scores. Table 15.9 reproduces the 3e table only
+  with delinquency 0 set to NA.
+- #43 (open): `xplot()` trims edges at the wrong radius with `nodesize` > 1 or under
+  `par(mfrow)`; asnr2e's ch15 generator works around it with `par(cex = 1)`.
+- Installed xucinet reinstalled from source at 717a6be (has `xleiden()` and the new
+  dataset). ergm 4.12.0 and RSiena 1.6.6 installed from CRAN (they were missing).
+
+## Done 23 Oct 2026 (Claude Code, #41)
 
 - `xleiden()` (R/xleiden.R): Leiden community detection (Traag, Waltman & van Eck 2019),
   modularity with `resolution`, seeded with Delphi's Random. Spec shared with UCINET,
