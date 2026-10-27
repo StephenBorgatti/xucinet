@@ -229,6 +229,37 @@
 #' as.matrix(doctorates)[1:4, 1:4]
 "doctorates"
 
+#' Friendship networks A, B and C of chapter 15
+#'
+#' Three made-up friendship networks among the same 14 people, seven men and
+#' seven women, drawn for chapter 15 to show what an ERGM picks up: network A
+#' is dense with closed triads and some gender homophily, network B is sparse
+#' and star-like, network C has few triangles but many 4-cycles.
+#'
+#' @format An `xucinet` object, 14 x 14, three binary undirected relations:
+#'   `NetworkA` (29 ties, 96 2-stars, 19 triangles), `NetworkB` (14 ties, 32
+#'   2-stars) and `NetworkC` (23 ties).
+#' @source Borgatti, S. P., Everett, M. G., Johnson, J. C. and Agneessens, F.
+#'   *Analyzing Social Networks Using R*. Sage. Figure 15.1.
+#' @section Book sections: 15.2-15.4 (practices 15.1-15.4).
+#' @seealso [friendship_abc_attr]
+#' @examples
+#' xdensity(friendship_abc, relation = "NetworkA")
+"friendship_abc"
+
+#' Gender of the people in networks A, B and C
+#'
+#' @format A data frame, 14 rows keyed by node id (a01-a14), one column:
+#' \describe{
+#'   \item{Gender}{1 = male, 0 = female; seven of each}
+#' }
+#' @source As [friendship_abc].
+#' @section Book sections: 15.2-15.4 (practices 15.1-15.4).
+#' @seealso [friendship_abc]
+#' @examples
+#' table(friendship_abc_attr$Gender)
+"friendship_abc_attr"
+
 #' Hawthorne bank wiring room
 #'
 #' Observations of 14 Western Electric employees in the bank wiring room, from
@@ -306,7 +337,9 @@
 #'
 #' @format An `xucinet` object, 26 x 26, five relations: `FriendshipT1` to
 #'   `FriendshipT4`, plus `CoattendedPrimary` (whether the pair knew each other
-#'   from primary school).
+#'   from primary school). As in the original files, 9 marks a missing answer
+#'   (a pupil absent at that wave) and 10 a structural zero (a pupil who has
+#'   left the class); RSiena reads 10 as such, and 9 should be set to `NA`.
 #' @source Knecht, A. (2008). *Friendship selection and friends' influence:
 #'   dynamics of networks and actor attributes in early adolescence*. PhD
 #'   dissertation, University of Utrecht.

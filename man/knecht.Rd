@@ -7,7 +7,9 @@
 \format{
 An \code{xucinet} object, 26 x 26, five relations: \code{FriendshipT1} to
 \code{FriendshipT4}, plus \code{CoattendedPrimary} (whether the pair knew each other
-from primary school).
+from primary school). As in the original files, 9 marks a missing answer
+(a pupil absent at that wave) and 10 a structural zero (a pupil who has
+left the class); RSiena reads 10 as such, and 9 should be set to \code{NA}.
 }
 \source{
 Knecht, A. (2008). \emph{Friendship selection and friends' influence:

@@ -7,11 +7,12 @@ networks <- c("baker_journals", "bkham", "camp92", "campnet", "pv504", "pv960",
               "polarstation", "kaptail", "knecht", "hightech", "mainas_terro",
               "newfrat", "padgett", "pane_training", "sampson", "trade_pre29",
               "papuan_village", "wolfe_primates", "zachary",
-              "lazega", "newguinea", "supremecourt")
+              "lazega", "newguinea", "supremecourt", "friendship_abc")
 attributes <- c("camp92_attr", "pv504_attr", "eies_attr", "knecht_attr",
                 "hightech_attr", "padgett_attr", "wolfe_primates_attr",
                 "zachary_attr", "lazega_attr",
-                "supremecourt_cases_attr", "supremecourt_judges_attr")
+                "supremecourt_cases_attr", "supremecourt_judges_attr",
+                "friendship_abc_attr")
 
 get_data <- function(name) {
   env <- new.env(parent = emptyenv())
@@ -50,7 +51,8 @@ test_that("attribute tables line up with their network, node for node", {
                 c("eies", "eies_attr"), c("knecht", "knecht_attr"),
                 c("hightech", "hightech_attr"), c("padgett", "padgett_attr"),
                 c("wolfe_primates", "wolfe_primates_attr"),
-                c("zachary", "zachary_attr"), c("lazega", "lazega_attr"))
+                c("zachary", "zachary_attr"), c("lazega", "lazega_attr"),
+                c("friendship_abc", "friendship_abc_attr"))
   for (p in pairs) {
     net <- get_data(p[1]); df <- get_data(p[2])
     expect_identical(rownames(as.matrix(net)), rownames(df), info = p[1])
@@ -181,4 +183,20 @@ test_that("supremecourt has the 2 Oct 2026 corrections", {
   expect_true("Ginsburg" %in% rownames(ja))
   expect_equal(unname(ca[["Majority Size"]]), unname(rowSums(m, na.rm = TRUE)))
   expect_equal(unname(ja$NoTimesMajority), unname(colSums(m, na.rm = TRUE)))
+})
+
+test_that("friendship_abc has the counts chapter 15 quotes", {
+  net <- get_data("friendship_abc")
+  g <- get_data("friendship_abc_attr")$Gender
+  expect_equal(xrelations(net), c("NetworkA", "NetworkB", "NetworkC"))
+  expect_false(net$directed)
+  a <- as.matrix(net, relation = "NetworkA")
+  b <- as.matrix(net, relation = "NetworkB")
+  expect_equal(sum(a) / 2, 29)
+  expect_equal(sum(choose(rowSums(a), 2)), 96)
+  expect_equal(sum(diag(a %*% a %*% a)) / 6, 19)
+  expect_equal(sum(choose(rowSums(b), 2)), 32)
+  same <- outer(g, g, "==")
+  expect_equal(c(sum(a * same), sum(a * !same)) / 2, c(19, 10))
+  expect_equal(sum(g == 1), 7)
 })
