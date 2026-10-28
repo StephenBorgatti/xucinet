@@ -242,3 +242,26 @@ test_that("auto label placement keeps labels off each other", {
 test_that("a single number for nodesize or labelsize is a multiple of the default", {
   expect_silent(draw(campnet, nodesize = 0.5, labelsize = 1.2))
 })
+
+test_that("edges reach the node symbols at any size and under par(mfrow)", {
+  # Issue #43. Two white nodes joined by a horizontal edge: along the edge's
+  # row of pixels the only blank runs are the two node interiors.
+  skip_if_not_installed("png")
+  m <- matrix(c(0, 1, 1, 0), 2, dimnames = list(c("a", "b"), c("a", "b")))
+  xy <- matrix(c(0, 1, 0, 0), 2, dimnames = list(c("a", "b"), NULL))
+  gaps <- function(mfrow, nodesize = NULL) {
+    f <- tempfile(fileext = ".png")
+    grDevices::png(f, width = 6, height = 3, units = "in", res = 300)
+    graphics::par(mfrow = mfrow)
+    xplot(m, layout = xy, nodecolor = "white", nodesize = nodesize, label = FALSE)
+    grDevices::dev.off()
+    img <- png::readPNG(f)[, , 1]
+    dark <- img[which.max(rowSums(img < 0.7)), ] < 0.7
+    r <- rle(dark[min(which(dark)):max(which(dark))])
+    sum(!r$values)
+  }
+  expect_equal(gaps(c(1, 1)), 2)
+  expect_equal(gaps(c(1, 1), nodesize = 1.8), 2)
+  expect_equal(gaps(c(1, 3)), 2)
+  expect_equal(gaps(c(5, 2)), 2)
+})

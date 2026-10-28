@@ -217,6 +217,12 @@ is_categorical <- function(v) {
   length(u) <= 6 && all(u == round(u))
 }
 
+# Radius in inches of a node symbol drawn with points(cex = cex). R draws the
+# pch 21 circle with radius 0.375 times half the character height, and the
+# character height in par("csi") already includes par("cex"), which par(mfrow)
+# lowers below 1.
+node_radius <- function(cex) 0.1875 * graphics::par("csi") * cex
+
 rescale <- function(v, lo, hi) {
   r <- range(v, na.rm = TRUE)
   out <- if (diff(r) == 0) rep((lo + hi) / 2, length(v))
@@ -495,7 +501,7 @@ xplot <- function(net, layout = "spring", relation = NULL, nodecolor = NULL,
   # labels (sized in inches) then take a different share of it. Nothing is
   # clipped and no space is set aside that the labels do not use.
   has_lab <- any(nzchar(lab[shown]))
-  rad <- 0.375 * graphics::par("cin")[2] * cex[shown] + 0.03
+  rad <- node_radius(cex[shown]) + 0.03
   off <- matrix(0, length(shown), 2)
   if (has_lab) {
     w <- graphics::strwidth(lab[shown], units = "inches", cex = lcex[shown])
@@ -644,7 +650,7 @@ draw_edges <- function(el, xy, cex, mats, nrel, arrows, edgewidth, edgecolor,
   # Work in inches so that lines stop at the symbol's edge and arrowheads keep
   # their shape whatever the scale of the axes.
   ux <- graphics::xinch(1); uy <- graphics::yinch(1)
-  rad <- 0.375 * graphics::par("cin")[2] * cex
+  rad <- node_radius(cex)
   asz <- if (is.matrix(arrowsize)) arrowsize[cbind(el$i, el$j)]
          else if (isTRUE(arrowsize)) rescale(el$value, 0.6, 1.8)
          else if (is.numeric(arrowsize)) rep_len(arrowsize, nrow(el))

@@ -29,6 +29,7 @@ Suggests:
     network,
     sna,
     numDeriv,
+    png,
     tidygraph,
     jsonlite,
     readxl,
