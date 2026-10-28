@@ -294,50 +294,63 @@ hclust_decimals <- function(levels) {
 #               Q = sum over clusters of (w_b / o - ((r_b + w_b) / o)^2).
 #   Silhouette  mean silhouette width on the dissimilarities; singletons score 0.
 # Corr and Modularity are undefined for one cluster; Silhouette also for n.
+# Every measure is built from sums by cluster, one rowsum() per level, rather
+# than cluster by cluster: the numbers are the same (to rounding), and the
+# 285 levels of the Terro clique co-membership (4275 nodes) take seconds
+# rather than hours (#45).
 moca_table <- function(d, sim, part) {
   n <- nrow(d); npart <- ncol(part)
-  lower <- lower.tri(d)
-  d_lower <- d[lower]
   out <- matrix(NA_real_, 3L, npart,
                 dimnames = list(c("Corr", "Modularity", "Silhouette"), NULL))
+  lower <- lower.tri(d)
+  d_lower <- d[lower]
+  npairs <- length(d_lower)
+  sd_mean <- mean(d_lower)
+  var_d <- mean((d_lower - sd_mean)^2)
+  dd <- diag(d)
   o <- sum(sim)
   deg <- rowSums(sim)
+  ds <- diag(sim)
+  idx <- cbind(0L, seq_len(n))
   for (p in seq_len(npart)) {
     v <- part[, p]
-    nb <- length(unique(v))
-    same <- outer(v, v, "==")
-    if (nb > 1L) {
-      out["Corr", p] <- -suppressWarnings(stats::cor(d_lower, as.numeric(same[lower])))
-      if (o > 0) {
-        q <- 0
-        for (b in unique(v)) {
-          inb <- v == b
-          w <- sum(sim[inb, inb])
-          kb <- sum(deg[inb])
-          q <- q + w / o - (kb / o)^2
-        }
-        out["Modularity", p] <- q
-      }
+    nb <- max(v)
+    if (nb < 2L) next
+    size <- tabulate(v, nb)
+    idx[, 1] <- v
+    # Column sums of d by cluster: dsum[b, i] = sum of d[j, i] over j in b.
+    dsum <- rowsum(d, v, reorder = TRUE)
+    own <- dsum[idx]                          # sum of d[i, j] over i's cluster, j = i included
+    # Corr: the correlation, over unordered pairs, of d with "same cluster",
+    # negated so that higher is better, from sums by cluster.
+    pw <- sum(size * (size - 1)) / 2
+    ps <- pw / npairs
+    var_s <- ps - ps^2
+    if (var_s > 0 && var_d > 0) {
+      within <- (sum(own) - sum(dd)) / 2
+      cov <- within / npairs - sd_mean * ps
+      out["Corr", p] <- -cov / sqrt(var_d * var_s)
     }
-    if (nb > 1L && nb < n) {
-      out["Silhouette", p] <- mean(silhouette_widths(d, v))
+    # Modularity, calcmoca() in umoca.pas: Q = sum_b (w_b/o - (k_b/o)^2).
+    if (o > 0) {
+      ssum <- rowsum(sim, v, reorder = TRUE)
+      w <- tapply(ssum[idx], v, sum)
+      kb <- tapply(deg, v, sum)
+      out["Modularity", p] <- sum(w / o - (kb / o)^2)
+    }
+    # Silhouette: a = mean distance to the rest of i's cluster, b = smallest
+    # mean distance to another cluster; singletons score 0.
+    if (nb < n) {
+      mean_to <- dsum / size                  # nb x n
+      mean_to[idx] <- Inf
+      b <- vapply(seq_len(n), function(i) min(mean_to[, i]), numeric(1))
+      a <- (own - dd) / (size[v] - 1)
+      mx <- pmax(a, b)
+      s <- ifelse(size[v] == 1L, 0, ifelse(mx > 0, (b - a) / mx, 0))
+      out["Silhouette", p] <- mean(s)
     }
   }
   out
-}
-
-silhouette_widths <- function(d, v) {
-  n <- nrow(d)
-  s <- numeric(n)
-  for (i in seq_len(n)) {
-    own <- which(v == v[i] & seq_len(n) != i)
-    if (!length(own)) { s[i] <- 0; next }
-    a <- mean(d[i, own])
-    others <- setdiff(unique(v), v[i])
-    b <- min(vapply(others, function(cl) mean(d[i, v == cl]), numeric(1)))
-    s[i] <- if (max(a, b) > 0) (b - a) / max(a, b) else 0
-  }
-  s
 }
 
 # handlesizes() in XCluster.pas: rows CL1.., columns levels, cells the share of

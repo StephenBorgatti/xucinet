@@ -1,5 +1,23 @@
 # xucinet 2.0.0.9000 (development)
 
+## Cliques and clustering on large networks (27 October 2026)
+
+* `xcliques()` finishes on large networks (#45). On the Terro data of book
+  section 11.7 (4275 nodes, 1244 cliques) it did not finish in 15 minutes; it
+  now takes about a minute, almost all of it the measures of cluster adequacy
+  for the 285 levels of the co-membership clustering. The clique enumeration
+  alone takes about half a second (it was 11 s): Bron and Kerbosch's
+  algorithm is done with vector operations, choosing the same fixed points, so
+  the cliques come out in the same order and with the same numbers. The
+  co-membership matrix is added clique by clique.
+* `xhclust()`'s measures of cluster adequacy (Corr, Modularity, Silhouette)
+  are computed from sums by cluster, one `rowsum()` per level, instead of
+  cluster by cluster. Same numbers to about 1e-15; much faster when there
+  are many items and levels. `xcliques()`, `xbicliques()` and every other
+  routine that clusters through `xhclust()` gain from it.
+* The `wiring` help page named the solderers S1-S3; they are S1, S2 and S4
+  (#46).
+
 ## MRQAP: the R-square test on symmetric data (18 October 2026)
 
 * `xmrqap(method = "dsp")` on symmetric data: the R-square test stored the

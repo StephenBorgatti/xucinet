@@ -116,6 +116,56 @@ test_that("the clique set is igraph's", {
   }
 })
 
+test_that("the vectorised enumeration keeps UCINET's order and scales (#45)", {
+  # The order is the book's numbering of the games cliques (11.2).
+  expect_equal(xcliques(wiring, relation = "Games")$cliques,
+               list(c("I1", "W1", "W2", "W3", "W4"), c("W1", "W2", "W3", "W4", "S1"),
+                    c("W1", "W3", "W4", "W5", "S1"), c("W6", "W7", "W8", "W9"),
+                    c("W7", "W8", "W9", "S4")))
+  # A sparse graph of 300 nodes: igraph's clique set, and the co-membership
+  # matrix built clique by clique equals the membership product.
+  set.seed(45)
+  u <- matrix(stats::runif(300^2) < 0.03, 300)
+  u <- (u | t(u)) * 1; diag(u) <- 0
+  dimnames(u) <- list(paste0("n", 1:300), paste0("n", 1:300))
+  r <- xcliques(u)
+  g <- igraph::graph_from_adjacency_matrix(u, mode = "undirected")
+  expect_equal(set_of(r$cliques), set_of(lapply(igraph::max_cliques(g, min = 3), names)))
+  member <- sapply(r$cliques, function(cl) rownames(u) %in% cl) * 1
+  expect_equal(unname(r$comembership), unname(member %*% t(member)))
+})
+
+test_that("the cluster adequacy measures equal a pair-by-pair computation (#45)", {
+  # The direct definitions, cluster by cluster, as moca_table() computed them
+  # before it worked from sums by cluster.
+  direct <- function(d, sim, v) {
+    n <- nrow(d); lower <- lower.tri(d)
+    corr <- -stats::cor(d[lower], as.numeric(outer(v, v, "==")[lower]))
+    o <- sum(sim); deg <- rowSums(sim)
+    q <- sum(vapply(unique(v), function(b) {
+      i <- v == b; sum(sim[i, i]) / o - (sum(deg[i]) / o)^2 }, numeric(1)))
+    s <- vapply(seq_len(n), function(i) {
+      own <- which(v == v[i] & seq_len(n) != i)
+      if (!length(own)) return(0)
+      a <- mean(d[i, own])
+      b <- min(vapply(setdiff(unique(v), v[i]), function(cl) mean(d[i, v == cl]), numeric(1)))
+      if (max(a, b) > 0) (b - a) / max(a, b) else 0
+    }, numeric(1))
+    c(Corr = corr, Modularity = q, Silhouette = mean(s))
+  }
+  set.seed(7)
+  x <- matrix(stats::runif(225), 15); x <- x + t(x)
+  dimnames(x) <- list(letters[1:15], letters[1:15])
+  r <- xhclust(x, type = "similarities", plot = FALSE)
+  sim <- x; diag(sim) <- 0
+  d <- max(x[row(x) != col(x)]) - x; diag(d) <- 0
+  moca <- r$matrices[["Measures of cluster adequacy"]]
+  part <- as.matrix(r$nodes[, grep("^[0-9]+\\(", names(r$nodes))])
+  for (j in which(apply(part, 2, max) > 1 & apply(part, 2, max) < 15)) {
+    expect_equal(moca[, j], direct(d, sim, part[, j]), tolerance = 1e-12, info = j)
+  }
+})
+
 test_that("the cliques report prints", {
   expect_snapshot(xcliques(campnet))
 })

@@ -263,7 +263,7 @@
 #' Hawthorne bank wiring room
 #'
 #' Observations of 14 Western Electric employees in the bank wiring room, from
-#' the Hawthorne studies: two inspectors (I1, I3), three solderers (S1-S3) and
+#' the Hawthorne studies: two inspectors (I1, I3), three solderers (S1, S2, S4) and
 #' nine wiremen (W1-W9), working in a single room. Six kinds of interaction were
 #' recorded. Best known through Homans's reanalysis and the Breiger, Boorman and
 #' Arabie CONCOR analysis.

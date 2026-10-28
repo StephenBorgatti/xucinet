@@ -46,6 +46,9 @@ batch at the end.** Design questions for all remaining chapters are batched in
   run on igraph. `xlouvain()` fixes UCINET issue 26 as Steve decided; on 2-mode data it is
   UCINET's bipartite-modularity Louvain (26 Sep, #18). Goldens named in
   `inst/goldens/subgroups/`.
+  27 Oct (#45): `xcliques()` runs on large networks (Terro, 4275 nodes: about a minute,
+  the enumeration half a second, same clique order); `xhclust()`'s adequacy measures come
+  from sums by cluster. #46: `wiring` help says S1, S2, S4.
 - Chapter 12 (equivalence) done: `xstructuralequivalence`, `xblockmodel`, `xcoreperiphery`
   (categorical and continuous, and 2-mode categorical), `xrege` (23 Sep, #23), and
   `xblockoptimize` (26 Sep, #24; UCINET issue 35). Goldens named in
@@ -166,7 +169,22 @@ batch at the end.** Design questions for all remaining chapters are batched in
   the one-sided proportion "larger than or equal to the observed value"; two-tailed with
   absolute values is our (and UCINET's) convention.
 
-## Done this session (27 Oct 2026, Claude Code, #42, for asnr2e #11)
+## Done this session (27 Oct 2026, late, Claude Code, #45 and #46, for asnr2e #14)
+
+- #45: `xcliques(mainas_terro)` did not finish (15+ min). Cause: `xhclust()`'s
+  `moca_table()` went cluster by cluster over the whole matrix at every level (285 levels,
+  ~3000 clusters each); 3 levels took 99 s. Now one `rowsum()` per level for Corr,
+  Modularity and Silhouette, per-column minimum for Silhouette's b; same numbers to ~1e-15
+  (checked against the old code on seven inputs, and a new test against the pair-by-pair
+  definitions). `bron_kerbosch_v2()` vectorised (fixed point = first argmin of the full
+  non-neighbour counts, which is what the Delphi's early exit picks): identical clique
+  lists, in the same order, on 36 networks x 3 minimum sizes; Terro 11 s -> 0.6 s. The
+  co-membership matrix is summed clique by clique (the dense product took 12 s).
+  `xcliques(mainas_terro)`: 73 s in all.
+- #46: `wiring` help page, solderers S1, S2, S4.
+- Tests: 3828 + 16 new pass; `devtools::check()` 0 errors, 0 warnings, 0 notes.
+
+## Done earlier on 27 Oct 2026 (Claude Code, #42, for asnr2e #11)
 
 - Dataset `friendship_abc` (relations NetworkA, NetworkB, NetworkC; nodes a01-a14,
   undirected) and `friendship_abc_attr` (Gender, 1 = male): the Figure 15.1 networks,

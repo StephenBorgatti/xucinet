@@ -95,9 +95,10 @@ xcliques <- function(net, min = 3, type = c("weak", "strong"), relation = NULL) 
 
   # constructoverlapmatrix: pairs of nodes, number of cliques they share; the
   # diagonal is the number of cliques each node is in.
-  member <- matrix(0, n, k)
-  for (j in seq_len(k)) member[cliques[[j]], j] <- 1
-  comemb <- member %*% t(member)
+  # Added clique by clique rather than as member %*% t(member), which on 4275
+  # nodes and 1244 cliques took 12 s (#45).
+  comemb <- matrix(0, n, n)
+  for (ix in cliques) comemb[ix, ix] <- comemb[ix, ix] + 1
   dimnames(comemb) <- list(labels, labels)
 
   clustering <- NULL
@@ -133,11 +134,15 @@ xcliques <- function(net, min = 3, type = c("weak", "strong"), relation = NULL) 
   out
 }
 
-# BronKerbosch / ExtendVersion2 in uclique.pas, one step at a time. `adj` is
-# logical, symmetric, with a FALSE diagonal; a pair is "connected" when it is
-# a tie or the same node (the Delphi zeroes the diagonal of a distance matrix
-# and tests `<= maxd`). Returns the cliques as index vectors, in the order the
-# algorithm saves them.
+# BronKerbosch / ExtendVersion2 in uclique.pas. `adj` is logical, symmetric,
+# with a FALSE diagonal; a pair is "connected" when it is a tie or the same
+# node (the Delphi zeroes the diagonal of a distance matrix and tests
+# `<= maxd`). Returns the cliques as index vectors, in the order the algorithm
+# saves them. The Delphi's scalar loops (counting non-neighbours, filtering
+# the new `not` and candidate sets) are done as vector operations; the choice
+# of fixed point and the order of the backtrack are unchanged, so the cliques
+# come out in the same order (#45: Terro, 4275 nodes, from 11 s to well under
+# a second).
 bron_kerbosch_v2 <- function(adj, minsize) {
   n <- nrow(adj)
   conn <- adj
@@ -146,54 +151,36 @@ bron_kerbosch_v2 <- function(adj, minsize) {
   compsub <- integer(0)
 
   extend <- function(old, ne, ce) {
-    minnod <- ce; nod <- 0L; fixp <- 0L; s <- 0L; pos <- 0L
-    # Determine each counter value and look for the minimum.
-    for (i in seq_len(ce)) {
-      if (minnod == 0) break
-      p <- old[i]
-      icount <- 0L
-      if (ne + 1 <= ce) {
-        for (j in (ne + 1):ce) {
-          if (icount >= minnod) break
-          if (!conn[p, old[j]]) {
-            icount <- icount + 1L
-            pos <- j
-          }
-        }
-      }
-      if (icount < minnod) {
-        fixp <- p
-        minnod <- icount
-        if (i <= ne) {
-          s <- pos
-        } else {
-          s <- i
-          nod <- 1L
-        }
-      }
+    cand <- if (ne < ce) old[(ne + 1L):ce] else integer(0)
+    # Fixed point: the first of old[1..ce] with the fewest non-neighbours among
+    # the candidates. The Delphi's early exit (icount >= minnod) only skips
+    # points that cannot win, so counting in full picks the same point.
+    nonadj <- !conn[old[seq_len(ce)], cand, drop = FALSE]
+    counts <- rowSums(nonadj)
+    i <- which.min(counts)
+    minnod <- counts[[i]]
+    fixp <- old[i]
+    if (i <= ne) {
+      # A point of `not`: start from its last non-neighbour among the candidates
+      # (`pos` in the Delphi). With minnod = 0 the loop below does not run.
+      s <- if (minnod > 0) ne + max(which(nonadj[i, ])) else 0L
+      nod <- 0L
+    } else {
+      s <- i
+      nod <- 1L
     }
     # Backtrack cycle.
     k <- minnod + nod
     while (k >= 1) {
-      p <- old[s]; old[s] <- old[ne + 1]
-      sel <- p; old[ne + 1] <- p
-      newne <- 0L
-      knew <- integer(0)
-      for (i in seq_len(ne)) {
-        if (conn[sel, old[i]]) {
-          newne <- newne + 1L
-          knew[newne] <- old[i]
-        }
-      }
-      newce <- newne
-      if (ne + 2 <= ce) {
-        for (i in (ne + 2):ce) {
-          if (conn[sel, old[i]]) {
-            newce <- newce + 1L
-            knew[newce] <- old[i]
-          }
-        }
-      }
+      p <- old[s]; old[s] <- old[ne + 1L]
+      sel <- p; old[ne + 1L] <- p
+      knot <- if (ne > 0) old[seq_len(ne)] else integer(0)
+      knot <- knot[conn[sel, knot]]
+      kcand <- if (ne + 2L <= ce) old[(ne + 2L):ce] else integer(0)
+      kcand <- kcand[conn[sel, kcand]]
+      knew <- c(knot, kcand)
+      newne <- length(knot)
+      newce <- length(knew)
       compsub <<- c(compsub, sel)
       if (newce == 0) {
         if (length(compsub) >= minsize) found[[length(found) + 1L]] <<- compsub
@@ -204,11 +191,7 @@ bron_kerbosch_v2 <- function(adj, minsize) {
       ne <- ne + 1L
       if (k > 1) {
         # Select a candidate disconnected from the fixed point.
-        s <- ne
-        repeat {
-          s <- s + 1L
-          if (!conn[fixp, old[s]]) break
-        }
+        s <- ne + which(!conn[fixp, old[(ne + 1L):ce]])[1L]
       }
       k <- k - 1L
     }
