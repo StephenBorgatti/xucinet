@@ -265,3 +265,25 @@ test_that("edges reach the node symbols at any size and under par(mfrow)", {
   expect_equal(gaps(c(1, 3)), 2)
   expect_equal(gaps(c(5, 2)), 2)
 })
+
+test_that("segs_cross_box finds the segments through a box", {
+  b <- c(0, 1, 0, 1)
+  segs <- rbind(c(-1, 0.5, 2, 0.5),   # straight through
+                c(-1, -1, 2, 2),      # diagonal through
+                c(2, 0, 3, 1),        # beside
+                c(0.5, 2, 0.5, 3),    # above, vertical
+                c(0.2, 0.2, 0.4, 0.4),# inside
+                c(-1, 0.5, -0.1, 0.5))# stops short
+  expect_equal(segs_cross_box(segs, b), c(TRUE, TRUE, FALSE, FALSE, TRUE, FALSE))
+  expect_equal(segs_cross_box(matrix(0, 0, 4), b), logical(0))
+})
+
+test_that("auto label placement moves a label off an edge", {
+  # One node with an edge leaving to the right: its label goes elsewhere.
+  off <- place_labels(c(0, 2), c(0, 0), c(0.3, 0.3), c(0.1, 0.1), c(0.05, 0.05),
+                      c(-Inf, Inf, -Inf, Inf), c(TRUE, FALSE), rbind(c(0, 0, 2, 0)))
+  expect_lt(off[1, 1], 0)
+  off <- place_labels(c(0, 2), c(0, 0), c(0.3, 0.3), c(0.1, 0.1), c(0.05, 0.05),
+                      c(-Inf, Inf, -Inf, Inf), c(TRUE, FALSE))
+  expect_gt(off[1, 1], 0)
+})

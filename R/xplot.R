@@ -302,9 +302,9 @@ is_colour <- function(x) {
 #'   "How attributes are drawn".
 #' @param label `TRUE` (node labels), `FALSE`, or a character vector of labels.
 #' @param labelpos Where labels go: `"auto"` (the default) tries right, left,
-#'   above and below each node and takes the place that overlaps least with
-#'   the nodes and the labels already placed; `"right"` puts every label to
-#'   the right of its node.
+#'   above, below and the four diagonals of each node and takes the place that
+#'   overlaps least with the nodes, the labels already placed and the edges;
+#'   `"right"` puts every label to the right of its node.
 #' @param palette Fills for categories: `"color"` (the default) or `"grey"`,
 #'   shades from near-white to dark for print that may be greyscale. Shapes
 #'   then carry the categories first.
@@ -501,6 +501,9 @@ xplot <- function(net, layout = "spring", relation = NULL, nodecolor = NULL,
   # labels (sized in inches) then take a different share of it. Nothing is
   # clipped and no space is set aside that the labels do not use.
   has_lab <- any(nzchar(lab[shown]))
+  # Each line once, for counting the edges that run through a label.
+  one <- !duplicated(cbind(pmin(el$i, el$j), pmax(el$i, el$j)))
+  ei <- el$i[one]; ej <- el$j[one]
   rad <- node_radius(cex[shown]) + 0.03
   off <- matrix(0, length(shown), 2)
   if (has_lab) {
@@ -510,7 +513,9 @@ xplot <- function(net, layout = "spring", relation = NULL, nodecolor = NULL,
       ux <- graphics::xinch(1); uy <- graphics::yinch(1)
       off <- if (labelpos == "right") cbind(rad + w / 2, 0)
              else place_labels(pts[, 1] / ux, pts[, 2] / uy, w, h, rad,
-                               c(-Inf, Inf, -Inf, Inf), nzchar(lab[shown]))
+                               c(-Inf, Inf, -Inf, Inf), nzchar(lab[shown]),
+                               cbind(xy[ei, 1] / ux, xy[ei, 2] / uy,
+                                     xy[ej, 1] / ux, xy[ej, 2] / uy))
       cx <- pts[, 1] + off[, 1] * ux; cy <- pts[, 2] + off[, 2] * uy
       bx <- c(cx - w / 2 * ux, cx + w / 2 * ux, pts[, 1] - rad * ux, pts[, 1] + rad * ux)
       by <- c(cy - h / 2 * uy, cy + h / 2 * uy, pts[, 2] - rad * uy, pts[, 2] + rad * uy)
@@ -727,13 +732,17 @@ draw_legends <- function(leg, col_v, shape_v, cat_col, cat_shape, relnames,
   invisible()
 }
 # Label placement for labelpos = "auto". Everything in inches. Each label may
-# sit right, left, above or below its node; nodes are taken most crowded
-# first, and each label takes the place whose box overlaps least with the
-# other nodes' symbols and the labels already placed, running outside the
-# plot counting heavily against a place. Ties keep the earlier place in that
-# order, so an uncrowded label stays on the right. Returns each label's centre
-# as an offset from its node.
-place_labels <- function(x, y, w, h, r, usr, has) {
+# sit at eight places around its node: right, left, above, below, then the
+# four diagonals. Nodes are taken most crowded first, and each label takes the
+# place with the lowest score: the share of the label covered by labels already
+# placed (weight 3) and by other nodes' symbols (weight 2), plus one for each
+# edge that runs through it (segs: one row x1, y1, x2, y2 per edge), with
+# running outside the plot counting heavily against a place. Counting edges is
+# from UCINET Draw's SmartLabelPlacement, which counts only the node's own
+# edges; here any edge counts. Ties keep the earlier place in that order, so
+# an uncrowded label stays on the right. Returns each label's centre as an
+# offset from its node.
+place_labels <- function(x, y, w, h, r, usr, has, segs = NULL) {
   n <- length(x)
   gap <- 0.03
   nodes <- cbind(x - r, x + r, y - r, y + r)
@@ -742,6 +751,7 @@ place_labels <- function(x, y, w, h, r, usr, has) {
     sum(pmax(0, pmin(b[2], B[, 2]) - pmax(b[1], B[, 1])) *
         pmax(0, pmin(b[4], B[, 4]) - pmax(b[3], B[, 3])))
   }
+  if (is.null(segs)) segs <- matrix(0, 0, 4)
   reach <- 2 * max(w) + max(r)
   crowd <- vapply(seq_len(n), function(i) sum(abs(x - x[i]) < reach & abs(y - y[i]) < reach),
                   numeric(1))
@@ -749,15 +759,19 @@ place_labels <- function(x, y, w, h, r, usr, has) {
   off <- matrix(0, n, 2)
   for (i in order(-crowd, seq_len(n))) {
     if (!has[i]) next
-    cand <- rbind(c(r[i] + gap + w[i] / 2, 0), c(-(r[i] + gap + w[i] / 2), 0),
-                  c(0, r[i] + gap + h[i] / 2), c(0, -(r[i] + gap + h[i] / 2)))
+    dx <- r[i] + gap + w[i] / 2; dy <- r[i] + gap + h[i] / 2
+    ex <- 0.7 * r[i] + gap + w[i] / 2; ey <- 0.7 * r[i] + gap + h[i] / 2
+    cand <- rbind(c(dx, 0), c(-dx, 0), c(0, dy), c(0, -dy),
+                  c(ex, ey), c(-ex, ey), c(ex, -ey), c(-ex, -ey))
+    area <- w[i] * h[i]
     best <- 1; bestscore <- Inf
-    for (k in 1:4) {
+    for (k in seq_len(nrow(cand))) {
       cx <- x[i] + cand[k, 1]; cy <- y[i] + cand[k, 2]
       b <- c(cx - w[i] / 2, cx + w[i] / 2, cy - h[i] / 2, cy + h[i] / 2)
-      s <- overlap(b, placed) + overlap(b, nodes[-i, , drop = FALSE]) +
+      s <- 3 * overlap(b, placed) / area + 2 * overlap(b, nodes[-i, , drop = FALSE]) / area +
+        sum(segs_cross_box(segs, b)) +
         10 * (max(0, usr[1] - b[1]) + max(0, b[2] - usr[2]) +
-              max(0, usr[3] - b[3]) + max(0, b[4] - usr[4]))
+              max(0, usr[3] - b[3]) + max(0, b[4] - usr[4])) / h[i]
       if (s < bestscore - 1e-12) { bestscore <- s; best <- k }
     }
     off[i, ] <- cand[best, ]
@@ -765,5 +779,23 @@ place_labels <- function(x, y, w, h, r, usr, has) {
     placed <- rbind(placed, c(cx - w[i] / 2, cx + w[i] / 2, cy - h[i] / 2, cy + h[i] / 2))
   }
   off
+}
+
+# Which segments (rows x1, y1, x2, y2) pass through the box b = (xmin, xmax,
+# ymin, ymax): Liang-Barsky clipping, all segments at once.
+segs_cross_box <- function(segs, b) {
+  if (!nrow(segs)) return(logical(0))
+  dx <- segs[, 3] - segs[, 1]; dy <- segs[, 4] - segs[, 2]
+  p <- cbind(-dx, dx, -dy, dy)
+  q <- cbind(segs[, 1] - b[1], b[2] - segs[, 1], segs[, 2] - b[3], b[4] - segs[, 2])
+  t0 <- rep(0, nrow(segs)); t1 <- rep(1, nrow(segs)); ok <- rep(TRUE, nrow(segs))
+  for (k in 1:4) {
+    par0 <- p[, k] == 0
+    ok <- ok & !(par0 & q[, k] < 0)
+    t <- q[, k] / ifelse(par0, 1, p[, k])
+    t0 <- ifelse(!par0 & p[, k] < 0, pmax(t0, t), t0)
+    t1 <- ifelse(!par0 & p[, k] > 0, pmin(t1, t), t1)
+  }
+  ok & t0 <= t1
 }
 

@@ -88,9 +88,9 @@ the layout is made, so the others keep their places (7.5.1).}
 relations?}
 
 \item{labelpos}{Where labels go: \code{"auto"} (the default) tries right, left,
-above and below each node and takes the place that overlaps least with
-the nodes and the labels already placed; \code{"right"} puts every label to
-the right of its node.}
+above, below and the four diagonals of each node and takes the place that
+overlaps least with the nodes, the labels already placed and the edges;
+\code{"right"} puts every label to the right of its node.}
 
 \item{palette}{Fills for categories: \code{"color"} (the default) or \code{"grey"},
 shades from near-white to dark for print that may be greyscale. Shapes
