@@ -182,6 +182,11 @@ batch at the end.** Design questions for all remaining chapters are batched in
   `node_radius()` (0.1875 * `par("csi")` * cex, the pch 21 radius as R draws it) is used
   for edge trimming and label placement. `test-xplot.R` renders a png and checks for gaps
   (png added to Suggests). Reinstalled.
+- #44 (06eddcb): `place_labels()` tries eight places (right, left, above, below, the four
+  diagonals) and scores each by label overlap (x3), node overlap (x2) and one per edge
+  through the label (`segs_cross_box()`, Liang-Barsky); the edge count is from UCINET
+  Draw's SmartLabelPlacement (`uc_draw_layout.pas`), which counts only incident edges. On
+  five test plots, edges through labels fell from 69 to 17. Reinstalled.
 - Installed xucinet reinstalled from source at 717a6be (has `xleiden()` and the new
   dataset). ergm 4.12.0 and RSiena 1.6.6 installed from CRAN (they were missing).
 
