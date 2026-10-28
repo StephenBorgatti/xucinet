@@ -177,8 +177,11 @@ batch at the end.** Design questions for all remaining chapters are batched in
   10 = pupil has left (structural zero) in the friendship relations; 0 = missing in
   Ethnicity, Religion and the delinquency scores. Table 15.9 reproduces the 3e table only
   with delinquency 0 set to NA.
-- #43 (open): `xplot()` trims edges at the wrong radius with `nodesize` > 1 or under
-  `par(mfrow)`; asnr2e's ch15 generator works around it with `par(cex = 1)`.
+- #43 fixed (9e84772): `xplot()` trimmed edges at twice the symbol radius and ignored
+  `par("cex")`, so edges stopped short of their nodes, more so under `par(mfrow)`. New
+  `node_radius()` (0.1875 * `par("csi")` * cex, the pch 21 radius as R draws it) is used
+  for edge trimming and label placement. `test-xplot.R` renders a png and checks for gaps
+  (png added to Suggests). Reinstalled.
 - Installed xucinet reinstalled from source at 717a6be (has `xleiden()` and the new
   dataset). ergm 4.12.0 and RSiena 1.6.6 installed from CRAN (they were missing).
 
