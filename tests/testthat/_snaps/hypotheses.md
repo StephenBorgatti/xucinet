@@ -10,7 +10,7 @@
       # of permutations:                      100
       Random seed:                            1
       Dependent variable:                     y
-      Input dataset:                          y
+      Input dataset:                          d
       Note:                                   100 permutations; p-values are 2-tailed.
       Note:                                   c.Sig is classical significance test. p.Sig is permutation test.
       
@@ -18,18 +18,14 @@
       
       Overall Regression Fit Statistics
       
-    Condition
-      Warning in `FUN()`:
-      NAs introduced by coercion
-    Output
-                    1      2      3      4      5      6      7 
-                 Nobs R-Squa Adj R-      F   F df Sig (c Sig (p 
-                          re square               lassic   erm) 
-                                                     al)        
-               ------ ------ ------ ------ ------ ------ ------ 
-           1 y     20  0.742  0.711 24.394         0.000  0.010 
+                    1      2      3      4      5      6      7      8 
+                 Nobs R-Squa Adj R-      F Num df Den df Sig (c Sig (p 
+                          re square                      lassic   erm) 
+                                                            al)        
+               ------ ------ ------ ------ ------ ------ ------ ------ 
+           1 d     20  0.742  0.711 24.394      2     17  0.000  0.010 
       
-      1 rows, 7 columns, 1 levels.
+      1 rows, 8 columns, 1 levels.
       
       Regression coefficients - predicting y
       

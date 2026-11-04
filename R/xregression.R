@@ -50,7 +50,8 @@
 #'   `$matrices` has the coefficient table: `Coef`, `Beta`, `SE`, `T`,
 #'   `c.Sig` (classical), `p.Sig` (permutation) and the three proportions
 #'   `As Large`, `As Small`, `As Extreme`. `$summary` has the number of
-#'   cases, R-square, adjusted R-square, F and its classical and permutation
+#'   cases, R-square, adjusted R-square, F, its degrees of freedom (`Num df`,
+#'   `Den df`) and its classical and permutation
 #'   significance. `$nodes` has the predicted values and residuals.
 #' @seealso [xcorrelation()], [xmrqap()].
 #' @examples
@@ -67,7 +68,7 @@ xregression <- function(formula, data = NULL, nperm = 10000, seed = NULL,
   coef <- fit$coef
   summary <- list(
     Nobs = fit$n, `R-Square` = fit$r2, `Adj R-square` = fit$adjr2,
-    F = fit$f, `F df` = sprintf("%d, %d", fit$df1, fit$df2),
+    F = fit$f, `Num df` = fit$df1, `Den df` = fit$df2,
     `Sig (classical)` = fit$fp, `Sig (perm)` = fit$fperm)
   nodes <- data.frame(`Y-Hat` = rep(NA_real_, nrow(mf$data)),
                       Residuals = NA_real_, row.names = rownames(mf$data),
@@ -76,7 +77,8 @@ xregression <- function(formula, data = NULL, nperm = 10000, seed = NULL,
   nodes[mf$complete, "Residuals"] <- fit$resid
 
   new_xucinet_output(
-    "Node level regression", list(title = mf$yname),
+    "Node level regression",
+    list(title = if (is.null(data)) mf$yname else deparse1(substitute(data))),
     nodes = nodes, summary = summary,
     matrices = stats::setNames(list(coef),
                                paste("Regression coefficients - predicting", mf$yname)),

@@ -25,7 +25,8 @@ An object of class \code{c("xregression", "xucinet_output")}.
 \verb{$matrices} has the coefficient table: \code{Coef}, \code{Beta}, \code{SE}, \code{T},
 \code{c.Sig} (classical), \code{p.Sig} (permutation) and the three proportions
 \verb{As Large}, \verb{As Small}, \verb{As Extreme}. \verb{$summary} has the number of
-cases, R-square, adjusted R-square, F and its classical and permutation
+cases, R-square, adjusted R-square, F, its degrees of freedom (\verb{Num df},
+\verb{Den df}) and its classical and permutation
 significance. \verb{$nodes} has the predicted values and residuals.
 }
 \description{
