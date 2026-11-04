@@ -12,7 +12,7 @@ attributes <- c("camp92_attr", "pv504_attr", "eies_attr", "knecht_attr",
                 "hightech_attr", "padgett_attr", "wolfe_primates_attr",
                 "zachary_attr", "lazega_attr",
                 "supremecourt_cases_attr", "supremecourt_judges_attr",
-                "friendship_abc_attr")
+                "friendship_abc_attr", "classrooms", "teams")
 
 get_data <- function(name) {
   env <- new.env(parent = emptyenv())
@@ -199,4 +199,15 @@ test_that("friendship_abc has the counts chapter 15 quotes", {
   same <- outer(g, g, "==")
   expect_equal(c(sum(a * same), sum(a * !same)) / 2, c(19, 10))
   expect_equal(sum(g == 1), 7)
+})
+
+test_that("the chapter 14 practice datasets keep their planted properties", {
+  # Made up by data-raw/make-ch14-practice.R; Practice 14.1 relies on these.
+  tm <- get_data("teams")
+  expect_equal(round(cor(tm$Centralization, tm$Performance), 3), 0.384)
+  cl <- get_data("classrooms")
+  expect_equal(nrow(cl), 63)
+  fit <- summary(lm(CorePeriphery ~ TeacherStyle + ClassSize, cl))$coefficients
+  expect_lt(fit["TeacherStyle", 4], 0.01)
+  expect_gt(fit["ClassSize", 4], 0.3)
 })
