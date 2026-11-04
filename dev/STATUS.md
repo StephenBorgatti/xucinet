@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 27 Oct 2026 (Claude Code; Cowork should
+Updated 4 Nov 2026 (Claude Code; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -169,7 +169,19 @@ batch at the end.** Design questions for all remaining chapters are batched in
   the one-sided proportion "larger than or equal to the observed value"; two-tailed with
   absolute values is our (and UCINET's) convention.
 
-## Done this session (27 Oct 2026, late, Claude Code, #45 and #46, for asnr2e #14)
+## Done this session (4 Nov 2026, Claude Code, #47-#49, for asnr2e #7)
+
+- #47 (open): made-up datasets for the chapter 14 practices, from
+  `data-raw/make-ch14-practice.R` (bc8f324). `classrooms` (63 sampled from 439):
+  TeacherStyle beta 0.395, p 0.002; ClassSize p 0.90. `teams` (the 18 teams of 14.3):
+  cor(Centralization, Performance) 0.384, classical p 0.116, permutation p 0.112. Both in
+  `R/data.R` and `test-data.R`. `callcenter` (Practice 14.2) not built: #49.
+- #48 (closed, 85a8174): `xregression()` printed a coercion warning and a blank F df on
+  every report; `$summary` now has numeric `Num df`, `Den df`, and the report names the
+  `data` argument. Snapshot updated.
+- `devtools::check()` 0 errors, 0 warnings, 0 notes; installed from bc8f324.
+
+## Done earlier (27 Oct 2026, late, Claude Code, #45 and #46, for asnr2e #14)
 
 - #45: `xcliques(mainas_terro)` did not finish (15+ min). Cause: `xhclust()`'s
   `moca_table()` went cluster by cluster over the whole matrix at every level (285 levels,
@@ -572,6 +584,8 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 ## Next
 
+0a. Steve: decide #49 (callcenter's planted rho); then build `callcenter` and
+    `callcenter_attr` in `data-raw/make-ch14-practice.R` and close #47.
 0. #38 and #39 done; their book side is asnr2e T34-T37, the practice prompt
    `docs/prompts/ch14-table143-practice143.md` and `asnr2e/STATUS.md`.
    UCINET side of the Supreme Court corrections: rebuild both `Datafiles.zip` in the ucinet
@@ -783,5 +797,10 @@ found in borgworld, still to be fixed there; MASS, graphics, grDevices to Import
 
 (Former questions 1, the tie rule in UCINET, answered 18 Oct, and the decimal-tie tolerance,
 answered 19 Oct: see Decisions.)
+
+2. #49 (4 Nov): Practice 14.2's `callcenter` cannot have a significant fitted rho of 0.2-0.4
+   with 30 nodes and in-degree beta ~0.35. Options (a) rho ~0.4 with a larger in-degree
+   effect, (b) rho up to ~0.65, (c) rho in range but not significant (recommended),
+   (d) a sparser advice network. Blocks `callcenter` and the rest of Practice 14.2.
 
 
