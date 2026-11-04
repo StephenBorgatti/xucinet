@@ -1,5 +1,5 @@
-# Build data/classrooms.rda and data/teams.rda: made-up data for Practice 14.1
-# of the book (chapter 14, testing hypotheses). The chapter's examples (63
+# Build data/classrooms.rda, data/teams.rda, data/callcenter.rda and
+# data/callcenter_attr.rda: made-up data for Practices 14.1 and 14.2 of the book (chapter 14, testing hypotheses). The chapter's examples (63
 # classrooms sampled from 439, the 18 project teams of section 14.3) are
 # hypothetical, so these datasets are invented to reproduce the situations the
 # chapter describes. They describe no real classrooms or teams. Each part has
@@ -48,8 +48,56 @@ stopifnot(round(cor(teams$Centralization, teams$Performance), 3) == 0.384,
           abs(cor(teams$TeamSize, teams$Centralization)) < 0.15,
           abs(cor(teams$TeamSize, teams$Performance)) < 0.15)
 
-# callcenter (Practice 14.2) waits for #49: its planted properties cannot all
-# be had with 30 nodes.
+# --- callcenter: advice among 30 call centre employees, with attributes -------
+# Practice 14.2. Each person asks 1-7 others for advice, chosen with
+# person-specific popularity weights, so a few people are asked by many.
+# Satisfaction depends on in-degree (standardized coefficient about 0.35),
+# weakly on Extraversion, not on Age, plus a contagion term with true rho 0.3
+# along the row-normalized advice ties: y = (I - 0.3 W)^-1 (exogenous part).
+# Steve's decision on #49 (option c): with 30 people a network effect of this
+# size cannot be told apart from zero, so the fitted rho is required to lie in
+# 0.2-0.4 but NOT to be significant. Seed 145 is the first of seeds 1, 2, ...
+# for which every check below holds (145 tried).
+
+set.seed(145)
+n <- 30
+ids <- sprintf("e%02d", 1:n)
+pop <- rgamma(n, shape = 0.8, rate = 1)
+k <- sample(1:7, n, replace = TRUE)
+A <- matrix(0, n, n, dimnames = list(ids, ids))
+for (i in 1:n) {
+  p <- pop
+  p[i] <- 0
+  A[i, sample(n, k[i], prob = p)] <- 1
+}
+indeg <- colSums(A)
+Age <- sample(22:58, n, replace = TRUE)
+Extraversion <- round(pmin(5, pmax(1, rnorm(n, 3.2, 0.8))), 1)
+exog <- 0.35 * scale(indeg)[, 1] + 0.12 * scale(Extraversion)[, 1] + rnorm(n, 0, 0.85)
+W <- A / pmax(rowSums(A), 1)
+y <- solve(diag(n) - 0.3 * W, exog)
+Satisfaction <- round(pmin(7, pmax(1, 4.3 + 1.1 * scale(y)[, 1])), 1)
+
+callcenter <- as_xucinet(list(Advice = A), directed = TRUE, title = "callcenter")
+callcenter_attr <- data.frame(Age, Extraversion, Satisfaction, row.names = ids)
+
+d <- callcenter_attr
+d$Indeg <- indeg[rownames(d)]
+f <- Satisfaction ~ Age + Extraversion + Indeg
+reg <- xregression(f, d, nperm = 10000, seed = 1)$matrices[[1]]
+lag <- xautoregression(callcenter, f, d)$matrices[[1]]
+err <- xautoregression(callcenter, f, d, model = "error")$matrices[[1]]
+b <- reg["Indeg", "Coef"]
+stopifnot(abs(sum(A) / (n * (n - 1)) - 0.12) < 0.02,
+          all(Satisfaction > 1 & Satisfaction < 7),
+          abs(reg["Indeg", "Beta"] - 0.35) < 0.08,
+          lag["Rho", "Coef"] >= 0.2, lag["Rho", "Coef"] <= 0.4, lag["Rho", "Sig"] > 0.05,
+          reg["Indeg", "p.Sig"] < 0.05, reg["Age", "p.Sig"] > 0.05,
+          lag["Indeg", "Sig"] < 0.05, err["Indeg", "Sig"] < 0.05,
+          abs(lag["Indeg", "Coef"] / b - 1) < 0.10,
+          abs(err["Indeg", "Coef"] / b - 1) < 0.10)
 
 save(classrooms, file = "data/classrooms.rda", compress = "xz", version = 2)
 save(teams, file = "data/teams.rda", compress = "xz", version = 2)
+save(callcenter, file = "data/callcenter.rda", compress = "xz", version = 2)
+save(callcenter_attr, file = "data/callcenter_attr.rda", compress = "xz", version = 2)

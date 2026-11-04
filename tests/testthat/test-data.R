@@ -7,12 +7,13 @@ networks <- c("baker_journals", "bkham", "camp92", "campnet", "pv504", "pv960",
               "polarstation", "kaptail", "knecht", "hightech", "mainas_terro",
               "newfrat", "padgett", "pane_training", "sampson", "trade_pre29",
               "papuan_village", "wolfe_primates", "zachary",
-              "lazega", "newguinea", "supremecourt", "friendship_abc")
+              "lazega", "newguinea", "supremecourt", "friendship_abc", "callcenter")
 attributes <- c("camp92_attr", "pv504_attr", "eies_attr", "knecht_attr",
                 "hightech_attr", "padgett_attr", "wolfe_primates_attr",
                 "zachary_attr", "lazega_attr",
                 "supremecourt_cases_attr", "supremecourt_judges_attr",
-                "friendship_abc_attr", "classrooms", "teams")
+                "friendship_abc_attr", "classrooms", "teams",
+                "callcenter_attr")
 
 get_data <- function(name) {
   env <- new.env(parent = emptyenv())
@@ -210,4 +211,24 @@ test_that("the chapter 14 practice datasets keep their planted properties", {
   fit <- summary(lm(CorePeriphery ~ TeacherStyle + ClassSize, cl))$coefficients
   expect_lt(fit["TeacherStyle", 4], 0.01)
   expect_gt(fit["ClassSize", 4], 0.3)
+})
+
+test_that("callcenter keeps the properties Practice 14.2 relies on", {
+  # Made up by data-raw/make-ch14-practice.R (xucinet #49, option c).
+  cc <- get_data("callcenter")
+  d <- get_data("callcenter_attr")
+  a <- as.matrix(cc, relation = "Advice")
+  expect_equal(rownames(d), rownames(a))
+  d$Indeg <- colSums(a)[rownames(d)]
+  f <- Satisfaction ~ Age + Extraversion + Indeg
+  ols <- summary(lm(f, d))$coefficients
+  expect_lt(ols["Indeg", 4], 0.05)
+  expect_gt(ols["Age", 4], 0.05)
+  skip_if_not_installed("sna")
+  skip_if_not_installed("numDeriv")
+  lag <- xautoregression(cc, f, d)$matrices[[1]]
+  expect_gte(lag["Rho", "Coef"], 0.2)
+  expect_lte(lag["Rho", "Coef"], 0.4)
+  expect_gt(lag["Rho", "Sig"], 0.05)
+  expect_lt(abs(lag["Indeg", "Coef"] / ols["Indeg", 1] - 1), 0.10)
 })
