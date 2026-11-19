@@ -7,13 +7,14 @@ networks <- c("baker_journals", "bkham", "camp92", "campnet", "pv504", "pv960",
               "polarstation", "kaptail", "knecht", "hightech", "mainas_terro",
               "newfrat", "padgett", "pane_training", "sampson", "trade_pre29",
               "papuan_village", "wolfe_primates", "zachary",
-              "lazega", "newguinea", "supremecourt", "friendship_abc", "callcenter")
+              "lazega", "newguinea", "supremecourt", "friendship_abc", "callcenter",
+              "lexnet")
 attributes <- c("camp92_attr", "pv504_attr", "eies_attr", "knecht_attr",
                 "hightech_attr", "padgett_attr", "wolfe_primates_attr",
                 "zachary_attr", "lazega_attr",
                 "supremecourt_cases_attr", "supremecourt_judges_attr",
                 "friendship_abc_attr", "classrooms", "teams",
-                "callcenter_attr")
+                "callcenter_attr", "lexattr")
 
 get_data <- function(name) {
   env <- new.env(parent = emptyenv())
@@ -53,7 +54,8 @@ test_that("attribute tables line up with their network, node for node", {
                 c("hightech", "hightech_attr"), c("padgett", "padgett_attr"),
                 c("wolfe_primates", "wolfe_primates_attr"),
                 c("zachary", "zachary_attr"), c("lazega", "lazega_attr"),
-                c("friendship_abc", "friendship_abc_attr"))
+                c("friendship_abc", "friendship_abc_attr"),
+                c("lexnet", "lexattr"))
   for (p in pairs) {
     net <- get_data(p[1]); df <- get_data(p[2])
     expect_identical(rownames(as.matrix(net)), rownames(df), info = p[1])
@@ -231,4 +233,20 @@ test_that("callcenter keeps the properties Practice 14.2 relies on", {
   expect_lte(lag["Rho", "Coef"], 0.4)
   expect_gt(lag["Rho", "Sig"], 0.05)
   expect_lt(abs(lag["Indeg", "Coef"] / ols["Indeg", 1] - 1), 0.10)
+})
+
+test_that("lexnet has its four relations and reproduces Table 8.12 (book 8.6.1)", {
+  lexnet <- get_data("lexnet"); lexattr <- get_data("lexattr")
+  expect_equal(xrelations(lexnet), c("Required", "Advice", "Conflict", "Feeling"))
+  expect_equal(dim(lexnet), c(75, 75, 4))
+  expect_false("GenderText" %in% names(lexattr))
+  expect_equal(lexattr$knowledge, (lexattr$knowledgejob + lexattr$knowledgeproc) / 2)
+  d <- lexattr
+  d$Constraint <- xstructuralholes(lexnet, relation = "Advice")$nodes[rownames(d), "Constraint"]
+  d <- d[stats::complete.cases(d[, c("knowledge", "Gender", "TenureYrs", "supervisor",
+                                     "Constraint")]), ]
+  expect_equal(nrow(d), 63)
+  m2 <- stats::lm(knowledge ~ Gender + TenureYrs + supervisor + Constraint, d)
+  expect_equal(round(stats::coef(m2)[["Constraint"]], 3), -0.785)
+  expect_equal(round(summary(m2)$r.squared, 3), 0.243)
 })

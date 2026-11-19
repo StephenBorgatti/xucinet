@@ -612,6 +612,61 @@
 #' xdensity(papuan_village)
 "papuan_village"
 
+#' Lexnet: employees of a manufacturing firm
+#'
+#' 75 employees of a manufacturing firm in Lexington, Kentucky, collected by
+#' Kristin Scott: four networks among the employees, and survey and
+#' supervisor ratings for each employee in [lexattr]. UCINET's sample file
+#' `Datafiles\lexnet`.
+#'
+#' @format An `xucinet` object, 75 x 75, four directed relations:
+#' \describe{
+#'   \item{Required}{binary}
+#'   \item{Advice}{binary: work advice ties (the relation used in section 8.6.1)}
+#'   \item{Conflict}{valued, 0-4}
+#'   \item{Feeling}{valued, 0-5}
+#' }
+#' The node labels are employee ids.
+#' @source Kristin Scott; distributed with UCINET (Borgatti, Everett and
+#'   Freeman 2002) as `lexnet`.
+#' @section Book sections: 8.6.1.
+#' @seealso [lexattr]
+#' @examples
+#' xstructuralholes(lexnet, relation = "Advice")
+"lexnet"
+
+#' Lexnet employee attributes
+#'
+#' Survey scales, supervisor ratings and demographics for the 75 employees of
+#' [lexnet], in the same order. Supervisor ratings are missing for 9
+#' employees.
+#'
+#' @format A data frame, 75 rows keyed by employee id, 81 columns. Those used
+#'   in the book:
+#' \describe{
+#'   \item{Gender}{1 = male, 0 = female (as Table 8.12 codes it)}
+#'   \item{TenureYrs}{tenure in years}
+#'   \item{supervisor}{1 = supervisor}
+#'   \item{knowledgeproc}{supervisor's rating, 1-5, of item (a): "great overall
+#'     knowledge of company procedures, products and services"}
+#'   \item{knowledgejob}{supervisor's rating, 1-5, of item (b), reverse-scored:
+#'     "poor overall knowledge of his/her job duties, expectations and
+#'     responsibilities"}
+#'   \item{knowledge}{the mean of `knowledgeproc` and `knowledgejob`}
+#' }
+#' The other columns are the employee's division, department, building, race,
+#' education, status and full-time status, and survey scales (perceived
+#' organizational support `POS`, affective commitment `AffCom...`, job
+#' satisfaction `jobsat`, justice, organizational citizenship behaviour `ocb`,
+#' work-family conflict, PANAS affect, and others) with their items. The
+#' UCINET file's `GenderText` column is text and is left out.
+#' @source As [lexnet].
+#' @section Book sections: 8.6.1.
+#' @seealso [lexnet]
+#' @examples
+#' summary(lexattr[, c("Gender", "TenureYrs", "supervisor", "knowledge")])
+"lexattr"
+
 #' Wolfe's primates
 #'
 #' Three months of interaction among a troop of monkeys observed in the wild by
