@@ -11,6 +11,10 @@ batch at the end.** Design questions for all remaining chapters are batched in
 
 ## Where things stand
 
+- **19 Nov 2026 (Claude Code, asnr2e T47): `xcyclicality()` reports every relation**, one
+  row each (data frame, like `xtransitivity()`); it had read only the first. UCINET's
+  uc_cyclicity.pas loops over all matrices. Tests 0 failures (4000); installed.
+
 - **19 Nov 2026 (Claude Code, #51; asnr2e #19): chapter 8.** `xaltercomposition()`'s
   categorical heterogeneity column is `Blau`; `xegoaltersimilarity(correction =)` (0.5 =
   Haldane-Anscombe, DIFFERENCES 50); new datasets `lexnet` and `lexnet_attr` (UCINET's sample

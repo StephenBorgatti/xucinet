@@ -10,19 +10,32 @@ xcyclicality(net)
 \item{net}{A network (any accepted form). 1-mode only.}
 }
 \value{
-An object of class \code{c("xcyclicality", "xucinet_output")}, with
-UCINET's six measures in \verb{$summary}.
+An object of class \code{c("xcyclicality", "xucinet_output")}.
+\verb{$summary} is a data frame with one row per relation and the six columns
+above.
 }
 \description{
 UCINET: Network | Cohesion | Cyclicality. How often a two-step path returns
-to where it started.
+to where it started, for every relation in the dataset.
 }
 \details{
 The same ordered two-paths \code{\link[=xtransitivity]{xtransitivity()}} counts, closed by the arc that
-completes a three-cycle rather than by the shortcut.
+completes a three-cycle rather than by the shortcut. Each relation is
+dichotomized at \verb{> 0}, as UCINET does; missing cells count as no tie and
+the diagonal takes no part.
+
+The six columns are \code{Threes} (the number of cyclic triples: two-paths
+i -> k -> j closed by j -> i), \code{Twos} (the number of two-paths),
+\code{Cyclicality} (\code{Threes / Twos}), \code{Density}, \code{Ratio} (\code{Cyclicality / Density}) and \verb{Cyclicity Index} (\code{(Cyclicality - Density) / (1 - Density)}).
+
+UCINET prints the measures as rows and the relations as columns; here, as
+in \code{\link[=xtransitivity]{xtransitivity()}}, each relation is a row.
 }
 \examples{
 xcyclicality(campnet)
+
+# one row for each of the three relations
+xcyclicality(hightech)
 }
 \seealso{
 \code{\link[=xtransitivity]{xtransitivity()}}.

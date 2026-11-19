@@ -182,6 +182,24 @@ test_that("cyclicality counts the same two-paths as transitivity", {
                xtransitivity(campnet)$summary[["Twos"]][1])
 })
 
+test_that("cyclicality reports every relation, one row each", {
+  # Until 19 Nov 2026 only the first relation was reported; uc_cyclicity.pas
+  # loops over every matrix of the dataset.
+  s <- xcyclicality(hightech)$summary
+  expect_equal(rownames(s), xrelations(hightech))
+  for (r in xrelations(hightech)) {
+    one <- xcyclicality(as.matrix(hightech, relation = r))$summary
+    expect_equal(unlist(s[r, ]), unlist(one[1, ]), tolerance = tol)
+  }
+  expect_equal(s[["Twos"]], xtransitivity(hightech)$summary[["Twos"]])
+  expect_equal(nrow(xcyclicality(sampson)$summary), length(xrelations(sampson)))
+})
+
+test_that("cyclicality names each valued relation it dichotomizes", {
+  a <- xcyclicality(sampson)$assumptions
+  expect_true(all(grepl("^Relation .* dichotomized at > 0[.]$", a)))
+})
+
 test_that("a three-cycle is wholly cyclic and not at all transitive", {
   m <- blank3()
   m["a", "b"] <- m["b", "c"] <- m["c", "a"] <- 1

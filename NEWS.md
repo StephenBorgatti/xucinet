@@ -1,5 +1,13 @@
 # xucinet 2.0.0.9000 (development)
 
+## xcyclicality() reports every relation (19 November 2026)
+
+* `xcyclicality()` read only the first relation of a multirelational dataset.
+  It now does what UCINET's Network | Cohesion | Cyclicality does and reports
+  every relation, as a data frame with one row per relation, like
+  `xtransitivity()`. Each valued relation is dichotomized at > 0 and named in
+  the assumptions.
+
 ## Datasets lexnet and lexnet_attr (19 November 2026)
 
 * New datasets `lexnet` (75 employees of a manufacturing firm in Lexington,

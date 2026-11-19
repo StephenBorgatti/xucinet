@@ -109,42 +109,72 @@ xtransitivity <- function(net) {
 #' Cyclicality
 #'
 #' UCINET: Network | Cohesion | Cyclicality. How often a two-step path returns
-#' to where it started.
+#' to where it started, for every relation in the dataset.
 #'
 #' The same ordered two-paths [xtransitivity()] counts, closed by the arc that
-#' completes a three-cycle rather than by the shortcut.
+#' completes a three-cycle rather than by the shortcut. Each relation is
+#' dichotomized at `> 0`, as UCINET does; missing cells count as no tie and
+#' the diagonal takes no part.
+#'
+#' The six columns are `Threes` (the number of cyclic triples: two-paths
+#' i -> k -> j closed by j -> i), `Twos` (the number of two-paths),
+#' `Cyclicality` (`Threes / Twos`), `Density`, `Ratio` (`Cyclicality /
+#' Density`) and `Cyclicity Index` (`(Cyclicality - Density) / (1 - Density)`).
+#'
+#' UCINET prints the measures as rows and the relations as columns; here, as
+#' in [xtransitivity()], each relation is a row.
 #'
 #' @param net A network (any accepted form). 1-mode only.
-#' @return An object of class `c("xcyclicality", "xucinet_output")`, with
-#'   UCINET's six measures in `$summary`.
+#' @return An object of class `c("xcyclicality", "xucinet_output")`.
+#'   `$summary` is a data frame with one row per relation and the six columns
+#'   above.
 #' @seealso [xtransitivity()].
 #' @examples
 #' xcyclicality(campnet)
+#'
+#' # one row for each of the three relations
+#' xcyclicality(hightech)
 #' @export
 xcyclicality <- function(net) {
   net <- xnet(net, substitute(net))
   require_1mode(net, "xcyclicality()")
 
-  m <- pick_relation(net, NULL)
-  a <- binary_offdiag(m)
-  assumptions <- if (is_valued(m)) "Data dichotomized at > 0." else character(0)
+  # uc_cyclicity.pas loops over every matrix of the dataset (net.nm), one
+  # column of its output each. Until 19 Nov 2026 this function read only the
+  # first relation.
+  mats <- relation_matrices(net)
+  rels <- if (length(mats) == 1L) net$title else xrelations(net)
+  valued <- vapply(mats, is_valued, logical(1))
+  assumptions <- character(0)
+  if (any(valued)) {
+    assumptions <- if (length(mats) == 1L) {
+      "Data dichotomized at > 0."
+    } else {
+      paste0("Relation ", rels[valued], " dichotomized at > 0.")
+    }
+  }
+
+  rows <- lapply(mats, function(m) cyclicity_summary(binary_offdiag(m)))
+  out <- as.data.frame(do.call(rbind, rows), optional = TRUE)
+  names(out) <- c("Threes", "Twos", "Cyclicality", "Density", "Ratio",
+                  "Cyclicity Index")
+  rownames(out) <- rels
+
+  new_xucinet_output(
+    "Cyclicality", net, summary = out, assumptions = assumptions,
+    subclass = "xcyclicality", call = match.call(),
+    summary_title = "Triplet Cyclicality")
+}
+
+# TripletCyclicity (G2Tools/ucyclicity.pas) for one dichotomized relation.
+cyclicity_summary <- function(a) {
   cnt <- triplet_counts(a)
   n <- nrow(a)
-
   cyc <- if (cnt$twos > 0) cnt$cycles / cnt$twos else NA_real_
   density <- cnt$ties / (n * (n - 1))
-  new_xucinet_output(
-    "Cyclicality", net,
-    summary = list(
-      "Threes" = cnt$cycles,
-      "Twos" = cnt$twos,
-      "Cyclicality" = cyc,
-      "Density" = density,
-      "Ratio" = if (cnt$twos > 0 && density > 0) cyc / density else NA_real_,
-      "Cyclicity Index" = if (cnt$twos > 0 && density < 1)
-        (cyc - density) / (1 - density) else NA_real_),
-    assumptions = assumptions, subclass = "xcyclicality",
-    summary_title = "Triplet Cyclicality")
+  c(cnt$cycles, cnt$twos, cyc, density,
+    if (cnt$twos > 0 && density > 0) cyc / density else NA_real_,
+    if (cnt$twos > 0 && density < 1) (cyc - density) / (1 - density) else NA_real_)
 }
 
 # Missing counts as no tie and the diagonal takes no part, which is what both
