@@ -11,6 +11,14 @@ batch at the end.** Design questions for all remaining chapters are batched in
 
 ## Where things stand
 
+- **19 Nov 2026 (Claude Code, #51; asnr2e #19): chapter 8.** `xaltercomposition()`'s
+  categorical heterogeneity column is `Blau`; `xegoaltersimilarity(correction =)` (0.5 =
+  Haldane-Anscombe, DIFFERENCES 50); new datasets `lexnet` and `lexattr` (UCINET's sample
+  files; Table 8.12 reproduces, tested). Tests 0 failures, R CMD check 0/0/0, installed.
+  New #52: `[.xucinet` silently ignores a third (relation) index. Open for Steve (asnr2e
+  #20): keep the name `lexattr` or rename to the `<dataset>_attr` convention (`lexnet_attr`);
+  what Required, Conflict and Feeling record.
+
 - **18 Nov 2026 (Cowork, for Steve): transitivity and the clustering coefficient split.**
   `xtransitivity(net)` now mimics UCINET's command-line `transitivity()`: `$summary` is a data
   frame, one row per relation, the twelve triplet columns, the CLI's two notes as epilogue; no
@@ -19,11 +27,9 @@ batch at the end.** Design questions for all remaining chapters are batched in
   graph, Fagiolo and Opsahl-Panzarasa (UCINET-ISSUES 41), overall and weighted overall, plus
   Density, one row per relation; only the first pair is printed when the three agree.
   Tests (test-xtransitivity.R, new test-xclusteringcoefficient.R) pass, R CMD check clean on
-  Linux R 4.3. Written in a Cowork session, which cannot run git or `devtools::document()`:
-  **to do in Claude Code:** run `devtools::document()` (the two .Rd files were made with
-  roxygen 7.3.1 and NAMESPACE was edited by hand), `devtools::check()`, commit, and rebuild
-  the crosswalk xlsx in asnr2e (crosswalk.py was edited). Book side: ch10 restructured
-  (10.2.3 Transitivity, 10.2.4 Cyclicality), asnr2e text-changes T47.
+  Linux R 4.3. Documented, tested and committed from Claude Code on 19 Nov (ab0f1be, #50,
+  closed); the asnr2e crosswalk xlsx rebuilt. Book side: ch10 restructured (10.2.3
+  Transitivity, 10.2.4 Cyclicality), asnr2e text-changes T47.
   Open question for Steve: `xCyclicality` (1e alias in `R/aliases-1e.R`) points to
   `xtransitivity`, not `xcyclicality`; probably a slip.
 
