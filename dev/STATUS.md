@@ -11,6 +11,22 @@ batch at the end.** Design questions for all remaining chapters are batched in
 
 ## Where things stand
 
+- **18 Nov 2026 (Cowork, for Steve): transitivity and the clustering coefficient split.**
+  `xtransitivity(net)` now mimics UCINET's command-line `transitivity()`: `$summary` is a data
+  frame, one row per relation, the twelve triplet columns, the CLI's two notes as epilogue; no
+  `method` argument (triads removed with their census code and tests) and no clustering
+  coefficient. New `xclusteringcoefficient(net, weighted = NULL, omega = "am")`: underlying
+  graph, Fagiolo and Opsahl-Panzarasa (UCINET-ISSUES 41), overall and weighted overall, plus
+  Density, one row per relation; only the first pair is printed when the three agree.
+  Tests (test-xtransitivity.R, new test-xclusteringcoefficient.R) pass, R CMD check clean on
+  Linux R 4.3. Written in a Cowork session, which cannot run git or `devtools::document()`:
+  **to do in Claude Code:** run `devtools::document()` (the two .Rd files were made with
+  roxygen 7.3.1 and NAMESPACE was edited by hand), `devtools::check()`, commit, and rebuild
+  the crosswalk xlsx in asnr2e (crosswalk.py was edited). Book side: ch10 restructured
+  (10.2.3 Transitivity, 10.2.4 Cyclicality), asnr2e text-changes T47.
+  Open question for Steve: `xCyclicality` (1e alias in `R/aliases-1e.R`) points to
+  `xtransitivity`, not `xcyclicality`; probably a slip.
+
 - Version 2.0.0.9000. Phase 0 complete (class, coercers, print, IO for csv/xlsx/##h/uci/
   dl/vna, 39 datasets, 1e aliases, pkgdown site, CI on Windows and Ubuntu).
 - Chapter 9 (centrality) complete: xdegree, xbetweenness, xcloseness, xeigenvector, xbeta,

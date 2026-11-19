@@ -1,5 +1,5 @@
-# Reciprocity, transitivity and cyclicality (chapter 10, sections 10.2.2 and
-# 10.2.3).
+# Reciprocity, transitivity and cyclicality (chapter 10, sections 10.2.2,
+# 10.2.3 and 10.2.4).
 #
 # The strongest check available before the goldens are generated is internal
 # agreement: xcohesion's block was validated against real UCINET output, and
@@ -72,25 +72,59 @@ test_that("xreciprocity refuses 2-mode data", {
   expect_error(xreciprocity(davis), "1-mode")
 })
 
-# ---- xtransitivity, triplets -------------------------------------------------
+# ---- xtransitivity -----------------------------------------------------------
+#
+# Follows UCINET's command-line transitivity() (runtransitivity, Xdpmat.pas):
+# one row per relation, the twelve triplet measures, nothing else.
 
-test_that("the triplet report is UCINET's twelve measures plus clustering", {
+test_that("the report is the command line's twelve columns", {
   s <- xtransitivity(campnet)$summary
-  expect_equal(names(s)[1:6], c("Threes", "Twos", "Transitivity", "Density",
-                                "Ratio", "Transitivity Index"))
-  expect_equal(names(s)[7:12], c("TP Covariance", "Transitivity Phi",
-                                 "Transitivity Phi Beta", "T Covariance",
-                                 "Transitivity Correlation", "Transitivity Beta"))
-  # question 10.2 folds this one in
-  expect_true("Clustering Coefficient" %in% names(s))
+  expect_s3_class(s, "data.frame")
+  expect_equal(names(s), c("Threes", "Twos", "Transitivity", "Density",
+                           "Ratio", "Transitivity Index",
+                           "TP Covariance", "Transitivity Phi",
+                           "Transitivity Phi Beta", "T Covariance",
+                           "Transitivity Correlation", "Transitivity Beta"))
+  expect_equal(rownames(s), "campnet")
+  # the clustering coefficient is xclusteringcoefficient()'s now
+  expect_false(any(grepl("Clustering", names(s))))
+  expect_null(xtransitivity(campnet)$nodes)
+})
+
+test_that("every relation gets a row, as on the command line", {
+  s <- xtransitivity(hightech)$summary
+  expect_equal(rownames(s), xrelations(hightech))
+  for (r in xrelations(hightech)) {
+    one <- xtransitivity(as.matrix(hightech, relation = r))$summary
+    expect_equal(unlist(s[r, ]), unlist(one[1, ]), tolerance = tol, info = r)
+  }
+})
+
+test_that("there is no method argument any more", {
+  expect_error(xtransitivity(campnet, method = "triads"), "unused argument")
 })
 
 test_that("transitivity agrees with xcohesion, which UCINET validated", {
-  co <- as.matrix(xcohesion(campnet)$summary)
-  s <- xtransitivity(campnet)$summary
-  expect_equal(s[["Transitivity"]], co["Transitivity/Closure", 1], tolerance = tol)
-  expect_equal(s[["Transitivity Index"]], co["Transitivity Index", 1], tolerance = tol)
-  expect_equal(s[["Density"]], co["Density", 1], tolerance = tol)
+  co <- as.matrix(xcohesion(hightech)$summary)
+  s <- xtransitivity(hightech)$summary
+  for (r in xrelations(hightech)) {
+    expect_equal(s[r, "Transitivity"], co["Transitivity/Closure", r],
+                 tolerance = tol, info = r)
+    expect_equal(s[r, "Transitivity Index"], co["Transitivity Index", r],
+                 tolerance = tol, info = r)
+    expect_equal(s[r, "Density"], co["Density", r], tolerance = tol, info = r)
+  }
+})
+
+test_that("the high-tech values are the ones chapter 10 quotes", {
+  # 10.2.3: advice 0.66 against density 0.45; friendship 0.46 against 0.24;
+  # reports-to has no transitivity at all.
+  s <- xtransitivity(hightech)$summary
+  expect_equal(round(s["Advice", "Transitivity"], 2), 0.66)
+  expect_equal(round(s["Advice", "Density"], 2), 0.45)
+  expect_equal(round(s["Friendship", "Transitivity"], 2), 0.46)
+  expect_equal(round(s["Friendship", "Density"], 2), 0.24)
+  expect_equal(s["ReportTo", "Transitivity"], 0)
 })
 
 test_that("the counts are two-paths and the transitive ones among them", {
@@ -129,82 +163,10 @@ test_that("the centred measures follow FinalizeTransitivity", {
                tolerance = 1e-6)
 })
 
-# ---- xtransitivity, triads ---------------------------------------------------
-
-test_that("the triad report is UCINET's three counts", {
-  res <- xtransitivity(campnet, method = "triads")
-  s <- res$summary
-  expect_equal(res$show_summary, c("Trans", "Trans+InTrans", "Triad Transitivity",
-                                   "Clustering Coefficient"))
-  expect_equal(s[["Triad Transitivity"]], s[["Trans"]] / s[["Trans+InTrans"]])
-})
-
-test_that("both versions are always returned; method chooses what is printed", {
-  a <- xtransitivity(campnet)
-  b <- xtransitivity(campnet, method = "triads")
-  expect_identical(a$summary, b$summary)
-  expect_true(all(c("Transitivity", "Triad Transitivity") %in% names(a$summary)))
-})
-
-test_that("the census covers every triple exactly once", {
-  for (net in list(campnet, hightech, hand4())) {
-    cen <- xucinet:::triad_census(xucinet:::binary_offdiag(as.matrix(net)))
-    n <- nrow(as.matrix(net))
-    expect_equal(sum(cen), choose(n, 3))
-  }
-})
-
-test_that("every one of the sixteen types is recognised", {
-  # One hand-built example of each, which is the only way to be sure the
-  # D/U/C splits are the right way round.
-  z <- blank3()
-  cases <- list(
-    "003" = z,
-    "012" = local({ m <- z; m["a","b"] <- 1; m }),
-    "102" = local({ m <- z; m["a","b"] <- m["b","a"] <- 1; m }),
-    "021D" = local({ m <- z; m["a","b"] <- m["a","c"] <- 1; m }),
-    "021U" = local({ m <- z; m["b","a"] <- m["c","a"] <- 1; m }),
-    "021C" = local({ m <- z; m["a","b"] <- m["b","c"] <- 1; m }),
-    "111D" = local({ m <- z; m["a","b"] <- m["b","a"] <- 1; m["c","a"] <- 1; m }),
-    "111U" = local({ m <- z; m["a","b"] <- m["b","a"] <- 1; m["a","c"] <- 1; m }),
-    "030T" = local({ m <- z; m["a","b"] <- m["a","c"] <- m["b","c"] <- 1; m }),
-    "030C" = local({ m <- z; m["a","b"] <- m["b","c"] <- m["c","a"] <- 1; m }),
-    "201" = local({ m <- z; m["a","b"] <- m["b","a"] <- m["a","c"] <- m["c","a"] <- 1; m }),
-    "120D" = local({ m <- z; m["a","b"] <- m["b","a"] <- 1; m["c","a"] <- m["c","b"] <- 1; m }),
-    "120U" = local({ m <- z; m["a","b"] <- m["b","a"] <- 1; m["a","c"] <- m["b","c"] <- 1; m }),
-    "120C" = local({ m <- z; m["a","b"] <- m["b","a"] <- 1; m["c","a"] <- m["b","c"] <- 1; m }),
-    "210" = local({ m <- z; m["a","b"] <- m["b","a"] <- m["a","c"] <- m["c","a"] <- 1
-                    m["b","c"] <- 1; m }),
-    "300" = local({ m <- matrix(1, 3, 3, dimnames = nm3); diag(m) <- 0; m }))
-  for (want in names(cases)) {
-    cen <- stats::setNames(
-      xucinet:::triad_census(xucinet:::binary_offdiag(cases[[want]])),
-      xucinet:::triad_names)
-    expect_equal(names(cen)[cen == 1], want, info = want)
-  }
-})
-
-test_that("the transitive and intransitive sets are UCINET's", {
-  # t = 030T, 120D, 120U, 300; it = 021C, 111D, 111U, 030C, 201, 120C, 210.
-  tri <- blank3()
-  tri["a", "b"] <- tri["a", "c"] <- tri["b", "c"] <- 1     # 030T
-  s <- xtransitivity(tri, method = "triads")$summary
-  expect_equal(s[["Trans"]], 1)
-  expect_equal(s[["Trans+InTrans"]], 1)
-
-  cyc <- blank3()
-  cyc["a", "b"] <- cyc["b", "c"] <- cyc["c", "a"] <- 1     # 030C
-  s2 <- xtransitivity(cyc, method = "triads")$summary
-  expect_equal(s2[["Trans"]], 0)
-  expect_equal(s2[["Trans+InTrans"]], 1)
-  expect_equal(s2[["Triad Transitivity"]], 0)
-})
-
-test_that("a vacuous triple counts in neither", {
-  # 003 and 012 are neither transitive nor intransitive.
-  s <- xtransitivity(blank3(), method = "triads")$summary
-  expect_equal(s[["Trans+InTrans"]], 0)
-  expect_true(is.na(s[["Triad Transitivity"]]))
+test_that("the command line's two notes are printed", {
+  out <- capture.output(print(xtransitivity(campnet)))
+  expect_true(any(grepl("ratio of transitivity to density would be 1.0", out)))
+  expect_true(any(grepl("Dekker, Krackhardt & Snijders 2019", out)))
 })
 
 # ---- xcyclicality ------------------------------------------------------------
@@ -217,7 +179,7 @@ test_that("the cyclicality report is UCINET's six measures", {
 
 test_that("cyclicality counts the same two-paths as transitivity", {
   expect_equal(xcyclicality(campnet)$summary[["Twos"]],
-               xtransitivity(campnet)$summary[["Twos"]])
+               xtransitivity(campnet)$summary[["Twos"]][1])
 })
 
 test_that("a three-cycle is wholly cyclic and not at all transitive", {
@@ -235,7 +197,7 @@ test_that("a transitive triple is not at all cyclic", {
 
 test_that("the density matches the other routines", {
   expect_equal(xcyclicality(campnet)$summary[["Density"]],
-               xtransitivity(campnet)$summary[["Density"]], tolerance = tol)
+               xtransitivity(campnet)$summary[["Density"]][1], tolerance = tol)
 })
 
 test_that("both refuse 2-mode data and dichotomize valued data", {

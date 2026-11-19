@@ -1,5 +1,24 @@
 # xucinet 2.0.0.9000 (development)
 
+## Transitivity and the clustering coefficient (18 November 2026)
+
+* `xtransitivity()` now follows UCINET's command-line function
+  `transitivity()`: `$summary` is a data frame with one row per relation and
+  the twelve triplet measures (`Threes` to `Transitivity Beta`), and the report
+  ends with the command line's two notes. It no longer has a `method`
+  argument (the menu dialog's Triads alternative is gone) and no longer
+  reports a clustering coefficient. Code that read `$summary[["Transitivity"]]`
+  still works for a one-relation network; it now gets a vector with one value
+  per relation.
+* New `xclusteringcoefficient()` (Network | Whole-Network Measures |
+  Clustering Coefficient): for every relation, the overall clustering
+  coefficient (the mean of the node values) and the weighted overall
+  coefficient, for the underlying graph, Fagiolo (2007) and Opsahl and
+  Panzarasa (2009), with density, as decided for UCINET 6.850 in
+  `dev/UCINET-ISSUES.md` issue 41. Valued data: `weighted` and `omega`. On
+  symmetric binary data the three definitions agree and only the first is
+  printed. No node-level values are returned.
+
 ## Datasets for the chapter 14 practices (4 November 2026)
 
 * New made-up datasets `classrooms` (63 classrooms sampled from 439: teacher

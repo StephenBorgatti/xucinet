@@ -110,6 +110,7 @@ reference:
   - xgeodesic
   - xreciprocity
   - xtransitivity
+  - xclusteringcoefficient
   - xcyclicality
 
 - title: Network | Regions

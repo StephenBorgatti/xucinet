@@ -497,6 +497,10 @@ by inverse degree.
 
 **What xucinet does:** `xtransitivity()` carries `Clustering Coefficient` in its
 `$summary`, and there is no node-level column and no `xclustering()` export.
+*Changed 18 November 2026 (Steve):* `xtransitivity()` now follows the command-line
+`transitivity()` and has no clustering coefficient; the coefficients are
+`xclusteringcoefficient()` (overall and weighted overall, one row per relation, no
+node-level values). See issue 41.
 
 **Fix in UCINET:** drop the per-node column from the Clustering Coefficient
 routine's output, or move it behind an option that is off by default.
@@ -1181,7 +1185,12 @@ binary (ties above 0) by default, with the average tie value among ego's neighbo
 menu routine's present valued form) as the option; pairs are symmetrized by the larger value.
 
 **What xucinet does:** the underlying-graph value only; Fagiolo and Opsahl-Panzarasa to be
-added on the R side.
+added on the R side. *Done 18 November 2026 (Cowork):* `xclusteringcoefficient()` reports
+all three, overall and weighted overall, with `Density`; valued data follow the decision
+above (`weighted = NULL` canonical defaults, `FALSE` dichotomizes all three, `TRUE` uses
+values in all three; `omega` for Opsahl-Panzarasa, default arithmetic mean). On campnet:
+underlying 0.569 / 0.505, Fagiolo 0.509 / 0.452, O-P 0.526 / 0.484, matching the values
+above and the CLI `cc()`. Goldens wait for the 6.850 build of the menu routine and `cc()`.
 
 ---
 
@@ -1302,6 +1311,44 @@ The log keeps the counts of original and retained ties and the percentage retain
    it, both cells of a kept pair are written, missing cells are no tie and stay missing,
    ties in value are broken by node order. On binary data every tie has the same value, so
    the log warns that the result depends only on node order. Default stays L-Spar.
+
+---
+
+## 46. Non-respondents, isolates and missing ties in edgelists and nodelists
+
+**design** · **open — fix pending** · decided 3 October 2026 (Steve), for UCINET 6.850 and xucinet
+
+Neither program has a stated rule for marking a node that did not respond in a list format, and
+the ASN3e text (Table 5.3) said the program "will automatically create a row of missing values"
+for such a node, which neither does. The convention, the same in both programs and in every
+list reader (spreadsheet import, DL edgelist and nodelist formats, `xread()`):
+
+1. A row with only a node name: the node exists and has no outgoing ties from this row (an
+   isolate if no one names it). Not missing.
+2. A node name followed by the missing-value code in the second position: a non-respondent.
+   Its row of the matrix is missing (the diagonal follows the usual diagonal rule, 0), and ties
+   to it from other rows are kept. Edgelist `john NA`; nodelist `john NA`.
+3. A missing-value code as a tie value: that one cell is missing. Edgelist third column
+   (`bill jane NA`); valued nodelist (`bill jane:NA`).
+4. A node that appears only as an alter, or not at all: as now, its row is 0s. The format cannot
+   tell a respondent who named no one from a non-respondent who was not marked, so the
+   documentation says to mark every non-respondent explicitly.
+5. Contradictory lines are errors that name the line: `john NA 3` in an edgelist, `john NA jane`
+   in a nodelist, a non-respondent line for a node that also has tie lines of its own.
+6. Missing-value code: NA by default; other codes declared by the user (xread `na =`, like
+   `read.csv`'s `na.strings`; in UCINET a field in the import dialog, and DL's existing
+   missing-value keyword if it has one).
+7. Layout detection (xucinet, and UCINET's spreadsheet importer if it detects layouts): a ragged
+   file whose third entries are all numbers or missing codes is a valued edgelist; otherwise a
+   ragged file is a nodelist. When the node names themselves are numbers this is ambiguous: keep
+   the nodelist reading and say so, suggesting `layout =`. Always report the layout used and the
+   nodes coded as non-respondents.
+
+**What xucinet does:** `xread()` reads ragged files as nodelists; NA handling in list formats not
+yet as above.
+
+**Fix:** as above in both programs; ASNR 2e ch05 (5.3.2, 5.3.3, 5.4.2, 5.4.3, Tables 5.2-5.3)
+already describes this convention.
 
 ---
 

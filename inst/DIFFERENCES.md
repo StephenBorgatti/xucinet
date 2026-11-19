@@ -477,10 +477,15 @@ comparing the relations is its purpose: it uses them all, as UCINET does.
 follow (`dev/UCINET-ISSUES.md` issue 16).
 
 UCINET's Clustering Coefficient routine, under Network | Whole Networks,
-reports an overall coefficient, a weighted overall coefficient and a
-coefficient for every node. `xtransitivity()` reports the overall
-coefficient (the mean of the node values) in its `$summary` and has no node table, and there is no
-`xclustering()` export.
+reported an overall coefficient, a weighted overall coefficient and a
+coefficient for every node. `xclusteringcoefficient()` (since 18 November
+2026; before that the overall coefficient sat in `xtransitivity()`'s
+`$summary`) reports the overall and weighted overall coefficients for every
+relation and has no node table. For directed data it reports three
+definitions side by side (the underlying graph, Fagiolo, Opsahl-Panzarasa),
+as decided for UCINET 6.850 in `dev/UCINET-ISSUES.md` issue 41; until 6.850
+ships, UCINET's menu routine reports the directed ego density instead and its
+command-line `cc()` reports Opsahl-Panzarasa alone.
 
 Two reasons. A whole-network routine does not return a node table (SPEC
 addendum, 23 September 2026). And the node-level coefficient is the density of
@@ -631,9 +636,10 @@ Where that moves output away from the UCINET dialog that prints it:
   the seventeenth column of `xegonet()`, which UCINET's Egonet Basic Measures
   does not have. `method` sets which ratio is printed first.
 - `xhomophily()` has no mixing matrix; it is `xmixing()`'s Observed table.
-- `xtransitivity()` always returns the triplet and the triad measures; the triad
-  ratio is named `Triad Transitivity` so that the two can sit in one list.
-  `method` chooses which are printed, and the printed label changes with it.
+- `xtransitivity()` used to return the triplet and the triad measures, with
+  `method` choosing which were printed. Since 18 November 2026 it follows the
+  command-line `transitivity()`, which has no triad version, so it returns the
+  twelve triplet measures only and has no `method` argument.
 - `xegoaltersimilarity()` returns a column for every continuous measure;
   `method` chooses which are printed.
 - `xcentralization()` returns all four centralizations in one row.
@@ -884,3 +890,4 @@ Steve decided (18 October 2026, #39) that both programs report the p-value as
 two bounds when that happens: failures left out (`Sig`) and failures counted as
 at least as extreme (`Sig.Upper`), printed only when some fit failed, with a
 note giving the counts; 6.850 does the same in its log and saved datasets.
+

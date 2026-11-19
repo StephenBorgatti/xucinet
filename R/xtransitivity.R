@@ -1,83 +1,109 @@
 # Transitivity and cyclicality.
 #
-# UCINET: Network | Cohesion | Transitivity (uc_Transitivity.pas) and
-# Cyclicality (uc_cyclicity.pas), repository StephenBorgatti/ucinet at commit
-# c7b4956. The engines are G2Tools/utransitivity.pas (TripletTransitivity and
-# FinalizeTransitivity, which is where the centred measures of Dekker,
-# Krackhardt and Snijders 2019 are derived), G2Tools/ucyclicity.pas
-# (TripletCyclicity) and G2Tools/utriadcountsnl.pas (triadtransitivity), all
-# repository StephenBorgatti/tools at commit 207958a.
+# xtransitivity() follows UCINET's command-line function transitivity()
+# (runtransitivity in Xdpmat.pas, repository StephenBorgatti/ucinet), which
+# loops over every matrix of the dataset, dichotomizes it at > 0, and fills one
+# row per matrix with the twelve measures of TripletTransitivity. The engine is
+# G2Tools/utransitivity.pas (TripletTransitivity and FinalizeTransitivity,
+# where the centred measures of Dekker, Krackhardt and Snijders 2019 are
+# derived), repository StephenBorgatti/tools.
 #
-# The Transitivity dialog has two methods, Triads and Triplets, and defaults to
-# Triplets (Method.ItemIndex = 1). Design question 10.2 described a `type =
-# c("adjacency","weak","strong")` argument instead; the dialog has no such
-# thing, so the argument here follows the dialog. See dev/STATUS.md.
+# Changed 18 Nov 2026 (Steve): xtransitivity() used to follow the menu dialog,
+# Network | Cohesion | Transitivity, with a `method` argument for its Triads
+# alternative, and carried the overall clustering coefficient in its summary
+# (design question 10.2). It now does what the command-line function does: the
+# twelve triplet measures for every relation, nothing else. The clustering
+# coefficient is xclusteringcoefficient().
 #
-# Both routines count the same ordered two-paths and differ only in what closes
-# them: transitivity wants the shortcut i -> j, cyclicality wants the return
-# arc k -> i. One pass gathers both.
-#
-# Question 10.2 also folds the overall clustering coefficient into this report
-# and drops the node-level one.
+# xcyclicality() is UCINET: Network | Cohesion | Cyclicality (uc_cyclicity.pas;
+# engine G2Tools/ucyclicity.pas, TripletCyclicity). Both routines count the
+# same ordered two-paths and differ only in what closes them: transitivity
+# wants the shortcut i -> j, cyclicality wants the return arc j -> i.
+
+# The twelve columns of the command-line table, in its order and under its
+# headings (y.cdvn.fillwith in runtransitivity).
+transitivity_measures <- c(
+  "Threes", "Twos", "Transitivity", "Density", "Ratio", "Transitivity Index",
+  "TP Covariance", "Transitivity Phi", "Transitivity Phi Beta",
+  "T Covariance", "Transitivity Correlation", "Transitivity Beta")
 
 #' Transitivity
 #'
-#' UCINET: Network | Cohesion | Transitivity. How often a two-step path is
-#' closed by a direct tie.
+#' UCINET command line: `transitivity()`. The proportion of two-step paths
+#' i -> k -> j that are closed by a direct tie i -> j, with the eleven related
+#' measures UCINET reports beside it, for every relation in the dataset.
 #'
-#' `method = "triplets"`, the dialog's default, counts ordered two-paths and
-#' the transitive triples among them, and reports the twelve measures UCINET
-#' derives from those counts - including the centred measures of Dekker,
-#' Krackhardt and Snijders (2019), which correct the plain proportion for
-#' density. `method = "triads"` classifies the triad census instead and reports
-#' the transitive count, the transitive-plus-intransitive count, and their
-#' ratio.
+#' Each relation is dichotomized at `> 0`, as UCINET does. Missing cells count
+#' as no tie and the diagonal takes no part.
 #'
-#' The overall clustering coefficient is reported alongside, per design
-#' question 10.2. The node-level coefficient is deliberately not computed.
+#' The twelve columns are:
 #'
-#' Missing cells count as no tie, and the diagonal takes no part, both as the
-#' engine does.
+#' - `Threes`: the number of transitive triples, that is, ordered two-paths
+#'   i -> k -> j that are closed by the tie i -> j.
+#' - `Twos`: the number of ordered two-paths i -> k -> j (k different from i
+#'   and j), closed or not.
+#' - `Transitivity`: `Threes / Twos`.
+#' - `Density`: the density of the relation.
+#' - `Ratio`: `Transitivity / Density`. If there is no tendency toward
+#'   transitivity, it is about 1.
+#' - `Transitivity Index`: `(Transitivity - Density) / (1 - Density)`.
+#' - `TP Covariance`, `Transitivity Phi`, `Transitivity Phi Beta`: the centred
+#'   measures of Dekker, Krackhardt and Snijders (2019) under their triadic
+#'   probability model (a random ordered triple).
+#' - `T Covariance`, `Transitivity Correlation`, `Transitivity Beta`: the
+#'   same under their dyadic probability model (a random ordered pair).
+#'   Values near 0 mean no increased tendency toward transitive triples.
+#'
+#' For undirected data `Transitivity` equals the weighted overall clustering
+#' coefficient. The clustering coefficients themselves are
+#' [xclusteringcoefficient()].
 #'
 #' @param net A network (any accepted form). 1-mode only.
-#' @param method Which version to print: `"triplets"` (the dialog's default) or
-#'   `"triads"`. Both are always computed.
-#' @return An object of class `c("xtransitivity", "xucinet_output")`, with the
-#'   measures of both versions in `$summary` under UCINET's headings (the triad
-#'   version's `Transitivity` as `Triad Transitivity`), and the overall
-#'   clustering coefficient.
-#' @seealso [xcyclicality()] for the same counts closed the other way, and
+#' @return An object of class `c("xtransitivity", "xucinet_output")`.
+#'   `$summary` is a data frame with one row per relation and the twelve
+#'   columns above.
+#' @references Dekker, D., Krackhardt, D. and Snijders, T. A. B. (2019).
+#'   Transitivity correlation: A descriptive measure of network transitivity.
+#'   *Network Science* 7(3), 353-375.
+#' @seealso [xclusteringcoefficient()] for the clustering coefficients,
+#'   [xcyclicality()] for the same two-paths closed the other way, and
 #'   [xcohesion()], whose `Transitivity/Closure` is this routine's
 #'   `Transitivity`.
 #' @examples
 #' xtransitivity(campnet)
-#' xtransitivity(campnet, method = "triads")
+#'
+#' # one row for each of the three relations
+#' xtransitivity(hightech)
 #' @export
-xtransitivity <- function(net, method = c("triplets", "triads")) {
+xtransitivity <- function(net) {
   net <- xnet(net, substitute(net))
-  method <- match.arg(method)
   require_1mode(net, "xtransitivity()")
 
-  m <- pick_relation(net, NULL)
-  a <- binary_offdiag(m)
-  assumptions <- if (is_valued(m)) "Data dichotomized at > 0." else character(0)
+  mats <- relation_matrices(net)
+  rels <- if (length(mats) == 1L) net$title else xrelations(net)
+  valued <- vapply(mats, is_valued, logical(1))
+  assumptions <- character(0)
+  if (any(valued)) {
+    assumptions <- if (length(mats) == 1L) {
+      "Data dichotomized at > 0."
+    } else {
+      paste0("Relation ", rels[valued], " dichotomized at > 0.")
+    }
+  }
 
-  # Both versions always (SPEC addendum, 23 Sep 2026, item 5); `method` chooses
-  # which is printed. The triad version's own "Transitivity" is stored as
-  # "Triad Transitivity" so that the two can sit in one summary.
-  trip <- triplet_summary(a)
-  triad <- triad_summary(a)
-  names(triad)[names(triad) == "Transitivity"] <- "Triad Transitivity"
-  # Question 10.2: the overall clustering coefficient belongs in this report.
-  summ <- c(trip, triad, list("Clustering Coefficient" = clustering_overall(a)))
-  shown <- c(if (identical(method, "triads")) names(triad) else names(trip),
-             "Clustering Coefficient")
+  rows <- lapply(mats, function(m) unlist(triplet_summary(binary_offdiag(m))))
+  out <- as.data.frame(do.call(rbind, rows), optional = TRUE)
+  names(out) <- transitivity_measures
+  rownames(out) <- rels
 
-  new_xucinet_output("Transitivity", net, summary = summ,
-                     assumptions = assumptions, subclass = "xtransitivity",
-                     show_summary = shown, call = match.call(),
-                     summary_title = if (identical(method, "triads"))
-                       "Triad Transitivity" else "Triplet Transitivity")
+  new_xucinet_output(
+    "Transitivity", net, summary = out, assumptions = assumptions,
+    subclass = "xtransitivity", call = match.call(),
+    epilogue = c(
+      paste0("If there were no particular tendency toward transitivity, the ",
+             "ratio of transitivity to density would be 1.0"),
+      paste0("TPhi/TC are centred (Dekker, Krackhardt & Snijders 2019): ~0 ",
+             "means no increased propensity toward transitive triples.")))
 }
 
 #' Cyclicality
@@ -196,123 +222,4 @@ triplet_summary <- function(a) {
     "Transitivity Correlation" = if (!is.na(varxij) && varxij > 0 && !is.na(varS) && varS > 0)
       tcov / sqrt(varxij * varS) else NA_real_,
     "Transitivity Beta" = ratio(tcov, varS))
-}
-
-# triadtransitivity: the census, split into the transitive types, the
-# intransitive ones, and the vacuous remainder.
-#
-#   transitive   030T, 120D, 120U, 300      (census 9, 12, 13, 16)
-#   intransitive 021C, 111D, 111U, 030C,
-#                201, 120C, 210             (census 6, 7, 8, 10, 11, 14, 15)
-#   vacuous      003, 012, 102, 021D, 021U  (census 1 to 5)
-triad_summary <- function(a) {
-  census <- triad_census(a)
-  transitive <- sum(census[c(9, 12, 13, 16)])
-  intransitive <- sum(census[c(6, 7, 8, 10, 11, 14, 15)])
-  den <- transitive + intransitive
-  list("Trans" = transitive,
-       "Trans+InTrans" = den,
-       "Transitivity" = if (den > 0) transitive / den else NA_real_)
-}
-
-# The sixteen Holland-Leinhardt triad types, in the census's order.
-triad_names <- c("003", "012", "102", "021D", "021U", "021C", "111D", "111U",
-                 "030T", "030C", "201", "120D", "120U", "120C", "210", "300")
-
-# The census is internal: UCINET's Triad Census is its own routine and is not
-# a chapter 10 row of the crosswalk, so exporting it here would add a function
-# the book does not name. `xtransitivity(method = "triads")` is what needs it.
-triad_census <- function(a) {
-  n <- nrow(a)
-  census <- integer(16)
-  if (n < 3) return(census)
-  for (i in seq_len(n - 2)) {
-    for (j in (i + 1):(n - 1)) {
-      for (k in (j + 1):n) {
-        code <- triad_code(a, i, j, k)
-        census[code] <- census[code] + 1L
-      }
-    }
-  }
-  census
-}
-
-# Classify one triple. The M-A-N counts fix the type except where several types
-# share them, and those are separated by whether the asymmetric arcs share a
-# source (down), share a target (up), or do neither (cyclic).
-triad_code <- function(a, i, j, k) {
-  idx <- c(i, j, k)
-  pairs <- rbind(c(1, 2), c(1, 3), c(2, 3))
-  fwd <- a[cbind(idx[pairs[, 1]], idx[pairs[, 2]])] > 0
-  bwd <- a[cbind(idx[pairs[, 2]], idx[pairs[, 1]])] > 0
-
-  mut <- sum(fwd & bwd)
-  asym <- sum(xor(fwd, bwd))
-
-  if (mut == 0 && asym == 0) return(1L)    # 003
-  if (mut == 0 && asym == 1) return(2L)    # 012
-  if (mut == 1 && asym == 0) return(3L)    # 102
-  if (mut == 2 && asym == 0) return(11L)   # 201
-  if (mut == 3) return(16L)                # 300
-  if (mut == 2 && asym == 1) return(15L)   # 210
-
-  arcs <- asym_arcs(idx, fwd, bwd, pairs)
-  from <- arcs$from
-  to <- arcs$to
-
-  if (mut == 1 && asym == 1) {
-    # The asymmetric arc either points into the mutual dyad (111D) or out of
-    # it (111U). Both are intransitive, so the split does not change the
-    # counts, but a census that reported one of them as always zero would be
-    # wrong on its own terms.
-    inmut <- idx[unique(as.vector(pairs[which(fwd & bwd), ]))]
-    return(if (to %in% inmut) 7L else 8L)
-  }
-
-  if (mut == 0 && asym == 2) {
-    # Two arcs: a common source is the out-star, a common target the in-star,
-    # and anything else a path.
-    if (from[1] == from[2]) return(4L)                       # 021D
-    if (to[1] == to[2]) return(5L)                           # 021U
-    return(6L)                                               # 021C
-  }
-  if (mut == 0 && asym == 3) {
-    # Three arcs and no mutual dyad: a directed cycle gives every node one
-    # arc out and one in, and a transitive triple gives one node two out.
-    # A common source or target never occurs here, which is why this case
-    # cannot be decided the way the two-arc ones are.
-    return(if (length(unique(from)) == 3) 10L else 9L)       # 030C / 030T
-  }
-  # mut == 1 && asym == 2
-  if (from[1] == from[2]) return(12L)                        # 120D
-  if (to[1] == to[2]) return(13L)                            # 120U
-  14L                                                        # 120C
-}
-
-# The asymmetric arcs of a triple, as sources and targets in node terms.
-asym_arcs <- function(idx, fwd, bwd, pairs) {
-  one <- which(xor(fwd, bwd))
-  from <- integer(length(one)); to <- integer(length(one))
-  for (s in seq_along(one)) {
-    p <- one[s]
-    u <- idx[pairs[p, 1]]; v <- idx[pairs[p, 2]]
-    if (fwd[p]) { from[s] <- u; to[s] <- v } else { from[s] <- v; to[s] <- u }
-  }
-  list(from = from, to = to)
-}
-
-# The overall clustering coefficient: the mean of the ego-network densities,
-# which is what usmallworld.getunwtdcc averages. Question 10.2 keeps this one
-# and drops the node-level version.
-clustering_overall <- function(a) {
-  u <- pmax(a, t(a))
-  n <- nrow(u)
-  per_node <- vapply(seq_len(n), function(i) {
-    nb <- which(u[i, ] > 0)
-    nb <- nb[nb != i]
-    if (length(nb) < 2) return(NA_real_)
-    sub <- u[nb, nb, drop = FALSE]
-    sum(sub > 0) / (length(nb) * (length(nb) - 1))
-  }, numeric(1))
-  mean(per_node, na.rm = TRUE)
 }

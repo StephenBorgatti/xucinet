@@ -40,13 +40,22 @@ g10_recip_sampson      = recip(sampson dyad)
 // using different tests (ledger entry 16).
 g10_recip_camp92       = recip(camp92 dyad)
 
-// --- Transitivity (Network | Cohesion | Transitivity) ----------------------
-// Dialog: Method = Triplets is the default (Method.ItemIndex = 1); run Triads
-// as well, since the R function offers both.
-g10_trans_campnet_trip = trans(campnet triplets)
-g10_trans_campnet_tri  = trans(campnet triads)
-g10_trans_hightech     = trans(hightech triplets)
-g10_trans_disc         = trans(g9_disc triplets)
+// --- Transitivity (command line: transitivity) -----------------------------
+// Since 18 Nov 2026 xtransitivity() follows the command-line function
+// transitivity() (runtransitivity in Xdpmat.pas): one row per matrix, the
+// twelve triplet measures. The menu's Triads method is not in the R function.
+g10_trans_campnet  = transitivity(campnet)
+g10_trans_hightech = transitivity(hightech)
+g10_trans_disc     = transitivity(g9_disc)
+
+// --- Clustering coefficient (command line: cc) -----------------------------
+// For xclusteringcoefficient(). Run on 6.850 or later only: UCINET-ISSUES 41
+// changes cc() and the menu routine to report the underlying-graph, Fagiolo
+// and Opsahl-Panzarasa coefficients side by side. Earlier builds report only
+// Opsahl-Panzarasa from cc().
+g10_cc_campnet  = cc(campnet)
+g10_cc_padgett  = cc(padgett)
+g10_cc_baker    = cc(baker_journals)
 
 // --- Cyclicality (Network | Cohesion | Cyclicality) ------------------------
 g10_cyc_campnet = cyclic(campnet)

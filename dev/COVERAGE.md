@@ -93,7 +93,8 @@ against the xucinet 2.0 function that serves it.
 |---|---|---|---|---|
 | 10.2.1 | Density, average degree | Network\|Whole Networks\|Density\|Density Overall | `xdensity()` | done |
 | 10.2.2 | Reciprocity (dyad-based and arc-based) | Network\|Whole Networks\|Reciprocity | `xreciprocity()` | coded, goldens pending |
-| 10.2.3 | Transitivity; cyclicality | Network\|Whole Networks\|Transitivity; ...\|Cyclicality | `xtransitivity()` | coded, goldens pending |
+| 10.2.3 | Transitivity; clustering coefficient | command line `transitivity()`; Network\|Whole-Network Measures\|Clustering Coefficient | `xtransitivity()`, `xclusteringcoefficient()` | coded, goldens pending (clustering coefficient waits for UCINET 6.850) |
+| 10.2.4 | Cyclicality | Network\|Cohesion\|Cyclicality | `xcyclicality()` | coded, goldens pending |
 | 10.3.1 | Components; component ratio; fragmentation; connectedness | Network\|Regions\|Components; Network\|Whole Networks\|Multiple Measures | `xcomponents()` | coded, goldens pending |
 | 10.3.2 | Distance-based: average distance, compactness, breadth, proportion reachable | Network\|Whole Networks\|Multiple Measures | `xcohesion()` | done |
 | 10.4 | Centralization (for any centrality measure) | Network\|Whole Networks\|Centralization | `xcentralization()` | coded, goldens pending |

@@ -4,45 +4,62 @@
 \alias{xtransitivity}
 \title{Transitivity}
 \usage{
-xtransitivity(net, method = c("triplets", "triads"))
+xtransitivity(net)
 }
 \arguments{
 \item{net}{A network (any accepted form). 1-mode only.}
-
-\item{method}{Which version to print: \code{"triplets"} (the dialog's default) or
-\code{"triads"}. Both are always computed.}
 }
 \value{
-An object of class \code{c("xtransitivity", "xucinet_output")}, with the
-measures of both versions in \verb{$summary} under UCINET's headings (the triad
-version's \code{Transitivity} as \verb{Triad Transitivity}), and the overall
-clustering coefficient.
+An object of class \code{c("xtransitivity", "xucinet_output")}.
+\verb{$summary} is a data frame with one row per relation and the twelve
+columns above.
 }
 \description{
-UCINET: Network | Cohesion | Transitivity. How often a two-step path is
-closed by a direct tie.
+UCINET command line: \code{transitivity()}. The proportion of two-step paths
+i -> k -> j that are closed by a direct tie i -> j, with the eleven related
+measures UCINET reports beside it, for every relation in the dataset.
 }
 \details{
-\code{method = "triplets"}, the dialog's default, counts ordered two-paths and
-the transitive triples among them, and reports the twelve measures UCINET
-derives from those counts - including the centred measures of Dekker,
-Krackhardt and Snijders (2019), which correct the plain proportion for
-density. \code{method = "triads"} classifies the triad census instead and reports
-the transitive count, the transitive-plus-intransitive count, and their
-ratio.
+Each relation is dichotomized at \verb{> 0}, as UCINET does. Missing cells count
+as no tie and the diagonal takes no part.
 
-The overall clustering coefficient is reported alongside, per design
-question 10.2. The node-level coefficient is deliberately not computed.
+The twelve columns are:
+\itemize{
+\item \code{Threes}: the number of transitive triples, that is, ordered two-paths
+i -> k -> j that are closed by the tie i -> j.
+\item \code{Twos}: the number of ordered two-paths i -> k -> j (k different from i
+and j), closed or not.
+\item \code{Transitivity}: \code{Threes / Twos}.
+\item \code{Density}: the density of the relation.
+\item \code{Ratio}: \code{Transitivity / Density}. If there is no tendency toward
+transitivity, it is about 1.
+\item \verb{Transitivity Index}: \code{(Transitivity - Density) / (1 - Density)}.
+\item \verb{TP Covariance}, \verb{Transitivity Phi}, \verb{Transitivity Phi Beta}: the centred
+measures of Dekker, Krackhardt and Snijders (2019) under their triadic
+probability model (a random ordered triple).
+\item \verb{T Covariance}, \verb{Transitivity Correlation}, \verb{Transitivity Beta}: the
+same under their dyadic probability model (a random ordered pair).
+Values near 0 mean no increased tendency toward transitive triples.
+}
 
-Missing cells count as no tie, and the diagonal takes no part, both as the
-engine does.
+For undirected data \code{Transitivity} equals the weighted overall clustering
+coefficient. The clustering coefficients themselves are
+\code{\link[=xclusteringcoefficient]{xclusteringcoefficient()}}.
 }
 \examples{
 xtransitivity(campnet)
-xtransitivity(campnet, method = "triads")
+
+# one row for each of the three relations
+xtransitivity(hightech)
+}
+\references{
+Dekker, D., Krackhardt, D. and Snijders, T. A. B. (2019).
+Transitivity correlation: A descriptive measure of network transitivity.
+\emph{Network Science} 7(3), 353-375.
 }
 \seealso{
-\code{\link[=xcyclicality]{xcyclicality()}} for the same counts closed the other way, and
+\code{\link[=xclusteringcoefficient]{xclusteringcoefficient()}} for the clustering coefficients,
+\code{\link[=xcyclicality]{xcyclicality()}} for the same two-paths closed the other way, and
 \code{\link[=xcohesion]{xcohesion()}}, whose \code{Transitivity/Closure} is this routine's
 \code{Transitivity}.
 }

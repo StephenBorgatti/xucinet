@@ -22,10 +22,12 @@ columns, and its tests run rather than skip.
 | `g10_recip_campnet_arc` | `xreciprocity` | arc-based |
 | `g10_recip_sampson` | `xreciprocity` | a second, denser network |
 | `g10_recip_camp92` | `xreciprocity` | valued: the case where the report's two halves disagree |
-| `g10_trans_campnet_trip` | `xtransitivity` | triplets, the dialog default |
-| `g10_trans_campnet_tri` | `xtransitivity` | triads |
-| `g10_trans_hightech` | `xtransitivity` | three relations at once |
+| `g10_trans_campnet` | `xtransitivity` | command-line `transitivity()` (since 18 Nov 2026) |
+| `g10_trans_hightech` | `xtransitivity` | three relations at once, one row each |
 | `g10_trans_disc` | `xtransitivity` | disconnected |
+| `g10_cc_campnet` | `xclusteringcoefficient` | directed: the three definitions differ (6.850 or later) |
+| `g10_cc_padgett` | `xclusteringcoefficient` | two symmetric relations |
+| `g10_cc_baker` | `xclusteringcoefficient` | valued |
 | `g10_cyc_campnet` | `xcyclicality` | |
 | `g10_cyc_sampson` | `xcyclicality` | |
 | `g10_comp_campnet_weak` | `xcomponents` | weak, the dialog default |
