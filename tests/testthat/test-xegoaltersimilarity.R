@@ -76,6 +76,34 @@ test_that("the report prints", {
                                       type = "categorical"))
 })
 
+test_that("correction adds a constant to each cell for Q and the odds ratio only", {
+  # hightech friendship, outgoing, by department: A17 has a = 4, b = 14, c = 0,
+  # d = 2, so Q is 1 uncorrected and (4.5 * 2.5 - 14.5 * 0.5) / (4.5 * 2.5 +
+  # 14.5 * 0.5) = 4 / 18.5 with 0.5 added to each cell.
+  raw <- xegoaltersimilarity(hightech, "Department", relation = "Friendship",
+                             type = "categorical", data = hightech_attr)$nodes
+  cor <- xegoaltersimilarity(hightech, "Department", relation = "Friendship",
+                             type = "categorical", correction = 0.5,
+                             data = hightech_attr)$nodes
+  expect_equal(raw["A17", "Yules Q"], 1)
+  expect_true(is.na(raw["A17", "Odds_Ratio"]))
+  expect_equal(cor["A17", "Yules Q"], 4 / 18.5, tolerance = tol)
+  expect_equal(cor["A17", "Odds_Ratio"], (4.5 * 2.5) / (14.5 * 0.5), tolerance = tol)
+  expect_equal(cor["A17", "Log_Odds"], log((4.5 * 2.5) / (14.5 * 0.5)), tolerance = tol)
+  expect_equal(cor["A03", "Yules Q"], (2.5 * 13.5 - 0.5 * 5.5) / (2.5 * 13.5 + 0.5 * 5.5),
+               tolerance = tol)
+  others <- setdiff(names(raw), c("Yules Q", "Odds_Ratio", "Log_Odds"))
+  expect_equal(cor[others], raw[others])
+  expect_true(is.na(cor["A07", "Yules Q"]))         # no ties: still missing
+})
+
+test_that("correction must be a single non-negative number", {
+  expect_error(xegoaltersimilarity(six(), groups(), type = "categorical",
+                                   correction = -1), "correction")
+  expect_error(xegoaltersimilarity(six(), groups(), type = "categorical",
+                                   correction = c(0.5, 1)), "correction")
+})
+
 # ---- continuous ----------------------------------------------------------------
 
 vals <- function() c(a = 1, b = 2, c = 4, d = 7, e = 11, f = 16)

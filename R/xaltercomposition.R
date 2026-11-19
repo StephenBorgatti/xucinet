@@ -37,8 +37,8 @@
 #'
 #' **Categorical.** The first column is ego's own value. Then, for each
 #' category `c` (sorted), `fc` is how many alters are in it and `pc` what
-#' proportion of ego's alters that is, followed by `Heterogeneity` (Blau's
-#' index, one minus the sum of squared proportions) and `IQV` (Blau divided by
+#' proportion of ego's alters that is, followed by `Blau` (Blau's index,
+#' one minus the sum of squared proportions) and `IQV` (Blau divided by
 #' its maximum, `1 - 1/K` for the `K` categories of the whole attribute). Tie
 #' values weight the counts, as UCINET does: on valued data `fc` is the total
 #' strength of ego's ties into category `c`. A table of the attribute's own
@@ -172,7 +172,7 @@ composition_categorical <- function(x, values, name, ignoreown) {
   names(nodes) <- name
   for (c in seq_len(k)) nodes[[paste0("f", cats$labels[c])]] <- fr[, c]
   for (c in seq_len(k)) nodes[[paste0("p", cats$labels[c])]] <- pr[, c]
-  nodes$Heterogeneity <- het
+  nodes$Blau <- het
   nodes$IQV <- iqv
   list(nodes = nodes, frequencies = freqs)
 }

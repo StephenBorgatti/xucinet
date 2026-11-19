@@ -25,9 +25,8 @@
       Ego Net Composition
       
                          1     2     3     4     5     6     7 
-                     Gende    f1    f2    p1    p2 Heter   IQV 
-                         r                         ogene       
-                                                     ity       
+                     Gende    f1    f2    p1    p2  Blau   IQV 
+                         r                                     
                      ----- ----- ----- ----- ----- ----- ----- 
            1   HOLLY 1.000 2.000 3.000 0.400 0.600 0.480 0.960 
            2  BRAZEY 1.000 0.000 3.000 0.000 1.000 0.000 0.000 

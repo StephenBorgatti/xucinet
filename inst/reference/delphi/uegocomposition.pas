@@ -18,7 +18,7 @@ const
 
 //net is modified in place according to tietype (symmetrized/transposed).
 //attr holds each node's category value; attrname labels the first output column.
-//meas gets one row per node: own value, f<cat>..., p<cat>..., Heterogeneity, IQV.
+//meas gets one row per node: own value, f<cat>..., p<cat>..., Blau, IQV.
 //tab gets the overall frequency table of attr categories.
 function egonetaltercomposition(net:tsmatds; tietype:integer; attr:tsvec;
   ignoreown:boolean; attrname:string; meas,tab:tsmatds; var err:string): boolean;
@@ -87,7 +87,7 @@ begin
         meas.cdvn.sput(j+1,'f'+s.getdvn(j));
         meas.cdvn.sput(j+1+s.n,'p'+s.getdvn(j));
         end;
-      meas.cdvn.sput(phet,'Heterogeneity');
+      meas.cdvn.sput(phet,'Blau');
       meas.cdvn.sput(piqv,'IQV');
       end;
     s.appendifnew:= false; //ensure that each ego has same categories

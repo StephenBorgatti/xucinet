@@ -11,6 +11,7 @@ xegoaltersimilarity(
   relation = NULL,
   ties = c("out", "any", "in", "reciprocated"),
   method = "negabsdiff",
+  correction = 0,
   normalize = c("none", "additive", "ratio", "interval"),
   data = NULL
 )
@@ -33,6 +34,11 @@ position. Defaults to the first.}
 \item{method}{Continuous only: which measures to print, one or more of
 \code{"negabsdiff"} (the default), \code{"zegers"}, \code{"minovermax"}, \code{"absdiff"},
 \code{"sqdiff"}, \code{"product"}. All six are always computed.}
+
+\item{correction}{Categorical only: a constant added to each cell of the
+two-by-two table before Yule's Q, the odds ratio and the log odds are
+computed. \code{0}, the default, is UCINET's calculation; \code{0.5} is the
+Haldane-Anscombe correction for zero cells.}
 
 \item{normalize}{Continuous only: rescale the attribute first? \code{"none"} (the
 default), \code{"additive"} (subtract the mean), \code{"ratio"} (divide by the root
@@ -67,6 +73,14 @@ by its maximum), \code{EI} (\code{(b-a)/(a+b)}), \code{Jaccard}, \verb{Yules Q},
 \code{fInGroup} (\code{a}) and \code{fOutGroup} (\code{b}), then ego's own value. An ego with no
 ties has every measure missing.
 
+Whenever one cell of the table is zero, the odds ratio is 0 or infinite
+(reported as missing) and Yule's Q is -1 or 1, whatever the other three
+cells hold; in small ego networks this is common. \code{correction} adds a
+constant to each of the four cells before \verb{Yules Q}, \code{Odds_Ratio} and
+\code{Log_Odds} are computed; \code{correction = 0.5} is the Haldane-Anscombe
+correction (Haldane 1956). The other measures always use the raw counts,
+and \code{fInGroup} and \code{fOutGroup} are always the raw counts.
+
 \strong{Continuous.} For each ego, the correlation between its row of tie values
 and the similarity of ego to each other node on the attribute. One column for
 each of six measures, all always computed; \code{method} chooses which are
@@ -81,11 +95,15 @@ ego is tied to people unlike itself.
 Network | Ego Networks | Ego-Alter Similarity | Categorical, and ... |
 Continuous. \emph{Definition of Ego Network} is \code{ties}; the continuous
 dialog's \emph{Measures} checklist is \code{method} and \emph{Attribute Normalization} is
-\code{normalize}.
+\code{normalize}. UCINET has no zero-cell correction: \code{correction} other than 0
+has no UCINET equivalent.
 }
 
 \examples{
 xegoaltersimilarity(campnet, camp92_attr$Gender, type = "categorical")
+xegoaltersimilarity(hightech, "Department", relation = "Friendship",
+                    type = "categorical", correction = 0.5,
+                    data = hightech_attr)
 xegoaltersimilarity(hightech, "Age", data = hightech_attr)
 }
 \seealso{

@@ -60,8 +60,8 @@ unless \code{type = "categorical"} is given.
 
 \strong{Categorical.} The first column is ego's own value. Then, for each
 category \code{c} (sorted), \code{fc} is how many alters are in it and \code{pc} what
-proportion of ego's alters that is, followed by \code{Heterogeneity} (Blau's
-index, one minus the sum of squared proportions) and \code{IQV} (Blau divided by
+proportion of ego's alters that is, followed by \code{Blau} (Blau's index,
+one minus the sum of squared proportions) and \code{IQV} (Blau divided by
 its maximum, \code{1 - 1/K} for the \code{K} categories of the whole attribute). Tie
 values weight the counts, as UCINET does: on valued data \code{fc} is the total
 strength of ego's ties into category \code{c}. A table of the attribute's own

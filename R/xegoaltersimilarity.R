@@ -40,6 +40,14 @@
 #' `fInGroup` (`a`) and `fOutGroup` (`b`), then ego's own value. An ego with no
 #' ties has every measure missing.
 #'
+#' Whenever one cell of the table is zero, the odds ratio is 0 or infinite
+#' (reported as missing) and Yule's Q is -1 or 1, whatever the other three
+#' cells hold; in small ego networks this is common. `correction` adds a
+#' constant to each of the four cells before `Yules Q`, `Odds_Ratio` and
+#' `Log_Odds` are computed; `correction = 0.5` is the Haldane-Anscombe
+#' correction (Haldane 1956). The other measures always use the raw counts,
+#' and `fInGroup` and `fOutGroup` are always the raw counts.
+#'
 #' **Continuous.** For each ego, the correlation between its row of tie values
 #' and the similarity of ego to each other node on the attribute. One column for
 #' each of six measures, all always computed; `method` chooses which are
@@ -53,7 +61,8 @@
 #' Network | Ego Networks | Ego-Alter Similarity | Categorical, and ... |
 #' Continuous. *Definition of Ego Network* is `ties`; the continuous
 #' dialog's *Measures* checklist is `method` and *Attribute Normalization* is
-#' `normalize`.
+#' `normalize`. UCINET has no zero-cell correction: `correction` other than 0
+#' has no UCINET equivalent.
 #'
 #' @inheritParams xaltercomposition
 #' @param ties Which ties are ego's: `"out"` (the default, as in UCINET),
@@ -61,6 +70,10 @@
 #' @param method Continuous only: which measures to print, one or more of
 #'   `"negabsdiff"` (the default), `"zegers"`, `"minovermax"`, `"absdiff"`,
 #'   `"sqdiff"`, `"product"`. All six are always computed.
+#' @param correction Categorical only: a constant added to each cell of the
+#'   two-by-two table before Yule's Q, the odds ratio and the log odds are
+#'   computed. `0`, the default, is UCINET's calculation; `0.5` is the
+#'   Haldane-Anscombe correction for zero cells.
 #' @param normalize Continuous only: rescale the attribute first? `"none"` (the
 #'   default), `"additive"` (subtract the mean), `"ratio"` (divide by the root
 #'   of the sum of squared deviations) or `"interval"` (z-scores).
@@ -70,12 +83,15 @@
 #'   [xaltercomposition()].
 #' @examples
 #' xegoaltersimilarity(campnet, camp92_attr$Gender, type = "categorical")
+#' xegoaltersimilarity(hightech, "Department", relation = "Friendship",
+#'                     type = "categorical", correction = 0.5,
+#'                     data = hightech_attr)
 #' xegoaltersimilarity(hightech, "Age", data = hightech_attr)
 #' @export
 xegoaltersimilarity <- function(net, attribute, type = NULL, relation = NULL,
                                 ties = c("out", "any", "in",
                                               "reciprocated"),
-                                method = "negabsdiff",
+                                method = "negabsdiff", correction = 0,
                                 normalize = c("none", "additive", "ratio",
                                               "interval"),
                                 data = NULL) {
@@ -84,6 +100,11 @@ xegoaltersimilarity <- function(net, attribute, type = NULL, relation = NULL,
                                             "reciprocated"),
                                "xegoaltersimilarity()")
   normalize <- match.arg(normalize)
+  if (!is.numeric(correction) || length(correction) != 1L || is.na(correction) ||
+      correction < 0) {
+    stop("xegoaltersimilarity(): correction must be a single number >= 0.",
+         call. = FALSE)
+  }
   rel <- ego_relation(net, relation, "xegoaltersimilarity()")
   m <- rel$m
   n <- nrow(m)
@@ -97,14 +118,21 @@ xegoaltersimilarity <- function(net, attribute, type = NULL, relation = NULL,
                  reciprocated = "Reciprocal ties only")[[ties]]
 
   if (kind$type == "categorical") {
-    nodes <- similarity_categorical(x, att$values, att$name)
+    nodes <- similarity_categorical(x, att$values, att$name, correction)
     rownames(nodes) <- rownames(m)
+    corr_note <- if (correction > 0) {
+      paste0(format(correction), " was added to each cell of the two-by-two ",
+             "table before Yule's Q, the odds ratio and the log odds were ",
+             "computed. UCINET does not do this.")
+    }
     new_xucinet_output(
       "Egonet Alter-Ego Similarity (e.g., homophily) for categorical attributes",
       net, nodes = nodes,
       assumptions = c(assumptions,
-                      "This routine automatically dichotomizes the network data."),
-      fields = c("Input Attribute:" = att$name, "Ego Network Type:" = dir_label),
+                      "This routine automatically dichotomizes the network data.",
+                      corr_note),
+      fields = c("Input Attribute:" = att$name, "Ego Network Type:" = dir_label,
+                 if (correction > 0) c("Zero-cell correction:" = format(correction))),
       nodes_title = "Node-level alter-ego similarity",
       subclass = "xegoaltersimilarity", call = match.call())
   } else {
@@ -144,7 +172,7 @@ xegoaltersimilarity <- function(net, attribute, type = NULL, relation = NULL,
 
 # tegonethomophily.run and tindividualhomophily. Every other node with a valid
 # cell and a valid attribute value is a case; the tie is x > 0.
-similarity_categorical <- function(x, values, name) {
+similarity_categorical <- function(x, values, name, correction = 0) {
   n <- nrow(x)
   cats <- category_keys(values)
   g <- cats$codes
@@ -158,7 +186,8 @@ similarity_categorical <- function(x, values, name) {
     tie <- x[i, js] > 0
     same <- g[js] == g[i]
     out[i, seq_along(labs)] <- individual_homophily(
-      sum(tie & same), sum(tie & !same), sum(!tie & same), sum(!tie & !same))
+      sum(tie & same), sum(tie & !same), sum(!tie & same), sum(!tie & !same),
+      correction)
     out[i, length(labs) + 1] <- if (is.numeric(values)) values[i] else g[i]
   }
   as.data.frame(out, check.names = FALSE)
@@ -166,7 +195,9 @@ similarity_categorical <- function(x, values, name) {
 
 # tindividualhomophily.calc, with calckappa. Nothing is computed unless ego
 # has a tie; each measure is missing where its own denominator vanishes.
-individual_homophily <- function(a, b, c, d) {
+# `k` (xucinet only) is added to every cell for the odds ratio, the log odds and
+# Yule's Q; with k = 0 this is UCINET's calculation.
+individual_homophily <- function(a, b, c, d, k = 0) {
   out <- rep(NA_real_, 13)
   n <- a + b + c + d
   if (a + b == 0) return(out)
@@ -178,12 +209,14 @@ individual_homophily <- function(a, b, c, d) {
   coleman <- if (h >= hexp) hstar / (1 - hexp) else hstar / hexp
   ei <- (b - a) / (a + b)
   jac <- if (a + b + c > 0) a / (a + b + c) else NA_real_
+  adk <- (a + k) * (d + k)
+  bck <- (b + k) * (c + k)
   odds <- logodds <- NA_real_
-  if (bc > 0 && ad > 0) {
-    odds <- ad / bc
+  if (bck > 0 && adk > 0) {
+    odds <- adk / bck
     logodds <- log(odds)
   }
-  yules <- if (ad + bc > 0) (ad - bc) / (ad + bc) else NA_real_
+  yules <- if (adk + bck > 0) (adk - bck) / (adk + bck) else NA_real_
   bona <- if (abs(ad - bc) > 1e-12) (ad - sqrt(a * b * c * d)) / (ad - bc)
           else NA_real_
   # calckappa

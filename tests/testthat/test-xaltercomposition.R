@@ -14,10 +14,10 @@ ages <- function() c(a = 50, b = 10, c = 20, d = 30, e = 40)
 
 # ---- categorical ---------------------------------------------------------------
 
-test_that("the columns are own value, f and p per category, Heterogeneity, IQV", {
+test_that("the columns are own value, f and p per category, Blau, IQV", {
   nd <- xaltercomposition(star_iso(), cats(), type = "categorical")$nodes
   expect_equal(names(nd), c("Attribute", "f1", "f2", "p1", "p2",
-                            "Heterogeneity", "IQV"))
+                            "Blau", "IQV"))
 })
 
 test_that("the centre's alters are two of category 1 and one of 2", {
@@ -27,14 +27,14 @@ test_that("the centre's alters are two of category 1 and one of 2", {
   expect_equal(r[["f2"]], 1)
   expect_equal(r[["p1"]], 2 / 3)
   het <- 1 - (4 / 9 + 1 / 9)
-  expect_equal(r[["Heterogeneity"]], het)
+  expect_equal(r[["Blau"]], het)
   expect_equal(r[["IQV"]], het / (1 - 1 / 2))
 })
 
 test_that("an isolate has zero counts and missing proportions", {
   r <- unlist(xaltercomposition(star_iso(), cats(), type = "categorical")$nodes["e", ])
   expect_equal(r[["f1"]], 0)
-  expect_true(all(is.na(r[c("p1", "p2", "Heterogeneity", "IQV")])))
+  expect_true(all(is.na(r[c("p1", "p2", "Blau", "IQV")])))
 })
 
 test_that("ignoreown leaves out ego's own category", {
@@ -42,7 +42,7 @@ test_that("ignoreown leaves out ego's own category", {
                                 ignoreown = TRUE)$nodes["a", ])
   expect_equal(r[["f1"]], 0)
   expect_equal(r[["f2"]], 1)
-  expect_equal(r[["Heterogeneity"]], 0)
+  expect_equal(r[["Blau"]], 0)
 })
 
 test_that("tie values weight the counts, as UCINET's addcase(value, weight) does", {

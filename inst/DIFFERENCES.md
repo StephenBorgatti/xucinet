@@ -891,3 +891,16 @@ two bounds when that happens: failures left out (`Sig`) and failures counted as
 at least as extreme (`Sig.Upper`), printed only when some fit failed, with a
 note giving the counts; 6.850 does the same in its log and saved datasets.
 
+## 50. Ego-alter similarity: an optional zero-cell correction
+
+**Status:** deliberate addition (Steve, 19 November 2026; book 8.5.1). UCINET
+has no equivalent, and the default reproduces UCINET.
+
+When one cell of an ego's two-by-two table (tied/untied by same/different) is
+zero, the odds ratio is 0 or infinite and Yule's Q is -1 or 1 whatever the other
+cells hold. In the high-tech friendship network by department, 9 of the 19
+egos with ties are at -1 or 1; A17 is at 1 although 14 of its 18 friends are in
+other departments. `xegoaltersimilarity(correction = 0.5)` adds 0.5 to each
+cell before `Yules Q`, `Odds_Ratio` and `Log_Odds` (Haldane 1956), giving A17
+a Q of 0.216. Every other column, including `fInGroup` and `fOutGroup`, uses
+the raw counts. If UCINET adds the option, this entry is removed.

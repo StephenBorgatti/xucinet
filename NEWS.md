@@ -1,5 +1,23 @@
 # xucinet 2.0.0.9000 (development)
 
+## Zero-cell correction in xegoaltersimilarity() (19 November 2026)
+
+* New argument `correction` for categorical attributes: a constant added to
+  each cell of ego's two-by-two table before `Yules Q`, `Odds_Ratio` and
+  `Log_Odds` are computed. `correction = 0.5` is the Haldane-Anscombe
+  correction, which keeps a single empty cell from forcing Q to -1 or 1. The
+  default, 0, is UCINET's calculation, and the other measures are unchanged
+  (book 8.5.1; DIFFERENCES entry 50).
+
+## Blau column in xaltercomposition() (18 November 2026)
+
+* The categorical output of `xaltercomposition()` names its heterogeneity
+  column `Blau` (was `Heterogeneity`), the name `xtiecomposition()` already
+  uses for the same quantity, one minus the sum of squared proportions.
+  UCINET's Egonet Alter Composition (G2Tools/uegocomposition.pas) is
+  relabelled to match in the source. Code that read `$nodes$Heterogeneity`
+  must read `$nodes$Blau`.
+
 ## Transitivity and the clustering coefficient (18 November 2026)
 
 * `xtransitivity()` now follows UCINET's command-line function
