@@ -641,8 +641,15 @@
 #' [lexnet], in the same order. Supervisor ratings are missing for 9
 #' employees.
 #'
-#' @format A data frame, 75 rows keyed by employee id, 81 columns. Those used
-#'   in the book:
+#' @format A data frame, 75 rows keyed by employee id, 81 columns: the
+#'   employee's division, department, building, race, education, status and
+#'   full-time status, gender, tenure and rank, survey scales (perceived
+#'   organizational support `POS`, affective commitment `AffCom...`, job
+#'   satisfaction `jobsat`, justice, organizational citizenship behaviour
+#'   `ocb`, work-family conflict, PANAS affect, and others) with their items,
+#'   and supervisor ratings. The UCINET file's `GenderText` column is text and
+#'   is left out.
+#' @section Columns used in the book:
 #' \describe{
 #'   \item{Gender}{1 = male, 0 = female (as Table 8.12 codes it)}
 #'   \item{TenureYrs}{tenure in years}
@@ -654,12 +661,6 @@
 #'     responsibilities"}
 #'   \item{knowledge}{the mean of `knowledgeproc` and `knowledgejob`}
 #' }
-#' The other columns are the employee's division, department, building, race,
-#' education, status and full-time status, and survey scales (perceived
-#' organizational support `POS`, affective commitment `AffCom...`, job
-#' satisfaction `jobsat`, justice, organizational citizenship behaviour `ocb`,
-#' work-family conflict, PANAS affect, and others) with their items. The
-#' UCINET file's `GenderText` column is text and is left out.
 #' @source As [lexnet].
 #' @section Book sections: 8.6.1.
 #' @seealso [lexnet]

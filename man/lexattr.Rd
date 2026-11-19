@@ -5,25 +5,14 @@
 \alias{lexattr}
 \title{Lexnet employee attributes}
 \format{
-A data frame, 75 rows keyed by employee id, 81 columns. Those used
-in the book:
-\describe{
-\item{Gender}{1 = male, 0 = female (as Table 8.12 codes it)}
-\item{TenureYrs}{tenure in years}
-\item{supervisor}{1 = supervisor}
-\item{knowledgeproc}{supervisor's rating, 1-5, of item (a): "great overall
-knowledge of company procedures, products and services"}
-\item{knowledgejob}{supervisor's rating, 1-5, of item (b), reverse-scored:
-"poor overall knowledge of his/her job duties, expectations and
-responsibilities"}
-\item{knowledge}{the mean of \code{knowledgeproc} and \code{knowledgejob}}
-}
-The other columns are the employee's division, department, building, race,
-education, status and full-time status, and survey scales (perceived
+A data frame, 75 rows keyed by employee id, 81 columns: the
+employee's division, department, building, race, education, status and
+full-time status, gender, tenure and rank, survey scales (perceived
 organizational support \code{POS}, affective commitment \code{AffCom...}, job
-satisfaction \code{jobsat}, justice, organizational citizenship behaviour \code{ocb},
-work-family conflict, PANAS affect, and others) with their items. The
-UCINET file's \code{GenderText} column is text and is left out.
+satisfaction \code{jobsat}, justice, organizational citizenship behaviour
+\code{ocb}, work-family conflict, PANAS affect, and others) with their items,
+and supervisor ratings. The UCINET file's \code{GenderText} column is text and
+is left out.
 }
 \source{
 As \link{lexnet}.
@@ -36,6 +25,21 @@ Survey scales, supervisor ratings and demographics for the 75 employees of
 \link{lexnet}, in the same order. Supervisor ratings are missing for 9
 employees.
 }
+\section{Columns used in the book}{
+
+\describe{
+\item{Gender}{1 = male, 0 = female (as Table 8.12 codes it)}
+\item{TenureYrs}{tenure in years}
+\item{supervisor}{1 = supervisor}
+\item{knowledgeproc}{supervisor's rating, 1-5, of item (a): "great overall
+knowledge of company procedures, products and services"}
+\item{knowledgejob}{supervisor's rating, 1-5, of item (b), reverse-scored:
+"poor overall knowledge of his/her job duties, expectations and
+responsibilities"}
+\item{knowledge}{the mean of \code{knowledgeproc} and \code{knowledgejob}}
+}
+}
+
 \section{Book sections}{
  8.6.1.
 }
