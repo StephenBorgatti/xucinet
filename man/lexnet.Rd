@@ -7,11 +7,21 @@
 \format{
 An \code{xucinet} object, 75 x 75, four directed relations:
 \describe{
-\item{Required}{binary}
-\item{Advice}{binary: work advice ties (the relation used in section 8.6.1)}
-\item{Conflict}{valued, 0-4}
-\item{Feeling}{valued, 0-5}
+\item{Required}{binary. 1 if i is required to interact with j because of
+i's job.}
+\item{Advice}{binary. 1 if i seeks advice from j (the relation used in
+section 8.6.1).}
+\item{Conflict}{categorical, 0-4: 0 i does not know j; 1 no conflict;
+2 mostly work-related conflict; 3 mostly personal conflict; 4 both
+work-related and personal conflict. Values greater than 1 indicate some
+kind of conflict.}
+\item{Feeling}{valued, 0-5: answers to "How do you generally feel about
+this person?": 0 i does not know j; 1 dislikes a lot; 2 dislikes a
+little; 3 neutral; 4 likes a little; 5 likes a lot.}
 }
+In Conflict and Feeling, 0 means i does not know j, so dichotomizing at > 0
+gives "knows", not conflict or liking: dichotomize Conflict at > 1, and
+Feeling at > 3 for liking or recode 1-2 for disliking.
 The node labels are employee ids.
 }
 \source{
@@ -24,7 +34,7 @@ lexnet
 \description{
 75 employees of a manufacturing firm in Lexington, Kentucky, collected by
 Kristin Scott: four networks among the employees, and survey and
-supervisor ratings for each employee in \link{lexattr}. UCINET's sample file
+supervisor ratings for each employee in \link{lexnet_attr}. UCINET's sample file
 \verb{Datafiles\\lexnet}.
 }
 \section{Book sections}{
@@ -35,6 +45,6 @@ supervisor ratings for each employee in \link{lexattr}. UCINET's sample file
 xstructuralholes(lexnet, relation = "Advice")
 }
 \seealso{
-\link{lexattr}
+\link{lexnet_attr}
 }
 \keyword{datasets}

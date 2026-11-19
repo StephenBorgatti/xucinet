@@ -13,11 +13,10 @@ batch at the end.** Design questions for all remaining chapters are batched in
 
 - **19 Nov 2026 (Claude Code, #51; asnr2e #19): chapter 8.** `xaltercomposition()`'s
   categorical heterogeneity column is `Blau`; `xegoaltersimilarity(correction =)` (0.5 =
-  Haldane-Anscombe, DIFFERENCES 50); new datasets `lexnet` and `lexattr` (UCINET's sample
+  Haldane-Anscombe, DIFFERENCES 50); new datasets `lexnet` and `lexnet_attr` (UCINET's sample
   files; Table 8.12 reproduces, tested). Tests 0 failures, R CMD check 0/0/0, installed.
-  New #52: `[.xucinet` silently ignores a third (relation) index. Open for Steve (asnr2e
-  #20): keep the name `lexattr` or rename to the `<dataset>_attr` convention (`lexnet_attr`);
-  what Required, Conflict and Feeling record.
+  New #52: `[.xucinet` silently ignores a third (relation) index. The attribute table,
+  first shipped as `lexattr`, was renamed `lexnet_attr` the same day (Steve, asnr2e #20).
 
 - **18 Nov 2026 (Cowork, for Steve): transitivity and the clustering coefficient split.**
   `xtransitivity(net)` now mimics UCINET's command-line `transitivity()`: `$summary` is a data

@@ -1,11 +1,13 @@
 # xucinet 2.0.0.9000 (development)
 
-## Datasets lexnet and lexattr (19 November 2026)
+## Datasets lexnet and lexnet_attr (19 November 2026)
 
 * New datasets `lexnet` (75 employees of a manufacturing firm in Lexington,
   Kentucky, collected by Kristin Scott; relations Required, Advice, Conflict,
-  Feeling) and `lexattr` (81 attributes, among them Gender, TenureYrs,
-  supervisor and the supervisor-rated `knowledge`), from UCINET's sample files.
+  Feeling) and `lexnet_attr` (81 attributes, among them Gender, TenureYrs,
+  supervisor and the supervisor-rated `knowledge`), from UCINET's sample files
+  (`Datafiles\lexnet` and `lexattr`; the attribute table follows the package's
+  `<dataset>_attr` naming).
   They let readers reproduce Table 8.12 of the book (Constraint on the Advice
   relation, 63 complete cases); a test checks it.
 

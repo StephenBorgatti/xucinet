@@ -78,7 +78,7 @@ mainas_terro,Mainas_Terro,net
 newfrat,Newcomb_Fraternity,net
 padgett,Padgett_FlorentineFamilies,net
 lexnet,lexnet,net
-lexattr,lexattr,attr
+lexnet_attr,lexattr,attr
 padgett_attr,Padgett_FlorentineFamilies_Attributes,attr
 pane_training,Pane_Training,net
 sampson,Sampson_Monastery,net
@@ -100,8 +100,9 @@ zachary_attr,Zachary_KarateClub_Attributes,attr
 #     18 people as camp92, so camp92_attr is the attribute table for both. The
 #     campnet help page says so, and the crosswalk row has been dropped.
 #
-# lexnet and lexattr are UCINET's own sample files (Datafiles\lexnet, lexattr),
-# added 19 Nov 2026 for Table 8.12 (xucinet #51). lexattr's GenderText column is
+# lexnet and lexnet_attr are UCINET's own sample files (Datafiles\lexnet, lexattr),
+# added 19 Nov 2026 for Table 8.12 (xucinet #51); the attribute table is renamed to
+# the package's <dataset>_attr convention (asnr2e #20). Its GenderText column is
 # text in a numeric file and imports as all missing; it is dropped (Gender holds
 # the same information).
 #
@@ -139,7 +140,7 @@ as_attribute_frame <- function(net) {
 }
 
 # To rebuild only some datasets, set `only` before sourcing, e.g.
-#   only <- c("lexnet", "lexattr"); source("data-raw/make-datasets.R")
+#   only <- c("lexnet", "lexnet_attr"); source("data-raw/make-datasets.R")
 if (exists("only")) manifest <- manifest[manifest$name %in% only, ]
 
 dir.create("data", showWarnings = FALSE)
@@ -157,7 +158,7 @@ for (i in seq_len(nrow(manifest))) {
   }
   net <- xreaducinet(path, title = nm)
   value <- if (manifest$kind[i] == "attr") as_attribute_frame(net) else net
-  if (nm == "lexattr") value$GenderText <- NULL
+  if (nm == "lexnet_attr") value$GenderText <- NULL
   if (!is.null(dataset_notes[[nm]])) xnotes(value) <- dataset_notes[[nm]]
   assign(nm, value)
   save(list = nm, file = file.path("data", paste0(nm, ".rda")),
