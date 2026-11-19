@@ -45,6 +45,10 @@
 #' @param net A network (any accepted form). 1-mode only.
 #' @param method Which ratio to print first: `"dyad"` (the default), `"arc"`,
 #'   or `"hybrid"`, which is the dyad ratio. Both are always computed.
+#' @param relation Which relation of a multi-relation dataset, by name (in any
+#'   case) or position. Defaults to the first, which is all UCINET's routine
+#'   reads; the output names the relation used when the dataset has more than
+#'   one.
 #' @return An object of class `c("xreciprocity", "xucinet_output")`.
 #'   `$summary` holds both ratios, dyad then arc.
 #' @seealso [xcohesion()], which reports the same two ratios among its 33
@@ -52,19 +56,26 @@
 #'   [xtransitivity()].
 #' @examples
 #' xreciprocity(campnet)
+#' xreciprocity(hightech, relation = "Friendship")
 #' @export
-xreciprocity <- function(net, method = c("dyad", "arc", "hybrid")) {
+xreciprocity <- function(net, method = c("dyad", "arc", "hybrid"), relation = NULL) {
   net <- xnet(net, substitute(net))
   method <- match.arg(method)
   require_1mode(net, "xreciprocity()")
 
-  m <- pick_relation(net, NULL)
+  # uc_reciprocitydlg.pas (runoverall) loads the dataset once and reports its
+  # first matrix only; `relation` chooses another (xucinet #53).
+  m <- pick_relation(net, relation)
   assumptions <- character(0)
   if (is_valued(m)) {
     assumptions <- c(
       assumptions,
       paste0("Data are valued and have not been dichotomized. The dyad and ",
              "arc ratios count a tie as any positive value."))
+  }
+  if (xnrelations(net) > 1) {
+    assumptions <- c(sprintf("Relation: %s (of %d).", relation_label(net, relation),
+                             xnrelations(net)), assumptions)
   }
 
   a <- m

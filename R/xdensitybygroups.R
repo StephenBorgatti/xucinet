@@ -34,6 +34,10 @@
 #' @param directed `NULL` (use the data as they are), `TRUE`, or `FALSE` to
 #'   symmetrize by the maximum first.
 #' @param data A data frame to look `attribute` up in.
+#' @param relation Which relation of a multi-relation dataset, by name (in any
+#'   case) or position. Defaults to the first, as in [xmixing()]; the output
+#'   names the relation used when the dataset has more than one. UCINET's
+#'   Mixing Tables loops over every matrix (differences ledger, entry 51).
 #' @return An object of class `c("xdensitybygroups", "xucinet_output")` whose
 #'   `$matrices` holds `Density`. The ANOVA density models and their test are
 #'   [xmixing()]'s.
@@ -44,7 +48,8 @@
 #' names(gender) <- rownames(camp92_attr)
 #' xdensitybygroups(campnet, gender)
 #' @export
-xdensitybygroups <- function(net, attribute, directed = NULL, data = NULL) {
+xdensitybygroups <- function(net, attribute, directed = NULL, data = NULL,
+                             relation = NULL) {
   net <- xnet(net, substitute(net))
   require_1mode(net, "xdensitybygroups()")
 
@@ -52,13 +57,17 @@ xdensitybygroups <- function(net, attribute, directed = NULL, data = NULL) {
   expr <- deparse1(substitute(attribute))
   res <- resolve_attribute(attribute, net, data, expr)
   groups <- res$values
-  m <- pick_relation(net, NULL)
+  m <- pick_relation(net, relation)
   if (length(groups) != nrow(m)) {
     stop("the partition has ", length(groups), " values but the network has ",
          nrow(m), " nodes.", call. = FALSE)
   }
 
   assumptions <- character(0)
+  if (xnrelations(net) > 1) {
+    assumptions <- c(sprintf("Relation: %s (of %d).", relation_label(net, relation),
+                             xnrelations(net)), assumptions)
+  }
   if (isFALSE(directed) && !isTRUE(isSymmetric(unname(m)))) {
     m <- pmax(m, t(m))
     assumptions <- c(assumptions, "Symmetrized with the maximum.")

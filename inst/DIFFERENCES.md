@@ -904,3 +904,19 @@ other departments. `xegoaltersimilarity(correction = 0.5)` adds 0.5 to each
 cell before `Yules Q`, `Odds_Ratio` and `Log_Odds` (Haldane 1956), giving A17
 a Q of 0.216. Every other column, including `fInGroup` and `fOutGroup`, uses
 the raw counts. If UCINET adds the option, this entry is removed.
+
+## 51. Components and density by groups: one relation at a time
+
+**Status:** deliberate (Claude Code, 19 November 2026, xucinet #53).
+
+UCINET's Components (uc_Components.pas) and Mixing Tables (uc_MixingTables.pas)
+loop over every matrix of a multirelational dataset and print a section for
+each. `xcomponents()` and `xdensitybygroups()` analyse one relation, chosen
+with `relation =` (the first by default, as in `xmixing()` and the package's
+other node- and group-level routines), and say which one in the output when
+the dataset has more than one. Their results are per-node and per-group
+tables, so a loop would return a list of them; call the function once per
+relation to get UCINET's full report. The whole-network routines whose UCINET
+form loops, `xtransitivity()`, `xcyclicality()` and `xhomophily()`, return one
+row per relation as UCINET does, and `xreciprocity()` reads the first relation
+by default as UCINET's Reciprocity does.

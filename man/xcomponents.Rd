@@ -4,7 +4,13 @@
 \alias{xcomponents}
 \title{Components}
 \usage{
-xcomponents(net, type = c("weak", "strong"), min = 1, sortby = c("size", "id"))
+xcomponents(
+  net,
+  type = c("weak", "strong"),
+  min = 1,
+  sortby = c("size", "id"),
+  relation = NULL
+)
 }
 \arguments{
 \item{net}{A network (any accepted form). For 2-mode data the bipartite
@@ -18,6 +24,11 @@ addition, and \code{min = 1} is the behaviour it has.}
 
 \item{sortby}{Order the size table by \code{"size"} (the dialog's default) or by
 \code{"id"}.}
+
+\item{relation}{Which relation of a multi-relation dataset, by name (in any
+case) or position. Defaults to the first; the output names the relation
+used when the dataset has more than one. UCINET's Components loops over
+every matrix (differences ledger, entry 51).}
 }
 \value{
 An object of class \code{c("xcomponents", "xucinet_output")}. \verb{$nodes}

@@ -70,10 +70,13 @@ test_that("weighted = FALSE dichotomizes before every measure (UCINET issue 21)"
   # UCINET's calcwhomophily applies binary treatment to the mixing matrix
   # only; xucinet applies it everywhere, as the dialog says.
   expect_differs_from_ucinet(21)
+  # camp92 has two relations (weeks 2 and 3), one row each since #53.
   b <- xhomophily(camp92, gender(), weighted = FALSE)
-  d <- xhomophily((as.matrix(camp92) > 0) * 1, gender())
-  for (k in names(d$summary)) {
-    expect_equal(b$summary[[k]], d$summary[[k]], info = k)
+  for (r in xrelations(camp92)) {
+    d <- xhomophily((as.matrix(camp92, relation = r) > 0) * 1, gender())
+    for (k in names(d$summary)) {
+      expect_equal(b$summary[r, k], d$summary[[k]], info = paste(r, k))
+    }
   }
   a <- xhomophily(camp92, gender(), weighted = TRUE)
   expect_false(isTRUE(all.equal(a$summary[["Corr"]], b$summary[["Corr"]])))

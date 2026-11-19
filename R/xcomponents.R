@@ -42,6 +42,10 @@
 #'   addition, and `min = 1` is the behaviour it has.
 #' @param sortby Order the size table by `"size"` (the dialog's default) or by
 #'   `"id"`.
+#' @param relation Which relation of a multi-relation dataset, by name (in any
+#'   case) or position. Defaults to the first; the output names the relation
+#'   used when the dataset has more than one. UCINET's Components loops over
+#'   every matrix (differences ledger, entry 51).
 #' @return An object of class `c("xcomponents", "xucinet_output")`. `$nodes`
 #'   holds the component of each node in the original order; `$summary` the
 #'   count and the five heterogeneity figures; `$matrices$Sizes` the size
@@ -53,14 +57,18 @@
 #' xcomponents(campnet, type = "strong")
 #' @export
 xcomponents <- function(net, type = c("weak", "strong"), min = 1,
-                        sortby = c("size", "id")) {
+                        sortby = c("size", "id"), relation = NULL) {
   net <- xnet(net, substitute(net))
   type <- match.arg(type)
   sortby <- match.arg(sortby)
 
-  m <- pick_relation(net, NULL)
+  m <- pick_relation(net, relation)
   assumptions <- character(0)
   if (is_valued(m)) assumptions <- c(assumptions, "Data dichotomized at > 0.")
+  if (xnrelations(net) > 1) {
+    assumptions <- c(sprintf("Relation: %s (of %d).", relation_label(net, relation),
+                             xnrelations(net)), assumptions)
+  }
 
   # A 2-mode dataset becomes its bipartite graph, so that rows and columns can
   # share a component.

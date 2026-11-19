@@ -34,8 +34,9 @@ xucinet does what the dialog says.}
 \item{data}{A data frame to look \code{attribute} up in.}
 }
 \value{
-An object of class \code{c("xhomophily", "xucinet_output")}, with the
-seven measures in \verb{$summary} under UCINET's headings. The group-by-group
+An object of class \code{c("xhomophily", "xucinet_output")}. \verb{$summary}
+is a data frame with one row per relation and the seven measures as
+columns, under UCINET's headings. The group-by-group
 mixing matrix UCINET prints beside them is \code{\link[=xmixing]{xmixing()}}'s \code{Observed} table:
 a whole-network function has no group-level table (SPEC addendum,
 23 September 2026).
@@ -55,11 +56,17 @@ so it is +1 when every tie crosses a boundary and -1 when none does.
 \item \verb{Modul Q} is Newman modularity and \code{Assort} his categorical
 assortativity, both computed on the mixing matrix.
 }
+
+Every relation of a multirelational dataset is analysed, one row each, as
+UCINET's routine does (it loops over the matrices of the dataset).
 }
 \examples{
 gender <- camp92_attr$Gender
 names(gender) <- rownames(camp92_attr)
 xhomophily(campnet, gender)
+
+# one row for each of the three relations
+xhomophily(hightech, "Department", data = hightech_attr)
 }
 \seealso{
 \code{\link[=xmixing]{xmixing()}} for the mixing matrix, \code{\link[=xdensitybygroups]{xdensitybygroups()}} for the

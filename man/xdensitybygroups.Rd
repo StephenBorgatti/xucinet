@@ -4,7 +4,7 @@
 \alias{xdensitybygroups}
 \title{Density by groups}
 \usage{
-xdensitybygroups(net, attribute, directed = NULL, data = NULL)
+xdensitybygroups(net, attribute, directed = NULL, data = NULL, relation = NULL)
 }
 \arguments{
 \item{net}{A network (any accepted form). 1-mode only.}
@@ -16,6 +16,11 @@ first in \code{net}'s attribute table and then in \code{data} (G3).}
 symmetrize by the maximum first.}
 
 \item{data}{A data frame to look \code{attribute} up in.}
+
+\item{relation}{Which relation of a multi-relation dataset, by name (in any
+case) or position. Defaults to the first, as in \code{\link[=xmixing]{xmixing()}}; the output
+names the relation used when the dataset has more than one. UCINET's
+Mixing Tables loops over every matrix (differences ledger, entry 51).}
 }
 \value{
 An object of class \code{c("xdensitybygroups", "xucinet_output")} whose

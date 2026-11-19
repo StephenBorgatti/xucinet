@@ -1,5 +1,16 @@
 # xucinet 2.0.0.9000 (development)
 
+## Multirelational data in four more routines (19 November 2026, #53)
+
+* `xhomophily()` read only the first relation of a multirelational dataset. It
+  now reports every relation, one row each (`$summary` is a data frame), as
+  UCINET's Homophily routine does.
+* `xreciprocity()`, `xcomponents()` and `xdensitybygroups()` gain a `relation`
+  argument (the first relation by default, as before) and name the relation
+  they used when the dataset has more than one. UCINET's Reciprocity reads the
+  first matrix only; its Components and Mixing Tables loop over every matrix,
+  which xucinet leaves to one call per relation (DIFFERENCES 51).
+
 ## xcyclicality() reports every relation (19 November 2026)
 
 * `xcyclicality()` read only the first relation of a multirelational dataset.

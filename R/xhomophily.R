@@ -30,6 +30,9 @@
 #' * `Modul Q` is Newman modularity and `Assort` his categorical
 #'   assortativity, both computed on the mixing matrix.
 #'
+#' Every relation of a multirelational dataset is analysed, one row each, as
+#' UCINET's routine does (it loops over the matrices of the dataset).
+#'
 #' @param net A network (any accepted form). 1-mode only.
 #' @param attribute The grouping: a vector, or the name of a column looked up
 #'   first in `net`'s attribute table and then in `data` (G3).
@@ -43,8 +46,9 @@
 #'   xucinet does what the dialog says.
 #' @param diagonal Allow reflexive ties? `FALSE` by default.
 #' @param data A data frame to look `attribute` up in.
-#' @return An object of class `c("xhomophily", "xucinet_output")`, with the
-#'   seven measures in `$summary` under UCINET's headings. The group-by-group
+#' @return An object of class `c("xhomophily", "xucinet_output")`. `$summary`
+#'   is a data frame with one row per relation and the seven measures as
+#'   columns, under UCINET's headings. The group-by-group
 #'   mixing matrix UCINET prints beside them is [xmixing()]'s `Observed` table:
 #'   a whole-network function has no group-level table (SPEC addendum,
 #'   23 September 2026).
@@ -54,6 +58,9 @@
 #' gender <- camp92_attr$Gender
 #' names(gender) <- rownames(camp92_attr)
 #' xhomophily(campnet, gender)
+#'
+#' # one row for each of the three relations
+#' xhomophily(hightech, "Department", data = hightech_attr)
 #' @export
 xhomophily <- function(net, attribute, directed = NULL, weighted = TRUE,
                        diagonal = FALSE, data = NULL) {
@@ -63,32 +70,40 @@ xhomophily <- function(net, attribute, directed = NULL, weighted = TRUE,
   expr <- deparse1(substitute(attribute))
   res <- resolve_attribute(attribute, net, data, expr)
   groups <- res$values
-  m <- pick_relation(net, NULL)
-  if (length(groups) != nrow(m)) {
+  # uc_NetworkHomophily.pas loops over every matrix of the dataset (m.nm),
+  # one row of its output each. Until 19 Nov 2026 this function read only the
+  # first relation (xucinet #53).
+  mats <- relation_matrices(net)
+  rels <- if (length(mats) == 1L) net$title else xrelations(net)
+  if (length(groups) != nrow(mats[[1L]])) {
     stop("the partition has ", length(groups), " values but the network has ",
-         nrow(m), " nodes.", call. = FALSE)
+         nrow(mats[[1L]]), " nodes.", call. = FALSE)
   }
 
   assumptions <- character(0)
-  if (isFALSE(directed)) {
-    # m.symmetrize(sy_union): a tie either way is a tie.
-    m <- pmax(m, t(m))
-    assumptions <- c(assumptions, "Direction of ties ignored.")
-  }
+  if (isFALSE(directed)) assumptions <- c(assumptions, "Direction of ties ignored.")
   if (!diagonal) assumptions <- c(assumptions, "Reflexive ties not counted.")
-  if (!weighted) {
-    # UCINET issue 21: binary treatment applies to every measure, not only to
-    # the mixing matrix as in calcwhomophily.
-    m <- ifelse(is.na(m), NA_real_, (m > 0) * 1)
-    assumptions <- c(assumptions, "Data treated as binary.")
-  }
+  if (!weighted) assumptions <- c(assumptions, "Data treated as binary.")
 
-  undirected <- isFALSE(directed) || isTRUE(isSymmetric(unname(m)))
-  hom <- homophily_measures(m, groups, weighted, diagonal, undirected)
+  rows <- lapply(mats, function(m) {
+    if (isFALSE(directed)) {
+      # m.symmetrize(sy_union): a tie either way is a tie.
+      m <- pmax(m, t(m))
+    }
+    if (!weighted) {
+      # UCINET issue 21: binary treatment applies to every measure, not only
+      # to the mixing matrix as in calcwhomophily.
+      m <- ifelse(is.na(m), NA_real_, (m > 0) * 1)
+    }
+    undirected <- isFALSE(directed) || isTRUE(isSymmetric(unname(m)))
+    unlist(homophily_measures(m, groups, weighted, diagonal, undirected)$summary)
+  })
+  out <- as.data.frame(do.call(rbind, rows), optional = TRUE)
+  rownames(out) <- rels
 
   new_xucinet_output(
     "Whole-Network Alter-Ego Similarity Measures", net,
-    summary = hom$summary,
+    summary = out,
     assumptions = assumptions, subclass = "xhomophily",
     summary_title = "Whole Network Ego-Alter Similarity Measures")
 }

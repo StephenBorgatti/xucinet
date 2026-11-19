@@ -4,13 +4,18 @@
 \alias{xreciprocity}
 \title{Reciprocity}
 \usage{
-xreciprocity(net, method = c("dyad", "arc", "hybrid"))
+xreciprocity(net, method = c("dyad", "arc", "hybrid"), relation = NULL)
 }
 \arguments{
 \item{net}{A network (any accepted form). 1-mode only.}
 
 \item{method}{Which ratio to print first: \code{"dyad"} (the default), \code{"arc"},
 or \code{"hybrid"}, which is the dyad ratio. Both are always computed.}
+
+\item{relation}{Which relation of a multi-relation dataset, by name (in any
+case) or position. Defaults to the first, which is all UCINET's routine
+reads; the output names the relation used when the dataset has more than
+one.}
 }
 \value{
 An object of class \code{c("xreciprocity", "xucinet_output")}.
@@ -41,6 +46,7 @@ disagree on valued data.
 }
 \examples{
 xreciprocity(campnet)
+xreciprocity(hightech, relation = "Friendship")
 }
 \seealso{
 \code{\link[=xcohesion]{xcohesion()}}, which reports the same two ratios among its 33

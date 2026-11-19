@@ -11,6 +11,12 @@ batch at the end.** Design questions for all remaining chapters are batched in
 
 ## Where things stand
 
+- **19 Nov 2026 (Claude Code, #53): first-relation-only routines.** `xhomophily()` loops
+  over every relation, one row each (UCINET loops); `xreciprocity()`, `xcomponents()`,
+  `xdensitybygroups()` take `relation =` and note the relation used (DIFFERENCES 51:
+  UCINET's Components and Mixing Tables loop, xucinet does one relation per call). New
+  tests/testthat/test-multirelation.R. Tests 0 failures (4044), R CMD check 0/0/0, installed.
+
 - **19 Nov 2026 (Claude Code, asnr2e T47): `xcyclicality()` reports every relation**, one
   row each (data frame, like `xtransitivity()`); it had read only the first. UCINET's
   uc_cyclicity.pas loops over all matrices. Tests 0 failures (4000); installed.
