@@ -383,11 +383,14 @@
 #' Polar station crew
 #'
 #' Strong ties among the 22 members of an over-wintering polar research station
-#' crew, recorded at two points in time. One of Jeffrey Johnson's studies of
-#' isolated, confined groups.
+#' crew, recorded at the beginning and at the end of the winter. One of Jeffrey
+#' Johnson's studies of isolated, confined groups.
 #'
-#' @format An `xucinet` object, 22 x 22, two relations `StrongTiesT1` and
-#'   `StrongTiesT2`.
+#' @format An `xucinet` object, 22 x 22, two binary directed relations:
+#' \describe{
+#'   \item{StrongTiesT1}{strong ties at the beginning of the winter}
+#'   \item{StrongTiesT2}{strong ties at the end of the winter}
+#' }
 #' @source Borgatti, S. P., Everett, M. G., Johnson, J. C. and Agneessens, F.
 #'   *Analyzing Social Networks*. 3rd edition. Sage.
 #' @section Book sections: 3.2, 3.7, 4.2, 4.3, 4.5, 4.6, 10.7, 12.10.
