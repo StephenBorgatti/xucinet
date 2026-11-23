@@ -4,11 +4,19 @@
 #' command line. One table, one column per measure, so that measures can be
 #' compared without running and joining a dozen routines.
 #'
-#' Every column is computed by the individual routine rather than reimplemented
-#' here, so the suite and the single-measure functions cannot drift apart. A
-#' measure whose routine is not written yet comes back as an `NA` column with a
-#' line in `$assumptions` naming what is missing -- the table keeps its shape
-#' and its headings, and fills in as the routines land.
+#' Degree, beta centrality, closeness, betweenness and eigenvector are computed
+#' by their own routines, so the suite and the single-measure functions cannot
+#' drift apart. The other measures are ported from the suite's own engine in
+#' UCINET: the 2-local eigenvector (the sum of the alters' degrees, weighted by
+#' the tie values), ARD (average reciprocal distance), 2-step betweenness
+#' (betweenness on geodesics of length 2 only), 2-step reach (the number of nodes
+#' within two steps), k-coreness (the highest k-core the node belongs to; for
+#' directed data, in- and out-cores defined by in- and outdegree) and
+#' fragmentation centrality (`Frag`, the increase in the proportion of pairs that
+#' cannot reach each other when the node is removed, and `DwFrag`, the same with
+#' pairs weighted by reciprocal distance). All of them are raw scores, as UCINET
+#' reports them by default. Every measure but degree, beta and the 2-local
+#' eigenvector is computed on the dichotomized graph.
 #'
 #' Column names and their order are UCINET's, from its own output: directed data
 #' gives paired Out/In columns and no eigenvector, symmetric data gives single
@@ -54,7 +62,6 @@ xcentrality <- function(net, relation = NULL, directed = NULL,
   if (is.null(directed)) directed <- !isSymmetric(unname(m))
 
   n <- nrow(m)
-  na_col <- rep(NA_real_, n)
 
   deg <- xdegree(m, directed = directed)$nodes
   bet <- xbetweenness(m, directed = directed)$nodes
@@ -62,49 +69,49 @@ xcentrality <- function(net, relation = NULL, directed = NULL,
   bc_in  <- xbeta(m, direction = "in")$nodes[[1]]
   bc_out <- xbeta(m, direction = "out")$nodes[[1]]
 
-  # Not written yet. Named individually rather than as "some measures are
-  # missing", so the report says what to go and write.
-  missing <- c("two-local", "ARD", "two-step betweenness", "two-step reach",
-               "k-coreness", "fragmentation", "distance-weighted fragmentation")
+  # The rest come from UCINET's suite engine (mcent-internals.R), on the
+  # dichotomized graph except the 2-local eigenvector.
+  a <- adjacency(m)
+  d <- geodesics(a)
+  fr <- mc_frag(a, d, bet$Betweenness)
+  tsb <- mc_twostepbet(a, d, directed)
 
   if (directed) {
     nodes <- data.frame(
       OutDegree = deg$Outdeg,     InDegree = deg$Indeg,
-      OutTwoLocal = na_col,       InTwoLocal = na_col,
+      OutTwoLocal = mc_local2(m, "out"), InTwoLocal = mc_local2(m, "in"),
       OutBetaCent = bc_out,       InBetaCent = bc_in,
       OutCloseness = clo$OutClose, InCloseness = clo$InClose,
-      OutARD = na_col,            InARD = na_col,
+      OutARD = mc_ard(d, "out"),  InARD = mc_ard(d, "in"),
       Betweenness = bet$Betweenness,
-      TwoStepBet = na_col,
-      Out2Step = na_col,          In2Step = na_col,
-      InKCore = na_col,           OutKCore = na_col,
-      Frag = na_col,              DwFrag = na_col,
+      TwoStepBet = tsb,
+      Out2Step = mc_kstep(d, 2, "out"), In2Step = mc_kstep(d, 2, "in"),
+      InKCore = mc_kcore(a, "in"),  OutKCore = mc_kcore(a, "out"),
+      Frag = fr$Frag,             DwFrag = fr$DwFrag,
       row.names = rownames(m), check.names = FALSE)
   } else {
     eig <- xeigenvector(m)$nodes$Eigenvector
     nodes <- data.frame(
       Degree = deg$Degree,
       Eigenvector = eig,
-      TwoLocal = na_col,
+      TwoLocal = mc_local2(m),
       BetaCent = bc_in,
       Closeness = clo$FreeClo,
-      ARD = na_col,
+      ARD = mc_ard(d),
       Betweenness = bet$Betweenness,
-      TwoStepBet = na_col,
-      `2StepReach` = na_col,
-      kCoreness = na_col,
-      Frag = na_col,
-      DwFrag = na_col,
+      TwoStepBet = tsb,
+      `2StepReach` = mc_kstep(d, 2),
+      kCoreness = mc_kcore(a),
+      Frag = fr$Frag,
+      DwFrag = fr$DwFrag,
       row.names = rownames(m), check.names = FALSE)
   }
 
   assumptions <- c(
     assumptions,
     sprintf("Data treated as %s.", if (directed) "directed" else "undirected"),
-    paste0("Not written yet, returned as NA: ",
-           paste(missing, collapse = ", "), "."),
-    paste("Each column is computed by its own routine, so the suite and the",
-          "single-measure functions cannot disagree."),
+    paste("All scores are raw. Degree, beta and 2-local eigenvector use the",
+          "tie values; the other measures use the dichotomized graph."),
     paste("Closeness and BetaCent differ from UCINET's own mcent(): its",
           "Closeness column holds total distance, which is farness rather than",
           "closeness, and its BetaCent uses a different normalization from the",

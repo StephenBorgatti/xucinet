@@ -11,6 +11,15 @@ batch at the end.** Design questions for all remaining chapters are batched in
 
 ## Where things stand
 
+- **23 Nov 2026, later (Claude Code; Steve reported the NA columns): `xcentrality()` is
+  complete.** The seven suite columns that were NA (2-local eigenvector, ARD, 2-step
+  betweenness, 2-step reach, k-coreness / in- and out-k-core, Frag, DwFrag) are ported from
+  G2Tools/umulticent.pas (tools 6b6a335) into R/mcent-internals.R, including UCINET's
+  zero-betweenness shortcut for fragmentation. All match G9_MC_ISO, G9_MC_CAMPNET and all ten
+  relations of G9_MC_SAMPSON. Fragmentation is O(n^3) in R: about 6 s at 300 nodes. No GitHub
+  issue (gh issue create was blocked by the permission check). Tests 0 failures (6176), R CMD
+  check 0/0/0. **Not yet installed**, like #55/#56 below.
+
 - **23 Nov 2026 (Claude Code, #55 and #56; Steve): 2-mode transitivity and
   centralization, which UCINET does not have.** `xtransitivity()` on 2-mode data reports
   Robins-Alexander closure (4 x 4-cycles / 3-paths, with Density, Ratio, Index; davis 341,

@@ -117,14 +117,42 @@ test_that("Closeness is closeness, not mcent's farness", {
   expect_equal(unname(gold[, "Closeness"]), unname(rowSums(d)), tolerance = 1e-4)
 })
 
-test_that("unwritten measures are NA columns that say what is missing", {
-  res <- xcentrality(iso())
-  for (cn in c("TwoLocal", "ARD", "TwoStepBet", "2StepReach", "kCoreness",
-               "Frag", "DwFrag")) {
-    expect_true(all(is.na(res$nodes[[cn]])), info = cn)
+# Ported from umulticent.pas (xucinet issue: the seven NA columns).
+suite_cols_u <- c("TwoLocal", "ARD", "TwoStepBet", "2StepReach", "kCoreness",
+                  "Frag", "DwFrag")
+suite_cols_d <- c("OutTwoLocal", "InTwoLocal", "OutARD", "InARD", "TwoStepBet",
+                  "Out2Step", "In2Step", "InKCore", "OutKCore", "Frag", "DwFrag")
+
+test_that("the suite-only measures match mcent on undirected data", {
+  skip_if_no_golden("G9_MC_ISO", "centrality")
+  gold <- golden_matrix("G9_MC_ISO", "centrality")
+  ours <- xcentrality(iso())$nodes
+  for (cn in suite_cols_u) {
+    expect_equal(ours[[cn]], unname(gold[, cn]), tolerance = tol, info = cn)
   }
-  expect_true(any(grepl("Not written yet", res$assumptions)))
-  expect_true(any(grepl("k-coreness", res$assumptions)))
+  expect_false(any(grepl("Not written yet", xcentrality(iso())$assumptions)))
+})
+
+test_that("the suite-only measures match mcent on campnet", {
+  skip_if_no_golden("G9_MC_CAMPNET", "centrality")
+  gold <- golden_matrix("G9_MC_CAMPNET", "centrality")
+  ours <- xcentrality(campnet)$nodes
+  for (cn in suite_cols_d) {
+    expect_equal(ours[[cn]], unname(gold[, cn]), tolerance = tol, info = cn)
+  }
+})
+
+test_that("the suite-only measures match mcent on all ten sampson relations", {
+  skip_if_no_golden("G9_MC_SAMPSON", "centrality")
+  gold <- xreaducinet(golden_path("G9_MC_SAMPSON", "centrality"))
+  for (r in seq_len(xnrelations(sampson))) {
+    g <- as.matrix(gold, relation = r)
+    ours <- xcentrality(sampson, relation = r)$nodes
+    for (cn in suite_cols_d) {
+      expect_equal(ours[[cn]], unname(g[, cn]), tolerance = tol,
+                   info = paste("relation", r, cn))
+    }
+  }
 })
 
 test_that("directed data gives the paired columns and no eigenvector", {
@@ -133,4 +161,15 @@ test_that("directed data gives the paired columns and no eigenvector", {
                   %in% names(res$nodes)))
   expect_false("Eigenvector" %in% names(res$nodes))
   expect_equal(res$nodes$OutDegree, xdegree(campnet)$nodes$Outdeg)
+})
+
+test_that("fragmentation's zero-betweenness shortcut changes nothing", {
+  set.seed(2)
+  n <- 40
+  x <- matrix(rbinom(n * n, 1, 1.5 / n), n)
+  diag(x) <- 0
+  a <- adjacency(x); d <- geodesics(a)
+  b <- xbetweenness(x, directed = TRUE)$nodes$Betweenness
+  expect_gt(sum(b == 0), 0)
+  expect_equal(mc_frag(a, d, b), mc_frag(a, d))
 })

@@ -26,11 +26,19 @@ command line. One table, one column per measure, so that measures can be
 compared without running and joining a dozen routines.
 }
 \details{
-Every column is computed by the individual routine rather than reimplemented
-here, so the suite and the single-measure functions cannot drift apart. A
-measure whose routine is not written yet comes back as an \code{NA} column with a
-line in \verb{$assumptions} naming what is missing -- the table keeps its shape
-and its headings, and fills in as the routines land.
+Degree, beta centrality, closeness, betweenness and eigenvector are computed
+by their own routines, so the suite and the single-measure functions cannot
+drift apart. The other measures are ported from the suite's own engine in
+UCINET: the 2-local eigenvector (the sum of the alters' degrees, weighted by
+the tie values), ARD (average reciprocal distance), 2-step betweenness
+(betweenness on geodesics of length 2 only), 2-step reach (the number of nodes
+within two steps), k-coreness (the highest k-core the node belongs to; for
+directed data, in- and out-cores defined by in- and outdegree) and
+fragmentation centrality (\code{Frag}, the increase in the proportion of pairs that
+cannot reach each other when the node is removed, and \code{DwFrag}, the same with
+pairs weighted by reciprocal distance). All of them are raw scores, as UCINET
+reports them by default. Every measure but degree, beta and the 2-local
+eigenvector is computed on the dichotomized graph.
 
 Column names and their order are UCINET's, from its own output: directed data
 gives paired Out/In columns and no eigenvector, symmetric data gives single
