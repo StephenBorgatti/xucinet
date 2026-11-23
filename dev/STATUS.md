@@ -1,6 +1,6 @@
 # xucinet — status
 
-Updated 4 Nov 2026 (Claude Code; Cowork should
+Updated 23 Nov 2026 (Claude Code; Cowork should
 correct anything here it knows better). Overwrite the first three sections each session;
 append to the last two.
 
@@ -10,6 +10,17 @@ batch at the end.** Design questions for all remaining chapters are batched in
 `asnr2e/docs/prompts/` (read `README.md` and `prompt-conventions.md` there first).
 
 ## Where things stand
+
+- **23 Nov 2026 (Claude Code, #55 and #56; Steve): 2-mode transitivity and
+  centralization, which UCINET does not have.** `xtransitivity()` on 2-mode data reports
+  Robins-Alexander closure (4 x 4-cycles / 3-paths, with Density, Ratio, Index; davis 341,
+  2916, 0.468), the definition of ASNR 13.4 (DIFFERENCES 53). `xdegree()`, `xbetweenness()`,
+  `xcloseness()`, `xeigenvector()` on 2-mode data report a row and a column centralization
+  (Freeman's form over the maximum for a bipartite graph of the same size: n - 1 for degree,
+  betweenness, eigenvector; the bipartite star for closeness, checked by exhaustive search up to
+  4 x 4), and `xcentralization()` reads them (DIFFERENCES 52); helpers in R/xcentrality.R.
+  New tests/testthat/test-twomode-closure-centralization.R. Tests 0 failures (6054), R CMD
+  check 0/0/0. **Not yet installed** (needs Steve's OK to install).
 
 - **19 Nov 2026 (Claude Code, #53): first-relation-only routines.** `xhomophily()` loops
   over every relation, one row each (UCINET loops); `xreciprocity()`, `xcomponents()`,

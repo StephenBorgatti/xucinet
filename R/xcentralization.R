@@ -19,20 +19,32 @@
 # Since 23 Sep 2026 (SPEC addendum, item 5) the result always holds all four,
 # in one row, missing where a routine reports none for the network; `measure`
 # chooses which is printed.
+#
+# 2-mode data (xucinet#56, 23 Nov 2026): each routine reports a centralization
+# for the rows and one for the columns (twomode_centralization() in
+# R/xcentrality.R), so the result holds two figures per measure. UCINET has no
+# 2-mode centralization (DIFFERENCES 52).
 
 # Which routine to ask, and which of its summary fields are the centralization.
 centralization_sources <- list(
   degree      = list(fn = "xdegree",
                      fields = c("Centralization", "Out-Centralization",
-                                "In-Centralization")),
+                                "In-Centralization", "Row Centralization",
+                                "Column Centralization")),
   betweenness = list(fn = "xbetweenness",
-                     fields = "Network Centralization Index (%)"),
+                     fields = c("Network Centralization Index (%)",
+                                "Row Centralization Index (%)",
+                                "Column Centralization Index (%)")),
   closeness   = list(fn = "xcloseness",
                      fields = c("Network Centralization (%)",
                                 "Network in-Centralization (%)",
-                                "Network out-Centralization (%)")),
+                                "Network out-Centralization (%)",
+                                "Row Centralization (%)",
+                                "Column Centralization (%)")),
   eigenvector = list(fn = "xeigenvector",
-                     fields = "Eigenvector centralization (%)"))
+                     fields = c("Eigenvector centralization (%)",
+                                "Row eigenvector centralization (%)",
+                                "Column eigenvector centralization (%)")))
 
 #' Centralization
 #'
@@ -56,7 +68,9 @@ centralization_sources <- list(
 #' @return An object of class `c("xcentralization", "xucinet_output")` whose
 #'   `$summary` holds every centralization the four routines report: degree
 #'   (one figure, or out- and in- for directed data), betweenness, closeness
-#'   (one, or in- and out-) and eigenvector.
+#'   (one, or in- and out-) and eigenvector. For 2-mode data each measure has
+#'   a row and a column figure, computed for each mode separately; see
+#'   [xdegree()]. UCINET reports no 2-mode centralization.
 #' @seealso [xdegree()], [xbetweenness()], [xcloseness()] and [xeigenvector()],
 #'   which report the same figures as part of their fuller output.
 #' @examples

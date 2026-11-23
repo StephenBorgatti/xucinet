@@ -7,12 +7,13 @@
 xtransitivity(net)
 }
 \arguments{
-\item{net}{A network (any accepted form). 1-mode only.}
+\item{net}{A network (any accepted form), 1-mode or 2-mode.}
 }
 \value{
 An object of class \code{c("xtransitivity", "xucinet_output")}.
 \verb{$summary} is a data frame with one row per relation and the twelve
-columns above.
+columns above, or for 2-mode data the six columns described in the
+2-mode section.
 }
 \description{
 UCINET command line: \code{transitivity()}. The proportion of two-step paths
@@ -46,16 +47,44 @@ For undirected data \code{Transitivity} equals the weighted overall clustering
 coefficient. The clustering coefficients themselves are
 \code{\link[=xclusteringcoefficient]{xclusteringcoefficient()}}.
 }
+\section{2-mode data}{
+
+A bipartite network has no transitive triples, since they would need a tie
+within a mode. For 2-mode data \code{xtransitivity()} reports instead the
+closure of Robins and Alexander (2004), which is how ASNR section 13.4
+defines transitivity for two-mode data: if i and j are both tied to v, and
+j is also tied to w, the path i - v - j - w is closed when i is tied to w,
+completing a 4-cycle. UCINET refuses 2-mode data here. The columns are
+\code{4-Cycles}, \code{3-Paths} (paths of length 3, counted once each),
+\code{Transitivity} (\verb{4 x 4-Cycles / 3-Paths}, the share of 3-paths that are
+closed), \code{Density} (ties over rows x columns), \code{Ratio}
+(\code{Transitivity / Density}; about 1 when ties are placed at random) and
+\verb{Transitivity Index} (\code{(Transitivity - Density) / (1 - Density)}). The
+measure is symmetric in the two modes. Opsahl's (2013) coefficient, which
+counts closure among three nodes of one mode, is not computed.
+}
+
 \examples{
 xtransitivity(campnet)
 
 # one row for each of the three relations
 xtransitivity(hightech)
+
+# 2-mode data: closure on 4-cycles
+xtransitivity(davis)
 }
 \references{
 Dekker, D., Krackhardt, D. and Snijders, T. A. B. (2019).
 Transitivity correlation: A descriptive measure of network transitivity.
 \emph{Network Science} 7(3), 353-375.
+
+Robins, G. and Alexander, M. (2004). Small worlds among interlocking
+directors: Network structure and distance in bipartite graphs.
+\emph{Computational and Mathematical Organization Theory} 10(1), 69-94.
+
+Opsahl, T. (2013). Triadic closure in two-mode networks: Redefining the
+global and local clustering coefficients. \emph{Social Networks} 35(2),
+159-167.
 }
 \seealso{
 \code{\link[=xclusteringcoefficient]{xclusteringcoefficient()}} for the clustering coefficients,

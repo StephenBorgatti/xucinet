@@ -218,8 +218,9 @@ test_that("the density matches the other routines", {
                xtransitivity(campnet)$summary[["Density"]][1], tolerance = tol)
 })
 
-test_that("both refuse 2-mode data and dichotomize valued data", {
-  expect_error(xtransitivity(davis), "1-mode")
+test_that("cyclicality refuses 2-mode data; both dichotomize valued data", {
+  # xtransitivity() has a 2-mode branch since 23 Nov 2026 (xucinet#55),
+  # tested in test-twomode-closure-centralization.R
   expect_error(xcyclicality(davis), "1-mode")
   expect_true(any(grepl("dichotomized", xtransitivity(baker_journals)$assumptions)))
   expect_true(any(grepl("dichotomized", xcyclicality(baker_journals)$assumptions)))

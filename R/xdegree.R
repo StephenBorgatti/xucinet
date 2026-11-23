@@ -26,7 +26,11 @@
 #'   columns, with a `Mode` column), `"rows"` or `"cols"`. The scores are
 #'   UCINET's 2-Mode Centrality, computed on the bipartite graph and normalized
 #'   by the size of the opposite mode (Borgatti and Everett 1997); see
-#'   [xcentrality()]. Ignored for 1-mode data.
+#'   [xcentrality()]. `$summary` then holds a row and a column
+#'   centralization, both whatever `mode` is: the sum of differences from the
+#'   mode's most central node over its largest possible value in a bipartite
+#'   graph of the same size. UCINET reports none for 2-mode data (DIFFERENCES
+#'   52). Ignored for 1-mode data.
 #' @return An `xucinet_output`. `$nodes` holds the degree columns in original
 #'   node order; `$summary` holds graph centralization, as a proportion rather
 #'   than a percentage, which is what UCINET reports.

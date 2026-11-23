@@ -223,17 +223,83 @@ twomode_single <- function(net, m, mode, cols, routine, subclass, call) {
     s
   })
   nodes <- do.call(rbind, parts)
+  # Centralization of each mode (xucinet#56), always both whatever `mode` is,
+  # so that the summary does not depend on an argument.
+  cz <- twomode_centralization(m, routine)
+  fields <- twomode_centralization_fields[[routine]]
+  pct <- routine != "Degree"
+  summary <- stats::setNames(as.list(unname(cz) * if (pct) 100 else 1), fields)
+  cz_note <- paste0(
+    "Centralization is computed for each mode separately (UCINET reports none for 2-mode data): ",
+    "the sum of differences from the most central node of the mode, divided by its largest ",
+    "possible value for a bipartite graph with the same mode sizes",
+    if (routine == "Degree") "; degree centralization uses the binarized data" else "",
+    if (routine == "Closeness" && anyNA(cz)) "; it is missing because the graph is not connected" else "",
+    ".")
   out <- new_xucinet_output(
-    routine, net, nodes = nodes,
+    routine, net, nodes = nodes, summary = summary,
     assumptions = c(
       sprintf("Data treated as 2-mode: %d rows by %d columns.", nrow(m), ncol(m)),
-      "Computed on the bipartite graph; normalized by the size of the opposite mode (Borgatti and Everett 1997), as UCINET's 2-Mode Centrality."),
+      "Computed on the bipartite graph; normalized by the size of the opposite mode (Borgatti and Everett 1997), as UCINET's 2-Mode Centrality.",
+      cz_note),
+    summary_title = if (pct) sprintf("2-Mode %s Centralization (%%)", routine) else
+      "2-Mode Degree Centralization -- as proportion, not percentage",
     nodes_title = sprintf("2-Mode %s for %s of %s", routine,
                           switch(mode, both = "ROWS and COLS", toupper(mode)),
                           net$title),
     stats_block = FALSE, subclass = subclass, call = call)
   out$primary <- names(cols)[if (length(cols) > 1) 2 else 1]
   out
+}
+
+# 2-mode centralization (xucinet#56; UCINET has none, DIFFERENCES 52). For each
+# mode, Freeman's form: the sum over the mode's nodes of (largest score - score),
+# divided by the largest that sum can be in a bipartite graph with the same two
+# mode sizes, on the normalized scores twomode_scores() reports.
+#
+#   Degree, Eigenvector  n_own - 1. Every normalized score is at most 1 (the
+#       eigenvector half is scaled to unit length), so the sum is at most
+#       n_own - 1, and one node tied to the whole other mode with the rest of
+#       its mode isolated reaches it. Degree uses the binarized data, as
+#       closeness and betweenness do, so that the bound holds for valued data.
+#   Betweenness  n_own - 1. Scores are divided by the largest a node can have
+#       (bipartite_max_betweenness), so the same bound applies; the bipartite
+#       star below reaches it (one node has the maximum, the others are leaves).
+#   Closeness  the value of the sum in the bipartite star: one node tied to the
+#       whole other mode, and each other node of its mode tied to one node of
+#       the other mode, spread as evenly as possible. No closed form is
+#       claimed; an exhaustive search of every bipartite graph up to 4 x 4,
+#       5 x 3 and 3 x 5 found no larger value (and for betweenness none above
+#       n_own - 1). Missing when the graph is not connected, as in 1-mode.
+twomode_centralization_fields <- list(
+  Degree      = c("Row Centralization", "Column Centralization"),
+  Betweenness = c("Row Centralization Index (%)", "Column Centralization Index (%)"),
+  Closeness   = c("Row Centralization (%)", "Column Centralization (%)"),
+  Eigenvector = c("Row eigenvector centralization (%)",
+                  "Column eigenvector centralization (%)"))
+
+bipartite_star <- function(n_own, n_other) {
+  s <- matrix(0, n_own, n_other)
+  s[1, ] <- 1
+  for (i in seq_len(n_own - 1)) s[i + 1, ((i - 1) %% n_other) + 1] <- 1
+  s
+}
+
+twomode_centralization <- function(m, measure) {
+  input <- if (measure == "Degree") (replace(m, is.na(m), 0) > 0) * 1 else m
+  sapply(c(rows = "rows", cols = "cols"), function(md) {
+    own <- if (md == "rows") nrow(m) else ncol(m)
+    other <- if (md == "rows") ncol(m) else nrow(m)
+    if (own < 2 || other < 1) return(NA_real_)
+    x <- twomode_scores(input, md)[[measure]]
+    if (anyNA(x) || !all(is.finite(x))) return(NA_real_)
+    num <- sum(max(x) - x)
+    den <- if (measure == "Closeness") {
+      y <- twomode_scores(bipartite_star(own, other), "rows")$Closeness
+      sum(max(y) - y)
+    } else own - 1
+    num / den
+  })
 }
 
 # The 2-mode test the single-measure routines share: rectangular, or declared

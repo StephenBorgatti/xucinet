@@ -23,7 +23,9 @@ xcentralization(
 An object of class \code{c("xcentralization", "xucinet_output")} whose
 \verb{$summary} holds every centralization the four routines report: degree
 (one figure, or out- and in- for directed data), betweenness, closeness
-(one, or in- and out-) and eigenvector.
+(one, or in- and out-) and eigenvector. For 2-mode data each measure has
+a row and a column figure, computed for each mode separately; see
+\code{\link[=xdegree]{xdegree()}}. UCINET reports no 2-mode centralization.
 }
 \description{
 How unequally a centrality measure is spread across the network: how far it

@@ -15,6 +15,12 @@
 # twelve triplet measures for every relation, nothing else. The clustering
 # coefficient is xclusteringcoefficient().
 #
+# 2-mode data (xucinet#55, 23 Nov 2026; Steve): UCINET refuses
+# them, xucinet computes Robins and Alexander's (2004) bipartite closure, the
+# definition ASNR 2e section 13.4 gives: a 3-path i - v - j - w (i, j in one
+# mode, v, w in the other) is closed when i - w is a tie as well, closing a
+# 4-cycle. Transitivity = 4 x 4-cycles / 3-paths. DIFFERENCES 53.
+#
 # xcyclicality() is UCINET: Network | Cohesion | Cyclicality (uc_cyclicity.pas;
 # engine G2Tools/ucyclicity.pas, TripletCyclicity). Both routines count the
 # same ordered two-paths and differ only in what closes them: transitivity
@@ -58,13 +64,37 @@ transitivity_measures <- c(
 #' coefficient. The clustering coefficients themselves are
 #' [xclusteringcoefficient()].
 #'
-#' @param net A network (any accepted form). 1-mode only.
+#' @section 2-mode data:
+#' A bipartite network has no transitive triples, since they would need a tie
+#' within a mode. For 2-mode data `xtransitivity()` reports instead the
+#' closure of Robins and Alexander (2004), which is how ASNR section 13.4
+#' defines transitivity for two-mode data: if i and j are both tied to v, and
+#' j is also tied to w, the path i - v - j - w is closed when i is tied to w,
+#' completing a 4-cycle. UCINET refuses 2-mode data here. The columns are
+#' `4-Cycles`, `3-Paths` (paths of length 3, counted once each),
+#' `Transitivity` (`4 x 4-Cycles / 3-Paths`, the share of 3-paths that are
+#' closed), `Density` (ties over rows x columns), `Ratio`
+#' (`Transitivity / Density`; about 1 when ties are placed at random) and
+#' `Transitivity Index` (`(Transitivity - Density) / (1 - Density)`). The
+#' measure is symmetric in the two modes. Opsahl's (2013) coefficient, which
+#' counts closure among three nodes of one mode, is not computed.
+#'
+#' @param net A network (any accepted form), 1-mode or 2-mode.
 #' @return An object of class `c("xtransitivity", "xucinet_output")`.
 #'   `$summary` is a data frame with one row per relation and the twelve
-#'   columns above.
+#'   columns above, or for 2-mode data the six columns described in the
+#'   2-mode section.
 #' @references Dekker, D., Krackhardt, D. and Snijders, T. A. B. (2019).
 #'   Transitivity correlation: A descriptive measure of network transitivity.
 #'   *Network Science* 7(3), 353-375.
+#'
+#'   Robins, G. and Alexander, M. (2004). Small worlds among interlocking
+#'   directors: Network structure and distance in bipartite graphs.
+#'   *Computational and Mathematical Organization Theory* 10(1), 69-94.
+#'
+#'   Opsahl, T. (2013). Triadic closure in two-mode networks: Redefining the
+#'   global and local clustering coefficients. *Social Networks* 35(2),
+#'   159-167.
 #' @seealso [xclusteringcoefficient()] for the clustering coefficients,
 #'   [xcyclicality()] for the same two-paths closed the other way, and
 #'   [xcohesion()], whose `Transitivity/Closure` is this routine's
@@ -74,10 +104,13 @@ transitivity_measures <- c(
 #'
 #' # one row for each of the three relations
 #' xtransitivity(hightech)
+#'
+#' # 2-mode data: closure on 4-cycles
+#' xtransitivity(davis)
 #' @export
 xtransitivity <- function(net) {
   net <- xnet(net, substitute(net))
-  require_1mode(net, "xtransitivity()")
+  if (identical(net$mode, "2-mode")) return(twomode_transitivity(net, match.call()))
 
   mats <- relation_matrices(net)
   rels <- if (length(mats) == 1L) net$title else xrelations(net)
@@ -104,6 +137,52 @@ xtransitivity <- function(net) {
              "ratio of transitivity to density would be 1.0"),
       paste0("TPhi/TC are centred (Dekker, Krackhardt & Snijders 2019): ~0 ",
              "means no increased propensity toward transitive triples.")))
+}
+
+# The 2-mode branch of xtransitivity(): Robins-Alexander closure, one row per
+# relation. For a binary affiliation matrix X with row degrees d and
+# S = X X' (shared columns for each pair of rows):
+#   3-paths  sum over ordered row pairs i != j of S[i,j] (d[j] - 1): every
+#            path of length 3 has exactly one row end, so starting from it
+#            counts each path once;
+#   4-cycles sum over unordered row pairs of choose(S[i,j], 2).
+# Closed 3-paths are 4 x 4-cycles (each 4-cycle contains four 3-paths).
+twomode_transitivity <- function(net, call) {
+  mats <- relation_matrices(net)
+  rels <- if (length(mats) == 1L) net$title else xrelations(net)
+  valued <- vapply(mats, is_valued, logical(1))
+  assumptions <- sprintf("Data treated as 2-mode: %d rows by %d columns.",
+                         nrow(mats[[1]]), ncol(mats[[1]]))
+  if (any(valued)) {
+    assumptions <- c(assumptions, if (length(mats) == 1L) "Data dichotomized at > 0."
+                     else paste0("Relation ", rels[valued], " dichotomized at > 0."))
+  }
+  assumptions <- c(assumptions, paste(
+    "2-mode transitivity is the closure of Robins and Alexander (2004): the share",
+    "of 3-paths closed into 4-cycles. UCINET refuses 2-mode data here."))
+  rows <- lapply(mats, function(m) {
+    x <- (replace(m, is.na(m), 0) > 0) * 1
+    s <- x %*% t(x)
+    d <- diag(s)
+    diag(s) <- 0
+    paths <- sum(s * rep(d - 1, each = nrow(s)))
+    cycles <- sum(choose(s[upper.tri(s)], 2))
+    tr <- if (paths > 0) 4 * cycles / paths else NA_real_
+    dens <- sum(x) / length(x)
+    c(cycles, paths, tr, dens,
+      if (!is.na(tr) && dens > 0) tr / dens else NA_real_,
+      if (!is.na(tr) && dens < 1) (tr - dens) / (1 - dens) else NA_real_)
+  })
+  out <- as.data.frame(do.call(rbind, rows), optional = TRUE)
+  names(out) <- c("4-Cycles", "3-Paths", "Transitivity", "Density", "Ratio",
+                  "Transitivity Index")
+  rownames(out) <- rels
+  new_xucinet_output(
+    "Transitivity", net, summary = out, assumptions = assumptions,
+    subclass = "xtransitivity", call = call,
+    summary_title = "2-Mode Transitivity (closure on 4-cycles)",
+    epilogue = paste0("If there were no particular tendency toward closure, the ",
+                      "ratio of transitivity to density would be 1.0"))
 }
 
 #' Cyclicality

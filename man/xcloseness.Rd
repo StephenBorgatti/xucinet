@@ -27,7 +27,11 @@ position. Defaults to the first.}
 columns, with a \code{Mode} column), \code{"rows"} or \code{"cols"}. The scores are
 UCINET's 2-Mode Centrality, computed on the bipartite graph and normalized
 by the size of the opposite mode (Borgatti and Everett 1997); see
-\code{\link[=xcentrality]{xcentrality()}}. Ignored for 1-mode data.}
+\code{\link[=xcentrality]{xcentrality()}}. \verb{$summary} then holds a row and a column
+centralization, both whatever \code{mode} is: the sum of differences from the
+mode's most central node over its largest possible value in a bipartite
+graph of the same size. UCINET reports none for 2-mode data (DIFFERENCES
+52). Ignored for 1-mode data.}
 }
 \value{
 An \code{xucinet_output} whose \verb{$nodes} holds the three measures, or six

@@ -920,3 +920,41 @@ relation to get UCINET's full report. The whole-network routines whose UCINET
 form loops, `xtransitivity()`, `xcyclicality()` and `xhomophily()`, return one
 row per relation as UCINET does, and `xreciprocity()` reads the first relation
 by default as UCINET's Reciprocity does.
+
+## 52. 2-mode centralization: computed, where UCINET reports none
+
+**Status:** deliberate (Steve, 23 November 2026, xucinet #56).
+
+UCINET's 2-Mode Centrality reports node scores only, and its 1-mode routines
+refuse rectangular data. For 2-mode data `xdegree()`, `xbetweenness()`,
+`xcloseness()` and `xeigenvector()` (and so `xcentralization()`) report a
+centralization for the rows and one for the columns, always both whatever
+`mode =` is. Each is Freeman's form on the normalized 2-mode scores: the sum
+over the mode's nodes of (largest score - score), divided by the largest
+that sum can be in a bipartite graph with the same two mode sizes. For
+degree, betweenness and eigenvector that maximum is n - 1 for a mode of n
+nodes (every normalized score is at most 1, and a graph reaching the bound
+exists). For closeness it is the value in the bipartite star: one node tied
+to the whole other mode, every other node of its mode tied to one node of the
+other mode, spread evenly. No closed form is claimed; an exhaustive search of
+all bipartite graphs up to 4 x 4, 5 x 3 and 3 x 5 found no larger value.
+Degree centralization uses the binarized data, as closeness and betweenness
+already do; closeness centralization is missing for a disconnected graph, as
+in 1-mode. Degree is a proportion, the others percentages, matching the
+1-mode reports. Borgatti and Everett (1997) discuss 2-mode centralization;
+these figures are not taken from a formula there (see the note on its
+betweenness maximum in `R/centrality-internals.R`).
+
+## 53. 2-mode transitivity: closure on 4-cycles, where UCINET refuses
+
+**Status:** deliberate (Steve, 23 November 2026, xucinet #55).
+
+UCINET's transitivity routines refuse 2-mode data. `xtransitivity()` given
+2-mode data reports the closure of Robins and Alexander (2004), the definition
+ASNR 2e section 13.4 gives: a path i - v - j - w of length 3 is closed when i
+and w are tied, completing a 4-cycle. `Transitivity` is 4 x 4-cycles / 3-paths,
+with `Density` (ties over rows x columns), `Ratio` and `Transitivity Index` as
+in the 1-mode table; the centred measures of the 1-mode table have no 2-mode
+counterpart here. The measure is the same from either mode. Opsahl's (2013)
+2-mode clustering coefficient is not computed. `xclusteringcoefficient()`
+and `xcohesion()` still refuse 2-mode data.
